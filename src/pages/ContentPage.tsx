@@ -65,11 +65,11 @@ const ContentPage = () => {
           });
           
           setContents(initialContents);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching steps:", error);
         toast.error("Failed to load your learning content.");
-      } finally {
         setLoading(false);
       }
     };
@@ -84,6 +84,7 @@ const ContentPage = () => {
       if (step && !contents[step.id]) {
         setLoading(true);
         try {
+          toast.info(`Generating detailed content for "${step.title}"...`);
           const content = await generateStepContent(step, topic);
           setContents(prev => ({ ...prev, [step.id]: content }));
           
@@ -102,7 +103,9 @@ const ContentPage = () => {
       }
     };
     
-    fetchStepContent();
+    if (steps.length > 0) {
+      fetchStepContent();
+    }
   }, [currentStep, steps, contents, topic]);
 
   const handleNext = () => {
@@ -206,7 +209,7 @@ const ContentPage = () => {
               className="flex flex-col items-center justify-center py-16"
             >
               <div className="w-10 h-10 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin mb-4"></div>
-              <p className="text-muted-foreground">Loading content...</p>
+              <p className="text-muted-foreground">Generating comprehensive content...</p>
             </motion.div>
           ) : (
             <motion.div

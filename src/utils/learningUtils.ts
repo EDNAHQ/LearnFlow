@@ -7,14 +7,6 @@ interface LearningPathData {
   is_approved: boolean;
 }
 
-interface LearningStepData {
-  id: string;
-  title: string;
-  content: string;
-  order_index: number;
-  path_id: string;
-}
-
 // Generate a learning plan for a given topic
 export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   // Check if user is authenticated
@@ -83,11 +75,11 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     pathId = newPath[0].id;
   }
   
-  // Now generate the learning plan steps using edge function
+  // Now generate the learning plan steps
   try {
     const steps: Step[] = [];
     
-    // Mock steps generator function - in production this would call an AI API
+    // Basic learning steps template
     const titles = [
       "Introduction to the Fundamentals",
       "Core Concepts & Terminology",
@@ -101,7 +93,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
       "Synthesis & Next Steps"
     ];
     
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < titles.length; i++) {
       const { data: stepData, error: stepError } = await supabase
         .from('learning_steps')
         .insert({
@@ -132,67 +124,48 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   }
 };
 
-// Generate detailed content for a learning step
+// Generate detailed content for a learning step using the edge function
 export const generateStepContent = async (step: Step, topic: string): Promise<string> => {
   try {
-    // Check if content already exists in the database
+    // Get the learning path ID for this step
     const { data: stepData, error: fetchError } = await supabase
       .from('learning_steps')
-      .select('detailed_content')
+      .select('path_id, order_index, detailed_content')
       .eq('id', step.id)
       .single();
       
     if (fetchError) {
-      console.error("Error fetching step content:", fetchError);
-      throw new Error("Failed to fetch step content");
+      console.error("Error fetching step:", fetchError);
+      throw new Error("Failed to fetch step data");
     }
     
     // If detailed content already exists, return it
-    if (stepData && stepData.detailed_content) {
+    if (stepData.detailed_content) {
       return stepData.detailed_content;
     }
     
-    // Otherwise, generate new content using an edge function or API
-    // For now, we'll generate mock content
-    const content = `# ${step.title} for ${topic}
-
-## Overview
-This section covers the essential aspects of ${step.title.toLowerCase()} as they relate to ${topic}.
-
-## Key Points
-- Understanding fundamental concepts of ${topic} in this area
-- Learning practical applications
-- Exploring related theories and frameworks
-- Connecting the dots with previous topics
-
-## Detailed Explanation
-${topic} has many interesting aspects when it comes to ${step.title.toLowerCase()}. Experts in the field suggest approaching this topic by first understanding the basic principles, then gradually expanding your knowledge to more complex ideas.
-
-## Practice Questions
-1. What are the core elements of ${step.title.toLowerCase()} in ${topic}?
-2. How can you apply these concepts in real-world situations?
-3. What challenges might you encounter and how would you overcome them?
-
-## Resources
-- Books: "The Complete Guide to ${topic}"
-- Online Courses: "${topic} Masterclass"
-- Communities: Join the ${topic} discussion forum for more insights
-
-## Next Steps
-After mastering this section, you'll be ready to move on to the next step in your learning journey.`;
-
-    // Save the generated content to the database
-    const { error: updateError } = await supabase
-      .from('learning_steps')
-      .update({ detailed_content: content })
-      .eq('id', step.id);
+    // Otherwise, call the edge function to generate content
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-learning-content', {
+        body: {
+          stepId: step.id,
+          topic,
+          title: step.title,
+          stepNumber: stepData.order_index + 1,
+          totalSteps: 10
+        }
+      });
       
-    if (updateError) {
-      console.error("Error updating step content:", updateError);
-      throw new Error("Failed to save generated content");
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error("Failed to generate content using the AI");
+      }
+      
+      return data.content;
+    } catch (error) {
+      console.error("Error calling edge function:", error);
+      throw new Error("Failed to call the content generation service");
     }
-    
-    return content;
   } catch (error) {
     console.error("Error generating step content:", error);
     throw new Error("Failed to generate content for this step");

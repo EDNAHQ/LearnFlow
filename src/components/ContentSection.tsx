@@ -19,6 +19,46 @@ const ContentSection = ({ title, content, index }: ContentSectionProps) => {
     return () => clearTimeout(timer);
   }, [index]);
 
+  // Format the content with proper markdown-like rendering
+  const formatContent = () => {
+    const paragraphs = content.split("\n\n");
+    
+    return paragraphs.map((paragraph, i) => {
+      // Check if this is a heading (starts with # or ##)
+      if (paragraph.startsWith('# ')) {
+        return (
+          <h2 key={i} className="text-xl font-semibold mt-6 mb-3">
+            {paragraph.replace('# ', '')}
+          </h2>
+        );
+      } else if (paragraph.startsWith('## ')) {
+        return (
+          <h3 key={i} className="text-lg font-medium mt-5 mb-2">
+            {paragraph.replace('## ', '')}
+          </h3>
+        );
+      } else if (paragraph.startsWith('- ')) {
+        // Handle bullet points
+        const listItems = paragraph.split('\n- ');
+        return (
+          <ul key={i} className="list-disc pl-5 mb-4 space-y-1">
+            {listItems.map((item, j) => (
+              <li key={`${i}-${j}`} className="text-pretty">
+                {item.replace('- ', '')}
+              </li>
+            ))}
+          </ul>
+        );
+      } else {
+        return (
+          <p key={i} className="mb-4 text-pretty">
+            {paragraph}
+          </p>
+        );
+      }
+    });
+  };
+
   return (
     <div 
       className={cn(
@@ -34,11 +74,7 @@ const ContentSection = ({ title, content, index }: ContentSectionProps) => {
       </div>
       
       <div className="prose prose-gray max-w-none">
-        {content.split("\n").map((paragraph, i) => (
-          <p key={i} className="mb-4 text-pretty">
-            {paragraph}
-          </p>
-        ))}
+        {formatContent()}
       </div>
     </div>
   );
