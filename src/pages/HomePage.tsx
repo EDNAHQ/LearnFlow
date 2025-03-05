@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import TopicInput from "@/components/TopicInput";
 import { MainNav } from "@/components/MainNav";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { 
   Book, 
   BrainCircuit, 
@@ -330,16 +330,12 @@ const HomePage = () => {
             </div>
             
             <div className="flex space-x-6 items-center">
-              <a 
-                href="#" 
+              <Link 
+                to="/why-free" 
                 className="text-gray-300 hover:text-white transition-colors flex items-center"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("LearnFlow is free because we believe in making quality education accessible to everyone. Our platform is supported by a combination of grants, partnerships, and optional premium features that we plan to introduce in the future.");
-                }}
               >
                 <span>Why is this free?</span>
-              </a>
+              </Link>
               
               <a 
                 href="https://github.com" 

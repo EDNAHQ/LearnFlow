@@ -11,6 +11,7 @@ export function MainNav() {
   
   const navItems = [
     { name: "Projects", path: "/projects" },
+    { name: "Why Free?", path: "/why-free" },
   ];
 
   return (
