@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,20 @@ const ContentPage = () => {
           
           if (stepsWithContent < data.length) {
             setGeneratingContent(true);
+            
+            // Manually trigger content generation for all steps without content
+            data.forEach(step => {
+              if (!step.detailed_content) {
+                console.log(`Triggering content generation for step: ${step.title}`);
+                generateStepContent(
+                  { id: step.id, title: step.title, description: step.content || "" },
+                  storedTopic,
+                  false
+                ).catch(err => {
+                  console.error(`Error generating content for step ${step.id}:`, err);
+                });
+              }
+            });
             
             toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
               duration: 5000,
@@ -256,7 +271,7 @@ const ContentPage = () => {
     <div className="min-h-screen bg-gray-50 text-gray-800">
       <div ref={topRef}></div>
       
-      <div className="bg-gradient-to-r from-learn-100 to-learn-50 shadow-sm">
+      <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
         <div className="container max-w-4xl mx-auto py-5 px-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -266,18 +281,18 @@ const ContentPage = () => {
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
-                className="flex items-center gap-1 text-gray-800 hover:bg-white/50"
+                className="flex items-center gap-1 text-white hover:bg-white/10"
                 onClick={goToProjects}
               >
                 <Home className="h-4 w-4" />
                 <span>Projects</span>
               </Button>
               
-              <div className="h-5 w-px bg-gray-300"></div>
+              <div className="h-5 w-px bg-gray-600"></div>
               
               <Button
                 variant="ghost"
-                className="flex items-center gap-1 text-gray-800 hover:bg-white/50"
+                className="flex items-center gap-1 text-white hover:bg-white/10"
                 onClick={handleBack}
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -287,12 +302,12 @@ const ContentPage = () => {
 
             <div className="flex items-center gap-3">
               {generatingContent && (
-                <div className="flex items-center gap-2 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   <span>Generating ({generatedSteps}/{steps.length})</span>
                 </div>
               )}
-              <div className="text-sm font-medium text-learn-600">
+              <div className="text-sm font-medium text-white">
                 LearnFlow
               </div>
             </div>
@@ -309,13 +324,13 @@ const ContentPage = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-2">
               <span>{topic}</span>
-              <div className="text-sm bg-learn-50 text-learn-600 px-2 py-1 rounded-full">
+              <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-2 py-1 rounded-full">
                 Step {currentStep + 1} of {steps.length}
               </div>
             </h1>
             <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
               <div 
-                className="bg-learn-500 h-full rounded-full transition-all duration-300"
+                className="bg-[#6D42EF] h-full rounded-full transition-all duration-300"
                 style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
               ></div>
             </div>
@@ -332,6 +347,8 @@ const ContentPage = () => {
               content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
               index={currentStep}
               detailedContent={currentStepData?.detailed_content}
+              pathId={pathId}
+              topic={topic}
             />
           </div>
 
@@ -347,7 +364,7 @@ const ContentPage = () => {
             </Button>
             {currentStep < steps.length - 1 ? (
               <Button
-                className="bg-learn-600 hover:bg-learn-700 text-white"
+                className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
                 onClick={() => markStepAsComplete(currentStepData.id)}
               >
                 Mark Complete
@@ -355,7 +372,7 @@ const ContentPage = () => {
               </Button>
             ) : (
               <Button
-                className={`bg-green-600 hover:bg-green-700 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
+                className={`bg-[#F5B623] hover:bg-[#F5B623]/90 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
                 onClick={completePath}
                 disabled={isSubmitting || projectCompleted}
               >
@@ -380,7 +397,7 @@ const ContentPage = () => {
       <div className="fixed bottom-6 right-6">
         <Button 
           onClick={goToProjects}
-          className="bg-white text-learn-600 hover:bg-learn-50 shadow-md rounded-full p-3 h-auto"
+          className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
         >
           <Home className="h-5 w-5" />
         </Button>

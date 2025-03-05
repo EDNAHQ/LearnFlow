@@ -155,6 +155,8 @@ serve(async (req) => {
         );
       }
 
+      console.log(`Received content generation request for: ${title} (ID: ${stepId})`);
+
       // Check if content already exists
       const { data: existingData, error: fetchError } = await supabase
         .from('learning_steps')
@@ -175,20 +177,20 @@ serve(async (req) => {
         );
       }
 
-      console.log(`Generating content for step: ${title} (${stepNumber}/${totalSteps})`);
+      console.log(`Generating content for step: ${title} (${stepNumber || '?'}/${totalSteps || '?'})`);
       
       // Generate content with OpenAI with improved focus
       const prompt = `
       You are an expert educator creating highly specialized learning content about "${topic}". 
       
-      This is step ${stepNumber} of ${totalSteps} in a focused learning path about ${topic}.
+      This is part of a learning path about ${topic}.
       
       The title of this section is: "${title}"
       
       Please generate detailed, educational content for this specific section. The content should be:
       - Laser-focused on the exact aspect of ${topic} indicated in the title
       - Relevant only to ${topic} without tangential discussions
-      - Appropriate for the current step (${stepNumber} of ${totalSteps}) in the learning progression
+      - Educational and well-structured
       
       Include:
       
@@ -203,38 +205,58 @@ serve(async (req) => {
       Remember to stay strictly on topic and focused on ${topic} as it relates to "${title}" - avoid introducing tangential concepts or going off on unrelated tangents.
       `;
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'o3-mini',
-          messages: [
-            { 
-              role: 'system', 
-              content: `You are an expert educator creating highly focused learning content. Your content should always be extremely specific to the requested topic and title without introducing unrelated concepts.` 
-            },
-            { role: 'user', content: prompt }
-          ],
-        }),
-      });
+      try {
+        console.log("Calling OpenAI API to generate content");
+        
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'o3-mini',
+            messages: [
+              { 
+                role: 'system', 
+                content: `You are an expert educator creating highly focused learning content. Your content should always be extremely specific to the requested topic and title without introducing unrelated concepts.` 
+              },
+              { role: 'user', content: prompt }
+            ],
+          }),
+        });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        console.error('OpenAI API error:', data);
-        throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('OpenAI API error:', errorData);
+          throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+        const generatedContent = data.choices[0].message.content;
+        console.log(`Content successfully generated (${generatedContent.length} characters)`);
+
+        // Save generated content to the database
+        const { error: updateError } = await supabase
+          .from('learning_steps')
+          .update({ detailed_content: generatedContent })
+          .eq('id', stepId);
+          
+        if (updateError) {
+          console.error("Error saving generated content:", updateError);
+          throw new Error(`Failed to save generated content: ${updateError.message}`);
+        }
+        
+        console.log(`Successfully saved content for step ${stepId}`);
+
+        return new Response(
+          JSON.stringify({ content: generatedContent }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (apiError) {
+        console.error('Error in content generation:', apiError);
+        throw new Error(`Content generation failed: ${apiError.message}`);
       }
-
-      const generatedContent = data.choices[0].message.content;
-      console.log(`Content successfully generated (${generatedContent.length} characters)`);
-
-      return new Response(
-        JSON.stringify({ content: generatedContent }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
   } catch (error) {
     console.error('Error in generate-learning-content function:', error);

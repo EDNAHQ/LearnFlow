@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";
@@ -198,13 +197,17 @@ const startBackgroundContentGeneration = async (steps: Step[], topic: string, pa
       if (!data.detailed_content) {
         console.log(`Generating content for step ${i+1}/${steps.length}: ${step.title}`);
         
-        // Don't await - let it run in background
-        generateStepContent(step, topic, true).catch(err => {
-          console.error(`Background generation error for step ${step.id}:`, err);
-        });
+        // Call the function but don't await - let it run in background
+        generateStepContent(step, topic, true)
+          .then(content => {
+            console.log(`Successfully generated content for step ${step.id}`);
+          })
+          .catch(err => {
+            console.error(`Background generation error for step ${step.id}:`, err);
+          });
         
         // Add a small delay between requests to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     } catch (error) {
       console.error(`Error in background generation for step ${step.id}:`, error);
@@ -215,6 +218,11 @@ const startBackgroundContentGeneration = async (steps: Step[], topic: string, pa
 
 // Generate detailed content for a learning step using the edge function
 export const generateStepContent = async (step: Step, topic: string, silent = false): Promise<string> => {
+  if (!step || !step.id || !topic) {
+    console.error("Missing required parameters for content generation:", { step, topic });
+    throw new Error("Missing required parameters for content generation");
+  }
+
   try {
     // Get the learning path ID for this step
     const { data: stepData, error: fetchError } = await supabase
@@ -235,7 +243,11 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     
     // Otherwise, call the edge function to generate content
     try {
-      console.log(`Generating detailed content for step: ${step.title}`);
+      console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
+      
+      if (!silent) {
+        toast.info(`Generating content for: ${step.title}`, { duration: 3000 });
+      }
       
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
@@ -243,8 +255,7 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           topic,
           title: step.title,
           stepNumber: stepData.order_index + 1,
-          totalSteps: 10,
-          silent
+          totalSteps: 10
         }
       });
       
@@ -256,19 +267,12 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
       const data = response.data;
       
       if (!data || !data.content) {
+        console.error("Invalid content format returned:", data);
         throw new Error("Invalid content generated");
       }
       
-      // Save the content to the database
-      const { error: updateError } = await supabase
-        .from('learning_steps')
-        .update({ detailed_content: data.content })
-        .eq('id', step.id);
-        
-      if (updateError) {
-        console.error("Error saving generated content:", updateError);
-        throw new Error("Failed to save generated content");
-      }
+      // No need to save here as the edge function should have saved it
+      console.log(`Content generation for step ${step.id} completed successfully`);
       
       return data.content;
     } catch (error) {
@@ -277,6 +281,9 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     }
   } catch (error) {
     console.error("Error generating step content:", error);
+    if (!silent) {
+      toast.error("Failed to generate content. Please try again later.");
+    }
     throw new Error("Failed to generate content for this step");
   }
 };

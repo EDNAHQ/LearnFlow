@@ -9,12 +9,15 @@ interface ContentSectionProps {
   content: string;
   index: number;
   detailedContent?: string | null;
+  pathId?: string;
+  topic?: string;
 }
 
-const ContentSection = ({ title, content, index, detailedContent }: ContentSectionProps) => {
+const ContentSection = ({ title, content, index, detailedContent, pathId, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
   const [isLoading, setIsLoading] = useState(false);
+  const stepId = content.split(":")[0]; // Extract step ID from content
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,10 +29,33 @@ const ContentSection = ({ title, content, index, detailedContent }: ContentSecti
 
   useEffect(() => {
     // Update loaded content when detailed content prop changes
-    if (detailedContent !== undefined) {
+    if (detailedContent) {
       setLoadedDetailedContent(detailedContent);
+      setIsLoading(false);
     }
   }, [detailedContent]);
+
+  // If no detailed content, try to load it directly
+  useEffect(() => {
+    if (!loadedDetailedContent && stepId && topic && !isLoading) {
+      const loadContent = async () => {
+        setIsLoading(true);
+        try {
+          const generatedContent = await generateStepContent(
+            { id: stepId, title, description: content.split(":")[1] || "" },
+            topic
+          );
+          setLoadedDetailedContent(generatedContent);
+        } catch (error) {
+          console.error("Error loading content:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      loadContent();
+    }
+  }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
 
   // Format the content with proper markdown-like rendering
   const formatContent = (text: string) => {
@@ -78,14 +104,14 @@ const ContentSection = ({ title, content, index, detailedContent }: ContentSecti
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
-      {!loadedDetailedContent ? (
+      {!loadedDetailedContent || isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
           <div className="relative">
-            <Loader2 className="w-12 h-12 animate-spin mb-3 text-learn-500" />
-            <Book className="w-5 h-5 text-learn-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <Loader2 className="w-12 h-12 animate-spin mb-3 text-[#6D42EF]" />
+            <Book className="w-5 h-5 text-[#E84393] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
           </div>
-          <p className="text-gray-500 mt-4">Content is being generated in the background...</p>
-          <p className="text-xs text-gray-400 mt-1">You can continue navigating through the steps</p>
+          <p className="text-gray-500 mt-4">Content is being generated...</p>
+          <p className="text-xs text-gray-400 mt-1">This may take a few moments</p>
         </div>
       ) : (
         <div className="prose prose-gray max-w-none">
