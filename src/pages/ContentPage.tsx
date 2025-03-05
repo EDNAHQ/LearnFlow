@@ -9,6 +9,7 @@ import { ArrowLeft, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { UserNav } from "@/components/UserNav";
 
 const ContentPage = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const ContentPage = () => {
           const fetchedSteps: Step[] = data.map(step => ({
             id: step.id,
             title: step.title,
-            description: step.content
+            description: step.content || ""
           }));
           
           setSteps(fetchedSteps);
@@ -119,7 +120,6 @@ const ContentPage = () => {
   const handleGoHome = () => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
-    sessionStorage.removeItem("learning-steps");
     sessionStorage.removeItem("learning-path-id");
   };
 
@@ -138,6 +138,10 @@ const ContentPage = () => {
 
   return (
     <div className="min-h-screen pt-6 pb-20 px-4 md:px-6">
+      <div className="absolute top-4 right-4">
+        <UserNav />
+      </div>
+      
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { UserNav } from "@/components/UserNav";
 
 const PlanPage = () => {
   const navigate = useNavigate();
@@ -70,8 +71,7 @@ const PlanPage = () => {
           return;
         }
         
-        // Store steps in sessionStorage
-        sessionStorage.setItem("learning-steps", JSON.stringify(steps));
+        // Store path ID in sessionStorage
         sessionStorage.setItem("learning-path-id", pathId);
         
         navigate("/content");
@@ -88,12 +88,15 @@ const PlanPage = () => {
   const handleReset = () => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
-    sessionStorage.removeItem("learning-steps");
     sessionStorage.removeItem("learning-path-id");
   };
 
   return (
     <div className="min-h-screen py-10 px-4 md:px-6">
+      <div className="absolute top-4 right-4">
+        <UserNav />
+      </div>
+      
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 10 }}

@@ -1,133 +1,200 @@
-import { Step } from "@/components/LearningStep";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Step } from "@/components/LearningStep";
 
-// Generate a learning plan using Supabase
+interface LearningPathData {
+  id: string;
+  topic: string;
+  is_approved: boolean;
+}
+
+interface LearningStepData {
+  id: string;
+  title: string;
+  content: string;
+  order_index: number;
+  path_id: string;
+}
+
+// Generate a learning plan for a given topic
 export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
-  // In a real app, this would call an AI service
-  // For now, we'll simulate a delay and return a static plan
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const steps: Step[] = [
-        {
-          id: 1,
-          title: `Understanding the Basics of ${topic}`,
-          description: `Explore the fundamental concepts and principles of ${topic}.`
-        },
-        {
-          id: 2,
-          title: `Historical Development of ${topic}`,
-          description: `Learn about the origin and evolution of ${topic} over time.`
-        },
-        {
-          id: 3,
-          title: `Key Components of ${topic}`,
-          description: `Break down the essential elements that make up ${topic}.`
-        },
-        {
-          id: 4,
-          title: `Practical Applications of ${topic}`,
-          description: `Discover how ${topic} is used in real-world scenarios.`
-        },
-        {
-          id: 5,
-          title: `Theoretical Frameworks in ${topic}`,
-          description: `Examine the theories and models that explain ${topic}.`
-        },
-        {
-          id: 6,
-          title: `Current Trends in ${topic}`,
-          description: `Stay updated with the latest developments in ${topic}.`
-        },
-        {
-          id: 7,
-          title: `Challenges and Limitations in ${topic}`,
-          description: `Identify potential obstacles and constraints in ${topic}.`
-        },
-        {
-          id: 8,
-          title: `Tools and Technologies for ${topic}`,
-          description: `Explore instruments and software used in ${topic}.`
-        },
-        {
-          id: 9,
-          title: `Case Studies in ${topic}`,
-          description: `Analyze real examples and success stories related to ${topic}.`
-        },
-        {
-          id: 10,
-          title: `Future Directions in ${topic}`,
-          description: `Predict emerging trends and future possibilities for ${topic}.`
-        }
-      ];
-      resolve(steps);
-    }, 2000);
-  });
+  // Check if user is authenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error("User is not authenticated");
+  }
+  
+  // Check if a learning path already exists for this topic for the current user
+  const { data: existingPaths, error: pathError } = await supabase
+    .from('learning_paths')
+    .select('id, topic, is_approved')
+    .eq('topic', topic)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  
+  if (pathError) {
+    console.error("Error checking existing paths:", pathError);
+    throw new Error("Failed to check existing learning paths");
+  }
+  
+  let pathId: string;
+  
+  // If a path already exists, use it, otherwise create a new one
+  if (existingPaths && existingPaths.length > 0) {
+    pathId = existingPaths[0].id;
+    
+    // Check if the path already has steps
+    const { data: existingSteps, error: stepsError } = await supabase
+      .from('learning_steps')
+      .select('id, title, content, order_index')
+      .eq('path_id', pathId)
+      .order('order_index');
+      
+    if (stepsError) {
+      console.error("Error checking existing steps:", stepsError);
+      throw new Error("Failed to check existing learning steps");
+    }
+    
+    // If steps exist, return them
+    if (existingSteps && existingSteps.length > 0) {
+      return existingSteps.map(step => ({
+        id: step.id,
+        title: step.title,
+        description: step.content || ""
+      }));
+    }
+  } else {
+    // Create a new learning path
+    const { data: newPath, error: createError } = await supabase
+      .from('learning_paths')
+      .insert({
+        topic,
+        user_id: user.id,
+        is_approved: false
+      })
+      .select();
+      
+    if (createError || !newPath || newPath.length === 0) {
+      console.error("Error creating new learning path:", createError);
+      throw new Error("Failed to create learning path");
+    }
+    
+    pathId = newPath[0].id;
+  }
+  
+  // Now generate the learning plan steps using edge function
+  try {
+    const steps: Step[] = [];
+    
+    // Mock steps generator function - in production this would call an AI API
+    const titles = [
+      "Introduction to the Fundamentals",
+      "Core Concepts & Terminology",
+      "Historical Development & Context",
+      "Key Theories & Frameworks",
+      "Practical Applications",
+      "Common Challenges & Solutions",
+      "Advanced Techniques",
+      "Resources & Tools",
+      "Case Studies & Examples",
+      "Synthesis & Next Steps"
+    ];
+    
+    for (let i = 0; i < 10; i++) {
+      const { data: stepData, error: stepError } = await supabase
+        .from('learning_steps')
+        .insert({
+          title: titles[i],
+          content: `Understanding ${titles[i].toLowerCase()} related to ${topic}.`,
+          path_id: pathId,
+          order_index: i,
+          completed: false
+        })
+        .select();
+        
+      if (stepError || !stepData || stepData.length === 0) {
+        console.error("Error creating step:", stepError);
+        throw new Error("Failed to create learning step");
+      }
+      
+      steps.push({
+        id: stepData[0].id,
+        title: stepData[0].title,
+        description: stepData[0].content || ""
+      });
+    }
+    
+    return steps;
+  } catch (error) {
+    console.error("Error generating learning plan:", error);
+    throw new Error("Failed to generate learning plan");
+  }
 };
 
-// Generate detailed content for a step using the edge function
+// Generate detailed content for a learning step
 export const generateStepContent = async (step: Step, topic: string): Promise<string> => {
   try {
-    // Check if detailed content already exists
-    const { data, error } = await supabase
+    // Check if content already exists in the database
+    const { data: stepData, error: fetchError } = await supabase
       .from('learning_steps')
-      .select('detailed_content, order_index')
+      .select('detailed_content')
       .eq('id', step.id)
       .single();
-    
-    if (error) {
-      console.error("Error fetching step content:", error);
-      throw error;
-    }
-    
-    // If content already exists, return it
-    if (data && data.detailed_content) {
-      return data.detailed_content;
-    }
-    
-    // Otherwise, generate new content using the edge function
-    const { data: functionData, error: functionError } = await supabase.functions.invoke('generate-learning-content', {
-      body: {
-        stepId: step.id,
-        topic: topic,
-        title: step.title,
-        stepNumber: data?.order_index !== undefined ? data.order_index + 1 : 1,
-        totalSteps: 10
-      }
-    });
-    
-    if (functionError) {
-      console.error("Error invoking edge function:", functionError);
-      throw functionError;
-    }
-    
-    if (functionData && functionData.content) {
-      return functionData.content;
-    }
-    
-    // Fallback content if edge function fails
-    const fallbackContent = `This is detailed information about ${step.title} related to ${topic}. 
       
-In a real application, this would be rich, AI-generated content that provides comprehensive information about this specific aspect of ${topic}.
-
-The content would include examples, explanations, and possibly references to help the learner fully understand this step in their learning journey.
-
-It would be tailored to the specific step (${step.id}) in the learning path and would build upon previous knowledge while preparing the learner for subsequent steps.`;
+    if (fetchError) {
+      console.error("Error fetching step content:", fetchError);
+      throw new Error("Failed to fetch step content");
+    }
     
-    // Update the step with the fallback content
+    // If detailed content already exists, return it
+    if (stepData && stepData.detailed_content) {
+      return stepData.detailed_content;
+    }
+    
+    // Otherwise, generate new content using an edge function or API
+    // For now, we'll generate mock content
+    const content = `# ${step.title} for ${topic}
+
+## Overview
+This section covers the essential aspects of ${step.title.toLowerCase()} as they relate to ${topic}.
+
+## Key Points
+- Understanding fundamental concepts of ${topic} in this area
+- Learning practical applications
+- Exploring related theories and frameworks
+- Connecting the dots with previous topics
+
+## Detailed Explanation
+${topic} has many interesting aspects when it comes to ${step.title.toLowerCase()}. Experts in the field suggest approaching this topic by first understanding the basic principles, then gradually expanding your knowledge to more complex ideas.
+
+## Practice Questions
+1. What are the core elements of ${step.title.toLowerCase()} in ${topic}?
+2. How can you apply these concepts in real-world situations?
+3. What challenges might you encounter and how would you overcome them?
+
+## Resources
+- Books: "The Complete Guide to ${topic}"
+- Online Courses: "${topic} Masterclass"
+- Communities: Join the ${topic} discussion forum for more insights
+
+## Next Steps
+After mastering this section, you'll be ready to move on to the next step in your learning journey.`;
+
+    // Save the generated content to the database
     const { error: updateError } = await supabase
       .from('learning_steps')
-      .update({ detailed_content: fallbackContent })
+      .update({ detailed_content: content })
       .eq('id', step.id);
-    
+      
     if (updateError) {
       console.error("Error updating step content:", updateError);
-      throw updateError;
+      throw new Error("Failed to save generated content");
     }
     
-    return fallbackContent;
+    return content;
   } catch (error) {
-    console.error("Error in generateStepContent:", error);
-    return "Failed to load content. Please try again.";
+    console.error("Error generating step content:", error);
+    throw new Error("Failed to generate content for this step");
   }
 };
