@@ -25,7 +25,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/" element={<Navigate to="/home" />} />
             <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
             <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
             <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />

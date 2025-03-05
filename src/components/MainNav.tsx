@@ -10,8 +10,6 @@ export function MainNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const navItems = [
-    { name: "Home", path: "/home" },
-    { name: "Learn", path: "/" },
     { name: "Projects", path: "/projects" },
   ];
 
@@ -35,8 +33,8 @@ export function MainNav() {
                   to={item.path}
                   className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     location.pathname === item.path 
-                      ? "text-white bg-brand-purple" 
-                      : "text-gray-700 hover:text-brand-purple hover:bg-gray-100"
+                      ? "text-white bg-[#6D42EF]" 
+                      : "text-gray-700 hover:text-[#6D42EF] hover:bg-gray-100"
                   }`}
                 >
                   {item.name}
@@ -71,8 +69,8 @@ export function MainNav() {
                 to={item.path}
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   location.pathname === item.path 
-                    ? "text-white bg-brand-purple" 
-                    : "text-gray-700 hover:text-brand-purple hover:bg-gray-100"
+                    ? "text-white bg-[#6D42EF]" 
+                    : "text-gray-700 hover:text-[#6D42EF] hover:bg-gray-100"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
