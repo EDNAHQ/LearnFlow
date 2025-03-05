@@ -80,21 +80,25 @@ const ProjectsPage = () => {
 
         // Try to check if is_completed column exists
         try {
-          // Test query to check if column exists
-          const { data: testData, error: testError } = await supabase
+          // Safely check if the is_completed column exists
+          const testQuery = await supabase
             .from('learning_paths')
             .select('is_completed')
             .limit(1);
-            
+          
           // If no error, the column exists so we can use it
-          if (!testError && projectsWithProgress.length > 0) {
-            const { data: completionData } = await supabase
+          if (!testQuery.error && projectsWithProgress.length > 0) {
+            // Get the IDs of all projects we need to update
+            const projectIds = projectsWithProgress.map(p => p.id);
+            
+            // Get completion status for all these projects in one query
+            const { data: completionData, error: completionError } = await supabase
               .from('learning_paths')
               .select('id, is_completed')
-              .in('id', projectsWithProgress.map(p => p.id));
+              .in('id', projectIds);
             
-            // Map completion status to projects if data exists
-            if (completionData && Array.isArray(completionData)) {
+            if (!completionError && completionData) {
+              // Map completion status to projects
               projectsWithProgress.forEach(project => {
                 const completionInfo = completionData.find(p => p.id === project.id);
                 if (completionInfo && completionInfo.is_completed) {
