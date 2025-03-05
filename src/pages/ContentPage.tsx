@@ -8,45 +8,72 @@ import { generateStepContent } from "@/utils/learningUtils";
 import { ArrowLeft, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContentPage = () => {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<string>("");
   const [steps, setSteps] = useState<Step[]>([]);
-  const [contents, setContents] = useState<Record<number, string>>({});
+  const [contents, setContents] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [pathId, setPathId] = useState<string | null>(null);
 
   useEffect(() => {
     // Retrieve data from sessionStorage
     const storedTopic = sessionStorage.getItem("learn-topic");
-    const storedSteps = sessionStorage.getItem("learning-steps");
+    const storedPathId = sessionStorage.getItem("learning-path-id");
     
-    if (!storedTopic || !storedSteps) {
+    if (!storedTopic || !storedPathId) {
       navigate("/");
       return;
     }
     
     setTopic(storedTopic);
-    setSteps(JSON.parse(storedSteps));
+    setPathId(storedPathId);
     
-    // Generate content for the first step
-    const generateInitialContent = async () => {
+    // Fetch all steps for this path from Supabase
+    const fetchSteps = async () => {
       try {
-        const parsedSteps: Step[] = JSON.parse(storedSteps);
-        if (parsedSteps.length > 0) {
-          const content = await generateStepContent(parsedSteps[0], storedTopic);
-          setContents({ 1: content });
+        const { data, error } = await supabase
+          .from('learning_steps')
+          .select('id, title, content, detailed_content, order_index')
+          .eq('path_id', storedPathId)
+          .order('order_index');
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Transform the data to match the Step interface
+          const fetchedSteps: Step[] = data.map(step => ({
+            id: step.id,
+            title: step.title,
+            description: step.content
+          }));
+          
+          setSteps(fetchedSteps);
+          
+          // Initialize contents with any existing detailed_content
+          const initialContents: Record<string, string> = {};
+          data.forEach(step => {
+            if (step.detailed_content) {
+              initialContents[step.id] = step.detailed_content;
+            }
+          });
+          
+          setContents(initialContents);
         }
       } catch (error) {
-        toast.error("Failed to generate content. Please try again.");
-        console.error("Error generating content:", error);
+        console.error("Error fetching steps:", error);
+        toast.error("Failed to load your learning content.");
       } finally {
         setLoading(false);
       }
     };
     
-    generateInitialContent();
+    fetchSteps();
   }, [navigate]);
 
   useEffect(() => {
@@ -58,6 +85,13 @@ const ContentPage = () => {
         try {
           const content = await generateStepContent(step, topic);
           setContents(prev => ({ ...prev, [step.id]: content }));
+          
+          // Mark the step as completed in the database
+          await supabase
+            .from('learning_steps')
+            .update({ completed: true })
+            .eq('id', step.id);
+            
         } catch (error) {
           toast.error("Failed to load content for this step.");
           console.error("Error generating step content:", error);
@@ -86,6 +120,7 @@ const ContentPage = () => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
     sessionStorage.removeItem("learning-steps");
+    sessionStorage.removeItem("learning-path-id");
   };
 
   if (steps.length === 0) {

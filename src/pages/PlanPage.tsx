@@ -7,6 +7,7 @@ import { generateLearningPlan } from "@/utils/learningUtils";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const PlanPage = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const PlanPage = () => {
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [pathId, setPathId] = useState<string | null>(null);
 
   useEffect(() => {
     const storedTopic = sessionStorage.getItem("learn-topic");
@@ -29,6 +31,19 @@ const PlanPage = () => {
       try {
         const plan = await generateLearningPlan(storedTopic);
         setSteps(plan);
+        
+        // Find the path ID for the first step
+        if (plan.length > 0) {
+          const { data, error } = await supabase
+            .from('learning_steps')
+            .select('path_id')
+            .eq('id', plan[0].id)
+            .single();
+            
+          if (!error && data) {
+            setPathId(data.path_id);
+          }
+        }
       } catch (error) {
         toast.error("Failed to generate learning plan. Please try again.");
         console.error("Error generating plan:", error);
@@ -40,17 +55,41 @@ const PlanPage = () => {
     fetchPlan();
   }, [navigate]);
 
-  const handleApprove = () => {
-    // Store steps in sessionStorage
-    sessionStorage.setItem("learning-steps", JSON.stringify(steps));
-    navigate("/content");
-    toast.success("Learning plan approved! Let's start learning.");
+  const handleApprove = async () => {
+    if (pathId) {
+      try {
+        // Update the path as approved
+        const { error } = await supabase
+          .from('learning_paths')
+          .update({ is_approved: true })
+          .eq('id', pathId);
+          
+        if (error) {
+          console.error("Error approving plan:", error);
+          toast.error("Failed to approve plan. Please try again.");
+          return;
+        }
+        
+        // Store steps in sessionStorage
+        sessionStorage.setItem("learning-steps", JSON.stringify(steps));
+        sessionStorage.setItem("learning-path-id", pathId);
+        
+        navigate("/content");
+        toast.success("Learning plan approved! Let's start learning.");
+      } catch (error) {
+        console.error("Error in handleApprove:", error);
+        toast.error("Something went wrong. Please try again.");
+      }
+    } else {
+      toast.error("No learning path found. Please try again.");
+    }
   };
 
   const handleReset = () => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
     sessionStorage.removeItem("learning-steps");
+    sessionStorage.removeItem("learning-path-id");
   };
 
   return (
