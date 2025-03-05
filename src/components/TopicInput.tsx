@@ -30,23 +30,23 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           placeholder="Enter a specific topic you want to learn about..."
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          className="pr-12 h-14 text-base transition-shadow duration-300 focus:shadow-subtle bg-gray-800 border-gray-700 text-white"
+          className="input-light pr-12 h-14 text-base shadow-sm transition-shadow duration-300 focus:shadow-md"
           disabled={loading}
         />
-        <div className="text-xs text-gray-400 mt-1 ml-1">
+        <div className="text-xs text-gray-500 mt-1 ml-1">
           For best results, enter a specific topic (e.g., "Python decorators" instead of just "Python")
         </div>
         <Button 
           type="submit" 
           size="icon" 
           disabled={!topic.trim() || loading}
-          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-90 hover:opacity-100 transition-opacity"
+          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-90 hover:opacity-100 transition-opacity bg-brand-purple hover:bg-brand-purple/90"
         >
           <ArrowRight className="h-5 w-5" />
         </Button>
       </div>
       {loading && (
-        <div className="mt-2 text-sm text-gray-400 animate-pulse-soft">
+        <div className="mt-2 text-sm text-gray-500 animate-pulse-soft">
           Creating your personalized learning journey...
         </div>
       )}

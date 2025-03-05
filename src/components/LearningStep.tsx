@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 export interface Step {
   id: string; // Changed from number to string to match Supabase UUID
@@ -39,7 +40,10 @@ const LearningStep = ({
           {index + 1}
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{step.title}</h3>
+          <h3 className="text-lg font-medium mb-1 flex items-center">
+            {step.title}
+            {isActive && <Sparkles className="h-4 w-4 ml-2 text-brand-gold" />}
+          </h3>
           <p className="text-sm text-muted-foreground">{step.description}</p>
         </div>
       </div>

@@ -131,6 +131,29 @@
   @apply bg-transparent border border-brand-gold text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all duration-300;
 }
 
+/* Updated input styles with lighter background */
+.input-light {
+  @apply bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:ring-brand-purple focus:border-brand-purple;
+}
+
+/* Updated navigation styles with lighter background */
+.nav-light {
+  @apply bg-white border-b border-gray-200 shadow-sm;
+}
+
+/* Logo styles */
+.logo-container {
+  @apply relative flex items-center justify-center;
+}
+
+.logo-bg {
+  @apply bg-brand-purple rounded-lg w-10 h-10 flex items-center justify-center transition-transform hover:scale-105;
+}
+
+.logo-text {
+  @apply text-xl font-bold ml-2 text-gray-900;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
