@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 
 export interface Step {
-  id: string; // Changed from number to string to match Supabase UUID
+  id: string;
   title: string;
   description: string;
 }
@@ -28,23 +28,23 @@ const LearningStep = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className={cn(
-        "mb-4 p-5 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-brand",
+        "p-5 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer hover:shadow-brand",
         isActive 
-          ? "border-l-4 border-l-brand-purple bg-white shadow-md" 
-          : "border border-gray-200 bg-white hover:border-brand-purple/30"
+          ? "bg-black/30 border-l-4 border-l-brand-purple shadow-md" 
+          : "bg-black/20 hover:border-brand-purple/30"
       )}
       onClick={onClick}
     >
       <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple font-medium">
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center text-brand-purple font-semibold">
           {index + 1}
         </div>
-        <div>
-          <h3 className="text-lg font-medium mb-1 flex items-center">
+        <div className="flex-1">
+          <h3 className="text-lg font-medium mb-2 flex items-center text-white">
             {step.title}
             {isActive && <Sparkles className="h-4 w-4 ml-2 text-brand-gold" />}
           </h3>
-          <p className="text-sm text-muted-foreground">{step.description}</p>
+          <p className="text-sm text-brand-light/70">{step.description}</p>
         </div>
       </div>
     </motion.div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import LearningStep, { Step } from "@/components/LearningStep";
 import { generateLearningPlan } from "@/utils/learningUtils";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, RefreshCw, LogIn } from "lucide-react";
+import { ArrowLeft, Check, RefreshCw, LogIn, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { UserNav } from "@/components/UserNav";
@@ -120,7 +120,7 @@ const PlanPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-6 bg-white">
+    <div className="min-h-screen py-10 px-4 md:px-6 brand-gradient-bg text-white">
       <div className="absolute top-4 right-4">
         <UserNav />
       </div>
@@ -133,14 +133,14 @@ const PlanPage = () => {
         >
           <Button 
             variant="ghost" 
-            className="flex items-center gap-1 hover:text-brand-purple" 
+            className="flex items-center gap-1 text-brand-light hover:text-brand-purple hover:bg-white/10" 
             onClick={handleReset}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back</span>
           </Button>
           
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-brand-light/70">
             <span className="font-medium text-brand-purple">LearnFlow</span>
           </div>
         </motion.div>
@@ -150,35 +150,40 @@ const PlanPage = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2 text-gradient-purple">Your Learning Plan</h1>
-            <p className="text-muted-foreground">
-              A personalized 10-step journey to master <span className="text-brand-purple font-medium">{topic}</span>
+          <div className="mb-10 text-center">
+            <div className="inline-flex justify-center items-center mb-3">
+              <div className="w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center mr-2">
+                <Sparkles className="h-5 w-5 text-brand-purple" />
+              </div>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gradient-purple">Your Learning Journey</h1>
+            <p className="text-brand-light/70 max-w-lg mx-auto">
+              A personalized 10-step plan to master <span className="text-brand-gold font-medium">{topic}</span>
             </p>
           </div>
           
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="w-12 h-12 rounded-full border-4 border-brand-purple/30 border-t-brand-purple animate-spin mb-4"></div>
-              <p className="text-muted-foreground">Crafting your learning journey...</p>
+              <p className="text-brand-light/70 animate-pulse-soft">Crafting your personalized learning journey...</p>
             </div>
           ) : authError ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-                <LogIn className="h-8 w-8 text-amber-600" />
+              <div className="w-16 h-16 rounded-full bg-brand-gold/20 flex items-center justify-center mb-4">
+                <LogIn className="h-8 w-8 text-brand-gold" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Authentication Required</h3>
-              <p className="text-muted-foreground mb-6 max-w-md">
+              <h3 className="text-xl font-bold mb-2 text-brand-light">Authentication Required</h3>
+              <p className="text-brand-light/70 mb-6 max-w-md">
                 You need to be logged in to create and save learning plans. Your plans will be stored in your account so you can access them anytime.
               </p>
-              <Button onClick={handleLogin} className="gap-2 bg-brand-purple hover:bg-brand-purple/90 btn-hover-effect">
+              <Button onClick={handleLogin} className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect">
                 <LogIn className="h-4 w-4" />
                 Sign In or Create Account
               </Button>
             </div>
           ) : (
             <>
-              <div className="mb-8">
+              <div className="mb-10 space-y-4">
                 {steps.map((step, index) => (
                   <LearningStep
                     key={step.id}
@@ -191,7 +196,7 @@ const PlanPage = () => {
               </div>
               
               <motion.div 
-                className="flex gap-4 justify-center"
+                className="flex flex-col sm:flex-row gap-4 justify-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -206,7 +211,7 @@ const PlanPage = () => {
                 </Button>
                 <Button 
                   onClick={handleApprove}
-                  className="gap-2 bg-brand-purple hover:bg-brand-purple/90 btn-hover-effect"
+                  className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect"
                 >
                   <Check className="h-4 w-4" />
                   Approve Plan & Continue
