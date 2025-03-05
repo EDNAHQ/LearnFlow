@@ -40,7 +40,8 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           type="submit" 
           size="icon" 
           disabled={!topic.trim() || loading}
-          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-90 hover:opacity-100 transition-opacity bg-brand-purple hover:bg-brand-purple/90"
+          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-90 hover:opacity-100 transition-opacity bg-brand-purple hover:bg-brand-purple/90"
+          style={{ top: "calc(50% - 7px)" }}
         >
           <ArrowRight className="h-5 w-5" />
         </Button>
