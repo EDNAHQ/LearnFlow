@@ -18,7 +18,7 @@ const PresentationOverview = ({
 }: PresentationOverviewProps) => {
   return (
     <motion.div
-      className="fixed inset-0 bg-white/95 z-50 p-8 overflow-y-auto"
+      className="fixed inset-0 bg-white z-50 p-8 overflow-y-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -38,7 +38,7 @@ const PresentationOverview = ({
               onClick={() => onSelectSlide(index)}
               className={`p-4 rounded-lg cursor-pointer transition-all ${
                 currentSlide === index 
-                  ? 'bg-brand-purple text-white shadow-md' 
+                  ? 'bg-[#6D42EF] text-white shadow-md' 
                   : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
               }`}
             >

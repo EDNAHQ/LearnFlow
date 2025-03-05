@@ -17,6 +17,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
   // Parse content into slides (paragraphs)
   useEffect(() => {
     if (content) {
+      // Split content by double newlines to separate paragraphs
       const paragraphs = content.split("\n\n").filter(p => p.trim().length > 0);
       setSlides(paragraphs);
     }
@@ -46,7 +47,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
       } else if (e.key === "Escape") {
         setShowOverview(false);
       } else if (e.key === "o") {
-        setShowOverview(true);
+        setShowOverview(prev => !prev);
       }
     };
 

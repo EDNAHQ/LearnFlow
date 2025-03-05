@@ -22,13 +22,14 @@ const PresentationControls = ({
   const { toggleMode } = useContentMode();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-200 to-transparent p-4 flex items-center justify-between">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between shadow-lg">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
           onClick={onToggleOverview}
+          type="button"
         >
           <List className="h-4 w-4" />
           <span className="ml-1">Overview</span>
@@ -39,6 +40,7 @@ const PresentationControls = ({
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
           onClick={() => toggleMode()}
+          type="button"
         >
           <Minimize className="h-4 w-4" />
           <span className="ml-1">Exit</span>
@@ -58,6 +60,7 @@ const PresentationControls = ({
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
           onClick={onPrevious}
           disabled={currentSlide === 0}
+          type="button"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           <span>Previous</span>
@@ -69,6 +72,7 @@ const PresentationControls = ({
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
           onClick={onNext}
           disabled={currentSlide === totalSlides - 1}
+          type="button"
         >
           <span>Next</span>
           <ArrowRight className="h-4 w-4 ml-1" />
