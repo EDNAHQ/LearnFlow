@@ -75,6 +75,14 @@ export default {
 					'800': '#34439d',
 					'900': '#2e3a7c',
 					'950': '#1e244d'
+				},
+				brand: {
+					purple: '#6D42EF',
+					pink: '#E84393',
+					gold: '#F5B623',
+					dark: '#1A1A1A',
+					light: '#FFFFFF',
+					gray: '#A3A3A3'
 				}
 			},
 			borderRadius: {
@@ -128,6 +136,7 @@ export default {
 			},
 			fontFamily: {
 				sans: [
+					'Poppins',
 					'Inter', 
 					'ui-sans-serif', 
 					'system-ui', 
@@ -145,6 +154,7 @@ export default {
 				'glass-strong': '0 8px 32px rgba(0, 0, 0, 0.1)',
 				'neomorphic': '10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff',
 				'subtle': '0 2px 10px rgba(0, 0, 0, 0.05)',
+				'brand': '0 8px 30px rgba(109, 66, 239, 0.2)',
 			}
 		}
 	},

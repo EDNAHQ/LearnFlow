@@ -37,6 +37,11 @@
 
     --radius: 0.8rem;
 
+    /* Brand color additions */
+    --brand-purple: 263 84% 60%;
+    --brand-pink: 334 84% 58%;
+    --brand-gold: 39 100% 55%;
+    
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -101,6 +106,31 @@
   @apply bg-[#ecf0f3] shadow-neomorphic rounded-2xl;
 }
 
+/* Brand style additions */
+.brand-card {
+  @apply bg-[#1A1A1A] text-white rounded-xl border border-white/10 shadow-xl;
+}
+
+.brand-card-active {
+  @apply bg-[#1A1A1A] text-white rounded-xl border-2 border-brand-purple/50 shadow-xl;
+}
+
+.brand-gradient-bg {
+  @apply bg-gradient-to-br from-[#1A1A1A] to-[#252525];
+}
+
+.brand-circle {
+  @apply flex items-center justify-center rounded-full;
+}
+
+.brand-btn-primary {
+  @apply bg-brand-purple hover:bg-opacity-90 text-white rounded-lg transition-all duration-300;
+}
+
+.brand-btn-secondary {
+  @apply bg-transparent border border-brand-gold text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all duration-300;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -149,5 +179,12 @@
   .text-pretty {
     text-wrap: pretty;
   }
+  
+  .text-gradient-purple {
+    @apply bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent;
+  }
+  
+  .btn-hover-effect {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  }
 }
-

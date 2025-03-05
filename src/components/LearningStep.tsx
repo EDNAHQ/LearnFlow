@@ -27,15 +27,15 @@ const LearningStep = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className={cn(
-        "mb-4 p-5 rounded-xl transition-all duration-300 cursor-pointer",
+        "mb-4 p-5 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-brand",
         isActive 
-          ? "glass-panel-strong border-learn-200 shadow-md" 
-          : "glass-panel hover:shadow-subtle"
+          ? "border-l-4 border-l-brand-purple bg-white shadow-md" 
+          : "border border-gray-200 bg-white hover:border-brand-purple/30"
       )}
       onClick={onClick}
     >
       <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-learn-100 flex items-center justify-center text-learn-700 font-medium">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple font-medium">
           {index + 1}
         </div>
         <div>

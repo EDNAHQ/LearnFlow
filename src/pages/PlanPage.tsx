@@ -133,7 +133,7 @@ const PlanPage = () => {
         >
           <Button 
             variant="ghost" 
-            className="flex items-center gap-1" 
+            className="flex items-center gap-1 hover:text-brand-purple" 
             onClick={handleReset}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -141,7 +141,7 @@ const PlanPage = () => {
           </Button>
           
           <div className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">LearnFlow</span>
+            <span className="font-medium text-brand-purple">LearnFlow</span>
           </div>
         </motion.div>
 
@@ -151,15 +151,15 @@ const PlanPage = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">Your Learning Plan</h1>
+            <h1 className="text-3xl font-bold mb-2 text-gradient-purple">Your Learning Plan</h1>
             <p className="text-muted-foreground">
-              A personalized 10-step journey to master <span className="text-foreground font-medium">{topic}</span>
+              A personalized 10-step journey to master <span className="text-brand-purple font-medium">{topic}</span>
             </p>
           </div>
           
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-12 h-12 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin mb-4"></div>
+              <div className="w-12 h-12 rounded-full border-4 border-brand-purple/30 border-t-brand-purple animate-spin mb-4"></div>
               <p className="text-muted-foreground">Crafting your learning journey...</p>
             </div>
           ) : authError ? (
@@ -171,7 +171,7 @@ const PlanPage = () => {
               <p className="text-muted-foreground mb-6 max-w-md">
                 You need to be logged in to create and save learning plans. Your plans will be stored in your account so you can access them anytime.
               </p>
-              <Button onClick={handleLogin} className="gap-2">
+              <Button onClick={handleLogin} className="gap-2 bg-brand-purple hover:bg-brand-purple/90 btn-hover-effect">
                 <LogIn className="h-4 w-4" />
                 Sign In or Create Account
               </Button>
@@ -199,14 +199,14 @@ const PlanPage = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleReset}
-                  className="gap-2"
+                  className="gap-2 border-brand-gold text-brand-gold hover:bg-brand-gold/10 hover:text-brand-gold btn-hover-effect"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Try Another Topic
                 </Button>
                 <Button 
                   onClick={handleApprove}
-                  className="gap-2 bg-learn-600 hover:bg-learn-700"
+                  className="gap-2 bg-brand-purple hover:bg-brand-purple/90 btn-hover-effect"
                 >
                   <Check className="h-4 w-4" />
                   Approve Plan & Continue
