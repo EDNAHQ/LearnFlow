@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { MainNav } from "@/components/MainNav";
 import LearningStep, { Step } from "@/components/LearningStep";
 import { generateLearningPlan } from "@/utils/learningUtils";
 import { motion } from "framer-motion";
@@ -125,44 +126,47 @@ const PlanPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-6 bg-white text-gray-800">
-      <div className="absolute top-4 right-4">
-        <UserNav />
-      </div>
-      
-      <div className="max-w-3xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <Button 
-            variant="ghost" 
-            className="flex items-center gap-1 text-gray-700 hover:text-brand-purple hover:bg-gray-100" 
-            onClick={handleReset}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back</span>
-          </Button>
-          
-          <div className="text-sm text-gray-500">
-            <span className="font-medium text-brand-purple">LearnFlow</span>
+    <div className="min-h-screen bg-white">
+      {/* Navigation Header */}
+      <header className="border-b border-gray-100 bg-white">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2 text-gray-700 hover:text-brand-purple" 
+                onClick={handleReset}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back</span>
+              </Button>
+            </div>
+            
+            <div className="text-brand-purple font-medium text-lg">
+              LearnFlow
+            </div>
+            
+            <div>
+              <UserNav />
+            </div>
           </div>
-        </motion.div>
+        </div>
+      </header>
 
+      <div className="container max-w-3xl mx-auto py-10 px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           <div className="mb-10 text-center">
-            <div className="inline-flex justify-center items-center mb-3">
-              <div className="w-10 h-10 rounded-full bg-brand-purple/20 flex items-center justify-center mr-2">
-                <Sparkles className="h-5 w-5 text-brand-purple" />
+            <div className="inline-flex justify-center items-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-brand-purple/10 flex items-center justify-center">
+                <Sparkles className="h-6 w-6 text-brand-purple" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gradient-purple">Your Learning Journey</h1>
-            <p className="text-gray-600 max-w-lg mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brand-purple">Your Learning Journey</h1>
+            <p className="text-gray-600 max-w-lg mx-auto mb-2">
               A personalized 10-step plan to master <span className="text-brand-gold font-medium">{topic}</span>
             </p>
           </div>
@@ -188,7 +192,7 @@ const PlanPage = () => {
             </div>
           ) : (
             <>
-              <div className="mb-10 space-y-4">
+              <div className="mb-10 space-y-3">
                 {steps.map((step, index) => (
                   <LearningStep
                     key={step.id}

@@ -28,10 +28,10 @@ const LearningStep = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className={cn(
-        "p-5 rounded-xl border border-white/10 transition-all duration-300 cursor-pointer hover:shadow-brand",
+        "p-5 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-md",
         isActive 
-          ? "bg-black/30 border-l-4 border-l-brand-purple shadow-md" 
-          : "bg-black/20 hover:border-brand-purple/30"
+          ? "bg-gray-200 border-l-4 border-l-brand-purple shadow-sm" 
+          : "bg-gray-100 hover:border-l-brand-purple/30 hover:border-l-4"
       )}
       onClick={onClick}
     >
@@ -40,11 +40,11 @@ const LearningStep = ({
           {index + 1}
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-medium mb-2 flex items-center text-white">
+          <h3 className="text-lg font-medium mb-2 flex items-center text-gray-800">
             {step.title}
             {isActive && <Sparkles className="h-4 w-4 ml-2 text-brand-gold" />}
           </h3>
-          <p className="text-sm text-brand-light/70">{step.description}</p>
+          <p className="text-sm text-gray-600">{step.description}</p>
         </div>
       </div>
     </motion.div>
