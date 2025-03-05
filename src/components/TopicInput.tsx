@@ -27,12 +27,15 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
       <div className="relative group">
         <Input
           type="text"
-          placeholder="Enter a topic you want to learn about..."
+          placeholder="Enter a specific topic you want to learn about..."
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           className="pr-12 h-14 text-base transition-shadow duration-300 focus:shadow-subtle"
           disabled={loading}
         />
+        <div className="text-xs text-muted-foreground mt-1 ml-1">
+          For best results, enter a specific topic (e.g., "Python decorators" instead of just "Python")
+        </div>
         <Button 
           type="submit" 
           size="icon" 

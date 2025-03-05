@@ -33,15 +33,19 @@ serve(async (req) => {
         );
       }
 
-      // Generate a learning plan using OpenAI
+      // Generate a learning plan using OpenAI with an improved, more focused prompt
       const prompt = `
-      You are an expert educator creating a learning plan for the topic: "${topic}".
+      You are an expert educator creating a highly focused and specialized learning plan for the topic: "${topic}".
       
-      Please create a comprehensive 10-step learning plan that will guide someone from beginner to advanced level on this topic.
+      Please create a comprehensive 10-step learning plan that will guide someone from beginner to advanced level SPECIFICALLY on the topic of ${topic}. 
+      The plan should be laser-focused on ${topic} without including tangential or loosely related topics.
       
       For each step, provide:
-      1. A clear, concise title (5-7 words max)
-      2. A brief one-sentence description of what the learner will understand after completing this step
+      1. A clear, concise title (5-7 words max) that directly relates to ${topic}
+      2. A brief one-sentence description of what the learner will understand about ${topic} after completing this step
+      
+      Each step should build logically on the previous one, creating a coherent progression from fundamentals to advanced concepts, 
+      all while staying strictly within the boundaries of ${topic}.
       
       Your response should be structured as an array of step objects with 'title' and 'description' fields, formatted as valid JSON.
       
@@ -49,20 +53,21 @@ serve(async (req) => {
       {
         "steps": [
           {
-            "title": "Introduction to the Fundamentals",
-            "description": "Understand the core principles and basic terminology."
+            "title": "Introduction to [Specific Aspect of ${topic}]",
+            "description": "Understand the core principles of ${topic} and essential terminology."
           },
           {
-            "title": "Second Step Title",
-            "description": "Brief description of what you'll learn"
+            "title": "Second Step Title About ${topic}",
+            "description": "Brief description focusing specifically on ${topic}"
           }
         ]
       }
       
-      Make sure to include exactly 10 steps, starting with fundamentals and moving to more advanced concepts.
+      Make sure to include exactly 10 steps, starting with fundamentals and moving to more advanced concepts,
+      all directly related to ${topic}.
       `;
 
-      console.log("Calling OpenAI API to generate learning plan for topic:", topic);
+      console.log("Calling OpenAI API to generate focused learning plan for topic:", topic);
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -71,9 +76,12 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'o3-mini',
           messages: [
-            { role: 'system', content: 'You are an expert educator creating learning plans.' },
+            { 
+              role: 'system', 
+              content: `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts.` 
+            },
             { role: 'user', content: prompt }
           ],
           response_format: { type: "json_object" }
@@ -139,7 +147,7 @@ serve(async (req) => {
         throw new Error(`Failed to parse learning plan: ${parseError.message}`);
       }
     } else {
-      // Original detailed content generation code
+      // Original detailed content generation code with improved focus
       if (!stepId || !topic || !title) {
         return new Response(
           JSON.stringify({ error: 'Missing required parameters' }),
@@ -168,23 +176,30 @@ serve(async (req) => {
 
       console.log(`Generating content for step: ${title} (${stepNumber}/${totalSteps})`);
       
-      // Generate content with OpenAI
+      // Generate content with OpenAI with improved focus
       const prompt = `
-      You are an expert educator creating learning content about "${topic}". 
+      You are an expert educator creating highly specialized learning content about "${topic}". 
       
-      This is step ${stepNumber} of ${totalSteps} in a comprehensive learning path.
+      This is step ${stepNumber} of ${totalSteps} in a focused learning path about ${topic}.
       
       The title of this section is: "${title}"
       
-      Please generate detailed, educational content for this section. Include:
+      Please generate detailed, educational content for this specific section. The content should be:
+      - Laser-focused on the exact aspect of ${topic} indicated in the title
+      - Relevant only to ${topic} without tangential discussions
+      - Appropriate for the current step (${stepNumber} of ${totalSteps}) in the learning progression
       
-      1. A clear introduction to this aspect of ${topic}
-      2. Key concepts and principles relevant to ${title}
-      3. Practical examples or applications
-      4. Common misconceptions or challenges
-      5. Summary of key takeaways
+      Include:
+      
+      1. A clear introduction to this specific aspect of ${topic}
+      2. Key concepts and principles that are directly relevant to "${title}" within the context of ${topic}
+      3. Practical examples or applications that demonstrate this specific aspect of ${topic}
+      4. Common misconceptions or challenges related specifically to this aspect of ${topic}
+      5. Summary of key takeaways that relate strictly to this aspect of ${topic}
       
       Make it educational, engaging, and around 500-700 words. Format with paragraphs for readability.
+      
+      Remember to stay strictly on topic and focused on ${topic} as it relates to "${title}" - avoid introducing tangential concepts or going off on unrelated tangents.
       `;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -194,9 +209,12 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'o3-mini',
           messages: [
-            { role: 'system', content: 'You are an expert educator creating learning content.' },
+            { 
+              role: 'system', 
+              content: `You are an expert educator creating highly focused learning content. Your content should always be extremely specific to the requested topic and title without introducing unrelated concepts.` 
+            },
             { role: 'user', content: prompt }
           ],
         }),
