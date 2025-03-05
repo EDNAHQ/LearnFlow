@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,13 +27,11 @@ const ContentPage = () => {
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
 
   useEffect(() => {
-    // Redirect to home if not authenticated
     if (!user) {
       navigate("/");
       return;
     }
 
-    // Retrieve topic and learning path ID from session storage
     const storedTopic = sessionStorage.getItem("learn-topic");
     const storedPathId = sessionStorage.getItem("learning-path-id");
 
@@ -62,8 +59,10 @@ const ContentPage = () => {
         }
 
         if (data && data.length > 0) {
+          console.log(`Retrieved ${data.length} learning steps for path:`, storedPathId);
           setSteps(data);
         } else {
+          console.log("No learning steps found for path:", storedPathId);
           toast.info("No learning steps found for this project.");
         }
       } catch (error) {
@@ -79,14 +78,12 @@ const ContentPage = () => {
 
   const markStepAsComplete = useCallback(async (stepId: string) => {
     try {
-      // Optimistically update the UI
       setSteps(prevSteps =>
         prevSteps.map(step =>
           step.id === stepId ? { ...step, completed: true } : step
         )
       );
 
-      // Update the step in the database
       const { error } = await supabase
         .from('learning_steps')
         .update({ completed: true })
@@ -96,14 +93,12 @@ const ContentPage = () => {
         console.error("Error marking step as complete:", error);
         toast.error("Failed to mark step as complete. Please try again.");
 
-        // Revert the optimistic update if the database update fails
         setSteps(prevSteps =>
           prevSteps.map(step =>
             step.id === stepId ? { ...step, completed: false } : step
           )
         );
       } else {
-        // Move to the next step if not already at the end
         if (currentStep < steps.length - 1) {
           setCurrentStep(currentStep + 1);
         }
@@ -120,18 +115,14 @@ const ContentPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Check if the is_completed column exists before attempting to update
       try {
-        // Try to update the learning path's completion status
-        // We won't use is_completed in the type, use a partial update
         const { error: updateError } = await supabase
           .from('learning_paths')
-          .update({ is_approved: true }) // Just update is_approved instead
+          .update({ is_approved: true })
           .eq('id', pathId);
         
         if (updateError) {
           console.error("Error updating path:", updateError);
-          // Even if there's an error, we'll still mark it as completed in the UI
         }
       } catch (error) {
         console.error("Error updating path:", error);
@@ -228,7 +219,7 @@ const ContentPage = () => {
             </div>
             <ContentSection 
               title={currentStepData?.title || ""}
-              content={currentStepData?.content || "No content available for this step."}
+              content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
               index={currentStep}
             />
           </div>
