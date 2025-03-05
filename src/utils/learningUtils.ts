@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";
@@ -55,6 +54,14 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     // If steps exist, return them
     if (existingSteps && existingSteps.length > 0) {
       console.log(`Found ${existingSteps.length} existing steps for path ${pathId}`);
+      
+      // Start background generation for steps without detailed content
+      startBackgroundContentGeneration(existingSteps.map(step => ({
+        id: step.id,
+        title: step.title,
+        description: step.content || ""
+      })), topic, pathId);
+      
       return existingSteps.map(step => ({
         id: step.id,
         title: step.title,
@@ -154,9 +161,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     console.log(`Successfully created ${steps.length} learning steps`);
     toast.success(`Your learning plan for ${topic} is ready!`);
     
-    // Start background generation of detailed content for all steps
-    // Don't await this - let it happen in background
-    startBackgroundContentGeneration(steps, topic, pathId);
+    // No need to start background generation here - it will start after plan approval
     
     return steps;
   } catch (error) {
@@ -169,13 +174,11 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
 // Function to start background generation of all content
 const startBackgroundContentGeneration = async (steps: Step[], topic: string, pathId: string) => {
   console.log(`Starting background content generation for ${steps.length} steps`);
-  toast.info("We'll now generate detailed content for all steps in the background", {
-    duration: 5000,
-    id: "background-generation-toast"
-  });
   
-  // Process steps one by one to avoid overloading the API or the browser
-  for (const step of steps) {
+  // Process steps concurrently but with a small delay between requests to avoid rate limiting
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    
     try {
       // Check if detailed content already exists for this step
       const { data, error } = await supabase
@@ -191,15 +194,21 @@ const startBackgroundContentGeneration = async (steps: Step[], topic: string, pa
       
       // Only generate if no detailed content exists
       if (!data.detailed_content) {
-        await generateStepContent(step, topic, true);
+        console.log(`Generating content for step ${i+1}/${steps.length}: ${step.title}`);
+        
+        // Don't await - let it run in background
+        generateStepContent(step, topic, true).catch(err => {
+          console.error(`Background generation error for step ${step.id}:`, err);
+        });
+        
+        // Add a small delay between requests to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (error) {
-      console.error(`Error generating content for step ${step.id}:`, error);
+      console.error(`Error in background generation for step ${step.id}:`, error);
       // Continue with other steps even if one fails
     }
   }
-  
-  console.log("Background content generation completed");
 };
 
 // Generate detailed content for a learning step using the edge function
@@ -226,11 +235,6 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     try {
       console.log(`Generating detailed content for step: ${step.title}`);
       
-      // Only show toast if not in silent mode
-      if (!silent) {
-        toast.info("Generating detailed content for this step...");
-      }
-      
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
           stepId: step.id,
@@ -238,38 +242,35 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           title: step.title,
           stepNumber: stepData.order_index + 1,
           totalSteps: 10,
-          silent // Pass silent parameter to edge function
+          silent
         }
       });
       
       if (response.error) {
         console.error("Edge function error:", response.error);
-        if (!silent) {
-          toast.error("Unable to generate content. Please try again later.");
-        }
         throw new Error("Failed to generate content using the AI");
       }
       
       const data = response.data;
       
       if (!data || !data.content) {
-        if (!silent) {
-          toast.error("Received an invalid response from our AI. Please try again.");
-        }
         throw new Error("Invalid content generated");
       }
       
-      // Only show success toast if not in silent mode
-      if (!silent) {
-        toast.success("Content generated successfully!");
+      // Save the content to the database
+      const { error: updateError } = await supabase
+        .from('learning_steps')
+        .update({ detailed_content: data.content })
+        .eq('id', step.id);
+        
+      if (updateError) {
+        console.error("Error saving generated content:", updateError);
+        throw new Error("Failed to save generated content");
       }
       
       return data.content;
     } catch (error) {
       console.error("Error calling edge function:", error);
-      if (!silent) {
-        toast.error("Failed to generate content. Please try again.");
-      }
       throw new Error("Failed to call the content generation service");
     }
   } catch (error) {

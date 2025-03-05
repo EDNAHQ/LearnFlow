@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import ContentSection from "@/components/ContentSection";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Loader2 } from "lucide-react";
 
 interface LearningStepData {
   id: string;
@@ -46,6 +47,7 @@ const ContentPage = () => {
     setTopic(storedTopic);
     setPathId(storedPathId);
 
+    // Initial fetch of learning steps
     const fetchLearningSteps = async () => {
       setIsLoading(true);
       try {
@@ -65,11 +67,15 @@ const ContentPage = () => {
           console.log(`Retrieved ${data.length} learning steps for path:`, storedPathId);
           setSteps(data);
           
+          // Count how many steps already have content
           const stepsWithContent = data.filter(step => step.detailed_content).length;
           setGeneratedSteps(stepsWithContent);
           
+          // If not all steps have content, show generation in progress
           if (stepsWithContent < data.length) {
             setGeneratingContent(true);
+            
+            // Single notification for generation progress
             toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
               duration: 5000,
               id: "content-generation-toast"
@@ -89,6 +95,7 @@ const ContentPage = () => {
 
     fetchLearningSteps();
     
+    // Set up interval to check for content generation progress
     const checkContentGenerationProgress = setInterval(async () => {
       if (storedPathId && generatingContent) {
         try {
@@ -103,6 +110,7 @@ const ContentPage = () => {
             if (stepsWithContent !== generatedSteps) {
               setGeneratedSteps(stepsWithContent);
               
+              // Update steps with new content
               setSteps(prevSteps => {
                 const updatedSteps = [...prevSteps];
                 data.forEach(newData => {
@@ -114,6 +122,13 @@ const ContentPage = () => {
                 return updatedSteps;
               });
               
+              // Update toast with current progress
+              toast.info(`Generating content (${stepsWithContent}/${steps.length} steps completed)`, {
+                duration: 5000,
+                id: "content-generation-toast"
+              });
+              
+              // If all content is generated, stop checking
               if (stepsWithContent === steps.length) {
                 setGeneratingContent(false);
                 toast.success("All learning content has been generated!", {
@@ -126,7 +141,7 @@ const ContentPage = () => {
           console.error("Error checking content generation status:", error);
         }
       }
-    }, 10000);
+    }, 5000); // Check every 5 seconds
     
     return () => clearInterval(checkContentGenerationProgress);
   }, [navigate, user, steps.length, generatingContent, generatedSteps]);
@@ -264,7 +279,7 @@ const ContentPage = () => {
               </p>
               
               {generatingContent && (
-                <div className="flex items-center gap-2 text-sm text-brand-purple bg-brand-purple/10 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   <span>Generating content ({generatedSteps}/{steps.length})</span>
                 </div>

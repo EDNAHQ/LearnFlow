@@ -33,7 +33,7 @@ serve(async (req) => {
         );
       }
 
-      // Generate a learning plan using OpenAI with an improved, more focused prompt
+      // Generate a learning plan using OpenAI with a focused prompt
       const prompt = `
       You are an expert educator creating a highly focused and specialized learning plan for the topic: "${topic}".
       
@@ -147,7 +147,7 @@ serve(async (req) => {
         throw new Error(`Failed to parse learning plan: ${parseError.message}`);
       }
     } else {
-      // Original detailed content generation code with improved focus
+      // Detailed content generation
       if (!stepId || !topic || !title) {
         return new Response(
           JSON.stringify({ error: 'Missing required parameters' }),
@@ -168,6 +168,7 @@ serve(async (req) => {
       }
 
       if (existingData?.detailed_content) {
+        console.log(`Content already exists for step ${stepId} (${title}), returning existing content`);
         return new Response(
           JSON.stringify({ content: existingData.detailed_content }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -229,17 +230,6 @@ serve(async (req) => {
 
       const generatedContent = data.choices[0].message.content;
       console.log(`Content successfully generated (${generatedContent.length} characters)`);
-
-      // Save the generated content to the database
-      const { error: updateError } = await supabase
-        .from('learning_steps')
-        .update({ detailed_content: generatedContent })
-        .eq('id', stepId);
-
-      if (updateError) {
-        console.error("Error updating content:", updateError);
-        throw new Error("Failed to save generated content");
-      }
 
       return new Response(
         JSON.stringify({ content: generatedContent }),

@@ -98,8 +98,13 @@ const PlanPage = () => {
         // Store path ID in sessionStorage
         sessionStorage.setItem("learning-path-id", pathId);
         
+        // Show a toast notification about background generation
+        toast.success("Learning plan approved! Content generation started in background.", {
+          duration: 5000,
+          id: "background-generation-start"
+        });
+        
         navigate("/content");
-        toast.success("Learning plan approved! Let's start learning.");
       } catch (error) {
         console.error("Error in handleApprove:", error);
         toast.error("Something went wrong. Please try again.");
