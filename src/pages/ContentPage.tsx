@@ -1,13 +1,16 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import ContentSection from "@/components/ContentSection";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, CheckCircle, Loader2, Home, ArrowRightCircle } from "lucide-react";
 import { generateStepContent } from "@/utils/learningUtils";
+import { ContentModeProvider } from "@/hooks/useContentMode";
+import { ModeToggle } from "@/components/ModeToggle";
+import ContentDisplay from "@/components/ContentDisplay";
 
 interface LearningStepData {
   id: string;
@@ -268,141 +271,145 @@ const ContentPage = () => {
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
-      <div ref={topRef}></div>
-      
-      <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
-        <div className="container max-w-4xl mx-auto py-5 px-4">
+    <ContentModeProvider>
+      <div className="min-h-screen bg-gray-50 text-gray-800">
+        <div ref={topRef}></div>
+        
+        <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
+          <div className="container max-w-4xl mx-auto py-5 px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-1 text-white hover:bg-white/10"
+                  onClick={goToProjects}
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Projects</span>
+                </Button>
+                
+                <div className="h-5 w-px bg-gray-600"></div>
+                
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-1 text-white hover:bg-white/10"
+                  onClick={handleBack}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back</span>
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <ModeToggle />
+                
+                {generatingContent && (
+                  <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Generating ({generatedSteps}/{steps.length})</span>
+                  </div>
+                )}
+                <div className="text-sm font-medium text-white">
+                  LearnFlow
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="container max-w-4xl mx-auto py-8 px-4">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                className="flex items-center gap-1 text-white hover:bg-white/10"
-                onClick={goToProjects}
-              >
-                <Home className="h-4 w-4" />
-                <span>Projects</span>
-              </Button>
-              
-              <div className="h-5 w-px bg-gray-600"></div>
-              
-              <Button
-                variant="ghost"
-                className="flex items-center gap-1 text-white hover:bg-white/10"
-                onClick={handleBack}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back</span>
-              </Button>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-2">
+                <span>{topic}</span>
+                <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-2 py-1 rounded-full">
+                  Step {currentStep + 1} of {steps.length}
+                </div>
+              </h1>
+              <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                <div 
+                  className="bg-[#6D42EF] h-full rounded-full transition-all duration-300"
+                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                ></div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {generatingContent && (
-                <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  <span>Generating ({generatedSteps}/{steps.length})</span>
-                </div>
-              )}
-              <div className="text-sm font-medium text-white">
-                LearnFlow
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {currentStepData?.title}
+                </h2>
               </div>
+              <ContentDisplay 
+                title={currentStepData?.title || ""}
+                content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
+                index={currentStep}
+                detailedContent={currentStepData?.detailed_content}
+                pathId={pathId}
+                topic={topic}
+              />
+            </div>
+
+            <div className="flex justify-between">
+              <Button
+                variant="secondary"
+                onClick={handleBack}
+                disabled={currentStep === 0}
+                className="text-gray-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Previous
+              </Button>
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
+                  onClick={() => markStepAsComplete(currentStepData.id)}
+                >
+                  Mark Complete
+                  <ArrowRightCircle className="w-4 h-4 ml-2" />
+                </Button>
+              ) : (
+                <Button
+                  className={`bg-[#F5B623] hover:bg-[#F5B623]/90 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
+                  onClick={completePath}
+                  disabled={isSubmitting || projectCompleted}
+                >
+                  {isSubmitting ? (
+                    <>
+                      Submitting...
+                      <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    </>
+                  ) : projectCompleted ? (
+                    <>
+                      Completed <CheckCircle className="w-4 h-4 ml-2" />
+                    </>
+                  ) : (
+                    "Complete Project"
+                  )}
+                </Button>
+              )}
             </div>
           </motion.div>
         </div>
+
+        <div className="fixed bottom-6 right-6">
+          <Button 
+            onClick={goToProjects}
+            className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
-
-      <div className="container max-w-4xl mx-auto py-8 px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-2">
-              <span>{topic}</span>
-              <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-2 py-1 rounded-full">
-                Step {currentStep + 1} of {steps.length}
-              </div>
-            </h1>
-            <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="bg-[#6D42EF] h-full rounded-full transition-all duration-300"
-                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {currentStepData?.title}
-              </h2>
-            </div>
-            <ContentSection 
-              title={currentStepData?.title || ""}
-              content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
-              index={currentStep}
-              detailedContent={currentStepData?.detailed_content}
-              pathId={pathId}
-              topic={topic}
-            />
-          </div>
-
-          <div className="flex justify-between">
-            <Button
-              variant="secondary"
-              onClick={handleBack}
-              disabled={currentStep === 0}
-              className="text-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Previous
-            </Button>
-            {currentStep < steps.length - 1 ? (
-              <Button
-                className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
-                onClick={() => markStepAsComplete(currentStepData.id)}
-              >
-                Mark Complete
-                <ArrowRightCircle className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                className={`bg-[#F5B623] hover:bg-[#F5B623]/90 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
-                onClick={completePath}
-                disabled={isSubmitting || projectCompleted}
-              >
-                {isSubmitting ? (
-                  <>
-                    Submitting...
-                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                  </>
-                ) : projectCompleted ? (
-                  <>
-                    Completed <CheckCircle className="w-4 h-4 ml-2" />
-                  </>
-                ) : (
-                  "Complete Project"
-                )}
-              </Button>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="fixed bottom-6 right-6">
-        <Button 
-          onClick={goToProjects}
-          className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
-        >
-          <Home className="h-5 w-5" />
-        </Button>
-      </div>
-    </div>
+    </ContentModeProvider>
   );
 };
 
