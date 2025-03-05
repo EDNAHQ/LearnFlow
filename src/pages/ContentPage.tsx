@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ const ContentPage = () => {
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
+  const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) {
@@ -163,7 +164,13 @@ const ContentPage = () => {
         );
       } else {
         if (currentStep < steps.length - 1) {
-          setCurrentStep(currentStep + 1);
+          setCurrentStep(prev => {
+            setTimeout(() => {
+              topRef.current?.scrollIntoView({ behavior: 'smooth' });
+              window.scrollTo(0, 0);
+            }, 100);
+            return prev + 1;
+          });
         }
       }
     } catch (error) {
@@ -247,6 +254,8 @@ const ContentPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
+      <div ref={topRef}></div>
+      
       <div className="bg-gradient-to-r from-learn-100 to-learn-50 shadow-sm">
         <div className="container max-w-4xl mx-auto py-5 px-4">
           <motion.div

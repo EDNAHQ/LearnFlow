@@ -125,7 +125,7 @@ const PlanPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-6 brand-gradient-bg text-white">
+    <div className="min-h-screen py-10 px-4 md:px-6 bg-white text-gray-800">
       <div className="absolute top-4 right-4">
         <UserNav />
       </div>
@@ -138,14 +138,14 @@ const PlanPage = () => {
         >
           <Button 
             variant="ghost" 
-            className="flex items-center gap-1 text-brand-light hover:text-brand-purple hover:bg-white/10" 
+            className="flex items-center gap-1 text-gray-700 hover:text-brand-purple hover:bg-gray-100" 
             onClick={handleReset}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back</span>
           </Button>
           
-          <div className="text-sm text-brand-light/70">
+          <div className="text-sm text-gray-500">
             <span className="font-medium text-brand-purple">LearnFlow</span>
           </div>
         </motion.div>
@@ -162,7 +162,7 @@ const PlanPage = () => {
               </div>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gradient-purple">Your Learning Journey</h1>
-            <p className="text-brand-light/70 max-w-lg mx-auto">
+            <p className="text-gray-600 max-w-lg mx-auto">
               A personalized 10-step plan to master <span className="text-brand-gold font-medium">{topic}</span>
             </p>
           </div>
@@ -170,15 +170,15 @@ const PlanPage = () => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="w-12 h-12 rounded-full border-4 border-brand-purple/30 border-t-brand-purple animate-spin mb-4"></div>
-              <p className="text-brand-light/70 animate-pulse-soft">Crafting your personalized learning journey...</p>
+              <p className="text-gray-500 animate-pulse-soft">Crafting your personalized learning journey...</p>
             </div>
           ) : authError ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-16 h-16 rounded-full bg-brand-gold/20 flex items-center justify-center mb-4">
                 <LogIn className="h-8 w-8 text-brand-gold" />
               </div>
-              <h3 className="text-xl font-bold mb-2 text-brand-light">Authentication Required</h3>
-              <p className="text-brand-light/70 mb-6 max-w-md">
+              <h3 className="text-xl font-bold mb-2 text-gray-800">Authentication Required</h3>
+              <p className="text-gray-600 mb-6 max-w-md">
                 You need to be logged in to create and save learning plans. Your plans will be stored in your account so you can access them anytime.
               </p>
               <Button onClick={handleLogin} className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect">
