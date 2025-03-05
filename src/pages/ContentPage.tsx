@@ -5,16 +5,21 @@ import { Button } from "@/components/ui/button";
 import ContentSection from "@/components/ContentSection";
 import { Step } from "@/components/LearningStep";
 import { generateStepContent } from "@/utils/learningUtils";
-import { ArrowLeft, Home, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Home, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { UserNav } from "@/components/UserNav";
 
+// Extend the Step interface to include order_index
+interface ExtendedStep extends Step {
+  order_index?: number;
+}
+
 const ContentPage = () => {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<string>("");
-  const [steps, setSteps] = useState<Step[]>([]);
+  const [steps, setSteps] = useState<ExtendedStep[]>([]);
   const [contents, setContents] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -184,6 +189,31 @@ const ContentPage = () => {
     sessionStorage.removeItem("learning-path-id");
   }, [navigate]);
 
+  // New function to handle project completion
+  const handleCompleteProject = async () => {
+    if (!pathId) return;
+    
+    try {
+      // Update the project status
+      await supabase
+        .from('learning_paths')
+        .update({ is_completed: true })
+        .eq('id', pathId);
+      
+      toast.success("Congratulations! Learning project completed! 🎉");
+      
+      // Navigate to projects page
+      navigate("/projects");
+      
+      // Clear session storage
+      sessionStorage.removeItem("learn-topic");
+      sessionStorage.removeItem("learning-path-id");
+    } catch (error) {
+      console.error("Error completing project:", error);
+      toast.error("Failed to complete the project. Please try again.");
+    }
+  };
+
   if (steps.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -196,6 +226,7 @@ const ContentPage = () => {
   }
 
   const currentStepData = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
 
   return (
     <div className="min-h-screen pt-6 pb-20 px-4 md:px-6">
@@ -299,6 +330,31 @@ const ContentPage = () => {
                   index={currentStep}
                 />
               )}
+              
+              {isLastStep && contents[currentStepData.id] && (
+                <motion.div 
+                  className="mt-12 text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <div className="p-6 rounded-lg bg-learn-50 border border-learn-100 mb-6">
+                    <h3 className="text-xl font-bold mb-2">Congratulations!</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You've completed all steps in this learning journey on {topic}.
+                      Would you like to mark this project as complete?
+                    </p>
+                    <Button 
+                      onClick={handleCompleteProject}
+                      className="bg-learn-600 hover:bg-learn-700 gap-2"
+                      size="lg"
+                    >
+                      <Trophy className="h-5 w-5" />
+                      Complete Project
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -324,14 +380,23 @@ const ContentPage = () => {
               {currentStep + 1} of {steps.length}
             </span>
             
-            <Button
-              onClick={handleNext}
-              disabled={currentStep === steps.length - 1}
-              className="gap-1 bg-learn-600 hover:bg-learn-700"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {isLastStep ? (
+              <Button
+                onClick={handleCompleteProject}
+                className="gap-1 bg-learn-600 hover:bg-learn-700"
+              >
+                Complete
+                <Trophy className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNext}
+                className="gap-1 bg-learn-600 hover:bg-learn-700"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </motion.div>
       </div>
