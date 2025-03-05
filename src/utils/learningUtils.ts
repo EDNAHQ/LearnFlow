@@ -163,7 +163,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
 };
 
 // Generate detailed content for a learning step using the edge function
-export const generateStepContent = async (step: Step, topic: string): Promise<string> => {
+export const generateStepContent = async (step: Step, topic: string, silent = false): Promise<string> => {
   try {
     // Get the learning path ID for this step
     const { data: stepData, error: fetchError } = await supabase
@@ -185,7 +185,11 @@ export const generateStepContent = async (step: Step, topic: string): Promise<st
     // Otherwise, call the edge function to generate content
     try {
       console.log(`Generating detailed content for step: ${step.title}`);
-      toast.info("Generating detailed content for this step...");
+      
+      // Only show toast if not in silent mode
+      if (!silent) {
+        toast.info("Generating detailed content for this step...");
+      }
       
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
@@ -193,28 +197,39 @@ export const generateStepContent = async (step: Step, topic: string): Promise<st
           topic,
           title: step.title,
           stepNumber: stepData.order_index + 1,
-          totalSteps: 10
+          totalSteps: 10,
+          silent // Pass silent parameter to edge function
         }
       });
       
       if (response.error) {
         console.error("Edge function error:", response.error);
-        toast.error("Unable to generate content. Please try again later.");
+        if (!silent) {
+          toast.error("Unable to generate content. Please try again later.");
+        }
         throw new Error("Failed to generate content using the AI");
       }
       
       const data = response.data;
       
       if (!data || !data.content) {
-        toast.error("Received an invalid response from our AI. Please try again.");
+        if (!silent) {
+          toast.error("Received an invalid response from our AI. Please try again.");
+        }
         throw new Error("Invalid content generated");
       }
       
-      toast.success("Content generated successfully!");
+      // Only show success toast if not in silent mode
+      if (!silent) {
+        toast.success("Content generated successfully!");
+      }
+      
       return data.content;
     } catch (error) {
       console.error("Error calling edge function:", error);
-      toast.error("Failed to generate content. Please try again.");
+      if (!silent) {
+        toast.error("Failed to generate content. Please try again.");
+      }
       throw new Error("Failed to call the content generation service");
     }
   } catch (error) {

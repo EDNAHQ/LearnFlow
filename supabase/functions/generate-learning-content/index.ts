@@ -19,7 +19,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { stepId, topic, title, stepNumber, totalSteps, generatePlan } = await req.json();
+    const { stepId, topic, title, stepNumber, totalSteps, generatePlan, silent } = await req.json();
 
     // Create a Supabase client for admin operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

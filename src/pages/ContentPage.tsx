@@ -126,11 +126,16 @@ const ContentPage = () => {
   useEffect(() => {
     if (steps.length > 0 && !preloadingComplete) {
       const preloadContent = async () => {
-        toast.info("Preparing your learning content in the background...");
+        // Single notification at the beginning only
+        const toastId = toast.info("Preparing your learning content in the background...", {
+          id: "content-loading",
+          duration: Infinity,
+        });
         
         const missingContentSteps = steps.filter(step => !contents[step.id]);
         if (missingContentSteps.length === 0) {
           setPreloadingComplete(true);
+          toast.dismiss(toastId);
           toast.success("All content is ready!");
           return;
         }
@@ -142,7 +147,7 @@ const ContentPage = () => {
           
           try {
             // Don't show toast for each step to avoid notification spam
-            const content = await generateStepContent(step, topic);
+            const content = await generateStepContent(step, topic, true); // Added silent parameter
             setContents(prev => ({ ...prev, [step.id]: content }));
             markStepAsCompleted(step.id);
             
@@ -157,6 +162,7 @@ const ContentPage = () => {
         
         setLoadingStep(null);
         setPreloadingComplete(true);
+        toast.dismiss(toastId);
         toast.success("All learning content has been loaded!");
       };
       
@@ -189,7 +195,7 @@ const ContentPage = () => {
     sessionStorage.removeItem("learning-path-id");
   }, [navigate]);
 
-  // New function to handle project completion
+  // Function to handle project completion
   const handleCompleteProject = async () => {
     if (!pathId) return;
     
@@ -197,7 +203,7 @@ const ContentPage = () => {
       // Update the project status
       await supabase
         .from('learning_paths')
-        .update({ is_completed: true })
+        .update({ completed: true }) // Changed from is_completed to match DB schema
         .eq('id', pathId);
       
       toast.success("Congratulations! Learning project completed! 🎉");
