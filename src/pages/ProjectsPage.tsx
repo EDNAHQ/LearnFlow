@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ interface LearningProject {
   topic: string;
   created_at: string;
   is_approved: boolean;
-  is_completed?: boolean; // Optional since it might not exist in the database
+  is_completed: boolean;
   progress?: number;
 }
 
@@ -29,10 +28,9 @@ const ProjectsPage = () => {
       if (!user) return;
 
       try {
-        // First, fetch base project data without is_completed
         const { data, error } = await supabase
           .from('learning_paths')
-          .select('id, topic, created_at, is_approved')
+          .select('id, topic, created_at, is_approved, is_completed')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
@@ -42,14 +40,12 @@ const ProjectsPage = () => {
           return;
         }
 
-        // Check if we got data back
         if (!data || !Array.isArray(data)) {
           setProjects([]);
           setLoading(false);
           return;
         }
 
-        // Create base projects with progress info
         const projectsWithProgress = await Promise.all(
           data.map(async (project) => {
             const { data: steps, error: stepsError } = await supabase
@@ -62,7 +58,7 @@ const ProjectsPage = () => {
               return {
                 ...project,
                 progress: 0,
-                is_completed: false // Default to false
+                is_completed: project.is_completed || false
               };
             }
 
@@ -73,45 +69,10 @@ const ProjectsPage = () => {
             return {
               ...project,
               progress,
-              is_completed: false // Default to false
+              is_completed: project.is_completed || false
             };
           })
         );
-
-        // Try to check if is_completed column exists
-        try {
-          // First check if the column exists with a safe query
-          const { error: columnCheckError } = await supabase
-            .from('learning_paths')
-            .select('is_completed')
-            .limit(1);
-          
-          // Only proceed if the column exists (no error)
-          if (!columnCheckError && projectsWithProgress.length > 0) {
-            // Get the IDs of all projects
-            const projectIds = projectsWithProgress.map(p => p.id);
-            
-            // Fetch completion status for these projects
-            const { data: completionData, error: completionError } = await supabase
-              .from('learning_paths')
-              .select('id, is_completed')
-              .in('id', projectIds);
-            
-            // Only update if we got valid data back
-            if (!completionError && completionData && Array.isArray(completionData)) {
-              // Map completion status to our projects
-              projectsWithProgress.forEach(project => {
-                const completionInfo = completionData.find(p => p.id === project.id);
-                if (completionInfo && completionInfo.is_completed) {
-                  project.is_completed = completionInfo.is_completed;
-                }
-              });
-            }
-          }
-        } catch (error) {
-          // Just log the error - we'll use the default false values for is_completed
-          console.log("is_completed column might not exist:", error);
-        }
 
         setProjects(projectsWithProgress);
       } catch (error) {
@@ -126,17 +87,14 @@ const ProjectsPage = () => {
   }, [user]);
 
   const handleProjectClick = (project: LearningProject) => {
-    // Don't allow clicking on completed projects
     if (project.is_completed) {
       toast.info("This project is already completed");
       return;
     }
     
-    // Store project details in session storage
     sessionStorage.setItem("learn-topic", project.topic);
     sessionStorage.setItem("learning-path-id", project.id);
 
-    // Navigate to the appropriate page
     if (project.is_approved) {
       navigate("/content");
     } else {

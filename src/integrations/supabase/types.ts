@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           id: string
           is_approved: boolean | null
+          is_completed: boolean | null
           topic: string
           updated_at: string
           user_id: string
@@ -22,6 +23,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_approved?: boolean | null
+          is_completed?: boolean | null
           topic: string
           updated_at?: string
           user_id: string
@@ -30,6 +32,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_approved?: boolean | null
+          is_completed?: boolean | null
           topic?: string
           updated_at?: string
           user_id?: string
