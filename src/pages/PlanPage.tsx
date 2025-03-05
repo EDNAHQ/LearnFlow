@@ -1,15 +1,26 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MainNav } from "@/components/MainNav";
 import LearningStep, { Step } from "@/components/LearningStep";
 import { generateLearningPlan } from "@/utils/learningUtils";
+import { deleteLearningPath } from "@/utils/projectUtils";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, RefreshCw, LogIn, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, RefreshCw, LogIn, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { UserNav } from "@/components/UserNav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const PlanPage = () => {
   const navigate = useNavigate();
@@ -20,9 +31,9 @@ const PlanPage = () => {
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [pathId, setPathId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check if user is authenticated
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setUser(data.user);
@@ -52,7 +63,6 @@ const PlanPage = () => {
         const plan = await generateLearningPlan(storedTopic);
         setSteps(plan);
         
-        // Find the path ID for the first step
         if (plan.length > 0) {
           const { data, error } = await supabase
             .from('learning_steps')
@@ -84,7 +94,6 @@ const PlanPage = () => {
   const handleApprove = async () => {
     if (pathId) {
       try {
-        // Update the path as approved
         const { error } = await supabase
           .from('learning_paths')
           .update({ is_approved: true })
@@ -96,10 +105,8 @@ const PlanPage = () => {
           return;
         }
         
-        // Store path ID in sessionStorage
         sessionStorage.setItem("learning-path-id", pathId);
         
-        // Show a toast notification about background generation
         toast.success("Learning plan approved! Content generation started in background.", {
           duration: 5000,
           id: "background-generation-start"
@@ -125,9 +132,28 @@ const PlanPage = () => {
     navigate("/auth");
   };
 
+  const handleDeletePlan = async () => {
+    if (!pathId) {
+      toast.error("No project ID found");
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      const success = await deleteLearningPath(pathId);
+      if (success) {
+        navigate("/projects");
+      }
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      toast.error("Failed to delete plan");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
@@ -169,6 +195,40 @@ const PlanPage = () => {
             <p className="text-gray-600 max-w-lg mx-auto mb-2">
               A personalized 10-step plan to master <span className="text-brand-gold font-medium">{topic}</span>
             </p>
+            
+            {!loading && !authError && pathId && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 text-brand-pink hover:bg-brand-pink/10 hover:text-brand-pink border-brand-pink/30"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Delete Plan
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-white">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Learning Plan</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete this learning plan and all its content.
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-brand-pink hover:bg-brand-pink/90 text-white"
+                      onClick={handleDeletePlan}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? "Deleting..." : "Delete Plan"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
           
           {loading ? (

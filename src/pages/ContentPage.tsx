@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, CheckCircle, Loader2, Home, ArrowRightCircle } from "lucide-react";
+import { generateStepContent } from "@/utils/learningUtils";
 
 interface LearningStepData {
   id: string;
