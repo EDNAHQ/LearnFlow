@@ -1,13 +1,24 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { ArrowLeft, Book, Clock, ExternalLink, Trophy, CheckCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, Book, Clock, ExternalLink, Trophy, CheckCircle, Sparkles, Trash2 } from "lucide-react";
 import { UserNav } from "@/components/UserNav";
 import { toast } from "sonner";
+import { deleteLearningPath } from "@/utils/projectUtils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface LearningProject {
   id: string;
@@ -23,6 +34,8 @@ const ProjectsPage = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<LearningProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -88,7 +101,6 @@ const ProjectsPage = () => {
   }, [user]);
 
   const handleProjectClick = (project: LearningProject) => {
-    // Always allow clicking regardless of completion status
     sessionStorage.setItem("learn-topic", project.topic);
     sessionStorage.setItem("learning-path-id", project.id);
 
@@ -118,9 +130,30 @@ const ProjectsPage = () => {
     return { label: 'Plan Created', bgColor: 'bg-brand-gold/20 text-brand-gold' };
   };
 
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) {
+      toast.error("No project selected for deletion");
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      const success = await deleteLearningPath(projectToDelete);
+      if (success) {
+        setProjects(projects.filter(project => project.id !== projectToDelete));
+        toast.success("Project deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project");
+    } finally {
+      setIsDeleting(false);
+      setProjectToDelete(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Header */}
       <header className="border-b border-gray-100 bg-white">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
@@ -194,23 +227,59 @@ const ProjectsPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className={`p-5 rounded-xl transition-all cursor-pointer hover:shadow-md ${
+                      className={`p-5 rounded-xl transition-all ${
                         isCompleted 
                           ? 'bg-gray-50 border-l-4 border-l-green-500' 
                           : 'bg-gray-50 hover:border-l-brand-purple hover:border-l-4'
                       }`}
-                      onClick={() => handleProjectClick(project)}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                        <h3 className="text-lg font-medium text-gray-800 flex items-center cursor-pointer" 
+                            onClick={() => handleProjectClick(project)}>
                           {isCompleted && (
                             <CheckCircle className="inline-block w-4 h-4 text-green-600 mr-1.5" />
                           )}
                           {project.topic}
                         </h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock className="w-3.5 h-3.5 mr-1" />
-                          <span>{formatDate(project.created_at)}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Clock className="w-3.5 h-3.5 mr-1" />
+                            <span>{formatDate(project.created_at)}</span>
+                          </div>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="w-7 h-7 rounded-full text-gray-400 hover:text-brand-pink hover:bg-brand-pink/10"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setProjectToDelete(project.id);
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-white">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Learning Project</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete "{project.topic}" and all its content.
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setProjectToDelete(null)}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-brand-pink hover:bg-brand-pink/90 text-white"
+                                  onClick={handleDeleteProject}
+                                  disabled={isDeleting}
+                                >
+                                  {isDeleting ? "Deleting..." : "Delete Project"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                       
@@ -232,18 +301,15 @@ const ProjectsPage = () => {
                             {status.label}
                           </span>
                         </div>
-                        {!isCompleted && (
-                          <Button variant="ghost" size="sm" className="gap-1 text-xs text-brand-purple hover:text-brand-purple/80">
-                            Continue
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                        {isCompleted && (
-                          <Button variant="ghost" size="sm" className="gap-1 text-xs text-green-600 hover:text-green-700">
-                            Review
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`gap-1 text-xs ${isCompleted ? 'text-green-600 hover:text-green-700' : 'text-brand-purple hover:text-brand-purple/80'}`}
+                          onClick={() => handleProjectClick(project)}
+                        >
+                          {isCompleted ? 'Review' : 'Continue'}
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
                       </div>
                     </motion.div>
                   );
@@ -262,6 +328,28 @@ const ProjectsPage = () => {
           )}
         </motion.div>
       </div>
+      
+      <AlertDialog open={!!projectToDelete && !isDeleting}>
+        <AlertDialogContent className="bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Learning Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this project and all its content.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setProjectToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-brand-pink hover:bg-brand-pink/90 text-white"
+              onClick={handleDeleteProject}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete Project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
