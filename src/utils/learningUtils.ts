@@ -38,6 +38,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   // If a path already exists, use it, otherwise create a new one
   if (existingPaths && existingPaths.length > 0) {
     pathId = existingPaths[0].id;
+    console.log("Found existing learning path:", pathId);
     
     // Check if the path already has steps
     const { data: existingSteps, error: stepsError } = await supabase
@@ -53,6 +54,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     
     // If steps exist, return them
     if (existingSteps && existingSteps.length > 0) {
+      console.log(`Found ${existingSteps.length} existing steps for path ${pathId}`);
       return existingSteps.map(step => ({
         id: step.id,
         title: step.title,
@@ -61,6 +63,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     }
   } else {
     // Create a new learning path
+    console.log("Creating new learning path for topic:", topic);
     const { data: newPath, error: createError } = await supabase
       .from('learning_paths')
       .insert({
@@ -76,36 +79,54 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     }
     
     pathId = newPath[0].id;
+    console.log("New learning path created:", pathId);
   }
   
   // Now generate the learning plan steps using AI
   try {
+    console.log("Calling edge function to generate learning plan");
+    toast.info("Generating your personalized learning plan...");
+    
     // Call the edge function to generate a learning plan
-    const { data, error } = await supabase.functions.invoke('generate-learning-content', {
+    const response = await supabase.functions.invoke('generate-learning-content', {
       body: {
         topic,
         generatePlan: true
       }
     });
     
-    if (error) {
-      console.error("Edge function error:", error);
+    if (response.error) {
+      console.error("Edge function error:", response.error);
+      toast.error("Unable to generate learning plan. Please try again later.");
       throw new Error("Failed to generate learning plan using AI");
     }
     
-    if (!data.steps || !Array.isArray(data.steps)) {
+    const data = response.data;
+    
+    if (!data || !data.steps || !Array.isArray(data.steps)) {
+      console.error("Invalid response format:", data);
+      toast.error("Received an invalid response from our AI. Please try again.");
       throw new Error("Invalid learning plan generated");
     }
+    
+    console.log(`Generated ${data.steps.length} steps for learning plan`);
     
     const steps: Step[] = [];
     
     // Insert the AI-generated steps into the database
     for (let i = 0; i < data.steps.length; i++) {
+      const step = data.steps[i];
+      
+      if (!step.title || !step.description) {
+        console.warn(`Step ${i} is missing title or description, skipping`);
+        continue;
+      }
+      
       const { data: stepData, error: stepError } = await supabase
         .from('learning_steps')
         .insert({
-          title: data.steps[i].title,
-          content: data.steps[i].description,
+          title: step.title,
+          content: step.description,
           path_id: pathId,
           order_index: i,
           completed: false
@@ -113,8 +134,9 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
         .select();
         
       if (stepError || !stepData || stepData.length === 0) {
-        console.error("Error creating step:", stepError);
-        throw new Error("Failed to create learning step");
+        console.error(`Error creating step ${i}:`, stepError);
+        // Continue with other steps even if one fails
+        continue;
       }
       
       steps.push({
@@ -124,9 +146,18 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
       });
     }
     
+    if (steps.length === 0) {
+      toast.error("Failed to save any learning steps. Please try again.");
+      throw new Error("No learning steps were created");
+    }
+    
+    console.log(`Successfully created ${steps.length} learning steps`);
+    toast.success(`Your learning plan for ${topic} is ready!`);
+    
     return steps;
   } catch (error) {
     console.error("Error generating learning plan:", error);
+    toast.error("Failed to generate your learning plan. Please try again.");
     throw new Error("Failed to generate learning plan");
   }
 };
@@ -153,7 +184,10 @@ export const generateStepContent = async (step: Step, topic: string): Promise<st
     
     // Otherwise, call the edge function to generate content
     try {
-      const { data, error } = await supabase.functions.invoke('generate-learning-content', {
+      console.log(`Generating detailed content for step: ${step.title}`);
+      toast.info("Generating detailed content for this step...");
+      
+      const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
           stepId: step.id,
           topic,
@@ -163,14 +197,24 @@ export const generateStepContent = async (step: Step, topic: string): Promise<st
         }
       });
       
-      if (error) {
-        console.error("Edge function error:", error);
+      if (response.error) {
+        console.error("Edge function error:", response.error);
+        toast.error("Unable to generate content. Please try again later.");
         throw new Error("Failed to generate content using the AI");
       }
       
+      const data = response.data;
+      
+      if (!data || !data.content) {
+        toast.error("Received an invalid response from our AI. Please try again.");
+        throw new Error("Invalid content generated");
+      }
+      
+      toast.success("Content generated successfully!");
       return data.content;
     } catch (error) {
       console.error("Error calling edge function:", error);
+      toast.error("Failed to generate content. Please try again.");
       throw new Error("Failed to call the content generation service");
     }
   } catch (error) {

@@ -43,19 +43,27 @@ serve(async (req) => {
       1. A clear, concise title (5-7 words max)
       2. A brief one-sentence description of what the learner will understand after completing this step
       
-      Format your response as a JSON array of objects with 'title' and 'description' properties.
-      Example: 
-      [
-        {
-          "title": "Introduction to the Fundamentals",
-          "description": "Understand the core principles and basic terminology."
-        },
-        ...
-      ]
+      Your response should be structured as an array of step objects with 'title' and 'description' fields, formatted as valid JSON.
       
-      The steps should be in a logical progression, starting with fundamentals and moving to more advanced concepts.
+      Example format:
+      {
+        "steps": [
+          {
+            "title": "Introduction to the Fundamentals",
+            "description": "Understand the core principles and basic terminology."
+          },
+          {
+            "title": "Second Step Title",
+            "description": "Brief description of what you'll learn"
+          }
+        ]
+      }
+      
+      Make sure to include exactly 10 steps, starting with fundamentals and moving to more advanced concepts.
       `;
 
+      console.log("Calling OpenAI API to generate learning plan for topic:", topic);
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -79,14 +87,26 @@ serve(async (req) => {
         throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
       }
 
+      console.log("OpenAI response received successfully");
+      
       try {
         // Parse the generated steps
         const generatedContent = data.choices[0].message.content;
+        console.log("Generated content:", generatedContent);
+        
         const parsedContent = JSON.parse(generatedContent);
         
-        if (!Array.isArray(parsedContent.steps) || parsedContent.steps.length < 5) {
-          throw new Error('Invalid or insufficient learning plan generated');
+        if (!Array.isArray(parsedContent.steps)) {
+          console.error("Invalid response format - steps is not an array:", parsedContent);
+          throw new Error('Invalid response format: steps is not an array');
         }
+        
+        if (parsedContent.steps.length < 5) {
+          console.error("Insufficient learning plan steps:", parsedContent.steps.length);
+          throw new Error('Insufficient learning plan generated');
+        }
+        
+        console.log(`Successfully parsed ${parsedContent.steps.length} steps`);
         
         return new Response(
           JSON.stringify({ steps: parsedContent.steps }),
@@ -94,6 +114,28 @@ serve(async (req) => {
         );
       } catch (parseError) {
         console.error('Error parsing generated content:', parseError, data.choices[0].message.content);
+        
+        // Attempt to fix malformed JSON
+        try {
+          const content = data.choices[0].message.content;
+          // Try to extract JSON part if it's wrapped in markdown or other text
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const extractedJson = jsonMatch[0];
+            const parsedJson = JSON.parse(extractedJson);
+            
+            if (Array.isArray(parsedJson.steps) && parsedJson.steps.length >= 5) {
+              console.log("Successfully recovered JSON from malformed response");
+              return new Response(
+                JSON.stringify({ steps: parsedJson.steps }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+          }
+        } catch (recoveryError) {
+          console.error("Recovery attempt failed:", recoveryError);
+        }
+        
         throw new Error(`Failed to parse learning plan: ${parseError.message}`);
       }
     } else {
@@ -124,6 +166,8 @@ serve(async (req) => {
         );
       }
 
+      console.log(`Generating content for step: ${title} (${stepNumber}/${totalSteps})`);
+      
       // Generate content with OpenAI
       const prompt = `
       You are an expert educator creating learning content about "${topic}". 
@@ -166,6 +210,7 @@ serve(async (req) => {
       }
 
       const generatedContent = data.choices[0].message.content;
+      console.log(`Content successfully generated (${generatedContent.length} characters)`);
 
       // Save the generated content to the database
       const { error: updateError } = await supabase
