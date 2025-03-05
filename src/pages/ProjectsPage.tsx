@@ -29,7 +29,7 @@ const ProjectsPage = () => {
       if (!user) return;
 
       try {
-        // Don't explicitly request is_completed to avoid errors if column doesn't exist
+        // First, fetch base project data without is_completed
         const { data, error } = await supabase
           .from('learning_paths')
           .select('id, topic, created_at, is_approved')
@@ -49,7 +49,7 @@ const ProjectsPage = () => {
           return;
         }
 
-        // Fetch progress for each project
+        // Create base projects with progress info
         const projectsWithProgress = await Promise.all(
           data.map(async (project) => {
             const { data: steps, error: stepsError } = await supabase
@@ -73,27 +73,27 @@ const ProjectsPage = () => {
             return {
               ...project,
               progress,
-              is_completed: false // Default to false, we'll check in a separate query
+              is_completed: false // Default to false
             };
           })
         );
 
-        // Now try to get is_completed status if that column exists
+        // Try to check if is_completed column exists
         try {
-          // First check if the column exists
-          const { error: columnCheckError } = await supabase
+          // Test query to check if column exists
+          const { data: testData, error: testError } = await supabase
             .from('learning_paths')
             .select('is_completed')
             .limit(1);
             
-          // Only try to get is_completed if the column exists
-          if (!columnCheckError && projectsWithProgress.length > 0) {
+          // If no error, the column exists so we can use it
+          if (!testError && projectsWithProgress.length > 0) {
             const { data: completionData } = await supabase
               .from('learning_paths')
               .select('id, is_completed')
               .in('id', projectsWithProgress.map(p => p.id));
             
-            // Map completion status to projects
+            // Map completion status to projects if data exists
             if (completionData && Array.isArray(completionData)) {
               projectsWithProgress.forEach(project => {
                 const completionInfo = completionData.find(p => p.id === project.id);

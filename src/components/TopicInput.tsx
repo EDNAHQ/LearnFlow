@@ -33,7 +33,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           className="pr-12 h-14 text-base transition-shadow duration-300 focus:shadow-subtle bg-gray-800 border-gray-700 text-white"
           disabled={loading}
         />
-        <div className="text-xs text-gray-300 mt-1 ml-1">
+        <div className="text-xs text-gray-400 mt-1 ml-1">
           For best results, enter a specific topic (e.g., "Python decorators" instead of just "Python")
         </div>
         <Button 
@@ -46,7 +46,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
         </Button>
       </div>
       {loading && (
-        <div className="mt-2 text-sm text-gray-300 animate-pulse-soft">
+        <div className="mt-2 text-sm text-gray-400 animate-pulse-soft">
           Creating your personalized learning journey...
         </div>
       )}
