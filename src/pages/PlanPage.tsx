@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import LearningStep, { Step } from "@/components/LearningStep";
 import { generateLearningPlan } from "@/utils/learningUtils";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, RefreshCw } from "lucide-react";
+import { ArrowLeft, Check, RefreshCw, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { UserNav } from "@/components/UserNav";
@@ -15,8 +15,20 @@ const PlanPage = () => {
   const [topic, setTopic] = useState<string>("");
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<boolean>(false);
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [pathId, setPathId] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const storedTopic = sessionStorage.getItem("learn-topic");
@@ -30,6 +42,12 @@ const PlanPage = () => {
     
     const fetchPlan = async () => {
       try {
+        if (!user) {
+          setAuthError(true);
+          setLoading(false);
+          return;
+        }
+        
         const plan = await generateLearningPlan(storedTopic);
         setSteps(plan);
         
@@ -46,15 +64,21 @@ const PlanPage = () => {
           }
         }
       } catch (error) {
-        toast.error("Failed to generate learning plan. Please try again.");
-        console.error("Error generating plan:", error);
+        if (error instanceof Error && error.message === "User is not authenticated") {
+          setAuthError(true);
+        } else {
+          toast.error("Failed to generate learning plan. Please try again.");
+          console.error("Error generating plan:", error);
+        }
       } finally {
         setLoading(false);
       }
     };
     
-    fetchPlan();
-  }, [navigate]);
+    if (user) {
+      fetchPlan();
+    }
+  }, [navigate, user]);
 
   const handleApprove = async () => {
     if (pathId) {
@@ -89,6 +113,10 @@ const PlanPage = () => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
     sessionStorage.removeItem("learning-path-id");
+  };
+
+  const handleLogin = () => {
+    navigate("/auth");
   };
 
   return (
@@ -133,6 +161,20 @@ const PlanPage = () => {
             <div className="flex flex-col items-center justify-center py-16">
               <div className="w-12 h-12 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin mb-4"></div>
               <p className="text-muted-foreground">Crafting your learning journey...</p>
+            </div>
+          ) : authError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <LogIn className="h-8 w-8 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Authentication Required</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                You need to be logged in to create and save learning plans. Your plans will be stored in your account so you can access them anytime.
+              </p>
+              <Button onClick={handleLogin} className="gap-2">
+                <LogIn className="h-4 w-4" />
+                Sign In or Create Account
+              </Button>
             </div>
           ) : (
             <>
