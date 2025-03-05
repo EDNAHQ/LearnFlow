@@ -97,17 +97,17 @@ const HomePage = () => {
           >
             <div className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 p-5">
               <div className="mb-6">
-                <h3 className="text-xl font-medium mb-4">What would you like to learn?</h3>
+                <h3 className="text-xl font-bold text-white mb-4">What would you like to learn?</h3>
                 <TopicInput onSubmit={handleSubmit} loading={loading} />
               </div>
               
               <div className="bg-gray-800 rounded-xl p-4">
-                <div className="text-sm text-gray-400 mb-2">Popular topics</div>
+                <div className="text-sm text-gray-200 mb-2 font-medium">Popular topics</div>
                 <div className="flex flex-wrap gap-2">
                   {["Machine Learning", "JavaScript", "Quantum Physics", "Creative Writing", "Cooking"].map((topic) => (
                     <span 
                       key={topic}
-                      className="px-3 py-1.5 bg-gray-700 hover:bg-[#6D42EF] rounded-full text-sm cursor-pointer transition-colors"
+                      className="px-3 py-1.5 bg-gray-700 hover:bg-[#6D42EF] rounded-full text-sm cursor-pointer transition-colors text-white"
                       onClick={() => handleSubmit(topic)}
                     >
                       {topic}
@@ -131,8 +131,8 @@ const HomePage = () => {
           transition={{ delay: 0.9, duration: 0.7 }}
         >
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How LearnFlow Works</h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">Our AI-powered platform transforms the way you learn by creating personalized learning experiences.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">How LearnFlow Works</h2>
+            <p className="text-gray-200 max-w-2xl mx-auto">Our AI-powered platform transforms the way you learn by creating personalized learning experiences.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -157,8 +157,8 @@ const HomePage = () => {
                 <div className="bg-gray-800 rounded-full w-14 h-14 flex items-center justify-center mb-5">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-medium mb-3">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
+                <h3 className="text-xl font-medium mb-3 text-white">{feature.title}</h3>
+                <p className="text-gray-200">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -167,7 +167,7 @@ const HomePage = () => {
       
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 mt-12">
-        <div className="container max-w-6xl mx-auto px-4 text-center text-gray-400 text-sm">
+        <div className="container max-w-6xl mx-auto px-4 text-center text-gray-300 text-sm">
           LearnFlow © {new Date().getFullYear()} • AI-Powered Learning Platform
         </div>
       </footer>

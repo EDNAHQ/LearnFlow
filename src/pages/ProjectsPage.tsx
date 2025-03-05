@@ -66,8 +66,9 @@ const ProjectsPage = () => {
               };
             }
 
-            const completedSteps = steps.filter(step => step.completed).length;
-            const progress = steps.length > 0 ? Math.round((completedSteps / steps.length) * 100) : 0;
+            const completedSteps = steps ? steps.filter(step => step.completed).length : 0;
+            const totalSteps = steps ? steps.length : 0;
+            const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
             return {
               ...project,
@@ -79,15 +80,21 @@ const ProjectsPage = () => {
 
         // Now try to get is_completed status if that column exists
         try {
-          // Only try this if we have projects
-          if (projectsWithProgress.length > 0) {
-            const { data: completionData, error: completionError } = await supabase
+          // First check if the column exists
+          const { error: columnCheckError } = await supabase
+            .from('learning_paths')
+            .select('is_completed')
+            .limit(1);
+            
+          // Only try to get is_completed if the column exists
+          if (!columnCheckError && projectsWithProgress.length > 0) {
+            const { data: completionData } = await supabase
               .from('learning_paths')
               .select('id, is_completed')
               .in('id', projectsWithProgress.map(p => p.id));
             
-            if (!completionError && completionData) {
-              // Map completion status to projects
+            // Map completion status to projects
+            if (completionData && Array.isArray(completionData)) {
               projectsWithProgress.forEach(project => {
                 const completionInfo = completionData.find(p => p.id === project.id);
                 if (completionInfo && completionInfo.is_completed) {
