@@ -21,14 +21,38 @@ const PresentationControls = ({
 }: PresentationControlsProps) => {
   const { toggleMode } = useContentMode();
 
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onPrevious();
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onNext();
+  };
+
+  const handleToggleOverview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleOverview) onToggleOverview();
+  };
+
+  const handleExit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMode();
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex items-center justify-between shadow-lg z-20">
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-          onClick={onToggleOverview}
+          onClick={handleToggleOverview}
           type="button"
         >
           <List className="h-4 w-4" />
@@ -39,7 +63,7 @@ const PresentationControls = ({
           variant="outline"
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-          onClick={() => toggleMode()}
+          onClick={handleExit}
           type="button"
         >
           <Minimize className="h-4 w-4" />
@@ -58,7 +82,7 @@ const PresentationControls = ({
           variant="outline"
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-          onClick={onPrevious}
+          onClick={handlePrevious}
           disabled={currentSlide === 0}
           type="button"
         >
@@ -70,7 +94,7 @@ const PresentationControls = ({
           variant="outline"
           size="sm"
           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-          onClick={onNext}
+          onClick={handleNext}
           disabled={currentSlide === totalSlides - 1}
           type="button"
         >

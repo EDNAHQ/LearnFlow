@@ -20,20 +20,28 @@ const PresentationView = ({ content }: PresentationViewProps) => {
       // Split content by double newlines to separate paragraphs
       const paragraphs = content.split("\n\n").filter(p => p.trim().length > 0);
       setSlides(paragraphs);
+      console.log("Slides created:", paragraphs.length);
     }
   }, [content]);
 
   const goToNextSlide = useCallback(() => {
+    console.log("Going to next slide");
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     }
   }, [currentSlide, slides.length]);
 
   const goToPreviousSlide = useCallback(() => {
+    console.log("Going to previous slide");
     if (currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
     }
   }, [currentSlide]);
+
+  const toggleOverview = useCallback(() => {
+    console.log("Toggling overview");
+    setShowOverview(prev => !prev);
+  }, []);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -82,7 +90,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
           totalSlides={slides.length}
           onPrevious={goToPreviousSlide}
           onNext={goToNextSlide}
-          onToggleOverview={() => setShowOverview(true)}
+          onToggleOverview={toggleOverview}
         />
       </div>
       

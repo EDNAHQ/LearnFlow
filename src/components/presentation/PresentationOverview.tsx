@@ -16,6 +16,18 @@ const PresentationOverview = ({
   onSelectSlide,
   onClose,
 }: PresentationOverviewProps) => {
+  const handleSelectSlide = (index: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelectSlide(index);
+  };
+
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
   return (
     <motion.div
       className="fixed inset-0 bg-white z-50 p-8 overflow-y-auto"
@@ -26,7 +38,13 @@ const PresentationOverview = ({
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-medium text-gray-800">Slides Overview</h3>
-          <Button variant="outline" size="icon" onClick={onClose} className="text-gray-800 hover:bg-gray-100">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleClose} 
+            className="text-gray-800 hover:bg-gray-100"
+            type="button"
+          >
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -35,7 +53,7 @@ const PresentationOverview = ({
           {slides.map((slide, index) => (
             <div
               key={index}
-              onClick={() => onSelectSlide(index)}
+              onClick={handleSelectSlide(index)}
               className={`p-4 rounded-lg cursor-pointer transition-all ${
                 currentSlide === index 
                   ? 'bg-[#6D42EF] text-white shadow-md' 
