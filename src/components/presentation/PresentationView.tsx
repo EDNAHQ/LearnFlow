@@ -39,7 +39,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showOverview) return;
       
-      if (e.key === "ArrowRight" || e.key === "Space") {
+      if (e.key === "ArrowRight" || e.key === " ") {
         goToNextSlide();
       } else if (e.key === "ArrowLeft") {
         goToPreviousSlide();
@@ -60,7 +60,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-[#1A1A1A] z-40"
+      className="fixed inset-0 bg-gray-100 z-40"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -90,7 +90,10 @@ const PresentationView = ({ content }: PresentationViewProps) => {
           <PresentationOverview
             slides={slides}
             currentSlide={currentSlide}
-            onSelectSlide={setCurrentSlide}
+            onSelectSlide={(index) => {
+              setCurrentSlide(index);
+              setShowOverview(false);
+            }}
             onClose={() => setShowOverview(false)}
           />
         )}
