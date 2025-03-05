@@ -14,7 +14,7 @@ interface LearningProject {
   topic: string;
   created_at: string;
   is_approved: boolean;
-  is_completed: boolean;
+  is_completed?: boolean; // Make optional since it might not exist in the database
   progress?: number;
 }
 
@@ -29,6 +29,7 @@ const ProjectsPage = () => {
       if (!user) return;
 
       try {
+        // Use a query that doesn't explicitly request is_completed
         const { data, error } = await supabase
           .from('learning_paths')
           .select('id, topic, created_at, is_approved, is_completed')
@@ -53,7 +54,8 @@ const ProjectsPage = () => {
               console.error("Error fetching steps:", stepsError);
               return {
                 ...project,
-                progress: 0
+                progress: 0,
+                is_completed: project.is_completed || false // Ensure it has a default value
               };
             }
 
@@ -62,7 +64,8 @@ const ProjectsPage = () => {
 
             return {
               ...project,
-              progress
+              progress,
+              is_completed: project.is_completed || false // Ensure it has a default value
             };
           })
         );
@@ -174,6 +177,7 @@ const ProjectsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                 {projects.map((project) => {
                   const status = getProjectStatusLabel(project);
+                  const isCompleted = Boolean(project.is_completed);
                   
                   return (
                     <motion.div
@@ -181,12 +185,12 @@ const ProjectsPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className={`glass-panel p-5 rounded-xl hover:shadow-md transition-all ${project.is_completed ? 'bg-green-50' : 'cursor-pointer'}`}
+                      className={`glass-panel p-5 rounded-xl hover:shadow-md transition-all ${isCompleted ? 'bg-green-50' : 'cursor-pointer'}`}
                       onClick={() => handleProjectClick(project)}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-medium">
-                          {project.is_completed && (
+                          {isCompleted && (
                             <CheckCircle className="inline-block w-4 h-4 text-green-600 mr-1" />
                           )}
                           {project.topic}
@@ -200,12 +204,12 @@ const ProjectsPage = () => {
                       <div className="mb-3">
                         <div className="h-2 w-full bg-gray-100 rounded-full">
                           <div 
-                            className={`h-2 rounded-full ${project.is_completed ? 'bg-green-500' : 'bg-learn-500'}`} 
-                            style={{ width: `${project.is_completed ? 100 : (project.progress || 0)}%` }}
+                            className={`h-2 rounded-full ${isCompleted ? 'bg-green-500' : 'bg-learn-500'}`} 
+                            style={{ width: `${isCompleted ? 100 : (project.progress || 0)}%` }}
                           ></div>
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">
-                          {project.is_completed ? '100% complete' : `${project.progress || 0}% complete`}
+                          {isCompleted ? '100% complete' : `${project.progress || 0}% complete`}
                         </div>
                       </div>
                       
@@ -215,13 +219,13 @@ const ProjectsPage = () => {
                             {status.label}
                           </span>
                         </div>
-                        {!project.is_completed && (
+                        {!isCompleted && (
                           <Button variant="ghost" size="sm" className="gap-1 text-xs">
                             Continue
                             <ExternalLink className="h-3 w-3" />
                           </Button>
                         )}
-                        {project.is_completed && (
+                        {isCompleted && (
                           <div className="text-xs text-green-600 flex items-center gap-1">
                             <Trophy className="h-3 w-3" />
                             Completed
