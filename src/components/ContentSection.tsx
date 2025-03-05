@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, Book } from "lucide-react";
 
 interface ContentSectionProps {
   title: string;
@@ -39,13 +39,13 @@ const ContentSection = ({ title, content, index, detailedContent }: ContentSecti
       // Check if this is a heading (starts with # or ##)
       if (paragraph.startsWith('# ')) {
         return (
-          <h2 key={i} className="text-xl font-semibold mt-6 mb-3">
+          <h2 key={i} className="text-xl font-semibold mt-6 mb-3 text-learn-800">
             {paragraph.replace('# ', '')}
           </h2>
         );
       } else if (paragraph.startsWith('## ')) {
         return (
-          <h3 key={i} className="text-lg font-medium mt-5 mb-2">
+          <h3 key={i} className="text-lg font-medium mt-5 mb-2 text-learn-700">
             {paragraph.replace('## ', '')}
           </h3>
         );
@@ -53,7 +53,7 @@ const ContentSection = ({ title, content, index, detailedContent }: ContentSecti
         // Handle bullet points
         const listItems = paragraph.split('\n- ');
         return (
-          <ul key={i} className="list-disc pl-5 mb-4 space-y-1">
+          <ul key={i} className="list-disc pl-5 mb-4 space-y-2">
             {listItems.map((item, j) => (
               <li key={`${i}-${j}`} className="text-pretty">
                 {item.replace('- ', '')}
@@ -74,32 +74,24 @@ const ContentSection = ({ title, content, index, detailedContent }: ContentSecti
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out glass-panel p-6 mb-8",
+        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
-      <div className="flex items-center mb-4">
-        <div className="w-8 h-8 rounded-full bg-learn-100 flex items-center justify-center text-learn-700 font-medium mr-3">
-          {index + 1}
+      {!loadedDetailedContent ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="relative">
+            <Loader2 className="w-12 h-12 animate-spin mb-3 text-learn-500" />
+            <Book className="w-5 h-5 text-learn-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          </div>
+          <p className="text-gray-500 mt-4">Content is being generated in the background...</p>
+          <p className="text-xs text-gray-400 mt-1">You can continue navigating through the steps</p>
         </div>
-        <h2 className="text-xl font-medium">{title}</h2>
-      </div>
-      
-      <div className="prose prose-gray max-w-none">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 className="w-8 h-8 animate-spin mb-3 text-learn-500" />
-            <p className="text-gray-400">Loading detailed content...</p>
-          </div>
-        ) : loadedDetailedContent ? (
-          formatContent(loadedDetailedContent)
-        ) : (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Loader2 className="w-8 h-8 animate-spin mb-3 text-learn-500" />
-            <p className="text-gray-400">Content is being generated in the background...</p>
-          </div>
-        )}
-      </div>
+      ) : (
+        <div className="prose prose-gray max-w-none">
+          {formatContent(loadedDetailedContent)}
+        </div>
+      )}
     </div>
   );
 };

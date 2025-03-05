@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import ContentSection from "@/components/ContentSection";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Loader2, Home, ArrowRightCircle } from "lucide-react";
 
 interface LearningStepData {
   id: string;
@@ -47,7 +46,6 @@ const ContentPage = () => {
     setTopic(storedTopic);
     setPathId(storedPathId);
 
-    // Initial fetch of learning steps
     const fetchLearningSteps = async () => {
       setIsLoading(true);
       try {
@@ -67,15 +65,12 @@ const ContentPage = () => {
           console.log(`Retrieved ${data.length} learning steps for path:`, storedPathId);
           setSteps(data);
           
-          // Count how many steps already have content
           const stepsWithContent = data.filter(step => step.detailed_content).length;
           setGeneratedSteps(stepsWithContent);
           
-          // If not all steps have content, show generation in progress
           if (stepsWithContent < data.length) {
             setGeneratingContent(true);
             
-            // Single notification for generation progress
             toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
               duration: 5000,
               id: "content-generation-toast"
@@ -95,7 +90,6 @@ const ContentPage = () => {
 
     fetchLearningSteps();
     
-    // Set up interval to check for content generation progress
     const checkContentGenerationProgress = setInterval(async () => {
       if (storedPathId && generatingContent) {
         try {
@@ -110,7 +104,6 @@ const ContentPage = () => {
             if (stepsWithContent !== generatedSteps) {
               setGeneratedSteps(stepsWithContent);
               
-              // Update steps with new content
               setSteps(prevSteps => {
                 const updatedSteps = [...prevSteps];
                 data.forEach(newData => {
@@ -122,13 +115,11 @@ const ContentPage = () => {
                 return updatedSteps;
               });
               
-              // Update toast with current progress
               toast.info(`Generating content (${stepsWithContent}/${steps.length} steps completed)`, {
                 duration: 5000,
                 id: "content-generation-toast"
               });
               
-              // If all content is generated, stop checking
               if (stepsWithContent === steps.length) {
                 setGeneratingContent(false);
                 toast.success("All learning content has been generated!", {
@@ -141,9 +132,11 @@ const ContentPage = () => {
           console.error("Error checking content generation status:", error);
         }
       }
-    }, 5000); // Check every 5 seconds
+    }, 5000);
     
-    return () => clearInterval(checkContentGenerationProgress);
+    return () => {
+      clearInterval(checkContentGenerationProgress);
+    };
   }, [navigate, user, steps.length, generatingContent, generatedSteps]);
 
   const markStepAsComplete = useCallback(async (stepId: string) => {
@@ -200,7 +193,10 @@ const ContentPage = () => {
       
       toast.success("Congratulations! Learning project completed! 🎉");
       setProjectCompleted(true);
-      setCurrentStep(steps.length);
+      
+      setTimeout(() => {
+        navigate("/projects");
+      }, 2000);
     } catch (error) {
       console.error("Error marking project as complete:", error);
       toast.error("Failed to mark project as complete");
@@ -215,6 +211,10 @@ const ContentPage = () => {
     } else {
       navigate("/projects");
     }
+  };
+
+  const goToProjects = () => {
+    navigate("/projects");
   };
 
   if (isLoading) {
@@ -246,55 +246,77 @@ const ContentPage = () => {
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
-      <div className="container max-w-4xl mx-auto py-10 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <Button
-            variant="ghost"
-            className="flex items-center gap-1 text-gray-800"
-            onClick={handleBack}
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      <div className="bg-gradient-to-r from-learn-100 to-learn-50 shadow-sm">
+        <div className="container max-w-4xl mx-auto py-5 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back</span>
-          </Button>
-          <div className="text-sm text-gray-500">
-            <span className="font-medium text-gray-800">LearnFlow</span>
-          </div>
-        </motion.div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                className="flex items-center gap-1 text-gray-800 hover:bg-white/50"
+                onClick={goToProjects}
+              >
+                <Home className="h-4 w-4" />
+                <span>Projects</span>
+              </Button>
+              
+              <div className="h-5 w-px bg-gray-300"></div>
+              
+              <Button
+                variant="ghost"
+                className="flex items-center gap-1 text-gray-800 hover:bg-white/50"
+                onClick={handleBack}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back</span>
+              </Button>
+            </div>
 
+            <div className="flex items-center gap-3">
+              {generatingContent && (
+                <div className="flex items-center gap-2 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Generating ({generatedSteps}/{steps.length})</span>
+                </div>
+              )}
+              <div className="text-sm font-medium text-learn-600">
+                LearnFlow
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="container max-w-4xl mx-auto py-8 px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-gray-800">{topic}</h1>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-500">
-                Follow the steps below to complete your learning journey
-              </p>
-              
-              {generatingContent && (
-                <div className="flex items-center gap-2 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  <span>Generating content ({generatedSteps}/{steps.length})</span>
-                </div>
-              )}
+            <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-2">
+              <span>{topic}</span>
+              <div className="text-sm bg-learn-50 text-learn-600 px-2 py-1 rounded-full">
+                Step {currentStep + 1} of {steps.length}
+              </div>
+            </h1>
+            <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="bg-learn-500 h-full rounded-full transition-all duration-300"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              ></div>
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-gray-800">
-                Step {currentStep + 1}: {currentStepData?.title}
+                {currentStepData?.title}
               </h2>
-              <div className="text-sm text-gray-500">
-                {currentStep + 1} / {steps.length}
-              </div>
             </div>
             <ContentSection 
               title={currentStepData?.title || ""}
@@ -319,7 +341,8 @@ const ContentPage = () => {
                 className="bg-learn-600 hover:bg-learn-700 text-white"
                 onClick={() => markStepAsComplete(currentStepData.id)}
               >
-                Mark Complete & Next
+                Mark Complete
+                <ArrowRightCircle className="w-4 h-4 ml-2" />
               </Button>
             ) : (
               <Button
@@ -343,6 +366,15 @@ const ContentPage = () => {
             )}
           </div>
         </motion.div>
+      </div>
+
+      <div className="fixed bottom-6 right-6">
+        <Button 
+          onClick={goToProjects}
+          className="bg-white text-learn-600 hover:bg-learn-50 shadow-md rounded-full p-3 h-auto"
+        >
+          <Home className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );
