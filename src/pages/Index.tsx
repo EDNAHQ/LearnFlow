@@ -5,6 +5,8 @@ import TopicInput from "@/components/TopicInput";
 import { motion } from "framer-motion";
 import { UserNav } from "@/components/UserNav";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Book } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -51,13 +53,27 @@ const Index = () => {
           LearnFlow
         </motion.h1>
         <motion.p 
-          className="text-muted-foreground max-w-md mx-auto"
+          className="text-muted-foreground max-w-md mx-auto mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.7 }}
         >
           Welcome, {user?.email?.split('@')[0]}! Your personalized learning journey begins with a single topic.
         </motion.p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.7 }}
+        >
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/projects")}
+            className="gap-2"
+          >
+            <Book className="h-4 w-4" />
+            View Your Learning Projects
+          </Button>
+        </motion.div>
       </motion.div>
 
       <motion.div 

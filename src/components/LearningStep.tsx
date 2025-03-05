@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface Step {
-  id: number;
+  id: string; // Changed from number to string to match Supabase UUID
   title: string;
   description: string;
 }
