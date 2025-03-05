@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText } from "lucide-react";
 
 interface ContentSectionProps {
   title: string;
   content: string;
   index: number;
+  detailedContent?: string | null;
 }
 
-const ContentSection = ({ title, content, index }: ContentSectionProps) => {
+const ContentSection = ({ title, content, index, detailedContent }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [detailedContent, setDetailedContent] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
+  const [isLoading, setIsLoading] = useState(detailedContent ? false : true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -25,6 +26,13 @@ const ContentSection = ({ title, content, index }: ContentSectionProps) => {
   }, [index]);
 
   useEffect(() => {
+    // Set detailed content if passed from parent
+    if (detailedContent) {
+      setLoadedDetailedContent(detailedContent);
+      setIsLoading(false);
+      return;
+    }
+
     // Get the topic from session storage
     const topic = sessionStorage.getItem("learn-topic");
     
@@ -45,17 +53,17 @@ const ContentSection = ({ title, content, index }: ContentSectionProps) => {
         };
         
         const result = await generateStepContent(step, topic, true);
-        setDetailedContent(result);
+        setLoadedDetailedContent(result);
       } catch (error) {
         console.error("Error loading detailed content:", error);
-        toast.error("Failed to load detailed content for this step");
+        // Don't show error toast here as we're now showing a general progress indicator
       } finally {
         setIsLoading(false);
       }
     };
     
     loadDetailedContent();
-  }, [title, content]);
+  }, [title, content, detailedContent]);
 
   // Format the content with proper markdown-like rendering
   const formatContent = (text: string) => {
@@ -117,10 +125,13 @@ const ContentSection = ({ title, content, index }: ContentSectionProps) => {
             <Loader2 className="w-8 h-8 animate-spin mb-3 text-learn-500" />
             <p className="text-gray-400">Loading detailed content...</p>
           </div>
-        ) : detailedContent ? (
-          formatContent(detailedContent)
+        ) : loadedDetailedContent ? (
+          formatContent(loadedDetailedContent)
         ) : (
-          formatContent(content)
+          <div className="flex flex-col items-center justify-center py-10">
+            <FileText className="w-8 h-8 mb-3 text-gray-300" />
+            <p className="text-gray-400">Content is being generated in the background...</p>
+          </div>
         )}
       </div>
     </div>

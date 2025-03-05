@@ -154,12 +154,52 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     console.log(`Successfully created ${steps.length} learning steps`);
     toast.success(`Your learning plan for ${topic} is ready!`);
     
+    // Start background generation of detailed content for all steps
+    // Don't await this - let it happen in background
+    startBackgroundContentGeneration(steps, topic, pathId);
+    
     return steps;
   } catch (error) {
     console.error("Error generating learning plan:", error);
     toast.error("Failed to generate your learning plan. Please try again.");
     throw new Error("Failed to generate learning plan");
   }
+};
+
+// Function to start background generation of all content
+const startBackgroundContentGeneration = async (steps: Step[], topic: string, pathId: string) => {
+  console.log(`Starting background content generation for ${steps.length} steps`);
+  toast.info("We'll now generate detailed content for all steps in the background", {
+    duration: 5000,
+    id: "background-generation-toast"
+  });
+  
+  // Process steps one by one to avoid overloading the API or the browser
+  for (const step of steps) {
+    try {
+      // Check if detailed content already exists for this step
+      const { data, error } = await supabase
+        .from('learning_steps')
+        .select('detailed_content')
+        .eq('id', step.id)
+        .single();
+        
+      if (error) {
+        console.error(`Error checking detailed content for step ${step.id}:`, error);
+        continue;
+      }
+      
+      // Only generate if no detailed content exists
+      if (!data.detailed_content) {
+        await generateStepContent(step, topic, true);
+      }
+    } catch (error) {
+      console.error(`Error generating content for step ${step.id}:`, error);
+      // Continue with other steps even if one fails
+    }
+  }
+  
+  console.log("Background content generation completed");
 };
 
 // Generate detailed content for a learning step using the edge function

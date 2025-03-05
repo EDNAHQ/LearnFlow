@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,13 +6,14 @@ import ContentSection from "@/components/ContentSection";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Loader2, FileText } from "lucide-react";
 
 interface LearningStepData {
   id: string;
   title: string;
   content: string;
   completed: boolean;
+  detailed_content?: string | null;
 }
 
 const ContentPage = () => {
@@ -26,6 +26,8 @@ const ContentPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
+  const [generatingContent, setGeneratingContent] = useState<boolean>(false);
+  const [generatedSteps, setGeneratedSteps] = useState<number>(0);
 
   useEffect(() => {
     if (!user) {
@@ -62,6 +64,17 @@ const ContentPage = () => {
         if (data && data.length > 0) {
           console.log(`Retrieved ${data.length} learning steps for path:`, storedPathId);
           setSteps(data);
+          
+          const stepsWithContent = data.filter(step => step.detailed_content).length;
+          setGeneratedSteps(stepsWithContent);
+          
+          if (stepsWithContent < data.length) {
+            setGeneratingContent(true);
+            toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
+              duration: 5000,
+              id: "content-generation-toast"
+            });
+          }
         } else {
           console.log("No learning steps found for path:", storedPathId);
           toast.info("No learning steps found for this project.");
@@ -75,7 +88,48 @@ const ContentPage = () => {
     };
 
     fetchLearningSteps();
-  }, [navigate, user]);
+    
+    const checkContentGenerationProgress = setInterval(async () => {
+      if (storedPathId && generatingContent) {
+        try {
+          const { data, error } = await supabase
+            .from('learning_steps')
+            .select('id, detailed_content')
+            .eq('path_id', storedPathId);
+            
+          if (!error && data) {
+            const stepsWithContent = data.filter(step => step.detailed_content).length;
+            
+            if (stepsWithContent !== generatedSteps) {
+              setGeneratedSteps(stepsWithContent);
+              
+              setSteps(prevSteps => {
+                const updatedSteps = [...prevSteps];
+                data.forEach(newData => {
+                  const index = updatedSteps.findIndex(step => step.id === newData.id);
+                  if (index !== -1 && newData.detailed_content) {
+                    updatedSteps[index].detailed_content = newData.detailed_content;
+                  }
+                });
+                return updatedSteps;
+              });
+              
+              if (stepsWithContent === steps.length) {
+                setGeneratingContent(false);
+                toast.success("All learning content has been generated!", {
+                  id: "content-generation-complete"
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error checking content generation status:", error);
+        }
+      }
+    }, 10000);
+    
+    return () => clearInterval(checkContentGenerationProgress);
+  }, [navigate, user, steps.length, generatingContent, generatedSteps]);
 
   const markStepAsComplete = useCallback(async (stepId: string) => {
     try {
@@ -204,9 +258,18 @@ const ContentPage = () => {
         >
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2 text-gray-800">{topic}</h1>
-            <p className="text-gray-500">
-              Follow the steps below to complete your learning journey
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500">
+                Follow the steps below to complete your learning journey
+              </p>
+              
+              {generatingContent && (
+                <div className="flex items-center gap-2 text-sm text-brand-purple bg-brand-purple/10 px-3 py-1 rounded-full">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Generating content ({generatedSteps}/{steps.length})</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mb-6">
@@ -222,6 +285,7 @@ const ContentPage = () => {
               title={currentStepData?.title || ""}
               content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
               index={currentStep}
+              detailedContent={currentStepData?.detailed_content}
             />
           </div>
 
