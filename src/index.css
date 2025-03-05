@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -89,11 +90,11 @@
 }
 
 .glass-panel {
-  @apply bg-white/90 backdrop-blur-lg border border-white/20 shadow-glass rounded-2xl;
+  @apply bg-white/90 backdrop-blur-lg border border-gray-200 shadow-glass rounded-2xl;
 }
 
 .glass-panel-strong {
-  @apply bg-white/80 backdrop-blur-xl border border-white/30 shadow-glass-strong rounded-2xl;
+  @apply bg-white/80 backdrop-blur-xl border border-gray-300 shadow-glass-strong rounded-2xl;
 }
 
 .neomorphic {
@@ -149,3 +150,4 @@
     text-wrap: pretty;
   }
 }
+

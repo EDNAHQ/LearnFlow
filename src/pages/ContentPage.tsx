@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -149,8 +150,8 @@ const ContentPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-        <Loader2 className="w-10 h-10 animate-spin mb-4" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
+        <Loader2 className="w-10 h-10 animate-spin mb-4 text-learn-500" />
         <p className="text-lg">Loading learning steps...</p>
       </div>
     );
@@ -158,12 +159,12 @@ const ContentPage = () => {
 
   if (!topic || !pathId) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-        <BookOpen className="w-12 h-12 mb-4" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
+        <BookOpen className="w-12 h-12 mb-4 text-learn-500" />
         <p className="text-xl font-semibold mb-2">
           Oops! It seems like we couldn't retrieve the learning topic.
         </p>
-        <p className="text-gray-400 mb-6">
+        <p className="text-gray-500 mb-6">
           Please go back to the projects page and try again.
         </p>
         <Button onClick={() => navigate("/projects")} className="bg-learn-600 hover:bg-learn-700">
@@ -176,7 +177,7 @@ const ContentPage = () => {
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-white text-gray-800">
       <div className="container max-w-4xl mx-auto py-10 px-4">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -185,14 +186,14 @@ const ContentPage = () => {
         >
           <Button
             variant="ghost"
-            className="flex items-center gap-1 text-white"
+            className="flex items-center gap-1 text-gray-800"
             onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back</span>
           </Button>
-          <div className="text-sm text-gray-400">
-            <span className="font-medium text-white">LearnFlow</span>
+          <div className="text-sm text-gray-500">
+            <span className="font-medium text-gray-800">LearnFlow</span>
           </div>
         </motion.div>
 
@@ -202,18 +203,18 @@ const ContentPage = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">{topic}</h1>
-            <p className="text-gray-400">
+            <h1 className="text-3xl font-bold mb-2 text-gray-800">{topic}</h1>
+            <p className="text-gray-500">
               Follow the steps below to complete your learning journey
             </p>
           </div>
 
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold text-gray-800">
                 Step {currentStep + 1}: {currentStepData?.title}
               </h2>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-gray-500">
                 {currentStep + 1} / {steps.length}
               </div>
             </div>
@@ -229,7 +230,7 @@ const ContentPage = () => {
               variant="secondary"
               onClick={handleBack}
               disabled={currentStep === 0}
-              className="text-white"
+              className="text-gray-800"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Previous

@@ -24,7 +24,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1A1A1A] text-white">
+    <div className="min-h-screen flex flex-col bg-white text-gray-800">
       <MainNav />
       
       <main className="flex-1 container max-w-6xl mx-auto px-4 py-12 md:py-24">
@@ -54,7 +54,7 @@ const HomePage = () => {
             </motion.h1>
             
             <motion.p
-              className="text-lg text-gray-300 mb-8"
+              className="text-lg text-gray-600 mb-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.7 }}
@@ -80,7 +80,7 @@ const HomePage = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-gray-600 text-white hover:bg-gray-800"
+                className="border-gray-300 text-gray-800 hover:bg-gray-100"
                 onClick={() => navigate("/projects")}
               >
                 <Book className="mr-2 h-5 w-5" />
@@ -95,19 +95,19 @@ const HomePage = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7, duration: 0.7 }}
           >
-            <div className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 p-5">
+            <div className="rounded-2xl overflow-hidden bg-gray-50 border border-gray-200 p-5">
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-4">What would you like to learn?</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">What would you like to learn?</h3>
                 <TopicInput onSubmit={handleSubmit} loading={loading} />
               </div>
               
-              <div className="bg-gray-800 rounded-xl p-4">
-                <div className="text-sm text-gray-200 mb-2 font-medium">Popular topics</div>
+              <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="text-sm text-gray-700 mb-2 font-medium">Popular topics</div>
                 <div className="flex flex-wrap gap-2">
                   {["Machine Learning", "JavaScript", "Quantum Physics", "Creative Writing", "Cooking"].map((topic) => (
                     <span 
                       key={topic}
-                      className="px-3 py-1.5 bg-gray-700 hover:bg-[#6D42EF] rounded-full text-sm cursor-pointer transition-colors text-white"
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-[#6D42EF] hover:text-white rounded-full text-sm cursor-pointer transition-colors text-gray-800"
                       onClick={() => handleSubmit(topic)}
                     >
                       {topic}
@@ -118,8 +118,8 @@ const HomePage = () => {
             </div>
             
             {/* Decorative elements */}
-            <div className="absolute -z-10 top-1/4 -right-10 w-32 h-32 rounded-full bg-[#E84393]/20 blur-2xl"></div>
-            <div className="absolute -z-10 -bottom-10 -left-10 w-40 h-40 rounded-full bg-[#6D42EF]/20 blur-2xl"></div>
+            <div className="absolute -z-10 top-1/4 -right-10 w-32 h-32 rounded-full bg-[#E84393]/10 blur-2xl"></div>
+            <div className="absolute -z-10 -bottom-10 -left-10 w-40 h-40 rounded-full bg-[#6D42EF]/10 blur-2xl"></div>
           </motion.div>
         </div>
         
@@ -131,8 +131,8 @@ const HomePage = () => {
           transition={{ delay: 0.9, duration: 0.7 }}
         >
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">How LearnFlow Works</h2>
-            <p className="text-gray-200 max-w-2xl mx-auto">Our AI-powered platform transforms the way you learn by creating personalized learning experiences.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">How LearnFlow Works</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Our AI-powered platform transforms the way you learn by creating personalized learning experiences.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -153,12 +153,12 @@ const HomePage = () => {
                 description: "Save and revisit your learning projects anytime, tracking your progress as you go."
               }
             ].map((feature, index) => (
-              <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-colors">
-                <div className="bg-gray-800 rounded-full w-14 h-14 flex items-center justify-center mb-5">
+              <div key={index} className="bg-white border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors shadow-sm">
+                <div className="bg-gray-50 rounded-full w-14 h-14 flex items-center justify-center mb-5">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-medium mb-3 text-white">{feature.title}</h3>
-                <p className="text-gray-200">{feature.description}</p>
+                <h3 className="text-xl font-medium mb-3 text-gray-800">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -166,8 +166,8 @@ const HomePage = () => {
       </main>
       
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-8 mt-12">
-        <div className="container max-w-6xl mx-auto px-4 text-center text-gray-300 text-sm">
+      <footer className="border-t border-gray-200 py-8 mt-12">
+        <div className="container max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
           LearnFlow © {new Date().getFullYear()} • AI-Powered Learning Platform
         </div>
       </footer>

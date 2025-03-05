@@ -120,7 +120,7 @@ const PlanPage = () => {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-6">
+    <div className="min-h-screen py-10 px-4 md:px-6 bg-white">
       <div className="absolute top-4 right-4">
         <UserNav />
       </div>
