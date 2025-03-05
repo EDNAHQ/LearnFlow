@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -203,7 +202,7 @@ const ContentPage = () => {
       // Update the project status
       await supabase
         .from('learning_paths')
-        .update({ completed: true }) // Changed from is_completed to match DB schema
+        .update({ is_completed: true }) // Changed from 'completed' to 'is_completed' to match DB schema
         .eq('id', pathId);
       
       toast.success("Congratulations! Learning project completed! 🎉");

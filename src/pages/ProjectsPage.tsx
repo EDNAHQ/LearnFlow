@@ -14,7 +14,7 @@ interface LearningProject {
   topic: string;
   created_at: string;
   is_approved: boolean;
-  is_completed?: boolean; // Make optional since it might not exist in the database
+  is_completed?: boolean; // Optional since it might not exist in the database
   progress?: number;
 }
 
@@ -29,16 +29,23 @@ const ProjectsPage = () => {
       if (!user) return;
 
       try {
-        // Use a query that doesn't explicitly request is_completed
+        // Don't explicitly request is_completed to avoid errors if column doesn't exist
         const { data, error } = await supabase
           .from('learning_paths')
-          .select('id, topic, created_at, is_approved, is_completed')
+          .select('id, topic, created_at, is_approved')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) {
           console.error("Error fetching learning projects:", error);
           toast.error("Failed to load your learning projects");
+          return;
+        }
+
+        // Check if we got data back
+        if (!data || !Array.isArray(data)) {
+          setProjects([]);
+          setLoading(false);
           return;
         }
 
@@ -55,7 +62,7 @@ const ProjectsPage = () => {
               return {
                 ...project,
                 progress: 0,
-                is_completed: project.is_completed || false // Ensure it has a default value
+                is_completed: false // Default to false
               };
             }
 
@@ -65,10 +72,34 @@ const ProjectsPage = () => {
             return {
               ...project,
               progress,
-              is_completed: project.is_completed || false // Ensure it has a default value
+              is_completed: false // Default to false, we'll check in a separate query
             };
           })
         );
+
+        // Now try to get is_completed status if that column exists
+        try {
+          // Only try this if we have projects
+          if (projectsWithProgress.length > 0) {
+            const { data: completionData, error: completionError } = await supabase
+              .from('learning_paths')
+              .select('id, is_completed')
+              .in('id', projectsWithProgress.map(p => p.id));
+            
+            if (!completionError && completionData) {
+              // Map completion status to projects
+              projectsWithProgress.forEach(project => {
+                const completionInfo = completionData.find(p => p.id === project.id);
+                if (completionInfo && completionInfo.is_completed) {
+                  project.is_completed = completionInfo.is_completed;
+                }
+              });
+            }
+          }
+        } catch (error) {
+          // Just log the error - we'll use the default false values for is_completed
+          console.log("is_completed column might not exist:", error);
+        }
 
         setProjects(projectsWithProgress);
       } catch (error) {
