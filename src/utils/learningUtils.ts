@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 
@@ -75,30 +76,34 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     pathId = newPath[0].id;
   }
   
-  // Now generate the learning plan steps
+  // Now generate the learning plan steps using AI
   try {
+    // Call the edge function to generate a learning plan
+    const { data, error } = await supabase.functions.invoke('generate-learning-content', {
+      body: {
+        topic,
+        generatePlan: true
+      }
+    });
+    
+    if (error) {
+      console.error("Edge function error:", error);
+      throw new Error("Failed to generate learning plan using AI");
+    }
+    
+    if (!data.steps || !Array.isArray(data.steps)) {
+      throw new Error("Invalid learning plan generated");
+    }
+    
     const steps: Step[] = [];
     
-    // Basic learning steps template
-    const titles = [
-      "Introduction to the Fundamentals",
-      "Core Concepts & Terminology",
-      "Historical Development & Context",
-      "Key Theories & Frameworks",
-      "Practical Applications",
-      "Common Challenges & Solutions",
-      "Advanced Techniques",
-      "Resources & Tools",
-      "Case Studies & Examples",
-      "Synthesis & Next Steps"
-    ];
-    
-    for (let i = 0; i < titles.length; i++) {
+    // Insert the AI-generated steps into the database
+    for (let i = 0; i < data.steps.length; i++) {
       const { data: stepData, error: stepError } = await supabase
         .from('learning_steps')
         .insert({
-          title: titles[i],
-          content: `Understanding ${titles[i].toLowerCase()} related to ${topic}.`,
+          title: data.steps[i].title,
+          content: data.steps[i].description,
           path_id: pathId,
           order_index: i,
           completed: false
