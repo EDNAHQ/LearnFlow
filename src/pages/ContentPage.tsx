@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ContentSection from "@/components/ContentSection";
@@ -18,8 +18,12 @@ const ContentPage = () => {
   const [contents, setContents] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingStep, setLoadingStep] = useState<number | null>(null);
   const [pathId, setPathId] = useState<string | null>(null);
+  const [preloadingComplete, setPreloadingComplete] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
 
+  // Fetch all steps for the learning path
   useEffect(() => {
     // Retrieve data from sessionStorage
     const storedTopic = sessionStorage.getItem("learn-topic");
@@ -77,54 +81,108 @@ const ContentPage = () => {
     fetchSteps();
   }, [navigate]);
 
+  // Generate content for the current step if not already loaded
   useEffect(() => {
-    // Generate content for the current step if it doesn't exist
-    const fetchStepContent = async () => {
-      const step = steps[currentStep];
-      if (step && !contents[step.id]) {
+    // Only fetch current step content if not preloading
+    if (steps.length > 0 && !preloadingComplete) {
+      const currentStepData = steps[currentStep];
+      if (currentStepData && !contents[currentStepData.id]) {
         setLoading(true);
-        try {
-          toast.info(`Generating detailed content for "${step.title}"...`);
-          const content = await generateStepContent(step, topic);
-          setContents(prev => ({ ...prev, [step.id]: content }));
-          
-          // Mark the step as completed in the database
-          await supabase
-            .from('learning_steps')
-            .update({ completed: true })
-            .eq('id', step.id);
-            
-        } catch (error) {
-          toast.error("Failed to load content for this step.");
-          console.error("Error generating step content:", error);
-        } finally {
-          setLoading(false);
-        }
+        generateStepContent(currentStepData, topic)
+          .then(content => {
+            setContents(prev => ({ ...prev, [currentStepData.id]: content }));
+            markStepAsCompleted(currentStepData.id);
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error("Error generating content:", error);
+            toast.error("Failed to load content for this step.");
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
       }
-    };
-    
-    if (steps.length > 0) {
-      fetchStepContent();
     }
-  }, [currentStep, steps, contents, topic]);
+  }, [currentStep, steps, contents, topic, preloadingComplete]);
 
-  const handleNext = () => {
+  // Mark a step as completed in the database
+  const markStepAsCompleted = async (stepId: string) => {
+    try {
+      await supabase
+        .from('learning_steps')
+        .update({ completed: true })
+        .eq('id', stepId);
+    } catch (error) {
+      console.error("Error marking step as completed:", error);
+    }
+  };
+
+  // Preload all content in the background
+  useEffect(() => {
+    if (steps.length > 0 && !preloadingComplete) {
+      const preloadContent = async () => {
+        toast.info("Preparing your learning content in the background...");
+        
+        const missingContentSteps = steps.filter(step => !contents[step.id]);
+        if (missingContentSteps.length === 0) {
+          setPreloadingComplete(true);
+          toast.success("All content is ready!");
+          return;
+        }
+        
+        // Process steps one by one in the background
+        for (let i = 0; i < missingContentSteps.length; i++) {
+          const step = missingContentSteps[i];
+          setLoadingStep(step.order_index);
+          
+          try {
+            // Don't show toast for each step to avoid notification spam
+            const content = await generateStepContent(step, topic);
+            setContents(prev => ({ ...prev, [step.id]: content }));
+            markStepAsCompleted(step.id);
+            
+            // Update progress
+            const progress = Math.round(((i + 1) / missingContentSteps.length) * 100);
+            setLoadingProgress(progress);
+          } catch (error) {
+            console.error(`Error generating content for step ${i + 1}:`, error);
+            // Continue with other steps even if one fails
+          }
+        }
+        
+        setLoadingStep(null);
+        setPreloadingComplete(true);
+        toast.success("All learning content has been loaded!");
+      };
+      
+      // Start preloading after a short delay to allow the first content to load
+      const timer = setTimeout(() => {
+        if (!preloadingComplete) {
+          preloadContent();
+        }
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [steps, contents, topic, preloadingComplete]);
+
+  const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
     }
-  };
+  }, [currentStep, steps.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
     }
-  };
+  }, [currentStep]);
 
-  const handleGoHome = () => {
+  const handleGoHome = useCallback(() => {
     navigate("/");
     sessionStorage.removeItem("learn-topic");
     sessionStorage.removeItem("learning-path-id");
-  };
+  }, [navigate]);
 
   if (steps.length === 0) {
     return (
@@ -197,6 +255,21 @@ const ContentPage = () => {
               transition={{ duration: 0.5 }}
             />
           </div>
+          
+          {loadingStep !== null && !preloadingComplete && (
+            <div className="text-xs text-muted-foreground">
+              <div className="flex justify-between mb-1">
+                <span>Loading content in background</span>
+                <span>{loadingProgress}%</span>
+              </div>
+              <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-learn-200 rounded-full transition-all duration-300"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
@@ -209,7 +282,7 @@ const ContentPage = () => {
               className="flex flex-col items-center justify-center py-16"
             >
               <div className="w-10 h-10 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin mb-4"></div>
-              <p className="text-muted-foreground">Generating comprehensive content...</p>
+              <p className="text-muted-foreground">Loading content for this step...</p>
             </motion.div>
           ) : (
             <motion.div
