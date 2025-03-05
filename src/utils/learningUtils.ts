@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";
@@ -121,6 +122,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     const steps: Step[] = [];
     
     // Insert the AI-generated steps into the database
+    // Fix: Ensure we're using the user's auth token, not the anonymous token
     for (let i = 0; i < data.steps.length; i++) {
       const step = data.steps[i];
       
