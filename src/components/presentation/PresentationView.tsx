@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PresentationSlide from "./PresentationSlide";
 import PresentationControls from "./PresentationControls";
 import PresentationOverview from "./PresentationOverview";
+import { useContentMode } from "@/hooks/useContentMode";
 
 interface PresentationViewProps {
   content: string;
@@ -13,25 +13,20 @@ const PresentationView = ({ content }: PresentationViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showOverview, setShowOverview] = useState(false);
   const [slides, setSlides] = useState<string[]>([]);
+  const { setMode } = useContentMode();
 
-  // Parse content into slides with improved handling
   useEffect(() => {
     if (content) {
-      // Split by double newlines or ===== separator
       const paragraphs = content
         .split(/\n\n|\n===+\n/)
         .map(p => p.trim())
         .filter(p => p.length > 0);
       
-      // If we ended up with very few slides, try to split longer slides
       let processedSlides = paragraphs;
       if (paragraphs.length <= 3 && content.length > 1000) {
-        // For longer content with few paragraph breaks, split by sentences
-        // to create more manageable slides
         processedSlides = [];
         paragraphs.forEach(paragraph => {
           if (paragraph.length > 400) {
-            // Split long paragraphs by sentences
             const sentences = paragraph.match(/[^.!?]+[.!?]+/g) || [];
             let currentSlide = "";
             
@@ -72,7 +67,10 @@ const PresentationView = ({ content }: PresentationViewProps) => {
     setShowOverview(prev => !prev);
   }, []);
 
-  // Handle keyboard navigation
+  const exitPresentation = useCallback(() => {
+    setMode("e-book");
+  }, [setMode]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showOverview) return;
@@ -126,6 +124,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
           onPrevious={goToPreviousSlide}
           onNext={goToNextSlide}
           onToggleOverview={toggleOverview}
+          onExit={exitPresentation}
         />
       </div>
       

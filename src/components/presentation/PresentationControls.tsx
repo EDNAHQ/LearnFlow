@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Grid, Minimize } from "lucide-react";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -19,8 +18,9 @@ const PresentationControls = ({
   onPrevious,
   onNext,
   onToggleOverview,
+  onExit,
 }: PresentationControlsProps) => {
-  const { toggleMode } = useContentMode();
+  const { setMode } = useContentMode();
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,7 +43,11 @@ const PresentationControls = ({
   const handleExit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleMode();
+    if (onExit) {
+      onExit();
+    } else {
+      setMode("e-book");
+    }
   };
 
   return (

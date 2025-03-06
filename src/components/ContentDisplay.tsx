@@ -1,4 +1,3 @@
-
 import { AnimatePresence } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
 import ContentSection from "./ContentSection";
@@ -21,7 +20,7 @@ interface ContentDisplayProps {
 }
 
 const ContentDisplay = (props: ContentDisplayProps) => {
-  const { mode } = useContentMode();
+  const { mode, setMode } = useContentMode();
   const { detailedContent, title, topic } = props;
   const [podcastTranscript, setPodcastTranscript] = useState<string | null>(null);
   const [isGeneratingTranscript, setIsGeneratingTranscript] = useState<boolean>(false);
@@ -69,26 +68,53 @@ const ContentDisplay = (props: ContentDisplayProps) => {
     }
   };
 
+  // Keep tabs in sync with the current mode
+  useEffect(() => {
+    if (mode === "e-book") return;
+    
+    // Automatically switch to the tab corresponding to the current mode
+    const tabValue = mode === "presentation" ? "presentation" : 
+                    mode === "podcast" ? "podcast" : "content";
+    
+    // We don't need to update the tab selection if it's already set to the right value
+    const selectedTab = document.querySelector(`[data-state="active"][data-orientation="horizontal"][role="tab"][value="${tabValue}"]`);
+    if (!selectedTab) {
+      const tabToClick = document.querySelector(`[role="tab"][value="${tabValue}"]`) as HTMLElement;
+      if (tabToClick) {
+        tabToClick.click();
+      }
+    }
+  }, [mode]);
+
   return (
-    <Tabs defaultValue={mode === "podcast" ? "podcast" : "content"} className="w-full">
+    <Tabs 
+      defaultValue={mode === "podcast" ? "podcast" : mode === "presentation" ? "presentation" : "content"} 
+      className="w-full"
+      onValueChange={(value) => {
+        if (value === "content" && mode !== "e-book") {
+          setMode("e-book");
+        } else if (value === "presentation" && mode !== "presentation") {
+          setMode("presentation");
+        } else if (value === "podcast" && mode !== "podcast") {
+          setMode("podcast");
+        }
+      }}
+    >
       <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger 
           value="content" 
-          onClick={() => mode !== "e-book" && mode !== "podcast" && useContentMode().setMode("e-book")}
           className="text-sm"
         >
           Read
         </TabsTrigger>
         <TabsTrigger 
           value="presentation" 
-          onClick={() => mode !== "presentation" && useContentMode().setMode("presentation")}
           className="text-sm"
         >
           Present
         </TabsTrigger>
         <TabsTrigger 
           value="podcast" 
-          onClick={() => mode !== "podcast" && useContentMode().setMode("podcast")}
           className="flex items-center gap-1.5 text-sm"
         >
           <Music className="h-3.5 w-3.5" />
