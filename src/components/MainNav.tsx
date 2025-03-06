@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -29,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/theme-provider";
 
@@ -116,9 +118,7 @@ export function MainNav({ className }: MainNavProps) {
               setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"))
             }
           >
-            {/* @ts-expect-error */}
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            {/* @ts-expect-error */}
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
           </Button>
@@ -137,16 +137,14 @@ export function MainNav({ className }: MainNavProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuHeader>
-                  <div className="flex flex-col space-y-1">
-                    <div className="text-sm font-medium leading-none">
-                      {user?.user_metadata?.name}
-                    </div>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
-                    </p>
+                <div className="flex flex-col space-y-1 p-2">
+                  <div className="text-sm font-medium leading-none">
+                    {user?.user_metadata?.name}
                   </div>
-                </DropdownMenuHeader>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
