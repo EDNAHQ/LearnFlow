@@ -42,11 +42,22 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'o3-mini',
         messages: [
           { 
             role: 'system', 
-            content: 'You are an AI assistant that converts educational content into an engaging podcast script. Create a natural conversation between two hosts (Host 1 and Host 2) that covers all the important information provided. Format the output as a podcast script with "Host 1:" and "Host 2:" prefixes. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog.'
+            content: `You are an AI assistant that converts educational content into an engaging podcast script. 
+Format the output EXACTLY like this:
+
+**Podcast Script: [TITLE]**
+
+**[Intro Music Fades Out]**
+
+**Host 1:** Welcome back to Tech Talk, where we dive deep into the fascinating world of technology and how it shapes our lives! I'm your host, Alex.
+
+**Host 2:** And I'm Jamie! Today, we're going to unravel the mystery behind APIs—those magical interfaces that allow different software applications to communicate.
+
+Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.`
           },
           { 
             role: 'user', 

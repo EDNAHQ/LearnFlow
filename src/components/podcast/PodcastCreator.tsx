@@ -175,7 +175,7 @@ Host 2: Let's get started!`;
                   <Info className="h-4 w-4 text-gray-500" />
                   <AlertTitle>Format Example</AlertTitle>
                   <AlertDescription className="text-xs text-gray-500 mt-2">
-                    <pre className="whitespace-pre-wrap">{examples}</pre>
+                    <pre className="whitespace-pre-wrap font-mono">{examples}</pre>
                   </AlertDescription>
                 </Alert>
               )}

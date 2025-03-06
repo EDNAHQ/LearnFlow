@@ -27,7 +27,6 @@ const ContentDisplay = (props: ContentDisplayProps) => {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Reset podcast transcript when content changes
     setPodcastTranscript(null);
   }, [detailedContent]);
 
@@ -68,13 +67,10 @@ const ContentDisplay = (props: ContentDisplayProps) => {
     }
   };
 
-  // Keep tabs in sync with the current mode
   useEffect(() => {
-    // Automatically switch the tab value based on the current mode
     const tabValue = mode === "e-book" ? "content" : 
                       mode === "presentation" ? "presentation" : "podcast";
     
-    // Find the tab that corresponds to the current mode and click it if it's not already active
     const selectedTab = document.querySelector(`[data-state="active"][data-orientation="horizontal"][role="tab"][value="${tabValue}"]`);
     if (!selectedTab) {
       const tabToClick = document.querySelector(`[role="tab"][value="${tabValue}"]`) as HTMLElement;
@@ -128,10 +124,7 @@ const ContentDisplay = (props: ContentDisplayProps) => {
 
       <TabsContent value="presentation" className="mt-0">
         <AnimatePresence mode="wait">
-          <PresentationView 
-            content={detailedContent || ""} 
-            onExit={() => setMode("e-book")}
-          />
+          <PresentationView content={detailedContent || ""} />
         </AnimatePresence>
       </TabsContent>
 
@@ -165,7 +158,16 @@ const ContentDisplay = (props: ContentDisplayProps) => {
         )}
         
         {podcastTranscript && (
-          <PodcastCreator initialTranscript={podcastTranscript} title={title} topic={topic || ""} />
+          <div className="mb-6">
+            <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
+              <pre className="whitespace-pre-wrap font-mono text-sm overflow-x-auto">
+                {podcastTranscript}
+              </pre>
+            </div>
+            <div className="mt-6">
+              <PodcastCreator initialTranscript={podcastTranscript} title={title} topic={topic || ""} />
+            </div>
+          </div>
         )}
       </TabsContent>
     </Tabs>
