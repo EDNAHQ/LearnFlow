@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/UserNav";
 import { Link, useNavigate } from "react-router-dom";
-import { Sparkles, LogIn } from "lucide-react";
+import { Sparkles, LogIn, Book } from "lucide-react";
 
 export function MainNav() {
   const { user } = useAuth();
@@ -18,7 +18,14 @@ export function MainNav() {
           </div>
           <span className="font-semibold">LearnFlow</span>
         </Link>
-        <nav className="ml-auto flex gap-2 items-center">
+        <nav className="flex ml-auto gap-4 items-center">
+          {!user && (
+            <Link to="/projects" className="text-sm font-medium text-gray-600 hover:text-gray-900 hidden sm:inline-block">
+              <Book className="inline-block mr-1 h-4 w-4" />
+              Projects
+            </Link>
+          )}
+          
           {user ? (
             <UserNav />
           ) : (

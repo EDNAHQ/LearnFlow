@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +5,7 @@ import TopicInput from "@/components/TopicInput";
 import { MainNav } from "@/components/MainNav";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { 
   Book, 
   BrainCircuit, 
@@ -24,6 +24,7 @@ import {
 const HomePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleSubmit = (topic: string) => {
     setLoading(true);
@@ -35,6 +36,20 @@ const HomePage = () => {
     setTimeout(() => {
       navigate("/plan");
     }, 1000);
+  };
+
+  const handleStartLearning = () => {
+    // If user is logged in, scroll to the topic input
+    if (user) {
+      // Scroll to the topic input section
+      const topicInput = document.getElementById('topic-input-section');
+      if (topicInput) {
+        topicInput.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // If not logged in, navigate to auth page
+      navigate("/auth");
+    }
   };
 
   return (
@@ -104,7 +119,7 @@ const HomePage = () => {
                 <Button 
                   size="lg" 
                   className="brand-btn-primary shadow-brand px-8 hover:translate-y-[-2px] transition-all"
-                  onClick={() => navigate("/")}
+                  onClick={handleStartLearning}
                 >
                   Start Learning
                 </Button>
@@ -126,6 +141,7 @@ const HomePage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.7, duration: 0.7 }}
+              id="topic-input-section"
             >
               <div className="rounded-2xl overflow-hidden bg-gray-50/80 backdrop-blur-sm border border-gray-200 shadow-subtle p-6 hover:shadow-brand transition-shadow duration-500">
                 <div className="mb-6">
