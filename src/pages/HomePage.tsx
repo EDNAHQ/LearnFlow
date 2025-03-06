@@ -236,50 +236,6 @@ const HomePage = () => {
           </div>
         </section>
         
-        {/* Testimonials Section */}
-        <section className="py-16 md:py-24 bg-gray-50">
-          <div className="container max-w-6xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <span className="text-[#E84393] font-medium mb-2 block">TESTIMONIALS</span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">What Our Users Say</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Discover how LearnFlow has transformed learning experiences for people around the world.
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  quote: "LearnFlow helped me master React in half the time it would've taken following traditional courses.",
-                  name: "Sarah Johnson",
-                  title: "Frontend Developer"
-                },
-                {
-                  quote: "The personalized learning path for machine learning fundamentals was exactly what I needed to break into AI.",
-                  name: "Michael Chen",
-                  title: "Data Scientist"
-                },
-                {
-                  quote: "As a busy professional, LearnFlow's structured approach helped me learn Spanish efficiently in my limited free time.",
-                  name: "Elena Rodriguez",
-                  title: "Marketing Director"
-                }
-              ].map((testimonial, index) => (
-                <div key={index} className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
-                  <div className="mb-4 text-[#F5B623]">
-                    {"★".repeat(5)}
-                  </div>
-                  <p className="text-gray-700 mb-6 italic">"{testimonial.quote}"</p>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">{testimonial.name}</h4>
-                    <p className="text-gray-500 text-sm">{testimonial.title}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        
         {/* CTA Section */}
         <section className="py-16 md:py-20 relative overflow-hidden">
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#6D42EF]/5 blur-3xl"></div>
