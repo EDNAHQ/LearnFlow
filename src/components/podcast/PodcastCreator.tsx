@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BarLoader } from '@/components/ui/loader';
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Info, MoveRight, CheckCircle, Music, Headphones, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -52,7 +52,6 @@ Host 2: Let's get started!`;
           description: "Your AI-generated podcast is ready to listen to.",
         })
       } else if (data.status === 'PROCESSING') {
-        // Poll again after a delay
         setTimeout(() => checkPodcastStatus(initialJobId), 5000); // Poll every 5 seconds
       } else {
         setError(`Podcast generation failed. Status: ${data.status}`);
@@ -82,7 +81,6 @@ Host 2: Let's get started!`;
     setPodcastUrl(null);
 
     try {
-      const supabase = createClient();
       const { data, error: uploadError } = await supabase.functions.invoke('generate-podcast', {
         body: { transcript },
       });
@@ -119,7 +117,6 @@ Host 2: Let's get started!`;
 
   const downloadPodcast = () => {
     if (podcastUrl) {
-      // Create a temporary link element
       const link = document.createElement('a');
       link.href = podcastUrl;
       link.download = 'podcast.mp3';
