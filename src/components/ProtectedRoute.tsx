@@ -71,7 +71,16 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
   
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    // Instead of redirecting to /auth, show a login prompt
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold">You need to be logged in to access this content</h2>
+          <p className="mt-2 text-gray-600">Please sign in to continue your learning journey</p>
+        </div>
+        <Navigate to="/auth?returnTo=current" replace />
+      </div>
+    );
   }
 
   return <>{children}</>;

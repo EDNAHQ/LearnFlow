@@ -1,14 +1,12 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   useEffect(() => {
-    // Redirect to the home page
+    // Always redirect to the home page
     navigate("/home");
   }, [navigate]);
 

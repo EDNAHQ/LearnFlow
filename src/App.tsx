@@ -27,7 +27,8 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/" element={<Navigate to="/home" />} />
-            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            {/* Allow HomePage to be accessed without authentication */}
+            <Route path="/home" element={<HomePage />} />
             <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
             <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
