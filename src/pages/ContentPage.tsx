@@ -117,7 +117,7 @@ const ContentPage = () => {
 
   // Loading state
   if (isLoading) {
-    return <ContentLoading />;
+    return <ContentLoading goToProjects={goToProjects} />;
   }
 
   // Error state
