@@ -16,8 +16,8 @@ const PresentationSlide = ({ content, isActive }: PresentationSlideProps) => {
       animate={{ opacity: isActive ? 1 : 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="w-full max-w-4xl mx-auto px-12 py-20 bg-[#1A1A1A] rounded-xl shadow-lg">
-        <p className="text-4xl leading-relaxed text-white font-light">{content}</p>
+      <div className="w-full max-w-4xl mx-auto px-12 py-20 bg-[#1A1A1A] text-white rounded-xl shadow-lg">
+        <p className="text-4xl leading-relaxed font-light">{content}</p>
       </div>
     </motion.div>
   );

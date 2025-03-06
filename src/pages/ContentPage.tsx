@@ -1,39 +1,32 @@
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, Loader2, Home, ArrowRightCircle } from "lucide-react";
-import { generateStepContent } from "@/utils/learningUtils";
+import { Home } from "lucide-react";
 import { ContentModeProvider } from "@/hooks/useContentMode";
-import { ModeToggle } from "@/components/ModeToggle";
 import ContentDisplay from "@/components/ContentDisplay";
-
-interface LearningStepData {
-  id: string;
-  title: string;
-  content: string;
-  completed: boolean;
-  detailed_content?: string | null;
-}
+import ContentHeader from "@/components/content/ContentHeader";
+import ContentProgress from "@/components/content/ContentProgress";
+import ContentNavigation from "@/components/content/ContentNavigation";
+import ContentLoading from "@/components/content/ContentLoading";
+import ContentError from "@/components/content/ContentError";
+import { useLearningSteps, LearningStepData } from "@/hooks/useLearningSteps";
 
 const ContentPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [topic, setTopic] = useState<string | null>(null);
-  const [steps, setSteps] = useState<LearningStepData[]>([]);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [pathId, setPathId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
-  const [generatingContent, setGeneratingContent] = useState<boolean>(false);
-  const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
 
+  // Get stored data from session
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -50,152 +43,32 @@ const ContentPage = () => {
 
     setTopic(storedTopic);
     setPathId(storedPathId);
+  }, [navigate, user]);
 
-    const fetchLearningSteps = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('learning_steps')
-          .select('*')
-          .eq('path_id', storedPathId)
-          .order('order_index', { ascending: true });
+  // Use custom hook to manage learning steps
+  const {
+    steps,
+    isLoading,
+    generatingContent,
+    generatedSteps,
+    markStepAsComplete,
+  } = useLearningSteps(pathId, topic);
 
-        if (error) {
-          console.error("Error fetching learning steps:", error);
-          toast.error("Failed to load learning steps");
-          return;
-        }
-
-        if (data && data.length > 0) {
-          console.log(`Retrieved ${data.length} learning steps for path:`, storedPathId);
-          setSteps(data);
-          
-          const stepsWithContent = data.filter(step => step.detailed_content).length;
-          setGeneratedSteps(stepsWithContent);
-          
-          if (stepsWithContent < data.length) {
-            setGeneratingContent(true);
-            
-            // Manually trigger content generation for all steps without content
-            data.forEach(step => {
-              if (!step.detailed_content) {
-                console.log(`Triggering content generation for step: ${step.title}`);
-                generateStepContent(
-                  { id: step.id, title: step.title, description: step.content || "" },
-                  storedTopic,
-                  false
-                ).catch(err => {
-                  console.error(`Error generating content for step ${step.id}:`, err);
-                });
-              }
-            });
-            
-            toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
-              duration: 5000,
-              id: "content-generation-toast"
-            });
-          }
-        } else {
-          console.log("No learning steps found for path:", storedPathId);
-          toast.info("No learning steps found for this project.");
-        }
-      } catch (error) {
-        console.error("Error fetching learning steps:", error);
-        toast.error("Failed to load learning steps");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLearningSteps();
+  const handleMarkComplete = async () => {
+    if (!steps[currentStep]) return;
     
-    const checkContentGenerationProgress = setInterval(async () => {
-      if (storedPathId && generatingContent) {
-        try {
-          const { data, error } = await supabase
-            .from('learning_steps')
-            .select('id, detailed_content')
-            .eq('path_id', storedPathId);
-            
-          if (!error && data) {
-            const stepsWithContent = data.filter(step => step.detailed_content).length;
-            
-            if (stepsWithContent !== generatedSteps) {
-              setGeneratedSteps(stepsWithContent);
-              
-              setSteps(prevSteps => {
-                const updatedSteps = [...prevSteps];
-                data.forEach(newData => {
-                  const index = updatedSteps.findIndex(step => step.id === newData.id);
-                  if (index !== -1 && newData.detailed_content) {
-                    updatedSteps[index].detailed_content = newData.detailed_content;
-                  }
-                });
-                return updatedSteps;
-              });
-              
-              toast.info(`Generating content (${stepsWithContent}/${steps.length} steps completed)`, {
-                duration: 5000,
-                id: "content-generation-toast"
-              });
-              
-              if (stepsWithContent === steps.length) {
-                setGeneratingContent(false);
-                toast.success("All learning content has been generated!", {
-                  id: "content-generation-complete"
-                });
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error checking content generation status:", error);
-        }
-      }
-    }, 5000);
+    const success = await markStepAsComplete(steps[currentStep].id);
     
-    return () => {
-      clearInterval(checkContentGenerationProgress);
-    };
-  }, [navigate, user, steps.length, generatingContent, generatedSteps]);
-
-  const markStepAsComplete = useCallback(async (stepId: string) => {
-    try {
-      setSteps(prevSteps =>
-        prevSteps.map(step =>
-          step.id === stepId ? { ...step, completed: true } : step
-        )
-      );
-
-      const { error } = await supabase
-        .from('learning_steps')
-        .update({ completed: true })
-        .eq('id', stepId);
-
-      if (error) {
-        console.error("Error marking step as complete:", error);
-        toast.error("Failed to mark step as complete. Please try again.");
-
-        setSteps(prevSteps =>
-          prevSteps.map(step =>
-            step.id === stepId ? { ...step, completed: false } : step
-          )
-        );
-      } else {
-        if (currentStep < steps.length - 1) {
-          setCurrentStep(prev => {
-            setTimeout(() => {
-              topRef.current?.scrollIntoView({ behavior: 'smooth' });
-              window.scrollTo(0, 0);
-            }, 100);
-            return prev + 1;
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error marking step as complete:", error);
-      toast.error("Failed to mark step as complete. Please try again.");
+    if (success && currentStep < steps.length - 1) {
+      setCurrentStep(prev => {
+        setTimeout(() => {
+          topRef.current?.scrollIntoView({ behavior: 'smooth' });
+          window.scrollTo(0, 0);
+        }, 100);
+        return prev + 1;
+      });
     }
-  }, [currentStep, steps, setSteps]);
+  };
 
   const completePath = async () => {
     if (!pathId) return;
@@ -242,84 +115,33 @@ const ContentPage = () => {
     navigate("/projects");
   };
 
+  // Loading state
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
-        <Loader2 className="w-10 h-10 animate-spin mb-4 text-learn-500" />
-        <p className="text-lg">Loading learning steps...</p>
-      </div>
-    );
+    return <ContentLoading />;
   }
 
+  // Error state
   if (!topic || !pathId) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
-        <BookOpen className="w-12 h-12 mb-4 text-learn-500" />
-        <p className="text-xl font-semibold mb-2">
-          Oops! It seems like we couldn't retrieve the learning topic.
-        </p>
-        <p className="text-gray-500 mb-6">
-          Please go back to the projects page and try again.
-        </p>
-        <Button onClick={() => navigate("/projects")} className="bg-learn-600 hover:bg-learn-700">
-          Go to Projects
-        </Button>
-      </div>
-    );
+    return <ContentError goToProjects={goToProjects} />;
   }
 
   const currentStepData = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
+
+  const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
   return (
     <ContentModeProvider>
       <div className="min-h-screen bg-gray-50 text-gray-800">
         <div ref={topRef}></div>
         
-        <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
-          <div className="container max-w-4xl mx-auto py-5 px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-1 text-white hover:bg-white/10"
-                  onClick={goToProjects}
-                >
-                  <Home className="h-4 w-4" />
-                  <span>Projects</span>
-                </Button>
-                
-                <div className="h-5 w-px bg-gray-600"></div>
-                
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-1 text-white hover:bg-white/10"
-                  onClick={handleBack}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <ModeToggle />
-                
-                {generatingContent && (
-                  <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    <span>Generating ({generatedSteps}/{steps.length})</span>
-                  </div>
-                )}
-                <div className="text-sm font-medium text-white">
-                  LearnFlow
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+        <ContentHeader 
+          onBack={handleBack}
+          onHome={goToProjects}
+          generatingContent={generatingContent}
+          generatedSteps={generatedSteps}
+          totalSteps={steps.length}
+        />
 
         <div className="container max-w-4xl mx-auto py-8 px-4">
           <motion.div
@@ -327,20 +149,11 @@ const ContentPage = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-3 justify-between">
-                <span>{topic}</span>
-                <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-4 py-1.5 rounded-full font-semibold">
-                  Step {currentStep + 1} of {steps.length}
-                </div>
-              </h1>
-              <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-[#6D42EF] h-full rounded-full transition-all duration-300"
-                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+            <ContentProgress 
+              topic={topic} 
+              currentStep={currentStep} 
+              totalSteps={steps.length} 
+            />
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
@@ -358,45 +171,15 @@ const ContentPage = () => {
               />
             </div>
 
-            <div className="flex justify-between">
-              <Button
-                variant="secondary"
-                onClick={handleBack}
-                disabled={currentStep === 0}
-                className="text-gray-800"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-              {currentStep < steps.length - 1 ? (
-                <Button
-                  className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
-                  onClick={() => markStepAsComplete(currentStepData.id)}
-                >
-                  Mark Complete
-                  <ArrowRightCircle className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  className={`bg-[#F5B623] hover:bg-[#F5B623]/90 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
-                  onClick={completePath}
-                  disabled={isSubmitting || projectCompleted}
-                >
-                  {isSubmitting ? (
-                    <>
-                      Submitting...
-                      <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                    </>
-                  ) : projectCompleted ? (
-                    <>
-                      Completed <CheckCircle className="w-4 h-4 ml-2" />
-                    </>
-                  ) : (
-                    "Complete Project"
-                  )}
-                </Button>
-              )}
-            </div>
+            <ContentNavigation 
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              onPrevious={handleBack}
+              onComplete={handleComplete}
+              isLastStep={isLastStep}
+              isSubmitting={isSubmitting}
+              projectCompleted={projectCompleted}
+            />
           </motion.div>
         </div>
 
