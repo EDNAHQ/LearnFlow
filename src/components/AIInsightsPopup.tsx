@@ -44,11 +44,11 @@ const AIInsightsPopup = ({
       setError(null);
       
       try {
-        // Call edge function
+        // Call edge function with correct parameter names matching the function implementation
         const { data, error } = await supabase.functions.invoke("generate-ai-insight", {
           body: {
-            text: selectedText,
-            context: topic,
+            selectedText: selectedText,
+            topic: topic,
           },
         });
         

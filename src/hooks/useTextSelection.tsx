@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 interface TextSelectionPosition {
   x: number;
@@ -26,9 +26,22 @@ export const useTextSelection = () => {
           x: rect.left + (rect.width / 2), 
           y: rect.bottom + window.scrollY 
         });
+      } else if (text.length > 0 && text.length <= 5) {
+        // If text is too short, clear selection but show a tooltip
+        console.log("Text selection too short (minimum 6 characters)");
+        setSelectedText("");
+        setPopupPosition(null);
       }
     }
   }, []);
+
+  // Add document-level listener for mouseup to capture selections outside specific components
+  useEffect(() => {
+    document.addEventListener("mouseup", handleTextSelection);
+    return () => {
+      document.removeEventListener("mouseup", handleTextSelection);
+    };
+  }, [handleTextSelection]);
 
   const clearSelection = useCallback(() => {
     setSelectedText("");
