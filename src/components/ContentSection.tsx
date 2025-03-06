@@ -1,8 +1,9 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
 import { Loader2, FileText, Book } from "lucide-react";
+import AIInsightsPopup from "./AIInsightsPopup";
 
 interface ContentSectionProps {
   title: string;
@@ -17,6 +18,8 @@ const ContentSection = ({ title, content, index, detailedContent, pathId, topic 
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedText, setSelectedText] = useState<string>("");
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
   const stepId = content.split(":")[0]; // Extract step ID from content
 
   useEffect(() => {
@@ -56,6 +59,42 @@ const ContentSection = ({ title, content, index, detailedContent, pathId, topic 
       loadContent();
     }
   }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
+
+  // Handle text selection for AI insights
+  const handleTextSelection = useCallback(() => {
+    const selection = window.getSelection();
+    
+    if (selection && !selection.isCollapsed) {
+      const text = selection.toString().trim();
+      
+      if (text && text.length > 5 && text.length < 500) {
+        // Get selection coordinates for positioning the popup
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        setSelectedText(text);
+        setPopupPosition({ 
+          x: rect.left + (rect.width / 2), 
+          y: rect.bottom + window.scrollY 
+        });
+      }
+    }
+  }, []);
+
+  // Close popup and clear selection
+  const handleClosePopup = useCallback(() => {
+    setSelectedText("");
+    setPopupPosition(null);
+    
+    // Clear text selection
+    if (window.getSelection) {
+      if (window.getSelection()?.empty) {
+        window.getSelection()?.empty();
+      } else if (window.getSelection()?.removeAllRanges) {
+        window.getSelection()?.removeAllRanges();
+      }
+    }
+  }, []);
 
   // Format the content with proper markdown-like rendering
   const formatContent = (text: string) => {
@@ -147,9 +186,27 @@ const ContentSection = ({ title, content, index, detailedContent, pathId, topic 
           <p className="text-xs text-gray-400 mt-1">This may take a few moments</p>
         </div>
       ) : (
-        <div className="prose prose-gray max-w-none">
+        <div 
+          className="prose prose-gray max-w-none"
+          onMouseUp={handleTextSelection}
+        >
           {formatContent(loadedDetailedContent)}
+          
+          {/* Small helper tip */}
+          <div className="mt-8 text-xs text-gray-400 border-t border-gray-100 pt-4 italic">
+            Tip: Highlight any text to get AI insights about specific topics
+          </div>
         </div>
+      )}
+      
+      {/* AI Insights Popup */}
+      {selectedText && popupPosition && topic && (
+        <AIInsightsPopup
+          selectedText={selectedText}
+          position={popupPosition}
+          onClose={handleClosePopup}
+          topic={topic}
+        />
       )}
     </div>
   );
