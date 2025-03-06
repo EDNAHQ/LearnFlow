@@ -1,19 +1,30 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthForm } from "@/components/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading } = useAuth();
   
   useEffect(() => {
     if (user && !loading) {
-      navigate("/");
+      // Check if we have a returnTo parameter
+      const params = new URLSearchParams(location.search);
+      const returnTo = params.get('returnTo');
+      
+      if (returnTo === 'current' && document.referrer) {
+        // Try to go back to the referring page
+        window.history.back();
+      } else {
+        // Default navigation to home
+        navigate("/");
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location]);
 
   if (loading) {
     return (
