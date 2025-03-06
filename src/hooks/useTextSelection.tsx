@@ -52,4 +52,5 @@ export const useTextSelection = () => {
   };
 };
 
-export type TextSelectionPosition = TextSelectionPosition;
+// Export the type so it can be used in other components
+export type { TextSelectionPosition };
