@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +11,14 @@ import { Info, MoveRight, CheckCircle, Music, Headphones, XCircle } from 'lucide
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-const PodcastCreator = () => {
-  const [transcript, setTranscript] = useState('');
+interface PodcastCreatorProps {
+  initialTranscript?: string;
+  title?: string;
+  topic?: string;
+}
+
+const PodcastCreator = ({ initialTranscript = '', title = '', topic = '' }: PodcastCreatorProps) => {
+  const [transcript, setTranscript] = useState(initialTranscript);
   const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,25 +31,28 @@ Host 2: Today we're talking about...
 Host 1: That sounds interesting!
 Host 2: Let's get started!`;
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCharCount(transcript.length);
   }, [transcript]);
 
+  useEffect(() => {
+    // Update transcript when initialTranscript prop changes
+    if (initialTranscript) {
+      setTranscript(initialTranscript);
+    }
+  }, [initialTranscript]);
+
   const checkPodcastStatus = async (initialJobId: string) => {
     try {
-      const response = await fetch('/api/check-podcast-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ jobId: initialJobId }),
+      const { data, error: statusError } = await supabase.functions.invoke('check-podcast-status', {
+        body: { jobId: initialJobId },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (statusError) {
+        setError(`Error checking status: ${statusError.message}`);
+        setIsGenerating(false);
+        return;
       }
-
-      const data = await response.json();
 
       if (data.status === 'COMPLETED') {
         setPodcastUrl(data.podcastUrl);
@@ -51,7 +60,7 @@ Host 2: Let's get started!`;
         toast({
           title: "Podcast Ready!",
           description: "Your AI-generated podcast is ready to listen to.",
-        })
+        });
       } else if (data.status === 'PROCESSING') {
         setTimeout(() => checkPodcastStatus(initialJobId), 5000); // Poll every 5 seconds
       } else {
@@ -62,7 +71,7 @@ Host 2: Let's get started!`;
           variant: "destructive",
           title: "Podcast Failed",
           description: "There was an error generating your podcast. Please try again.",
-        })
+        });
       }
     } catch (e: any) {
       setError(`Failed to check podcast status: ${e.message}`);
@@ -72,7 +81,7 @@ Host 2: Let's get started!`;
         variant: "destructive",
         title: "Podcast Failed",
         description: "There was an error generating your podcast. Please try again.",
-      })
+      });
     }
   };
 
@@ -132,9 +141,14 @@ Host 2: Let's get started!`;
   return (
     <Card className="bg-white shadow-lg">
       <CardHeader>
-        <CardTitle>Create Your Podcast</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Music className="h-5 w-5 text-brand-purple" />
+          {title ? `Create Podcast: ${title}` : 'Create Your Podcast'}
+        </CardTitle>
         <CardDescription>
-          Enter your podcast script formatted with "Host 1:" and "Host 2:" markers
+          {initialTranscript 
+            ? "We've generated a podcast script for you. Edit it if needed, then create your podcast."
+            : "Enter your podcast script formatted with \"Host 1:\" and \"Host 2:\" markers"}
         </CardDescription>
       </CardHeader>
       <Tabs defaultValue="create" className="w-full">
@@ -177,6 +191,7 @@ Host 2: Let's get started!`;
               </div>
             </div>
           </CardContent>
+          
           <CardFooter className="flex flex-col items-start">
             <div className="flex justify-between w-full items-center">
               <div className="text-sm text-gray-500">

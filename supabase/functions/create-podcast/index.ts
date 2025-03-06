@@ -70,64 +70,16 @@ serve(async (req) => {
     }
 
     console.log(`Podcast generation job initiated with ID: ${jobId}`);
-
-    // Check job status (poll until complete or timeout)
-    const maxAttempts = 15; // Maximum number of polling attempts
-    const delaySeconds = 2; // Delay between polling attempts
     
-    let attempt = 0;
-    let podcastUrl = null;
-    
-    while (attempt < maxAttempts) {
-      attempt++;
-      
-      const statusUrl = `https://api.play.ai/api/v1/tts/${jobId}`;
-      const statusResponse = await fetch(statusUrl, { headers });
-      
-      if (!statusResponse.ok) {
-        console.error(`Error checking status (attempt ${attempt}):`, await statusResponse.text());
-        await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-        continue;
-      }
-      
-      const statusData = await statusResponse.json();
-      const status = statusData.output?.status;
-      
-      console.log(`Job status (attempt ${attempt}): ${status}`);
-      
-      if (status === 'COMPLETED') {
-        podcastUrl = statusData.output?.url;
-        break;
-      }
-
-      // If not complete, wait and try again
-      await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-    }
-    
-    if (!podcastUrl) {
-      // If we reach max attempts without completion
-      if (attempt >= maxAttempts) {
-        return new Response(
-          JSON.stringify({ 
-            jobId,
-            status: 'PROCESSING',
-            message: 'Podcast is still being generated. Please check status again later.'
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      throw new Error('Failed to get podcast URL');
-    }
-
     return new Response(
       JSON.stringify({ 
-        success: true,
-        podcastUrl,
-        jobId 
+        jobId,
+        status: 'PROCESSING',
+        message: 'Podcast generation started successfully.'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+    
   } catch (error) {
     console.error('Error in create-podcast function:', error);
     
