@@ -70,13 +70,11 @@ const ContentDisplay = (props: ContentDisplayProps) => {
 
   // Keep tabs in sync with the current mode
   useEffect(() => {
-    if (mode === "e-book") return;
+    // Automatically switch the tab value based on the current mode
+    const tabValue = mode === "e-book" ? "content" : 
+                      mode === "presentation" ? "presentation" : "podcast";
     
-    // Automatically switch to the tab corresponding to the current mode
-    const tabValue = mode === "presentation" ? "presentation" : 
-                    mode === "podcast" ? "podcast" : "content";
-    
-    // We don't need to update the tab selection if it's already set to the right value
+    // Find the tab that corresponds to the current mode and click it if it's not already active
     const selectedTab = document.querySelector(`[data-state="active"][data-orientation="horizontal"][role="tab"][value="${tabValue}"]`);
     if (!selectedTab) {
       const tabToClick = document.querySelector(`[role="tab"][value="${tabValue}"]`) as HTMLElement;
@@ -130,7 +128,10 @@ const ContentDisplay = (props: ContentDisplayProps) => {
 
       <TabsContent value="presentation" className="mt-0">
         <AnimatePresence mode="wait">
-          <PresentationView content={detailedContent || ""} />
+          <PresentationView 
+            content={detailedContent || ""} 
+            onExit={() => setMode("e-book")}
+          />
         </AnimatePresence>
       </TabsContent>
 

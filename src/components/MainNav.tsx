@@ -40,6 +40,7 @@ export function MainNav({ className }: MainNavProps) {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const isActive = (path: string) => location.pathname === path;
+  const isHomePage = location.pathname === "/home";
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -64,17 +65,19 @@ export function MainNav({ className }: MainNavProps) {
             </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link
-              to="/home"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                isActive("/home")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/60"
-              )}
-            >
-              Home
-            </Link>
+            {!isHomePage && (
+              <Link
+                to="/home"
+                className={cn(
+                  "transition-colors hover:text-foreground/80",
+                  isActive("/home")
+                    ? "text-foreground font-semibold"
+                    : "text-foreground/60"
+                )}
+              >
+                Home
+              </Link>
+            )}
             <Link
               to="/projects"
               className={cn(
@@ -86,17 +89,19 @@ export function MainNav({ className }: MainNavProps) {
             >
               Projects
             </Link>
-            <Link
-              to="/podcast"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                isActive("/podcast")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/60"
-              )}
-            >
-              Podcast Creator
-            </Link>
+            {!isHomePage && (
+              <Link
+                to="/podcast"
+                className={cn(
+                  "transition-colors hover:text-foreground/80",
+                  isActive("/podcast")
+                    ? "text-foreground font-semibold"
+                    : "text-foreground/60"
+                )}
+              >
+                Podcast Creator
+              </Link>
+            )}
             <Link
               to="/why-free"
               className={cn(
@@ -190,14 +195,16 @@ export function MainNav({ className }: MainNavProps) {
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-4">
-                <Link
-                  to="/home"
-                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                  onClick={closeMobileMenu}
-                >
-                  <Sparkles className="h-5 w-5 text-brand-purple" />
-                  <span>Home</span>
-                </Link>
+                {!isHomePage && (
+                  <Link
+                    to="/home"
+                    className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
+                    onClick={closeMobileMenu}
+                  >
+                    <Sparkles className="h-5 w-5 text-brand-purple" />
+                    <span>Home</span>
+                  </Link>
+                )}
                 <Link
                   to="/projects"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
@@ -206,14 +213,16 @@ export function MainNav({ className }: MainNavProps) {
                   <User className="h-5 w-5 text-brand-purple" />
                   <span>Projects</span>
                 </Link>
-                <Link
-                  to="/podcast"
-                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                  onClick={closeMobileMenu}
-                >
-                  <User className="h-5 w-5 text-brand-purple" />
-                  <span>Podcast Creator</span>
-                </Link>
+                {!isHomePage && (
+                  <Link
+                    to="/podcast"
+                    className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
+                    onClick={closeMobileMenu}
+                  >
+                    <User className="h-5 w-5 text-brand-purple" />
+                    <span>Podcast Creator</span>
+                  </Link>
+                )}
                 <Link
                   to="/why-free"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Grid, Minimize } from "lucide-react";
 import { useContentMode } from "@/hooks/useContentMode";
