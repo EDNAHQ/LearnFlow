@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import ContentNavigation from "@/components/content/ContentNavigation";
 import ContentLoading from "@/components/content/ContentLoading";
 import ContentError from "@/components/content/ContentError";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
-import { ModeToggle } from "@/components/ModeToggle";
 
 const ContentPage = () => {
   const navigate = useNavigate();
@@ -150,7 +150,7 @@ const ContentPage = () => {
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
-            <ModeToggle />
+            {/* ModeToggle removed from here as requested */}
           </div>
 
           <div className="mb-6">
