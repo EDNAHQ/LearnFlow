@@ -17,8 +17,6 @@ import {
   Menu,
   Sparkles,
   Github,
-  Moon,
-  Sun,
   User,
   HelpCircle,
   LogOut,
@@ -32,7 +30,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/components/theme-provider";
 
 interface MainNavProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -44,7 +41,6 @@ export function MainNav({ className }: MainNavProps) {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { setTheme, theme } = useTheme();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -65,19 +61,6 @@ export function MainNav({ className }: MainNavProps) {
             </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {!isHomePage && (
-              <Link
-                to="/home"
-                className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  isActive("/home")
-                    ? "text-foreground font-semibold"
-                    : "text-foreground/60"
-                )}
-              >
-                Home
-              </Link>
-            )}
             <Link
               to="/projects"
               className={cn(
@@ -89,19 +72,6 @@ export function MainNav({ className }: MainNavProps) {
             >
               Projects
             </Link>
-            {!isHomePage && (
-              <Link
-                to="/podcast"
-                className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  isActive("/podcast")
-                    ? "text-foreground font-semibold"
-                    : "text-foreground/60"
-                )}
-              >
-                Podcast Creator
-              </Link>
-            )}
             <Link
               to="/why-free"
               className={cn(
@@ -116,15 +86,6 @@ export function MainNav({ className }: MainNavProps) {
           </nav>
         </div>
         <div className="ml-auto flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -195,16 +156,6 @@ export function MainNav({ className }: MainNavProps) {
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-4">
-                {!isHomePage && (
-                  <Link
-                    to="/home"
-                    className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                    onClick={closeMobileMenu}
-                  >
-                    <Sparkles className="h-5 w-5 text-brand-purple" />
-                    <span>Home</span>
-                  </Link>
-                )}
                 <Link
                   to="/projects"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
@@ -213,16 +164,6 @@ export function MainNav({ className }: MainNavProps) {
                   <User className="h-5 w-5 text-brand-purple" />
                   <span>Projects</span>
                 </Link>
-                {!isHomePage && (
-                  <Link
-                    to="/podcast"
-                    className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                    onClick={closeMobileMenu}
-                  >
-                    <User className="h-5 w-5 text-brand-purple" />
-                    <span>Podcast Creator</span>
-                  </Link>
-                )}
                 <Link
                   to="/why-free"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
