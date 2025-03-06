@@ -4,11 +4,10 @@ import ContentSection from "./ContentSection";
 import PresentationView from "./presentation/PresentationView";
 import PodcastCreator from "./podcast/PodcastCreator";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface ContentDisplayProps {
   title: string;
@@ -20,7 +19,7 @@ interface ContentDisplayProps {
 }
 
 const ContentDisplay = (props: ContentDisplayProps) => {
-  const { mode, setMode } = useContentMode();
+  const { mode } = useContentMode();
   const { detailedContent, title, topic } = props;
   const [podcastTranscript, setPodcastTranscript] = useState<string | null>(null);
   const [isGeneratingTranscript, setIsGeneratingTranscript] = useState<boolean>(false);
@@ -67,68 +66,25 @@ const ContentDisplay = (props: ContentDisplayProps) => {
     }
   };
 
-  useEffect(() => {
-    const tabValue = mode === "e-book" ? "content" : 
-                      mode === "presentation" ? "presentation" : "podcast";
-    
-    const selectedTab = document.querySelector(`[data-state="active"][data-orientation="horizontal"][role="tab"][value="${tabValue}"]`);
-    if (!selectedTab) {
-      const tabToClick = document.querySelector(`[role="tab"][value="${tabValue}"]`) as HTMLElement;
-      if (tabToClick) {
-        tabToClick.click();
-      }
-    }
-  }, [mode]);
+  if (mode === "e-book") {
+    return (
+      <AnimatePresence mode="wait">
+        <ContentSection {...props} />
+      </AnimatePresence>
+    );
+  }
 
-  return (
-    <Tabs 
-      defaultValue={mode === "podcast" ? "podcast" : mode === "presentation" ? "presentation" : "content"} 
-      className="w-full"
-      onValueChange={(value) => {
-        if (value === "content" && mode !== "e-book") {
-          setMode("e-book");
-        } else if (value === "presentation" && mode !== "presentation") {
-          setMode("presentation");
-        } else if (value === "podcast" && mode !== "podcast") {
-          setMode("podcast");
-        }
-      }}
-    >
-      <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger 
-          value="content" 
-          className="text-sm"
-        >
-          Read
-        </TabsTrigger>
-        <TabsTrigger 
-          value="presentation" 
-          className="text-sm"
-        >
-          Present
-        </TabsTrigger>
-        <TabsTrigger 
-          value="podcast" 
-          className="flex items-center gap-1.5 text-sm"
-        >
-          <Music className="h-3.5 w-3.5" />
-          <span>Podcast</span>
-        </TabsTrigger>
-      </TabsList>
+  if (mode === "presentation") {
+    return (
+      <AnimatePresence mode="wait">
+        <PresentationView content={detailedContent || ""} />
+      </AnimatePresence>
+    );
+  }
 
-      <TabsContent value="content" className="mt-0">
-        <AnimatePresence mode="wait">
-          <ContentSection {...props} />
-        </AnimatePresence>
-      </TabsContent>
-
-      <TabsContent value="presentation" className="mt-0">
-        <AnimatePresence mode="wait">
-          <PresentationView content={detailedContent || ""} />
-        </AnimatePresence>
-      </TabsContent>
-
-      <TabsContent value="podcast" className="mt-0">
+  if (mode === "podcast") {
+    return (
+      <div className="mb-6">
         {!podcastTranscript && !isGeneratingTranscript && (
           <div className="bg-white shadow-sm rounded-lg p-6 mb-6 text-center border border-gray-100">
             <Music className="h-12 w-12 mx-auto text-brand-purple opacity-60 mb-3" />
@@ -158,7 +114,7 @@ const ContentDisplay = (props: ContentDisplayProps) => {
         )}
         
         {podcastTranscript && (
-          <div className="mb-6">
+          <div>
             <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
               <pre className="whitespace-pre-wrap font-mono text-sm overflow-x-auto">
                 {podcastTranscript}
@@ -169,9 +125,11 @@ const ContentDisplay = (props: ContentDisplayProps) => {
             </div>
           </div>
         )}
-      </TabsContent>
-    </Tabs>
-  );
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default ContentDisplay;

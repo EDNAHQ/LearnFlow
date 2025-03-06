@@ -13,13 +13,11 @@ const ContentModeContext = createContext<ContentModeContextProps | undefined>(un
 
 export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
   const [mode, setMode] = useState<ContentMode>(() => {
-    // Check localStorage for saved preference
     const savedMode = localStorage.getItem("content-mode");
     return (savedMode as ContentMode) || "e-book";
   });
 
   useEffect(() => {
-    // Save preference to localStorage
     localStorage.setItem("content-mode", mode);
   }, [mode]);
 

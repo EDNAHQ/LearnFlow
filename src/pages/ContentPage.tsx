@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,14 +6,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Home } from "lucide-react";
-import { ContentModeProvider } from "@/hooks/useContentMode";
+import { useContentMode } from "@/hooks/useContentMode";
 import ContentDisplay from "@/components/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
 import ContentProgress from "@/components/content/ContentProgress";
 import ContentNavigation from "@/components/content/ContentNavigation";
 import ContentLoading from "@/components/content/ContentLoading";
 import ContentError from "@/components/content/ContentError";
-import { useLearningSteps, LearningStepData } from "@/hooks/useLearningSteps";
+import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { ModeToggle } from "@/components/ModeToggle";
 
 const ContentPage = () => {
   const navigate = useNavigate();
@@ -26,7 +26,6 @@ const ContentPage = () => {
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
   const topRef = useRef<HTMLDivElement>(null);
 
-  // Get stored data from session
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -45,7 +44,6 @@ const ContentPage = () => {
     setPathId(storedPathId);
   }, [navigate, user]);
 
-  // Use custom hook to manage learning steps
   const {
     steps,
     isLoading,
@@ -115,12 +113,10 @@ const ContentPage = () => {
     navigate("/projects");
   };
 
-  // Loading state
   if (isLoading) {
     return <ContentLoading goToProjects={goToProjects} />;
   }
 
-  // Error state
   if (!topic || !pathId) {
     return <ContentError goToProjects={goToProjects} />;
   }
@@ -131,68 +127,69 @@ const ContentPage = () => {
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
   return (
-    <ContentModeProvider>
-      <div className="min-h-screen bg-gray-50 text-gray-800">
-        <div ref={topRef}></div>
-        
-        <ContentHeader 
-          onBack={handleBack}
-          onHome={goToProjects}
-          generatingContent={generatingContent}
-          generatedSteps={generatedSteps}
-          totalSteps={steps.length}
-        />
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      <div ref={topRef}></div>
+      
+      <ContentHeader 
+        onBack={handleBack}
+        onHome={goToProjects}
+        generatingContent={generatingContent}
+        generatedSteps={generatedSteps}
+        totalSteps={steps.length}
+      />
 
-        <div className="container max-w-4xl mx-auto py-8 px-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+      <div className="container max-w-4xl mx-auto py-8 px-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex justify-between items-center mb-6">
             <ContentProgress 
               topic={topic} 
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
+            <ModeToggle />
+          </div>
 
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {currentStepData?.title}
-                </h2>
-              </div>
-              <ContentDisplay 
-                title={currentStepData?.title || ""}
-                content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
-                index={currentStep}
-                detailedContent={currentStepData?.detailed_content}
-                pathId={pathId}
-                topic={topic}
-              />
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {currentStepData?.title}
+              </h2>
             </div>
-
-            <ContentNavigation 
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              onPrevious={handleBack}
-              onComplete={handleComplete}
-              isLastStep={isLastStep}
-              isSubmitting={isSubmitting}
-              projectCompleted={projectCompleted}
+            <ContentDisplay 
+              title={currentStepData?.title || ""}
+              content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
+              index={currentStep}
+              detailedContent={currentStepData?.detailed_content}
+              pathId={pathId}
+              topic={topic}
             />
-          </motion.div>
-        </div>
+          </div>
 
-        <div className="fixed bottom-6 right-6">
-          <Button 
-            onClick={goToProjects}
-            className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
-          >
-            <Home className="h-5 w-5" />
-          </Button>
-        </div>
+          <ContentNavigation 
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            onPrevious={handleBack}
+            onComplete={handleComplete}
+            isLastStep={isLastStep}
+            isSubmitting={isSubmitting}
+            projectCompleted={projectCompleted}
+          />
+        </motion.div>
       </div>
-    </ContentModeProvider>
+
+      <div className="fixed bottom-6 right-6">
+        <Button 
+          onClick={goToProjects}
+          className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
+        >
+          <Home className="h-5 w-5" />
+        </Button>
+      </div>
+    </div>
   );
 };
 
