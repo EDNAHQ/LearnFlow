@@ -328,9 +328,9 @@ const ContentPage = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-2">
+              <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-3 justify-between">
                 <span>{topic}</span>
-                <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-2 py-1 rounded-full">
+                <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-4 py-1.5 rounded-full font-semibold">
                   Step {currentStep + 1} of {steps.length}
                 </div>
               </h1>
