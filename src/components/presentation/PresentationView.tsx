@@ -14,32 +14,61 @@ const PresentationView = ({ content }: PresentationViewProps) => {
   const [showOverview, setShowOverview] = useState(false);
   const [slides, setSlides] = useState<string[]>([]);
 
-  // Parse content into slides (paragraphs)
+  // Parse content into slides with improved handling
   useEffect(() => {
     if (content) {
-      // Split content by double newlines to separate paragraphs
-      const paragraphs = content.split("\n\n").filter(p => p.trim().length > 0);
-      setSlides(paragraphs);
-      console.log("Slides created:", paragraphs.length);
+      // Split by double newlines or ===== separator
+      const paragraphs = content
+        .split(/\n\n|\n===+\n/)
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+      
+      // If we ended up with very few slides, try to split longer slides
+      let processedSlides = paragraphs;
+      if (paragraphs.length <= 3 && content.length > 1000) {
+        // For longer content with few paragraph breaks, split by sentences
+        // to create more manageable slides
+        processedSlides = [];
+        paragraphs.forEach(paragraph => {
+          if (paragraph.length > 400) {
+            // Split long paragraphs by sentences
+            const sentences = paragraph.match(/[^.!?]+[.!?]+/g) || [];
+            let currentSlide = "";
+            
+            sentences.forEach(sentence => {
+              if (currentSlide.length + sentence.length < 400) {
+                currentSlide += sentence;
+              } else {
+                if (currentSlide) processedSlides.push(currentSlide.trim());
+                currentSlide = sentence;
+              }
+            });
+            
+            if (currentSlide) processedSlides.push(currentSlide.trim());
+          } else {
+            processedSlides.push(paragraph);
+          }
+        });
+      }
+      
+      setSlides(processedSlides);
+      console.log("Slides created:", processedSlides.length);
     }
   }, [content]);
 
   const goToNextSlide = useCallback(() => {
-    console.log("Going to next slide");
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     }
   }, [currentSlide, slides.length]);
 
   const goToPreviousSlide = useCallback(() => {
-    console.log("Going to previous slide");
     if (currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
     }
   }, [currentSlide]);
 
   const toggleOverview = useCallback(() => {
-    console.log("Toggling overview");
     setShowOverview(prev => !prev);
   }, []);
 
@@ -64,12 +93,18 @@ const PresentationView = ({ content }: PresentationViewProps) => {
   }, [goToNextSlide, goToPreviousSlide, showOverview]);
 
   if (!content || slides.length === 0) {
-    return <div className="text-center py-10">No content available for presentation.</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-md border border-gray-200">
+          <p className="text-gray-600">No content available for presentation.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-gray-100 z-40"
+      className="fixed inset-0 bg-gray-50 z-40"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
