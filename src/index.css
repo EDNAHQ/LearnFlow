@@ -131,6 +131,24 @@
   @apply bg-transparent border border-brand-gold text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all duration-300;
 }
 
+/* Content text styles for better readability */
+.content-text {
+  @apply text-gray-800;
+}
+
+/* Updated content container styles */
+.content-container {
+  @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100;
+}
+
+.content-paragraph {
+  @apply text-gray-800 leading-relaxed mb-4;
+}
+
+.content-heading {
+  @apply font-semibold text-gray-900 mb-3;
+}
+
 /* Updated input styles with lighter background */
 .input-light {
   @apply bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:ring-brand-purple focus:border-brand-purple;

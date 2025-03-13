@@ -1,42 +1,49 @@
 
 import { Button } from "@/components/ui/button";
-import { BookOpen, Presentation } from "lucide-react";
+import { BookOpen, Presentation, Music } from "lucide-react";
 import { useContentMode } from "@/hooks/useContentMode";
 import { cn } from "@/lib/utils";
 
 export const ModeToggle = () => {
-  const { mode, toggleMode } = useContentMode();
+  const { mode, setMode } = useContentMode();
 
   return (
-    <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full p-1 border border-gray-200">
+    <div className="flex items-center gap-2">
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => mode !== "e-book" && toggleMode()}
+        onClick={() => setMode("e-book")}
         className={cn(
-          "rounded-full px-3 flex items-center gap-1.5",
-          mode === "e-book" 
-            ? "bg-[#6D42EF] text-white" 
-            : "text-gray-600 hover:text-[#6D42EF]"
+          "text-gray-900 hover:text-gray-900 hover:bg-gray-200/70",
+          mode === "e-book" && "bg-gray-200 text-gray-900 font-medium"
         )}
       >
-        <BookOpen className="h-4 w-4" />
-        <span className="text-xs font-medium">Read</span>
+        <BookOpen className="h-4 w-4 mr-2" />
+        Read
       </Button>
-      
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => mode !== "presentation" && toggleMode()}
+        onClick={() => setMode("presentation")}
         className={cn(
-          "rounded-full px-3 flex items-center gap-1.5",
-          mode === "presentation" 
-            ? "bg-[#6D42EF] text-white" 
-            : "text-gray-600 hover:text-[#6D42EF]"
+          "text-gray-900 hover:text-gray-900 hover:bg-gray-200/70",
+          mode === "presentation" && "bg-gray-200 text-gray-900 font-medium"
         )}
       >
-        <Presentation className="h-4 w-4" />
-        <span className="text-xs font-medium">Present</span>
+        <Presentation className="h-4 w-4 mr-2" />
+        Present
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setMode("podcast")}
+        className={cn(
+          "text-gray-900 hover:text-gray-900 hover:bg-gray-200/70",
+          mode === "podcast" && "bg-gray-200 text-gray-900 font-medium"
+        )}
+      >
+        <Music className="h-4 w-4 mr-2" />
+        Podcast
       </Button>
     </div>
   );

@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { ArrowLeft, Book, Clock, ExternalLink, Trophy, CheckCircle, Sparkles, Trash2 } from "lucide-react";
+import { Book, Clock, ExternalLink, Trophy, CheckCircle, Sparkles, Trash2 } from "lucide-react";
 import { UserNav } from "@/components/UserNav";
 import { toast } from "sonner";
 import { deleteLearningPath } from "@/utils/projectUtils";
@@ -153,48 +154,48 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-100 bg-white">
-        <div className="container max-w-6xl mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
-              <Button 
-                variant="ghost" 
-                className="flex items-center gap-2 text-gray-700 hover:text-brand-purple" 
-                onClick={() => navigate("/")}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Home</span>
-              </Button>
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Background pattern elements */}
+      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-brand-purple/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-0"></div>
+      <div className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-brand-gold/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 z-0"></div>
+      
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+        <div className="container flex h-16 items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="bg-[#6D42EF] rounded-lg w-9 h-9 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-            
-            <div className="text-brand-purple font-medium text-lg">
-              LearnFlow
-            </div>
-            
-            <div>
-              <UserNav />
-            </div>
+            <span className="font-semibold">LearnFlow</span>
+          </Link>
+          
+          <div>
+            <UserNav />
           </div>
         </div>
       </header>
 
-      <div className="container max-w-4xl mx-auto py-10 px-4">
+      <div className="container max-w-6xl mx-auto py-12 px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-10 text-center">
-            <div className="inline-flex justify-center items-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-brand-purple/10 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-brand-purple" />
+          <div className="mb-12 text-center relative">
+            {/* Decorative elements */}
+            <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-brand-purple/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 z-0"></div>
+            <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-brand-pink/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-0"></div>
+            
+            <div className="relative">
+              <div className="inline-flex justify-center items-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-brand-purple/10 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-brand-purple" />
+                </div>
               </div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-brand-purple">Your Learning Projects</h1>
+              <p className="text-gray-600 max-w-lg mx-auto">
+                Review and continue your learning journey
+              </p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brand-purple">Your Learning Projects</h1>
-            <p className="text-gray-600 max-w-lg mx-auto">
-              Review and continue your learning journey
-            </p>
           </div>
           
           {loading ? (
@@ -203,20 +204,23 @@ const ProjectsPage = () => {
               <p className="text-gray-500 animate-pulse-soft">Loading your projects...</p>
             </div>
           ) : projects.length === 0 ? (
-            <div className="text-center py-16 glass-panel rounded-xl">
-              <Book className="w-12 h-12 mx-auto mb-4 text-brand-purple opacity-50" />
-              <h3 className="text-xl font-medium mb-2">No learning projects yet</h3>
-              <p className="text-gray-600 mb-6">Start your learning journey by creating your first project</p>
-              <Button 
-                onClick={handleNewProject} 
-                className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect"
-              >
-                Create Your First Project
-              </Button>
+            <div className="text-center py-16 glass-panel rounded-xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white to-brand-purple/5 pointer-events-none"></div>
+              <div className="relative z-10">
+                <Book className="w-16 h-16 mx-auto mb-5 text-brand-purple opacity-50" />
+                <h3 className="text-2xl font-medium mb-3">No learning projects yet</h3>
+                <p className="text-gray-600 mb-8">Start your learning journey by creating your first project</p>
+                <Button 
+                  onClick={handleNewProject} 
+                  className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect"
+                >
+                  Create Your First Project
+                </Button>
+              </div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 {projects.map((project) => {
                   const status = getProjectStatusLabel(project);
                   const isCompleted = Boolean(project.is_completed);
@@ -227,13 +231,13 @@ const ProjectsPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className={`p-5 rounded-xl transition-all ${
+                      className={`p-6 rounded-xl transition-all ${
                         isCompleted 
-                          ? 'bg-gray-50 border-l-4 border-l-green-500' 
-                          : 'bg-gray-50 hover:border-l-brand-purple hover:border-l-4'
+                          ? 'bg-gray-50/80 border-l-4 border-l-green-500 hover:shadow-md' 
+                          : 'bg-gray-50/80 hover:border-l-brand-purple hover:border-l-4 hover:shadow-md'
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-3">
                         <h3 className="text-lg font-medium text-gray-800 flex items-center cursor-pointer" 
                             onClick={() => handleProjectClick(project)}>
                           {isCompleted && (
