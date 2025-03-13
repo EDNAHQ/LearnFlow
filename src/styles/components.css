@@ -58,7 +58,7 @@
 
 /* Updated content container styles */
 .content-container {
-  @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100;
+  @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100 w-full;
 }
 
 .content-paragraph {
