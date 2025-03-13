@@ -1,0 +1,80 @@
+
+/* Component-specific styles */
+
+.glass-panel {
+  @apply bg-white/90 backdrop-blur-lg border border-gray-200 shadow-glass rounded-2xl;
+}
+
+.glass-panel-strong {
+  @apply bg-white/80 backdrop-blur-xl border border-gray-300 shadow-glass-strong rounded-2xl;
+}
+
+.neomorphic {
+  @apply bg-[#ecf0f3] shadow-neomorphic rounded-2xl;
+}
+
+/* Brand style additions */
+.brand-card {
+  @apply bg-[#1A1A1A] text-white rounded-xl border border-white/10 shadow-xl;
+}
+
+.brand-card-active {
+  @apply bg-[#1A1A1A] text-white rounded-xl border-2 border-brand-purple/50 shadow-xl;
+}
+
+.brand-gradient-bg {
+  @apply bg-gradient-to-br from-[#1A1A1A] to-[#252525];
+}
+
+.brand-circle {
+  @apply flex items-center justify-center rounded-full;
+}
+
+.brand-btn-primary {
+  @apply bg-brand-purple hover:bg-opacity-90 text-white rounded-lg transition-all duration-300;
+}
+
+.brand-btn-secondary {
+  @apply bg-transparent border border-brand-gold text-brand-gold hover:bg-brand-gold/10 rounded-lg transition-all duration-300;
+}
+
+/* Logo styles */
+.logo-container {
+  @apply relative flex items-center justify-center;
+}
+
+.logo-bg {
+  @apply bg-brand-purple rounded-lg w-10 h-10 flex items-center justify-center transition-transform hover:scale-105;
+}
+
+.logo-text {
+  @apply text-xl font-bold ml-2 text-gray-900;
+}
+
+/* Content text styles for better readability */
+.content-text {
+  @apply text-gray-800;
+}
+
+/* Updated content container styles */
+.content-container {
+  @apply bg-white rounded-lg shadow-sm p-6 border border-gray-100;
+}
+
+.content-paragraph {
+  @apply text-gray-800 leading-relaxed mb-4;
+}
+
+.content-heading {
+  @apply font-semibold text-gray-900 mb-3;
+}
+
+/* Updated input styles with lighter background */
+.input-light {
+  @apply bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:ring-brand-purple focus:border-brand-purple;
+}
+
+/* Updated navigation styles with lighter background */
+.nav-light {
+  @apply bg-white border-b border-gray-200 shadow-sm;
+}
