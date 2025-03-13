@@ -11,12 +11,23 @@ import PodcastControls from './PodcastControls';
 
 interface PodcastCreatorProps {
   initialTranscript?: string;
+  content?: string; // Add content prop to match usage in ContentDisplay
   title?: string;
   topic?: string;
+  pathId?: string;
+  stepId?: string;
 }
 
-const PodcastCreator = ({ initialTranscript = '', title = '', topic = '' }: PodcastCreatorProps) => {
-  const [transcript, setTranscript] = useState(initialTranscript);
+const PodcastCreator = ({ 
+  initialTranscript = '', 
+  content = '', // Add default value
+  title = '', 
+  topic = '',
+  pathId = '',
+  stepId = ''
+}: PodcastCreatorProps) => {
+  // Use content prop if provided, otherwise use initialTranscript
+  const [transcript, setTranscript] = useState(content || initialTranscript);
   const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,10 +40,13 @@ const PodcastCreator = ({ initialTranscript = '', title = '', topic = '' }: Podc
   }, [transcript]);
 
   useEffect(() => {
-    if (initialTranscript) {
+    // Update transcript when either initialTranscript or content changes
+    if (content) {
+      setTranscript(content);
+    } else if (initialTranscript) {
       setTranscript(initialTranscript);
     }
-  }, [initialTranscript]);
+  }, [initialTranscript, content]);
 
   const checkPodcastStatus = async (initialJobId: string) => {
     try {
@@ -138,7 +152,7 @@ const PodcastCreator = ({ initialTranscript = '', title = '', topic = '' }: Podc
           {title ? `Create Podcast: ${title}` : 'Create Your Podcast'}
         </CardTitle>
         <CardDescription>
-          {initialTranscript 
+          {content || initialTranscript 
             ? "We've generated a podcast script for you. Edit it if needed, then create your podcast."
             : "Enter your podcast script formatted with \"Host 1:\" and \"Host 2:\" markers"}
         </CardDescription>

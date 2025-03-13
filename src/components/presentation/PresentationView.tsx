@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PresentationSlide from "./PresentationSlide";
@@ -7,9 +8,10 @@ import { useContentMode } from "@/hooks/useContentMode";
 
 interface PresentationViewProps {
   content: string;
+  title?: string; // Make title optional to match the usage in ContentDisplay
 }
 
-const PresentationView = ({ content }: PresentationViewProps) => {
+const PresentationView = ({ content, title }: PresentationViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showOverview, setShowOverview] = useState(false);
   const [slides, setSlides] = useState<string[]>([]);
@@ -68,7 +70,7 @@ const PresentationView = ({ content }: PresentationViewProps) => {
   }, []);
 
   const exitPresentation = useCallback(() => {
-    setMode("e-book");
+    setMode("text");
   }, [setMode]);
 
   useEffect(() => {
