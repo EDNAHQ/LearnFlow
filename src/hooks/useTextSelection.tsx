@@ -8,7 +8,7 @@ interface TextSelectionPosition {
 
 export const useTextSelection = () => {
   const [selectedText, setSelectedText] = useState<string>("");
-  const [popupPosition, setPopupPosition] = useState<TextSelectionPosition | null>(null);
+  const [showInsightsDialog, setShowInsightsDialog] = useState<boolean>(false);
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -17,20 +17,12 @@ export const useTextSelection = () => {
       const text = selection.toString().trim();
       
       if (text && text.length > 5 && text.length < 500) {
-        // Get selection coordinates for positioning the popup
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        
         setSelectedText(text);
-        setPopupPosition({ 
-          x: rect.left + (rect.width / 2), 
-          y: rect.bottom + window.scrollY 
-        });
+        setShowInsightsDialog(true);
       } else if (text.length > 0 && text.length <= 5) {
-        // If text is too short, clear selection but show a tooltip
+        // If text is too short, clear selection but don't show dialog
         console.log("Text selection too short (minimum 6 characters)");
         setSelectedText("");
-        setPopupPosition(null);
       }
     }
   }, []);
@@ -45,7 +37,7 @@ export const useTextSelection = () => {
 
   const clearSelection = useCallback(() => {
     setSelectedText("");
-    setPopupPosition(null);
+    setShowInsightsDialog(false);
     
     // Clear text selection
     if (window.getSelection) {
@@ -59,7 +51,8 @@ export const useTextSelection = () => {
 
   return {
     selectedText,
-    popupPosition,
+    showInsightsDialog,
+    setShowInsightsDialog,
     handleTextSelection,
     clearSelection
   };

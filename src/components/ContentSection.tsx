@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
-import AIInsightsPopup from "./AIInsightsPopup";
 import ContentLoader from "./content/ContentLoader";
 import ContentHelperTip from "./ContentHelperTip";
 import { formatContent } from "@/utils/contentFormatter";
 import { useTextSelection } from "@/hooks/useTextSelection";
+import AIInsightsDialog from "./AIInsightsDialog";
 
 interface ContentSectionProps {
   title: string;
@@ -21,7 +21,12 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
   const [isLoading, setIsLoading] = useState(false);
-  const { selectedText, popupPosition, handleTextSelection, clearSelection } = useTextSelection();
+  const { 
+    selectedText, 
+    showInsightsDialog, 
+    setShowInsightsDialog, 
+    handleTextSelection 
+  } = useTextSelection();
   
   const stepId = content.split(":")[0]; // Extract step ID from content
 
@@ -63,10 +68,24 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }
   }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
 
+  const handleDialogOpenChange = (open: boolean) => {
+    setShowInsightsDialog(open);
+    if (!open) {
+      // Clear the text selection when dialog is closed
+      if (window.getSelection) {
+        if (window.getSelection()?.empty) {
+          window.getSelection()?.empty();
+        } else if (window.getSelection()?.removeAllRanges) {
+          window.getSelection()?.removeAllRanges();
+        }
+      }
+    }
+  };
+
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full max-w-full overflow-hidden",
+        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full max-w-[860px] mx-auto overflow-hidden",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
@@ -85,12 +104,12 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         </div>
       )}
       
-      {/* AI Insights Popup */}
-      {selectedText && popupPosition && topic && (
-        <AIInsightsPopup
+      {/* AI Insights Dialog */}
+      {topic && (
+        <AIInsightsDialog
           selectedText={selectedText}
-          position={popupPosition}
-          onClose={clearSelection}
+          open={showInsightsDialog}
+          onOpenChange={handleDialogOpenChange}
           topic={topic}
         />
       )}

@@ -19,7 +19,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { selectedText, topic } = await req.json();
+    const { selectedText, topic, question } = await req.json();
 
     if (!selectedText || !topic) {
       return new Response(
@@ -31,25 +31,50 @@ serve(async (req) => {
     console.log(`Generating insights for selected text on topic: ${topic}`);
     
     // Generate insights using OpenAI
-    const prompt = `
-    You are an expert educator specialized in the topic of "${topic}".
+    let prompt = '';
     
-    A learner has highlighted the following text while studying:
-    
-    """
-    ${selectedText}
-    """
-    
-    Please provide a concise but insightful explanation (100-150 words maximum) about this text.
-    Your explanation should:
-    1. Clarify any complex concepts mentioned
-    2. Provide additional context if needed
-    3. Explain why this concept is important in the broader context of ${topic}
-    4. Give a concrete, relevant example if applicable
-    
-    Keep your response friendly, educational, and specifically focused on the highlighted text.
-    The learner wants to quickly understand this concept better without getting overwhelmed.
-    `;
+    if (question) {
+      // If a specific question was asked about the highlighted text
+      prompt = `
+      You are an expert educator specialized in the topic of "${topic}".
+      
+      A learner has highlighted the following text while studying:
+      
+      """
+      ${selectedText}
+      """
+      
+      They have a specific question about this text:
+      "${question}"
+      
+      Please provide a clear, educational response to their question (150-200 words maximum).
+      Focus specifically on answering their question while providing context from the broader topic of ${topic}.
+      Include a concrete example or application if relevant.
+      
+      Keep your response friendly, educational, and specifically focused on their question about the highlighted text.
+      `;
+    } else {
+      // Default insight generation without a specific question
+      prompt = `
+      You are an expert educator specialized in the topic of "${topic}".
+      
+      A learner has highlighted the following text while studying:
+      
+      """
+      ${selectedText}
+      """
+      
+      Please provide a concise but insightful explanation (100-150 words maximum) about this text.
+      Your explanation should:
+      1. Clarify any complex concepts mentioned
+      2. Provide additional context if needed
+      3. Explain why this concept is important in the broader context of ${topic}
+      4. Give a concrete, relevant example if applicable
+      
+      Keep your response friendly, educational, and specifically focused on the highlighted text.
+      The learner wants to quickly understand this concept better without getting overwhelmed.
+      `;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

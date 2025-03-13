@@ -1,12 +1,10 @@
 
-import { AnimatePresence } from "framer-motion";
-import { useContentMode } from "@/hooks/useContentMode";
+import { Tab } from "@headlessui/react";
+import { FileText, Presentation, Headphones } from "lucide-react";
 import ContentSection from "./ContentSection";
 import PresentationView from "./presentation/PresentationView";
 import PodcastCreator from "./podcast/PodcastCreator";
-import { useState } from "react";
-import { Music } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useContentMode } from "@/hooks/useContentMode";
 
 interface ContentDisplayProps {
   title: string;
@@ -17,59 +15,90 @@ interface ContentDisplayProps {
   topic?: string;
 }
 
-const ContentDisplay = (props: ContentDisplayProps) => {
-  const { mode } = useContentMode();
-  const { detailedContent, title, topic } = props;
-  const [podcastTranscript, setPodcastTranscript] = useState<string | null>(null);
-  
-  if (mode === "e-book") {
-    return (
-      <AnimatePresence mode="wait">
-        <div className="max-w-[860px] mx-auto w-full">
-          <ContentSection {...props} />
-        </div>
-      </AnimatePresence>
-    );
-  }
+const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic }: ContentDisplayProps) => {
+  const { contentMode, setContentMode } = useContentMode();
 
-  if (mode === "presentation") {
-    return (
-      <AnimatePresence mode="wait">
-        <div className="max-w-[860px] mx-auto w-full">
-          <PresentationView content={detailedContent || ""} />
-        </div>
-      </AnimatePresence>
-    );
-  }
-
-  if (mode === "podcast") {
-    return (
-      <div className="mb-6 w-full max-w-[860px] mx-auto">
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-6 text-center border border-gray-100 w-full">
-          <Music className="h-12 w-12 mx-auto text-brand-purple opacity-60 mb-3" />
-          <h3 className="font-semibold text-lg mb-2">Podcast Feature Coming Soon!</h3>
-          <p className="text-gray-600 text-sm mb-4">
-            We're working on enhancing our podcast generation feature. 
-            Check back soon for an improved experience!
-          </p>
-          <Alert className="bg-brand-purple/10 border-brand-purple text-left">
-            <AlertTitle className="text-brand-purple">Under Development</AlertTitle>
-            <AlertDescription className="text-gray-700">
-              Our team is currently improving the podcast generation functionality to make it more reliable and feature-rich.
-            </AlertDescription>
-          </Alert>
-        </div>
-        
-        {podcastTranscript && (
-          <div className="mt-6 w-full">
-            <PodcastCreator initialTranscript={podcastTranscript} title={title} topic={topic || ""} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="w-full max-w-[860px] mx-auto">
+      <Tab.Group selectedIndex={contentMode} onChange={setContentMode}>
+        <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 p-1 mb-4">
+          <Tab
+            className={({ selected }) => `
+              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+              flex items-center justify-center
+              ${
+                selected
+                  ? 'bg-white shadow text-[#6D42EF]'
+                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
+              }
+            `}
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Text
+          </Tab>
+          <Tab
+            className={({ selected }) => `
+              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+              flex items-center justify-center
+              ${
+                selected
+                  ? 'bg-white shadow text-[#6D42EF]'
+                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
+              }
+            `}
+          >
+            <Presentation className="w-4 h-4 mr-2" />
+            Slides
+          </Tab>
+          <Tab
+            className={({ selected }) => `
+              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+              flex items-center justify-center
+              ${
+                selected
+                  ? 'bg-white shadow text-[#6D42EF]'
+                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
+              }
+            `}
+          >
+            <Headphones className="w-4 h-4 mr-2" />
+            Podcast
+          </Tab>
+        </Tab.List>
+        <Tab.Panels>
+          <Tab.Panel>
+            <ContentSection 
+              title={title}
+              content={content}
+              index={index}
+              detailedContent={detailedContent}
+              pathId={pathId}
+              topic={topic}
+            />
+          </Tab.Panel>
+          <Tab.Panel>
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full max-w-[860px] mx-auto">
+              <PresentationView 
+                title={title} 
+                content={detailedContent || content.split(":")[1] || ""} 
+              />
+            </div>
+          </Tab.Panel>
+          <Tab.Panel>
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 w-full max-w-[860px] mx-auto">
+              <PodcastCreator 
+                title={title} 
+                content={detailedContent || content.split(":")[1] || ""} 
+                pathId={pathId}
+                stepId={content.split(":")[0]}
+                topic={topic || ""}
+              />
+            </div>
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+    </div>
+  );
 };
 
 export default ContentDisplay;
