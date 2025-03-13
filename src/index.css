@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -228,4 +227,52 @@
   .btn-hover-effect {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
   }
+}
+
+/* Content specific styling */
+.content-section h2, 
+.content-section h3, 
+.content-section h4 {
+  position: relative;
+  display: inline-block;
+}
+
+.content-section h2::after, 
+.content-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--brand-purple) 0%, transparent 100%);
+  border-radius: 2px;
+}
+
+.content-section pre {
+  position: relative;
+}
+
+.content-section pre::before {
+  content: 'Code';
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background-color: #1A1A1A;
+  color: white;
+  padding: 0 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.content-section blockquote {
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-left-color: var(--brand-purple);
+}
+
+.content-section ul li::before {
+  color: var(--brand-purple);
 }

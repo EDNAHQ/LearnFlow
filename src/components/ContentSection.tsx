@@ -66,7 +66,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8",
+        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
@@ -77,7 +77,13 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           className="prose prose-gray max-w-none"
           onMouseUp={handleTextSelection}
         >
-          {formatContent(loadedDetailedContent)}
+          <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 border-b pb-3 border-brand-purple/20">
+            {title}
+          </h1>
+          
+          <div className="mt-6 content-section">
+            {formatContent(loadedDetailedContent)}
+          </div>
           
           <ContentHelperTip />
         </div>
