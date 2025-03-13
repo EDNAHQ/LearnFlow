@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -229,50 +230,201 @@
   }
 }
 
-/* Content specific styling */
+/* Completely revamped content section styling */
 .content-section h2, 
 .content-section h3, 
 .content-section h4 {
   position: relative;
   display: inline-block;
+  margin: 1.5rem 0 1rem;
+  color: hsl(var(--brand-purple));
+}
+
+.content-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.content-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  color: hsl(var(--brand-purple), 0.9);
+}
+
+.content-section h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: hsl(var(--brand-purple), 0.8);
 }
 
 .content-section h2::after, 
 .content-section h3::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -2px;
   left: 0;
-  height: 2px;
+  height: 3px;
   width: 100%;
-  background: linear-gradient(90deg, var(--brand-purple) 0%, transparent 100%);
-  border-radius: 2px;
+  background: linear-gradient(90deg, hsl(var(--brand-purple)) 0%, transparent 100%);
+  border-radius: 3px;
 }
 
+/* Enhanced code block styling */
 .content-section pre {
   position: relative;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid rgba(109, 66, 239, 0.2);
 }
 
-.content-section pre::before {
-  content: 'Code';
-  position: absolute;
-  top: -10px;
-  left: 12px;
-  background-color: #1A1A1A;
+.content-section pre code {
+  display: block;
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: white;
-  padding: 0 8px;
-  font-size: 12px;
-  border-radius: 4px;
-  font-family: 'Poppins', sans-serif;
+  background-color: #1A1A1A;
+}
+
+/* Enhance code syntax highlighting */
+.content-section code .keyword {
+  color: #E84393; /* Brand pink */
+  font-weight: 600;
+}
+
+.content-section code .string {
+  color: #F5B623; /* Brand gold */
+}
+
+.content-section code .comment {
+  color: #6B7280;
+  font-style: italic;
+}
+
+.content-section code .function {
+  color: #3B82F6;
   font-weight: 500;
 }
 
+/* Enhanced blockquote styling */
 .content-section blockquote {
   border-left-width: 4px;
   border-left-style: solid;
-  border-left-color: var(--brand-purple);
+  border-left-color: hsl(var(--brand-purple));
+  background-color: rgba(109, 66, 239, 0.05);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  position: relative;
+}
+
+.content-section blockquote::before {
+  content: '"';
+  position: absolute;
+  top: -0.5rem;
+  left: -0.5rem;
+  font-size: 3rem;
+  color: rgba(109, 66, 239, 0.2);
+  font-family: serif;
+}
+
+/* Enhanced list styling */
+.content-section ul {
+  list-style: none;
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.content-section ul li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .content-section ul li::before {
-  color: var(--brand-purple);
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: hsl(var(--brand-purple));
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.content-section ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+  counter-reset: item;
+}
+
+.content-section ol li {
+  position: relative;
+  padding-left: 0.5rem;
+  margin-bottom: 0.75rem;
+  counter-increment: item;
+}
+
+.content-section ol li::marker {
+  color: hsl(var(--brand-purple));
+  font-weight: 600;
+}
+
+/* Improved table styling */
+.content-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.content-section table th {
+  background-color: rgba(109, 66, 239, 0.1);
+  color: hsl(var(--brand-purple));
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+.content-section table td {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.content-section table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Improved paragraph spacing */
+.content-section p {
+  margin: 1.25rem 0;
+  line-height: 1.8;
+}
+
+/* Fancy divider */
+.content-section hr {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, hsl(var(--brand-purple)), transparent);
+  margin: 2rem 0;
+}
+
+/* Enhanced inline code */
+.content-section p code,
+.content-section li code {
+  background-color: #1A1A1A;
+  color: #E84393;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: monospace;
 }
