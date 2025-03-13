@@ -2,8 +2,8 @@
 /* Content section styling for ReactMarkdown component */
 
 .content-section {
-  /* General content section styles moved to content-styles.css */
   width: 100%;
+  min-width: 100%;
 }
 
 /* Enhanced code block styling with language tag */

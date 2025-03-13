@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -54,7 +53,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-800 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col w-full min-w-full bg-white text-gray-800 relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="fixed -z-10 top-0 right-0 w-1/2 h-1/2 bg-brand-purple/5 rounded-full blur-3xl"></div>
       <div className="fixed -z-10 bottom-0 left-0 w-1/3 h-1/3 bg-brand-pink/5 rounded-full blur-3xl"></div>
@@ -62,11 +61,11 @@ const HomePage = () => {
       <MainNav />
       
       {/* Hero Section */}
-      <main className="flex-1 relative">
+      <main className="flex-1 relative w-full min-w-full">
         {/* Decorative Pattern - Top */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full blur-xl"></div>
         
-        <section className="container max-w-6xl mx-auto px-4 py-12 md:py-24 relative">
+        <section className="w-full max-w-full container mx-auto px-4 py-12 md:py-24 relative">
           {/* Circuit Pattern */}
           <div className="absolute top-1/4 left-0 w-full h-full opacity-5 pointer-events-none">
             <svg width="100%" height="100%" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
@@ -198,7 +197,7 @@ const HomePage = () => {
         </section>
         
         {/* Features Section */}
-        <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
+        <section className="w-full max-w-full py-16 md:py-24 bg-gray-50 relative overflow-hidden">
           {/* Decorative Pattern - Rings */}
           <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
             <svg width="100%" height="100%" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
@@ -208,7 +207,7 @@ const HomePage = () => {
             </svg>
           </div>
           
-          <div className="container max-w-6xl mx-auto px-4 relative z-10">
+          <div className="container w-full max-w-full mx-auto px-4 relative z-10">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -258,11 +257,11 @@ const HomePage = () => {
         </section>
         
         {/* Benefits Section */}
-        <section className="py-16 md:py-24 relative">
+        <section className="w-full max-w-full py-16 md:py-24 relative">
           {/* Subtle grid pattern background */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMSkiPjxwYXRoIGQ9Ik0wIDBoNDBNMCA0MGg0ME00MCAwdjQwTTAgMHY0MCIgc3Ryb2tlPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMikiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')]"></div>
           
-          <div className="container max-w-6xl mx-auto px-4 relative z-10">
+          <div className="container w-full max-w-full mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <span className="bg-brand-pink/10 text-brand-pink px-4 py-1 rounded-full font-medium inline-block mb-2">WHY CHOOSE LEARNFLOW</span>
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Transform Your Learning Journey</h2>
@@ -316,9 +315,9 @@ const HomePage = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="py-16 md:py-20 relative overflow-hidden">
+        <section className="w-full max-w-full py-16 md:py-20 relative overflow-hidden">
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-brand-purple/5 blur-3xl"></div>
-          <div className="container max-w-5xl mx-auto px-4 text-center relative z-10">
+          <div className="container w-full max-w-full mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -369,7 +368,7 @@ const HomePage = () => {
       </main>
       
       {/* Enhanced Footer */}
-      <footer className="bg-gray-900 text-white py-12 relative overflow-hidden">
+      <footer className="w-full max-w-full bg-gray-900 text-white py-12 relative overflow-hidden">
         {/* Footer pattern */}
         <div className="absolute inset-0 opacity-5 pointer-events-none">
           <svg width="100%" height="100%" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
@@ -383,7 +382,7 @@ const HomePage = () => {
           </svg>
         </div>
         
-        <div className="container max-w-6xl mx-auto px-4 relative z-10">
+        <div className="container w-full max-w-full mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div className="flex items-center mb-6 md:mb-0">
               <div className="bg-brand-purple rounded-lg w-10 h-10 flex items-center justify-center shadow-lg">
