@@ -21,7 +21,7 @@ const ContentHeader = ({
 }: ContentHeaderProps) => {
   return (
     <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
-      <div className="container max-w-4xl mx-auto py-5 px-4">
+      <div className="container max-w-[860px] mx-auto py-5 px-4">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

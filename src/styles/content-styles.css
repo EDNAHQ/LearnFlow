@@ -66,12 +66,16 @@
 /* Code blocks */
 .content-section pre {
   @apply my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg w-full;
+  max-width: 100%;
 }
 
 .content-section pre code {
   @apply block p-5 overflow-x-auto text-base w-full;
   background-color: #1A1A1A;
   color: white;
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Inline code */
@@ -106,6 +110,7 @@
 /* Tables */
 .content-section table {
   @apply w-full border-collapse my-6 rounded-lg overflow-hidden shadow-sm;
+  table-layout: fixed;
 }
 
 .content-section thead {
@@ -118,6 +123,7 @@
 
 .content-section td {
   @apply px-4 py-3 text-sm border-t border-gray-100;
+  word-wrap: break-word;
 }
 
 .content-section tbody tr:nth-child(even) {

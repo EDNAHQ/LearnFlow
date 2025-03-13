@@ -25,7 +25,9 @@ const ContentDisplay = (props: ContentDisplayProps) => {
   if (mode === "e-book") {
     return (
       <AnimatePresence mode="wait">
-        <ContentSection {...props} />
+        <div className="max-w-[860px] mx-auto w-full">
+          <ContentSection {...props} />
+        </div>
       </AnimatePresence>
     );
   }
@@ -33,14 +35,16 @@ const ContentDisplay = (props: ContentDisplayProps) => {
   if (mode === "presentation") {
     return (
       <AnimatePresence mode="wait">
-        <PresentationView content={detailedContent || ""} />
+        <div className="max-w-[860px] mx-auto w-full">
+          <PresentationView content={detailedContent || ""} />
+        </div>
       </AnimatePresence>
     );
   }
 
   if (mode === "podcast") {
     return (
-      <div className="mb-6 w-full">
+      <div className="mb-6 w-full max-w-[860px] mx-auto">
         <div className="bg-white shadow-sm rounded-lg p-6 mb-6 text-center border border-gray-100 w-full">
           <Music className="h-12 w-12 mx-auto text-brand-purple opacity-60 mb-3" />
           <h3 className="font-semibold text-lg mb-2">Podcast Feature Coming Soon!</h3>
