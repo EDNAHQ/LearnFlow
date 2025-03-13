@@ -1,7 +1,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 
-type ContentMode = "e-book" | "presentation" | "podcast";
+type ContentMode = "text" | "e-book" | "presentation" | "podcast" | "slides";
 
 interface ContentModeContextProps {
   mode: ContentMode;
@@ -14,7 +14,7 @@ const ContentModeContext = createContext<ContentModeContextProps | undefined>(un
 export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
   const [mode, setMode] = useState<ContentMode>(() => {
     const savedMode = localStorage.getItem("content-mode");
-    return (savedMode as ContentMode) || "e-book";
+    return (savedMode as ContentMode) || "text";
   });
 
   useEffect(() => {
@@ -23,9 +23,9 @@ export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleMode = () => {
     setMode(prev => {
-      if (prev === "e-book") return "presentation";
-      if (prev === "presentation") return "podcast";
-      return "e-book";
+      if (prev === "text" || prev === "e-book") return "slides";
+      if (prev === "slides" || prev === "presentation") return "podcast";
+      return "text";
     });
   };
 

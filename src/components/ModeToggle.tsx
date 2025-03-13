@@ -12,10 +12,10 @@ export const ModeToggle = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setMode("e-book")}
+        onClick={() => setMode("text")}
         className={cn(
           "text-white hover:text-white border border-brand-purple/30 hover:bg-brand-purple/20",
-          mode === "e-book" && "bg-brand-purple/20 text-white font-medium border-brand-purple"
+          mode === "text" && "bg-brand-purple/20 text-white font-medium border-brand-purple"
         )}
       >
         <BookOpen className="h-4 w-4 mr-2" />
@@ -24,10 +24,10 @@ export const ModeToggle = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setMode("presentation")}
+        onClick={() => setMode("slides")}
         className={cn(
           "text-white hover:text-white border border-brand-purple/30 hover:bg-brand-purple/20",
-          mode === "presentation" && "bg-brand-purple/20 text-white font-medium border-brand-purple"
+          mode === "slides" && "bg-brand-purple/20 text-white font-medium border-brand-purple"
         )}
       >
         <Presentation className="h-4 w-4 mr-2" />
