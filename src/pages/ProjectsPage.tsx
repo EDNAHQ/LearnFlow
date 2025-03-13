@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Book, Clock, ExternalLink, Trophy, CheckCircle, Sparkles, Trash2 } from "lucide-react";
-import { UserNav } from "@/components/UserNav";
+import { MainNav } from "@/components/MainNav";
 import { toast } from "sonner";
 import { deleteLearningPath } from "@/utils/projectUtils";
 import {
@@ -159,21 +158,8 @@ const ProjectsPage = () => {
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-brand-purple/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-0"></div>
       <div className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-brand-gold/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 z-0"></div>
       
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="bg-[#6D42EF] rounded-lg w-9 h-9 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-semibold">LearnFlow</span>
-          </Link>
-          
-          <div>
-            <UserNav />
-          </div>
-        </div>
-      </header>
-
+      <MainNav />
+      
       <div className="container max-w-6xl mx-auto py-12 px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0 }}

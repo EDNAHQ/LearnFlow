@@ -9,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -22,15 +21,7 @@ import {
   LogOut,
   Brain,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
+import { UserNav } from "@/components/UserNav";
 
 interface MainNavProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -90,51 +81,7 @@ export function MainNav({ className }: MainNavProps) {
         </div>
         <div className="ml-auto flex items-center space-x-4">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.user_metadata?.avatar_url as string} />
-                    <AvatarFallback>
-                      {user?.user_metadata?.name
-                        ?.slice(0, 2)
-                        .toUpperCase() || "XX"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex flex-col space-y-1 p-2">
-                  <div className="text-sm font-medium leading-none">
-                    {user?.user_metadata?.name}
-                  </div>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate("/projects")} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Projects</span>
-                  <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => navigate("/why-free")} className="cursor-pointer">
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>Why is this free?</span>
-                  <DropdownMenuShortcut>⌘?</DropdownMenuShortcut>
-                </DropdownMenuItem>
-                <DropdownMenuItem disabled>
-                  <Github className="mr-2 h-4 w-4" />
-                  <span>Github</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                  <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserNav />
           ) : (
             <Button size="sm" onClick={() => navigate("/auth")}>
               Sign In
