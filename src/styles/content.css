@@ -3,6 +3,7 @@
 
 .content-section {
   /* General content section styles moved to content-styles.css */
+  width: 100%;
 }
 
 /* Enhanced code block styling with language tag */
@@ -27,6 +28,13 @@
   font-size: 3rem;
   color: rgba(109, 66, 239, 0.2);
   font-family: serif;
+}
+
+/* List items should display properly */
+.content-section ul li,
+.content-section ol li {
+  display: list-item;
+  width: 100%;
 }
 
 /* Styles for special content features */

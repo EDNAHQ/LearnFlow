@@ -127,7 +127,7 @@ const ContentPage = () => {
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
+    <div className="min-h-screen bg-gray-50 text-gray-800 w-full">
       <div ref={topRef}></div>
       
       <ContentHeader 
@@ -138,13 +138,14 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="container max-w-4xl mx-auto py-8 px-4">
+      <div className="w-full max-w-6xl mx-auto py-8 px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
+          className="w-full"
         >
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 w-full">
             <ContentProgress 
               topic={topic} 
               currentStep={currentStep} 
@@ -153,7 +154,7 @@ const ContentPage = () => {
             {/* ModeToggle removed from here as requested */}
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-gray-800">
                 {currentStepData?.title}

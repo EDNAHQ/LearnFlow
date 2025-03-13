@@ -3,7 +3,7 @@
 
 /* Content section containers */
 .content-section {
-  @apply max-w-none text-gray-800 leading-relaxed;
+  @apply max-w-none text-gray-800 leading-relaxed w-full;
 }
 
 /* Headings */
@@ -39,7 +39,7 @@
 /* Lists */
 .content-section ul,
 .content-section ol {
-  @apply my-5 pl-6 space-y-3;
+  @apply my-5 pl-6 space-y-2 w-full;
 }
 
 .content-section ul {
@@ -51,7 +51,8 @@
 }
 
 .content-section li {
-  @apply pl-2 text-lg leading-relaxed mb-3;
+  @apply pl-2 text-lg leading-relaxed mb-2;
+  display: list-item;
 }
 
 .content-section ul li::marker {
@@ -64,7 +65,7 @@
 
 /* Code blocks */
 .content-section pre {
-  @apply my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg;
+  @apply my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg w-full;
 }
 
 .content-section pre code {

@@ -66,7 +66,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8",
+        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
@@ -74,10 +74,10 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         <ContentLoader />
       ) : (
         <div 
-          className="prose prose-gray max-w-none"
+          className="prose prose-gray max-w-none w-full"
           onMouseUp={handleTextSelection}
         >
-          <div className="content-section">
+          <div className="content-section w-full">
             {formatContent(loadedDetailedContent)}
           </div>
           

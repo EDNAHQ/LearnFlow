@@ -40,8 +40,8 @@ const ContentDisplay = (props: ContentDisplayProps) => {
 
   if (mode === "podcast") {
     return (
-      <div className="mb-6">
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-6 text-center border border-gray-100">
+      <div className="mb-6 w-full">
+        <div className="bg-white shadow-sm rounded-lg p-6 mb-6 text-center border border-gray-100 w-full">
           <Music className="h-12 w-12 mx-auto text-brand-purple opacity-60 mb-3" />
           <h3 className="font-semibold text-lg mb-2">Podcast Feature Coming Soon!</h3>
           <p className="text-gray-600 text-sm mb-4">
@@ -57,7 +57,7 @@ const ContentDisplay = (props: ContentDisplayProps) => {
         </div>
         
         {podcastTranscript && (
-          <div className="mt-6">
+          <div className="mt-6 w-full">
             <PodcastCreator initialTranscript={podcastTranscript} title={title} topic={topic || ""} />
           </div>
         )}
