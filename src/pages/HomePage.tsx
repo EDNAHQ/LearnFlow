@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -75,12 +74,12 @@ const HomePage = () => {
             </svg>
           </div>
           
-          <div className="container grid md:grid-cols-2 gap-12 items-center">
+          <div className="container grid md:grid-cols-2 gap-12 items-start">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7 }}
-              className="relative z-10"
+              className="relative z-10 mt-6"
             >
               <motion.div 
                 initial={{ opacity: 0 }}
@@ -92,17 +91,16 @@ const HomePage = () => {
               </motion.div>
               
               <motion.h1 
-                className="text-4xl md:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-800 via-gray-900 to-brand-purple bg-clip-text text-transparent"
+                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-800 via-gray-900 to-brand-purple bg-clip-text text-transparent"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.7 }}
               >
-                Master any topic with 
-                <span className="text-brand-purple ml-2">personalized learning</span>
+                Master any topic with personalized learning
               </motion.h1>
               
               <motion.p
-                className="text-lg text-gray-600 mb-8"
+                className="text-lg text-gray-600 mb-8 max-w-xl"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.7 }}
@@ -260,7 +258,7 @@ const HomePage = () => {
         {/* Benefits Section */}
         <section className="w-full py-16 md:py-24 relative">
           {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMSkiPjxwYXRoIGQ9Ik0wIDBoNDBNMCA0MGg0ME00MCAwdjQwTTAgMHY0MCIgc3Ryb2tlPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMikiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')]"></div>
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSRyZ2JhKDEyOCwxMjgsMTI4LDAuMSkiPjxwYXRoIGQ9Ik0wIDBoNDBNMCA0MGg0ME00MCAwdjQwTTAgMHY0MCIgc3Ryb2tlPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMikiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')]"></div>
           
           <div className="container relative z-10">
             <div className="text-center mb-16">

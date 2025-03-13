@@ -1,5 +1,6 @@
 
-import { Tab } from "@headlessui/react";
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Presentation, Headphones } from "lucide-react";
 import ContentSection from "./ContentSection";
 import PresentationView from "./presentation/PresentationView";
@@ -16,87 +17,58 @@ interface ContentDisplayProps {
 }
 
 const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic }: ContentDisplayProps) => {
-  const { contentMode, setContentMode } = useContentMode();
+  const { mode, setMode } = useContentMode();
 
   return (
     <div className="w-full max-w-[860px] mx-auto">
-      <Tab.Group selectedIndex={contentMode} onChange={setContentMode}>
-        <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 p-1 mb-4">
-          <Tab
-            className={({ selected }) => `
-              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
-              flex items-center justify-center
-              ${
-                selected
-                  ? 'bg-white shadow text-[#6D42EF]'
-                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
-              }
-            `}
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            Text
-          </Tab>
-          <Tab
-            className={({ selected }) => `
-              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
-              flex items-center justify-center
-              ${
-                selected
-                  ? 'bg-white shadow text-[#6D42EF]'
-                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
-              }
-            `}
-          >
-            <Presentation className="w-4 h-4 mr-2" />
-            Slides
-          </Tab>
-          <Tab
-            className={({ selected }) => `
-              w-full rounded-lg py-2.5 text-sm font-medium leading-5 
-              flex items-center justify-center
-              ${
-                selected
-                  ? 'bg-white shadow text-[#6D42EF]'
-                  : 'text-gray-600 hover:bg-white/[0.12] hover:text-gray-700'
-              }
-            `}
-          >
-            <Headphones className="w-4 h-4 mr-2" />
-            Podcast
-          </Tab>
-        </Tab.List>
-        <Tab.Panels>
-          <Tab.Panel>
-            <ContentSection 
+      <Tabs value={mode} onValueChange={setMode} className="w-full">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="text" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span>Text</span>
+          </TabsTrigger>
+          <TabsTrigger value="slides" className="flex items-center gap-2">
+            <Presentation className="w-4 h-4" />
+            <span>Slides</span>
+          </TabsTrigger>
+          <TabsTrigger value="podcast" className="flex items-center gap-2">
+            <Headphones className="w-4 h-4" />
+            <span>Podcast</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="text">
+          <ContentSection 
+            title={title}
+            content={content}
+            index={index}
+            detailedContent={detailedContent}
+            pathId={pathId}
+            topic={topic}
+          />
+        </TabsContent>
+        
+        <TabsContent value="slides">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full max-w-[860px] mx-auto">
+            <PresentationView 
+              slides={detailedContent || content.split(":")[1] || ""} 
               title={title}
-              content={content}
-              index={index}
-              detailedContent={detailedContent}
-              pathId={pathId}
-              topic={topic}
             />
-          </Tab.Panel>
-          <Tab.Panel>
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full max-w-[860px] mx-auto">
-              <PresentationView 
-                title={title} 
-                content={detailedContent || content.split(":")[1] || ""} 
-              />
-            </div>
-          </Tab.Panel>
-          <Tab.Panel>
-            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 w-full max-w-[860px] mx-auto">
-              <PodcastCreator 
-                title={title} 
-                content={detailedContent || content.split(":")[1] || ""} 
-                pathId={pathId}
-                stepId={content.split(":")[0]}
-                topic={topic || ""}
-              />
-            </div>
-          </Tab.Panel>
-        </Tab.Panels>
-      </Tab.Group>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="podcast">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 w-full max-w-[860px] mx-auto">
+            <PodcastCreator 
+              contentText={detailedContent || content.split(":")[1] || ""} 
+              pathId={pathId || ""}
+              stepId={content.split(":")[0] || ""}
+              title={title}
+              topic={topic || ""}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
