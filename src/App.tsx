@@ -29,7 +29,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <div className="w-full min-w-full">
+              <div className="w-full min-w-full h-full">
                 <Routes>
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/" element={<Navigate to="/home" />} />

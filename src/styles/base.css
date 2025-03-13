@@ -91,24 +91,32 @@
     padding: 0;
   }
 
-  html, body, #root {
+  html, body {
     width: 100%;
-    min-width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
+  }
+
+  #root {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    max-width: none;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: 'Poppins', sans-serif;
-    width: 100vw;
-    min-height: 100vh;
-    overflow-x: hidden;
   }
   
   main {
     width: 100%;
-    min-width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
   }
@@ -116,6 +124,8 @@
   .container {
     width: 100%;
     max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 }
 
