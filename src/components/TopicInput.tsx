@@ -22,7 +22,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-lg mx-auto relative"
+      className="w-full max-w-full mx-auto relative"
     >
       <div className="relative group">
         <Input
