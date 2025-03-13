@@ -53,7 +53,7 @@ const ProjectsPage = () => {
               <div className="text-center">
                 <Button 
                   onClick={handleNewProject}
-                  className="gap-2 bg-brand-purple hover:bg-brand-purple/90 text-white btn-hover-effect"
+                  className="gap-2 bg-gradient-to-r from-brand-purple to-brand-pink hover:opacity-90 text-white btn-hover-effect"
                 >
                   Start a New Learning Project
                 </Button>
