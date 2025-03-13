@@ -20,6 +20,7 @@ import {
   User,
   HelpCircle,
   LogOut,
+  Brain,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -55,7 +56,9 @@ export function MainNav({ className }: MainNavProps) {
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link to="/home" className="mr-6 flex items-center space-x-2">
-            <Sparkles className="h-6 w-6 text-brand-purple" />
+            <div className="p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
+              <Brain className="h-5 w-5 text-white" />
+            </div>
             <span className="hidden font-bold sm:inline-block">
               LearnFlow
             </span>
