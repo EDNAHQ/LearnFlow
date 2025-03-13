@@ -24,13 +24,13 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
   return (
     <motion.form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-full mx-auto relative"
+      className="w-full max-w-full mx-auto relative z-20"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <div className={`relative group transition-all duration-300 ${isFocused ? 'scale-[1.01]' : ''}`}>
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-30">
           <Search className="h-5 w-5" />
         </div>
         <Input
@@ -40,7 +40,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           onChange={(e) => setTopic(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="input-light pl-10 pr-12 h-14 text-base shadow-sm transition-all duration-300 focus:shadow-md border-gray-200 focus:border-brand-purple/50"
+          className="input-light pl-10 pr-12 h-14 text-base shadow-sm transition-all duration-300 focus:shadow-md border-gray-200 focus:border-brand-purple/50 relative z-20"
           disabled={loading}
         />
         <motion.div 
@@ -56,7 +56,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           type="submit" 
           size="icon" 
           disabled={!topic.trim() || loading}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-300 
+          className={`absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-300 z-30
             ${!topic.trim() ? 'bg-gray-400' : 'bg-brand-purple hover:bg-brand-purple/90 shadow-sm hover:shadow-md'}`}
           style={{ top: "calc(50% - 7px)" }}
         >

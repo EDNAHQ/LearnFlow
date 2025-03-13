@@ -54,16 +54,17 @@ const HeroSection = () => {
         className="absolute inset-0 w-full h-full opacity-10 pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cpattern id='smallGrid' width='20' height='20' patternUnits='userSpaceOnUse'%3e%3cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='%236D42EF' stroke-width='0.5' opacity='0.3'/%3e%3c/pattern%3e%3c/defs%3e%3crect width='100%25' height='100%25' fill='url(%23smallGrid)'/%3e%3c/svg%3e")`,
-          backgroundSize: '50px 50px'
+          backgroundSize: '50px 50px',
+          zIndex: 1
         }}
       />
       
-      <div className="container grid md:grid-cols-2 gap-12 items-center">
+      <div className="container grid md:grid-cols-2 gap-12 items-center relative">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7 }}
-          className="relative z-10"
+          className="relative z-20"
         >
           <motion.div 
             initial={{ opacity: 0 }}
@@ -133,7 +134,7 @@ const HeroSection = () => {
           id="topic-input-section"
         >
           <motion.div 
-            className="rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm border border-gray-200 shadow-xl p-6 hover:shadow-brand transition-shadow duration-500"
+            className="rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm border border-gray-200 shadow-xl p-6 hover:shadow-brand transition-shadow duration-500 relative z-30"
             whileHover={{ boxShadow: "0 20px 25px -5px rgba(109, 66, 239, 0.1), 0 10px 10px -5px rgba(109, 66, 239, 0.04)" }}
           >
             <div className="mb-6">
@@ -181,7 +182,7 @@ const HeroSection = () => {
           
           {/* Enhanced floating particles */}
           <motion.div 
-            className="absolute -right-4 top-10 w-4 h-4 rounded-full bg-brand-gold/40"
+            className="absolute -right-4 top-10 w-4 h-4 rounded-full bg-brand-gold/40 z-10"
             animate={{
               y: [0, 15, 0],
               x: [0, 5, 0],
@@ -194,7 +195,7 @@ const HeroSection = () => {
             }}
           />
           <motion.div 
-            className="absolute right-20 top-20 w-2 h-2 rounded-full bg-brand-purple/40"
+            className="absolute right-20 top-20 w-2 h-2 rounded-full bg-brand-purple/40 z-10"
             animate={{
               y: [0, -10, 0],
               x: [0, -5, 0],
@@ -206,7 +207,7 @@ const HeroSection = () => {
             }}
           />
           <motion.div 
-            className="absolute left-10 bottom-10 w-3 h-3 rounded-full bg-brand-pink/40"
+            className="absolute left-10 bottom-10 w-3 h-3 rounded-full bg-brand-pink/40 z-10"
             animate={{
               y: [0, -15, 0],
               scale: [1, 1.1, 1],
