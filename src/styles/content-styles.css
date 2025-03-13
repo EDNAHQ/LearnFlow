@@ -1,0 +1,124 @@
+
+/* Content formatting styles */
+
+/* Content section containers */
+.content-section {
+  @apply max-w-none text-gray-800 leading-relaxed;
+}
+
+/* Headings */
+.content-section h1, 
+.content-section h2, 
+.content-section h3, 
+.content-section h4 {
+  @apply font-bold text-brand-purple mb-4 mt-6;
+  line-height: 1.3;
+}
+
+.content-section h1 {
+  @apply text-3xl mt-8 border-b border-brand-purple/20 pb-2;
+}
+
+.content-section h2 {
+  @apply text-2xl mt-7;
+}
+
+.content-section h3 {
+  @apply text-xl mt-6 text-brand-purple/90;
+}
+
+.content-section h4 {
+  @apply text-lg mt-5 text-brand-purple/80;
+}
+
+/* Paragraph text */
+.content-section p {
+  @apply my-4 text-lg leading-relaxed;
+}
+
+/* Lists */
+.content-section ul,
+.content-section ol {
+  @apply my-5 pl-6 space-y-3;
+}
+
+.content-section ul {
+  @apply list-disc;
+}
+
+.content-section ol {
+  @apply list-decimal;
+}
+
+.content-section li {
+  @apply pl-2 text-lg leading-relaxed mb-3;
+}
+
+.content-section ul li::marker {
+  @apply text-brand-purple font-bold;
+}
+
+.content-section ol li::marker {
+  @apply text-brand-purple font-semibold;
+}
+
+/* Code blocks */
+.content-section pre {
+  @apply my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg;
+}
+
+.content-section pre code {
+  @apply block p-5 overflow-x-auto text-base;
+  background-color: #1A1A1A;
+  color: white;
+}
+
+/* Inline code */
+.content-section p code,
+.content-section li code {
+  @apply px-1.5 py-0.5 rounded text-brand-pink text-sm;
+  background-color: rgba(26, 26, 26, 0.05);
+  font-family: monospace;
+}
+
+/* Blockquotes */
+.content-section blockquote {
+  @apply border-l-4 border-brand-purple bg-brand-purple/5 pl-5 py-2 my-5 italic rounded-r-lg;
+}
+
+/* Links */
+.content-section a {
+  @apply text-brand-purple hover:text-brand-pink underline transition-colors;
+}
+
+/* Images */
+.content-section img {
+  @apply rounded-lg border border-gray-200 shadow-sm my-4 max-w-full mx-auto;
+}
+
+/* Horizontal rules */
+.content-section hr {
+  @apply my-8 border-0 h-0.5 rounded-full;
+  background: linear-gradient(90deg, transparent, hsl(var(--brand-purple)), transparent);
+}
+
+/* Tables */
+.content-section table {
+  @apply w-full border-collapse my-6 rounded-lg overflow-hidden shadow-sm;
+}
+
+.content-section thead {
+  @apply bg-brand-purple/10;
+}
+
+.content-section th {
+  @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-brand-purple;
+}
+
+.content-section td {
+  @apply px-4 py-3 text-sm border-t border-gray-100;
+}
+
+.content-section tbody tr:nth-child(even) {
+  @apply bg-black/[0.02];
+}

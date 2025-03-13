@@ -6,7 +6,8 @@ This directory contains modular CSS files for better organization and maintainab
 - `base.css`: Contains Tailwind directives, CSS variables, and base styles
 - `components.css`: Component-specific classes like cards, panels, buttons 
 - `animations.css`: Animation keyframes, transitions, and related utilities
-- `content.css`: Styles specific to content rendering (markdown, typography)
+- `content-styles.css`: Core styles for content formatting (headings, lists, code blocks)
+- `content.css`: Additional styles for ReactMarkdown component and special content features
 - `legacy.css`: Contains styles from the original App.css file for backward compatibility
 
 ## Usage
@@ -20,3 +21,6 @@ When adding new styles:
 2. Use Tailwind classes when possible instead of custom CSS
 3. Follow the existing naming conventions
 4. Add comments for complex or non-obvious styles
+5. For content formatting:
+   - Use `content-styles.css` for basic element styling
+   - Use `content.css` for specialized ReactMarkdown components

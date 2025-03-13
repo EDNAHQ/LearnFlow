@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -38,15 +37,16 @@ export const formatContent = (text: string) => {
         code: ({ node, inline, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || "");
           return !inline && match ? (
-            <div className="relative my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-brand-purple text-xs font-semibold text-white rounded-bl-md">
-                {match[1].toUpperCase()}
-              </div>
+            <div className="relative">
+              {match[1] && (
+                <div className="language-tag">
+                  {match[1].toUpperCase()}
+                </div>
+              )}
               <SyntaxHighlighter
                 style={atomDark}
                 language={match[1]}
                 PreTag="div"
-                className="pt-8"
                 {...props}
               >
                 {String(children).replace(/\n$/, "")}

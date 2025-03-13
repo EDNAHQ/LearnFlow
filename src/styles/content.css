@@ -1,233 +1,24 @@
 
-/* Content section styling */
+/* Content section styling for ReactMarkdown component */
 
-.content-section h1, 
-.content-section h2, 
-.content-section h3, 
-.content-section h4 {
-  font-weight: 700;
-  line-height: 1.3;
-  color: hsl(var(--brand-purple));
-  margin-top: 1.75rem;
-  margin-bottom: 1rem;
-  position: relative;
+.content-section {
+  /* General content section styles moved to content-styles.css */
 }
 
-.content-section h1 {
-  font-size: 2rem;
-  color: hsl(var(--brand-purple));
-  border-bottom: 2px solid rgba(109, 66, 239, 0.2);
-  padding-bottom: 0.5rem;
-}
-
-.content-section h2 {
-  font-size: 1.75rem;
-  color: hsl(var(--brand-purple));
-}
-
-.content-section h3 {
-  font-size: 1.5rem;
-  color: hsl(var(--brand-purple), 0.9);
-}
-
-.content-section p {
-  margin: 1.25rem 0;
-  line-height: 1.8;
-  font-size: 1.125rem;
-}
-
-/* Improved list styling */
-.content-section ul,
-.content-section ol {
-  margin: 1.5rem 0;
-  padding-left: 1.5rem;
-}
-
-.content-section ul {
-  list-style-type: disc;
-}
-
-.content-section ol {
-  list-style-type: decimal;
-}
-
-.content-section li {
-  margin-bottom: 0.75rem;
-  line-height: 1.7;
-  font-size: 1.125rem;
-  padding-left: 0.5rem;
-}
-
-.content-section ul li::marker {
-  color: hsl(var(--brand-purple));
-}
-
-.content-section ol li::marker {
-  color: hsl(var(--brand-purple));
-  font-weight: 600;
-}
-
-/* Enhanced code block styling */
+/* Enhanced code block styling with language tag */
 .content-section pre {
-  margin: 1.5rem 0;
-  border-radius: 0.5rem;
-  overflow: hidden;
+  position: relative;
 }
 
 .content-section pre code {
-  padding: 1.25rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  padding-top: 2rem; /* Space for language tag */
 }
 
-/* Enhanced blockquote styling */
-.content-section blockquote {
-  border-left: 4px solid hsl(var(--brand-purple));
-  background-color: rgba(109, 66, 239, 0.05);
-  padding: 1rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 0 0.5rem 0.5rem 0;
-  font-style: italic;
+.language-tag {
+  @apply absolute top-0 right-0 px-3 py-1 bg-brand-purple text-xs font-semibold text-white rounded-bl-md;
 }
 
-/* Enhanced link styling */
-.content-section a {
-  color: hsl(var(--brand-purple));
-  text-decoration: underline;
-  transition: color 0.2s ease;
-}
-
-.content-section a:hover {
-  color: hsl(var(--brand-pink));
-}
-
-/* Table styling */
-.content-section table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  font-size: 0.9em;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.content-section thead {
-  background-color: rgba(109, 66, 239, 0.1);
-}
-
-.content-section th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: hsl(var(--brand-purple));
-}
-
-.content-section td {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.content-section tbody tr:nth-child(even) {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Completely revamped content section styling */
-.content-section h2, 
-.content-section h3, 
-.content-section h4 {
-  position: relative;
-  display: inline-block;
-  margin: 1.5rem 0 1rem;
-  color: hsl(var(--brand-purple));
-}
-
-.content-section h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-}
-
-.content-section h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 1.75rem;
-  color: hsl(var(--brand-purple), 0.9);
-}
-
-.content-section h4 {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: hsl(var(--brand-purple), 0.8);
-}
-
-.content-section h2::after, 
-.content-section h3::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  background: linear-gradient(90deg, hsl(var(--brand-purple)) 0%, transparent 100%);
-  border-radius: 3px;
-}
-
-/* Enhanced code block styling */
-.content-section pre {
-  position: relative;
-  margin: 1.5rem 0;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  border: 1px solid rgba(109, 66, 239, 0.2);
-}
-
-.content-section pre code {
-  display: block;
-  padding: 1.25rem;
-  overflow-x: auto;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: white;
-  background-color: #1A1A1A;
-}
-
-/* Enhance code syntax highlighting */
-.content-section code .keyword {
-  color: #E84393; /* Brand pink */
-  font-weight: 600;
-}
-
-.content-section code .string {
-  color: #F5B623; /* Brand gold */
-}
-
-.content-section code .comment {
-  color: #6B7280;
-  font-style: italic;
-}
-
-.content-section code .function {
-  color: #3B82F6;
-  font-weight: 500;
-}
-
-/* Enhanced blockquote styling */
-.content-section blockquote {
-  border-left-width: 4px;
-  border-left-style: solid;
-  border-left-color: hsl(var(--brand-purple));
-  background-color: rgba(109, 66, 239, 0.05);
-  padding: 1rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 0 8px 8px 0;
-  font-style: italic;
-  position: relative;
-}
-
+/* Custom styles for specific content types */
 .content-section blockquote::before {
   content: '"';
   position: absolute;
@@ -238,95 +29,11 @@
   font-family: serif;
 }
 
-/* Enhanced list styling */
-.content-section ul {
-  list-style: none;
-  padding-left: 1.5rem;
-  margin: 1.25rem 0;
+/* Styles for special content features */
+.content-callout {
+  @apply bg-brand-purple/5 border-l-4 border-brand-purple p-4 rounded-r-lg my-6;
 }
 
-.content-section ul li {
-  position: relative;
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.content-section ul li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: hsl(var(--brand-purple));
-  font-weight: bold;
-  font-size: 1.25rem;
-}
-
-.content-section ol {
-  list-style: decimal;
-  padding-left: 1.5rem;
-  margin: 1.25rem 0;
-  counter-reset: item;
-}
-
-.content-section ol li {
-  position: relative;
-  padding-left: 0.5rem;
-  margin-bottom: 0.75rem;
-  counter-increment: item;
-}
-
-.content-section ol li::marker {
-  color: hsl(var(--brand-purple));
-  font-weight: 600;
-}
-
-/* Improved table styling */
-.content-section table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.content-section table th {
-  background-color: rgba(109, 66, 239, 0.1);
-  color: hsl(var(--brand-purple));
-  font-weight: 600;
-  text-align: left;
-  padding: 0.75rem 1rem;
-}
-
-.content-section table td {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.content-section table tr:nth-child(even) {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Improved paragraph spacing */
-.content-section p {
-  margin: 1.25rem 0;
-  line-height: 1.8;
-}
-
-/* Fancy divider */
-.content-section hr {
-  border: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(var(--brand-purple)), transparent);
-  margin: 2rem 0;
-}
-
-/* Enhanced inline code */
-.content-section p code,
-.content-section li code {
-  background-color: #1A1A1A;
-  color: #E84393;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-family: monospace;
+.content-callout-title {
+  @apply font-bold text-brand-purple mb-2;
 }
