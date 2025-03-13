@@ -51,7 +51,7 @@ const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic 
         <TabsContent value="slides">
           <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full max-w-[860px] mx-auto">
             <PresentationView 
-              slides={detailedContent || content.split(":")[1] || ""} 
+              content={detailedContent || content.split(":")[1] || ""} 
               title={title}
             />
           </div>
@@ -60,7 +60,7 @@ const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic 
         <TabsContent value="podcast">
           <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 w-full max-w-[860px] mx-auto">
             <PodcastCreator 
-              contentText={detailedContent || content.split(":")[1] || ""} 
+              content={detailedContent || content.split(":")[1] || ""} 
               pathId={pathId || ""}
               stepId={content.split(":")[0] || ""}
               title={title}
