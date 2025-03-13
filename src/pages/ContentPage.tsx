@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -154,9 +153,9 @@ const ContentPage = () => {
             {/* ModeToggle removed from here as requested */}
           </div>
 
-          <div className="mb-6 w-full">
+          <div className="mb-6 w-full max-w-[860px] mx-auto">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-gray-800 w-full max-w-[860px]">
                 {currentStepData?.title}
               </h2>
             </div>
