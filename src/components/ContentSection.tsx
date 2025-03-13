@@ -77,7 +77,6 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           className="prose prose-gray max-w-none"
           onMouseUp={handleTextSelection}
         >
-          {/* Removed redundant title since it's already shown above */}
           <div className="mt-0 content-section">
             {formatContent(loadedDetailedContent)}
           </div>

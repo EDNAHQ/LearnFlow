@@ -27,24 +27,10 @@ export const formatContent = (text: string) => {
       );
     } 
     
-    // Enhanced code block formatting with syntax highlighting colors
+    // Enhanced code block formatting
     else if (paragraph.startsWith('```')) {
       const codeType = paragraph.match(/```([a-z]*)/)?.[1] || '';
       const code = paragraph.replace(/```([a-z]*\n)?/g, '').replace(/```$/g, '');
-      
-      // Add keyword highlighting for common programming languages
-      let formattedCode = code;
-      
-      // Basic syntax highlighting
-      if (['vba', 'js', 'javascript', 'typescript', 'ts', 'python', 'java', 'csharp', 'c#'].includes(codeType.toLowerCase())) {
-        formattedCode = code
-          // Highlight keywords
-          .replace(/(Sub |Function |Dim |As |Const |End Sub|End Function|Option |If |Then |Else |ElseIf |For |Next |Do |Loop |While |Wend |Select |Case |Public |Private|MsgBox)/g, '<span class="text-brand-pink font-semibold">$1</span>')
-          // Highlight strings
-          .replace(/"([^"]*)"/g, '<span class="text-brand-gold">"$1"</span>')
-          // Highlight comments
-          .replace(/('.*)/g, '<span class="text-green-400 italic">$1</span>');
-      }
       
       return (
         <div key={i} className="relative mb-8 mt-6">
@@ -52,10 +38,9 @@ export const formatContent = (text: string) => {
             {codeType ? codeType.toUpperCase() : 'CODE'}
           </div>
           <pre className="bg-[#1A1A1A] p-6 pt-7 rounded-lg overflow-x-auto border border-brand-purple/30 shadow-lg text-white">
-            <code 
-              className="text-sm font-mono leading-relaxed" 
-              dangerouslySetInnerHTML={{ __html: formattedCode }}
-            />
+            <code className="text-sm font-mono leading-relaxed">
+              {code}
+            </code>
           </pre>
         </div>
       );
