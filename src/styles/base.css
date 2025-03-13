@@ -88,9 +88,17 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    @apply w-full h-full;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
   }
 }
 

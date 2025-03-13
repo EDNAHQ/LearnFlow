@@ -9,10 +9,12 @@
 /* Enhanced code block styling with language tag */
 .content-section pre {
   position: relative;
+  width: 100%;
 }
 
 .content-section pre code {
   padding-top: 2rem; /* Space for language tag */
+  width: 100%;
 }
 
 .language-tag {
@@ -39,7 +41,7 @@
 
 /* Styles for special content features */
 .content-callout {
-  @apply bg-brand-purple/5 border-l-4 border-brand-purple p-4 rounded-r-lg my-6;
+  @apply bg-brand-purple/5 border-l-4 border-brand-purple p-4 rounded-r-lg my-6 w-full;
 }
 
 .content-callout-title {

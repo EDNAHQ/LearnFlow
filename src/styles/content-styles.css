@@ -11,35 +11,35 @@
 .content-section h2, 
 .content-section h3, 
 .content-section h4 {
-  @apply font-bold text-brand-purple mb-4 mt-6;
+  @apply font-bold text-brand-purple mb-4 mt-6 w-full;
   line-height: 1.3;
 }
 
 .content-section h1 {
-  @apply text-3xl mt-8 border-b border-brand-purple/20 pb-2;
+  @apply text-3xl mt-8 border-b border-brand-purple/20 pb-2 w-full;
 }
 
 .content-section h2 {
-  @apply text-2xl mt-7;
+  @apply text-2xl mt-7 w-full;
 }
 
 .content-section h3 {
-  @apply text-xl mt-6 text-brand-purple/90;
+  @apply text-xl mt-6 text-brand-purple/90 w-full;
 }
 
 .content-section h4 {
-  @apply text-lg mt-5 text-brand-purple/80;
+  @apply text-lg mt-5 text-brand-purple/80 w-full;
 }
 
 /* Paragraph text */
 .content-section p {
-  @apply my-4 text-lg leading-relaxed;
+  @apply my-4 text-lg leading-relaxed w-full;
 }
 
 /* Lists */
 .content-section ul,
 .content-section ol {
-  @apply my-5 pl-6 space-y-2 w-full;
+  @apply my-5 pl-6 space-y-2 w-full block;
 }
 
 .content-section ul {
@@ -51,7 +51,7 @@
 }
 
 .content-section li {
-  @apply pl-2 text-lg leading-relaxed mb-2;
+  @apply pl-2 text-lg leading-relaxed mb-2 w-full block;
   display: list-item;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .content-section pre code {
-  @apply block p-5 overflow-x-auto text-base;
+  @apply block p-5 overflow-x-auto text-base w-full;
   background-color: #1A1A1A;
   color: white;
 }
@@ -84,7 +84,7 @@
 
 /* Blockquotes */
 .content-section blockquote {
-  @apply border-l-4 border-brand-purple bg-brand-purple/5 pl-5 py-2 my-5 italic rounded-r-lg;
+  @apply border-l-4 border-brand-purple bg-brand-purple/5 pl-5 py-2 my-5 italic rounded-r-lg w-full;
 }
 
 /* Links */
@@ -99,7 +99,7 @@
 
 /* Horizontal rules */
 .content-section hr {
-  @apply my-8 border-0 h-0.5 rounded-full;
+  @apply my-8 border-0 h-0.5 rounded-full w-full;
   background: linear-gradient(90deg, transparent, hsl(var(--brand-purple)), transparent);
 }
 
