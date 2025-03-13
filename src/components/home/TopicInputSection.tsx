@@ -20,7 +20,7 @@ const TopicInputSection = ({ loading, onSubmit }: TopicInputSectionProps) => {
       id="topic-input-section"
     >
       <motion.div 
-        className="rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm border border-gray-200 shadow-xl p-6 hover:shadow-brand transition-shadow duration-500 relative z-30"
+        className="rounded-2xl overflow-hidden bg-white/90 backdrop-blur-sm border border-gray-200 shadow-xl p-6 hover:shadow-brand transition-shadow duration-500 relative z-20"
         whileHover={{ boxShadow: "0 20px 25px -5px rgba(109, 66, 239, 0.1), 0 10px 10px -5px rgba(109, 66, 239, 0.04)" }}
       >
         <div className="mb-6">
