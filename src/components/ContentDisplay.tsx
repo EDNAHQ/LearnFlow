@@ -1,7 +1,6 @@
 
 import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Presentation, Headphones } from "lucide-react";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ContentSection from "./ContentSection";
 import PresentationView from "./presentation/PresentationView";
 import PodcastCreator from "./podcast/PodcastCreator";
@@ -17,26 +16,11 @@ interface ContentDisplayProps {
 }
 
 const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic }: ContentDisplayProps) => {
-  const { mode, setMode } = useContentMode();
+  const { mode } = useContentMode();
 
   return (
     <div className="w-full max-w-[860px] mx-auto">
-      <Tabs value={mode} onValueChange={setMode} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="text" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            <span>Text</span>
-          </TabsTrigger>
-          <TabsTrigger value="slides" className="flex items-center gap-2">
-            <Presentation className="w-4 h-4" />
-            <span>Slides</span>
-          </TabsTrigger>
-          <TabsTrigger value="podcast" className="flex items-center gap-2">
-            <Headphones className="w-4 h-4" />
-            <span>Podcast</span>
-          </TabsTrigger>
-        </TabsList>
-        
+      <Tabs value={mode} className="w-full">
         <TabsContent value="text">
           <ContentSection 
             title={title}
