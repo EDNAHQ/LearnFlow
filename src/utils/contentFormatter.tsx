@@ -1,9 +1,10 @@
+
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { QuestionMarkCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 // Helper component for question prompts
 const QuestionPrompt = ({ 
@@ -21,7 +22,7 @@ const QuestionPrompt = ({
       onClick={() => onInsightRequest(questionText)}
     >
       {questionText}
-      <QuestionMarkCircle className="h-3.5 w-3.5 inline-block opacity-70 group-hover:opacity-100" />
+      <HelpCircle className="h-3.5 w-3.5 inline-block opacity-70 group-hover:opacity-100" />
     </span>
   );
 };
