@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
 import ContentLoader from "./content/ContentLoader";
@@ -28,6 +28,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsGenerated, setQuestionsGenerated] = useState(false);
   
   const { 
     selectedText, 
@@ -76,34 +77,40 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }
   }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
 
-  // Generate related questions once content is loaded
-  useEffect(() => {
-    if (loadedDetailedContent && topic && !relatedQuestions.length && !loadingQuestions) {
-      const generateRelatedQuestions = async () => {
-        setLoadingQuestions(true);
-        try {
-          const response = await supabase.functions.invoke('generate-learning-content', {
-            body: {
-              content: loadedDetailedContent,
-              topic,
-              title,
-              generateQuestions: true
-            }
-          });
-          
-          if (response.data?.questions && Array.isArray(response.data.questions)) {
-            setRelatedQuestions(response.data.questions);
-          }
-        } catch (error) {
-          console.error("Error generating related questions:", error);
-        } finally {
-          setLoadingQuestions(false);
+  // Generate related questions once content is loaded - but only once
+  const generateRelatedQuestions = useCallback(async () => {
+    if (!loadedDetailedContent || !topic || questionsGenerated || relatedQuestions.length > 0) {
+      return;
+    }
+    
+    setLoadingQuestions(true);
+    try {
+      const response = await supabase.functions.invoke('generate-learning-content', {
+        body: {
+          content: loadedDetailedContent,
+          topic,
+          title,
+          generateQuestions: true
         }
-      };
+      });
       
+      if (response.data?.questions && Array.isArray(response.data.questions)) {
+        setRelatedQuestions(response.data.questions);
+      }
+    } catch (error) {
+      console.error("Error generating related questions:", error);
+    } finally {
+      setLoadingQuestions(false);
+      setQuestionsGenerated(true);
+    }
+  }, [loadedDetailedContent, topic, title, questionsGenerated, relatedQuestions.length]);
+
+  // Trigger question generation once content is loaded
+  useEffect(() => {
+    if (loadedDetailedContent && topic && !questionsGenerated && !loadingQuestions) {
       generateRelatedQuestions();
     }
-  }, [loadedDetailedContent, topic, title, relatedQuestions.length, loadingQuestions]);
+  }, [loadedDetailedContent, topic, questionsGenerated, loadingQuestions, generateRelatedQuestions]);
 
   const handleDialogOpenChange = (open: boolean) => {
     setShowInsightsDialog(open);
