@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,16 +15,23 @@ import ContentNavigation from "@/components/content/ContentNavigation";
 import ContentLoading from "@/components/content/ContentLoading";
 import ContentError from "@/components/content/ContentError";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { ModeToggle } from "@/components/ModeToggle";
 
 const ContentPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setMode } = useContentMode();
   const [topic, setTopic] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [pathId, setPathId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
   const topRef = useRef<HTMLDivElement>(null);
+
+  // Set "text" (Read) mode by default when component mounts
+  useEffect(() => {
+    setMode("text");
+  }, [setMode]);
 
   useEffect(() => {
     if (!user) {
@@ -150,7 +158,7 @@ const ContentPage = () => {
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
-            {/* ModeToggle removed from here as requested */}
+            <ModeToggle />
           </div>
 
           <div className="mb-6 w-full max-w-[860px] mx-auto">
