@@ -1,5 +1,4 @@
-
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { generateStepContent } from "@/utils/learningUtils";
 import ContentLoader from "./content/ContentLoader";
