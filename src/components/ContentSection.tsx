@@ -12,6 +12,7 @@ import ContentMarginNote from "./ContentMarginNote";
 import { supabase } from "@/integrations/supabase/client";
 import { generateMarginNotes, MarginNote } from "@/utils/marginNotesUtils";
 import { toast } from "sonner";
+import ReactDOM from 'react-dom';
 
 interface ContentSectionProps {
   title: string;
@@ -34,6 +35,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const [marginNotes, setMarginNotes] = useState<MarginNote[]>([]);
   const [loadingMarginNotes, setLoadingMarginNotes] = useState(false);
   const [marginNotesGenerated, setMarginNotesGenerated] = useState(false);
+  const [insightsAdded, setInsightsAdded] = useState(false);
   
   const { 
     selectedText, 
@@ -60,6 +62,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     setMarginNotes([]);
     setMarginNotesGenerated(false);
     setLoadingMarginNotes(false);
+    setInsightsAdded(false);
   }, [content, topic]);
 
   useEffect(() => {
@@ -123,7 +126,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }
   }, [loadedDetailedContent, topic, title, stepId, questionsGenerated, loadingQuestions]);
 
-  // Create DOM references to paragraphs for positioning margin notes
+  // Create DOM references to the content for processing
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   // Generate margin notes once content is loaded
@@ -136,19 +139,13 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     try {
       console.log(`Generating margin notes for: ${title}`);
       
-      // Show loading state immediately with placeholders
-      setMarginNotes([
-        { id: 'loading-1', paragraph: '', insight: 'Loading insight...' },
-        { id: 'loading-2', paragraph: '', insight: 'Loading insight...' }
-      ]);
-      
       const notes = await generateMarginNotes(loadedDetailedContent, topic);
       
       console.log(`Generated ${notes.length} margin notes for: ${title}`);
       
       if (notes.length > 0) {
         setMarginNotes(notes);
-        toast.success(`${notes.length} AI insights added to your content`, {
+        toast.success(`${notes.length} AI insights added to enhance your learning`, {
           position: "bottom-right",
         });
       } else {
@@ -201,40 +198,126 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     setShowInsightsDialog(true);
   };
 
-  // Position margin notes next to their respective paragraphs
+  // Add insights inline to paragraphs
   useEffect(() => {
-    if (!contentRef.current || marginNotes.length === 0) return;
+    if (!contentRef.current || marginNotes.length === 0 || insightsAdded) return;
     
-    // Give the DOM time to render the content first
-    const timer = setTimeout(() => {
+    const addInsightsToContent = () => {
       const contentDiv = contentRef.current;
       if (!contentDiv) return;
       
+      // Find all paragraphs in the content
       const paragraphs = contentDiv.querySelectorAll('p');
-      
       if (paragraphs.length === 0) return;
       
-      // For each margin note, find a matching paragraph and position the note
+      let notesAdded = 0;
+      
+      // For each margin note, find a matching paragraph and add the insight button
       marginNotes.forEach((note) => {
-        if (note.id.startsWith('loading-')) return;
+        const paragraphFragment = note.paragraph.substring(0, 50).toLowerCase();
         
-        // Find paragraphs that contain this note's text
+        // Try to find a paragraph containing this fragment
         for (let i = 0; i < paragraphs.length; i++) {
           const paragraph = paragraphs[i];
-          const paragraphText = paragraph.textContent || '';
+          const paragraphText = paragraph.textContent?.toLowerCase() || '';
           
-          if (paragraphText.includes(note.paragraph.substring(0, 50))) {
-            // Mark this paragraph with a data attribute
-            paragraph.setAttribute('data-has-note', note.id);
+          if (paragraphText.includes(paragraphFragment)) {
+            // Add the insight button at the end of the paragraph
             paragraph.classList.add('has-margin-note');
+            
+            // Create a span to hold the insight button
+            const insightSpan = document.createElement('span');
+            insightSpan.className = 'insight-indicator';
+            
+            // Render our React component into this span
+            paragraph.appendChild(insightSpan);
+            
+            // Use React to render the ContentMarginNote component
+            const root = React.createElement(ContentMarginNote, { 
+              insight: note.insight, 
+              key: note.id 
+            });
+            
+            // Render the component
+            ReactDOM.render(root, insightSpan);
+            
+            notesAdded++;
             break;
           }
         }
       });
-    }, 500); // Short delay to ensure rendering is complete
+      
+      console.log(`Added ${notesAdded} insight indicators to content`);
+      setInsightsAdded(true);
+    };
     
-    return () => clearTimeout(timer);
-  }, [marginNotes, loadedDetailedContent]);
+    // Short delay to ensure content is fully rendered
+    setTimeout(addInsightsToContent, 500);
+  }, [marginNotes, loadedDetailedContent, insightsAdded]);
+
+  // Use a different approach with React.createElement
+  const renderContentWithInsights = useCallback(() => {
+    if (!loadedDetailedContent) return null;
+    
+    // Process content and insert insight buttons
+    const contentHtml = formatContent(loadedDetailedContent, topic, handleQuestionClick);
+    
+    // After content is rendered, process it to add insights
+    useEffect(() => {
+      if (marginNotes.length > 0 && contentRef.current && !insightsAdded) {
+        const addInsights = () => {
+          const paragraphs = contentRef.current?.querySelectorAll('p');
+          if (!paragraphs || paragraphs.length === 0) return;
+          
+          marginNotes.forEach(note => {
+            const searchText = note.paragraph.substring(0, 50).toLowerCase();
+            
+            for (const p of Array.from(paragraphs)) {
+              const text = p.textContent?.toLowerCase() || '';
+              if (text.includes(searchText)) {
+                p.classList.add('has-margin-note');
+                
+                // Create container for the insight button
+                const span = document.createElement('span');
+                span.className = 'insight-indicator';
+                p.appendChild(span);
+                
+                // Render React component into the container
+                const insightElement = document.createElement('div');
+                span.appendChild(insightElement);
+                
+                // Create a temporary container for the React component
+                const tempDiv = document.createElement('div');
+                ReactDOM.render(
+                  <ContentMarginNote insight={note.insight} />,
+                  tempDiv
+                );
+                
+                // Move the rendered content to our target
+                while (tempDiv.firstChild) {
+                  insightElement.appendChild(tempDiv.firstChild);
+                }
+                
+                break;
+              }
+            }
+          });
+          
+          setInsightsAdded(true);
+        };
+        
+        setTimeout(addInsights, 500);
+      }
+    }, [marginNotes, insightsAdded]);
+    
+    return (
+      <div 
+        className="content-section"
+        ref={contentRef}
+        dangerouslySetInnerHTML={{ __html: contentHtml }}
+      />
+    );
+  }, [loadedDetailedContent, topic, marginNotes, insightsAdded, handleQuestionClick]);
 
   return (
     <div 
@@ -254,50 +337,17 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           <div 
             className="content-section relative"
             ref={contentRef}
-          >
-            {formatContent(loadedDetailedContent, topic, handleQuestionClick)}
-            
-            {/* Render margin notes */}
-            <div className="margin-notes-container">
-              {marginNotes.map((note, index) => {
-                if (note.id.startsWith('loading-') && loadingMarginNotes) {
-                  return (
-                    <div 
-                      key={note.id}
-                      className="fixed right-4 top-1/2 transform -translate-y-1/2 z-10"
-                      style={{ top: `${120 + index * 70}px` }}
-                    >
-                      <ContentMarginNote 
-                        insight={note.insight} 
-                        isLoading={true}
-                      />
-                    </div>
-                  );
-                }
-                
-                // Try to find the paragraph element with this note's ID
-                const paragraphEl = contentRef.current?.querySelector(`[data-has-note="${note.id}"]`);
-                if (!paragraphEl) return null;
-                
-                // Calculate position based on the paragraph
-                const paragraphRect = paragraphEl.getBoundingClientRect();
-                const contentRect = contentRef.current?.getBoundingClientRect() || { top: 0, left: 0 };
-                
-                // The top position relative to the content container
-                const top = paragraphRect.top - contentRect.top + (paragraphRect.height / 2) - 20;
-                
-                return (
-                  <div 
-                    key={note.id}
-                    className="absolute right-[-60px]"
-                    style={{ top: `${top}px` }}
-                  >
-                    <ContentMarginNote insight={note.insight} />
-                  </div>
-                );
-              })}
+            dangerouslySetInnerHTML={{ __html: formatContent(loadedDetailedContent, topic, handleQuestionClick) }}
+          />
+          
+          {/* After content is rendered, find paragraphs and add insights */}
+          {marginNotes.length > 0 && (
+            <div className="hidden">
+              {marginNotes.map(note => (
+                <ContentMarginNote key={note.id} insight={note.insight} />
+              ))}
             </div>
-          </div>
+          )}
           
           <ContentRelatedQuestions 
             questions={relatedQuestions}

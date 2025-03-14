@@ -40,23 +40,21 @@ serve(async (req) => {
     // Generate a margin note for each paragraph
     for (const [index, paragraph] of selectedParagraphs.entries()) {
       const prompt = `
-        You are an expert educator creating insightful margin notes for learning content about "${topic}".
+        You are creating small insight bubbles to enhance learning content about "${topic}".
         
         Below is a paragraph from a learning resource:
         """
         ${paragraph}
         """
         
-        Create a short, insightful note (50-80 words) that provides ONE of the following:
-        1. An interesting fact that extends the knowledge in this paragraph
-        2. A practical application of the concept discussed
-        3. A clarification of a potentially confusing aspect
-        4. A "did you know" insight that's relevant but not mentioned
-        5. A connection to another important concept in this field
+        Create a very concise insight (30-40 words max) that provides ONE of the following:
+        1. A fascinating fact related to this paragraph's content
+        2. A practical application of the concept
+        3. A clarification of a complex point
+        4. A "did you know" insight
         
-        Your margin note should feel like an interesting aside that enriches the reader's understanding.
-        Be concise, engaging, and directly relevant to this specific paragraph.
-        Do not summarize the paragraph itself - add new information or perspective.
+        Make it extremely brief but valuable - it will appear in a small popup beside the text.
+        Focus on quality over quantity. Be concise and direct.
       `;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -70,7 +68,7 @@ serve(async (req) => {
           messages: [
             { 
               role: 'system', 
-              content: `You are an expert educator creating concise and insightful margin notes about topics related to ${topic}.`
+              content: `You create extremely concise and valuable learning insights about ${topic}.`
             },
             { role: 'user', content: prompt }
           ],

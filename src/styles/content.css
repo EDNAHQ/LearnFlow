@@ -5,11 +5,19 @@
   background-color: rgba(109, 66, 239, 0.05);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  margin-right: 3rem; /* Make room for the margin note */
-  border-right: 3px solid rgba(109, 66, 239, 0.2);
+  border-left: 3px solid rgba(109, 66, 239, 0.2);
 }
 
-.margin-notes-container {
-  position: relative;
-  z-index: 20;
+.insight-indicator {
+  display: inline-flex;
+  vertical-align: text-top;
+  margin-left: 0.5rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .has-margin-note {
+    margin-right: 0;
+    border-right: none;
+  }
 }

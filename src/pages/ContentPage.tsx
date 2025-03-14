@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -63,7 +64,7 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="container py-8">
+      <div className="container py-8 px-2 sm:px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -78,7 +79,7 @@ const ContentPage = () => {
             />
           </div>
 
-          <div className="mb-6 w-full max-w-[860px] mx-auto px-8">
+          <div className="mb-6 w-full max-w-[860px] mx-auto px-2 sm:px-8">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-gray-800 w-full">
                 {currentStepData?.title}

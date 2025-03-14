@@ -17,22 +17,33 @@ export const generateMarginNotes = async (
   content: string,
   topic: string
 ): Promise<MarginNote[]> => {
-  // Split content into paragraphs
+  // Split content into paragraphs (more robust)
   const paragraphs = content
-    .split("\n\n")
-    .filter(p => p.trim().length > 100)  // Only consider substantial paragraphs
-    .slice(0, 5);  // Limit to 5 paragraphs for analysis
+    .split(/\n+/)
+    .map(p => p.trim())
+    .filter(p => p.length > 80 && !p.startsWith('#') && !p.startsWith('-') && !p.startsWith('*'))  // Only substantial paragraphs, no headings/lists
+    .slice(0, 10);  // Consider up to 10 paragraphs for analysis
   
   if (paragraphs.length === 0) {
+    console.log("No suitable paragraphs found for insights");
     return [];
   }
   
-  // Select 2-3 paragraphs to generate insights for
-  const selectedParagraphs = paragraphs.length <= 3 
-    ? paragraphs 
-    : paragraphs
-        .sort(() => 0.5 - Math.random())  // Shuffle
-        .slice(0, Math.min(3, Math.ceil(paragraphs.length / 2)));  // Take 2-3
+  // Select 2-3 paragraphs evenly distributed through the content
+  let selectedParagraphs = [];
+  
+  if (paragraphs.length <= 3) {
+    selectedParagraphs = paragraphs;
+  } else {
+    // Get paragraphs from beginning, middle, and end to ensure good distribution
+    selectedParagraphs = [
+      paragraphs[0], // First paragraph
+      paragraphs[Math.floor(paragraphs.length / 2)], // Middle paragraph
+      paragraphs[paragraphs.length - 1] // Last paragraph
+    ];
+  }
+  
+  console.log(`Selected ${selectedParagraphs.length} paragraphs for insights from ${paragraphs.length} total`);
   
   try {
     const response = await supabase.functions.invoke('generate-margin-notes', {
