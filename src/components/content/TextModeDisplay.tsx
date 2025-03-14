@@ -19,8 +19,8 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
-  // Use detailed content if available, otherwise use the content
-  // Content should already be cleaned by ContentDisplay component
+  // Simply use detailed content if available, otherwise use content
+  // Both should be strings by this point
   const displayContent = detailedContent || content;
 
   return (

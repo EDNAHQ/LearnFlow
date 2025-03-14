@@ -13,8 +13,7 @@ const SlideModeDisplay = ({
   content, 
   detailedContent 
 }: SlideModeDisplayProps) => {
-  // Use detailed content if available, otherwise use the content
-  // Content should already be cleaned by ContentDisplay component
+  // Simply use detailed content if available, otherwise use content
   const displayContent = detailedContent || content;
   
   return (

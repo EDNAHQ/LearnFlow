@@ -54,24 +54,18 @@ const ContentPage = () => {
 
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
-  // Process content to ensure we never display [object Object]
-  const processStepContent = (stepData: any) => {
-    if (!stepData) return "No content available for this step.";
-    
-    if (!stepData.content) return "No content available for this step.";
-    
-    if (typeof stepData.content === 'object') {
-      try {
-        return JSON.stringify(stepData.content);
-      } catch (error) {
-        return "Content could not be displayed.";
-      }
+  // Ensure content is a string
+  const getContentAsString = (content: any): string => {
+    if (content === undefined || content === null) {
+      return "No content available";
     }
-    
-    return stepData.content;
+    if (typeof content === 'object') {
+      return JSON.stringify(content);
+    }
+    return String(content);
   };
 
-  const safeContent = processStepContent(currentStepData);
+  const safeContent = getContentAsString(currentStepData?.content);
 
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
@@ -83,12 +77,12 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="w-full py-8 px-4 md:px-8 lg:px-16">
+      <div className="w-full max-w-[860px] mx-auto py-8 px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-7xl mx-auto"
+          className="w-full"
         >
           <div className="flex justify-between items-center mb-6 w-full">
             <ContentProgress 
