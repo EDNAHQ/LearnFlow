@@ -8,6 +8,8 @@ import { formatContent } from "@/utils/contentFormatter";
 import { useTextSelection } from "@/hooks/useTextSelection";
 import AIInsightsDialog from "./AIInsightsDialog";
 import TextSelectionButton from "./TextSelectionButton";
+import ContentRelatedQuestions from "./ContentRelatedQuestions";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContentSectionProps {
   title: string;
@@ -24,6 +26,9 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const [isLoading, setIsLoading] = useState(false);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
+  const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  
   const { 
     selectedText, 
     showSelectionButton,
@@ -71,6 +76,35 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }
   }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
 
+  // Generate related questions once content is loaded
+  useEffect(() => {
+    if (loadedDetailedContent && topic && !relatedQuestions.length && !loadingQuestions) {
+      const generateRelatedQuestions = async () => {
+        setLoadingQuestions(true);
+        try {
+          const response = await supabase.functions.invoke('generate-learning-content', {
+            body: {
+              content: loadedDetailedContent,
+              topic,
+              title,
+              generateQuestions: true
+            }
+          });
+          
+          if (response.data?.questions && Array.isArray(response.data.questions)) {
+            setRelatedQuestions(response.data.questions);
+          }
+        } catch (error) {
+          console.error("Error generating related questions:", error);
+        } finally {
+          setLoadingQuestions(false);
+        }
+      };
+      
+      generateRelatedQuestions();
+    }
+  }, [loadedDetailedContent, topic, title, relatedQuestions.length, loadingQuestions]);
+
   const handleDialogOpenChange = (open: boolean) => {
     setShowInsightsDialog(open);
     if (!open) {
@@ -105,6 +139,12 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           <div className="content-section w-full">
             {formatContent(loadedDetailedContent, topic, handleQuestionClick)}
           </div>
+          
+          <ContentRelatedQuestions 
+            questions={relatedQuestions}
+            isLoading={loadingQuestions}
+            onQuestionClick={handleQuestionClick}
+          />
           
           <ContentHelperTip />
         </div>
