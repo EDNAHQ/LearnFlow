@@ -1,8 +1,9 @@
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { TextSelectionPosition } from "@/hooks/useTextSelection";
 
 interface TextSelectionButtonProps {
@@ -12,56 +13,47 @@ interface TextSelectionButtonProps {
 }
 
 const TextSelectionButton = ({ position, onInsightRequest, visible }: TextSelectionButtonProps) => {
-  const buttonRef = useRef<HTMLDivElement>(null);
-  
-  // Adjust position to ensure button stays in viewport
-  const getAdjustedPosition = () => {
-    if (!position) return { top: 0, left: 0 };
-    
-    const buttonWidth = 180; // Approximate width of button
-    const windowWidth = window.innerWidth;
-    const maxX = windowWidth - buttonWidth - 10;
-    
-    return {
-      top: `${position.y + 10}px`,
-      left: `${Math.min(position.x - buttonWidth / 2, maxX)}px`,
-    };
-  };
-
-  // Prevent default touch behavior to avoid unwanted page interactions
-  useEffect(() => {
-    const handleTouchMove = (e: TouchEvent) => {
-      if (buttonRef.current?.contains(e.target as Node)) {
-        e.preventDefault();
-      }
-    };
-    
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    return () => {
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, []);
+  // Fixed position at the bottom of the content area instead of following selection
+  const buttonStyle = {
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    zIndex: 50
+  } as const;
 
   return (
     <AnimatePresence>
-      {visible && position && (
+      {visible && (
         <motion.div
-          ref={buttonRef}
-          className="selection-button fixed z-50 shadow-lg rounded-full"
-          style={getAdjustedPosition()}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          transition={{ duration: 0.2 }}
+          style={buttonStyle}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.3 }}
+          className="shadow-lg rounded-full"
         >
-          <Button
-            onClick={onInsightRequest}
-            className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white rounded-full pl-4 pr-5 py-2 flex items-center"
-            size="sm"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            Get AI Insights
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white rounded-full h-14 w-14 flex items-center justify-center shadow-md"
+              >
+                <Sparkles className="h-6 w-6" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="bg-white p-3 w-60 shadow-lg border border-gray-200">
+              <div className="flex flex-col space-y-2">
+                <p className="text-sm font-medium text-gray-700">Get AI insights on your selection</p>
+                <Button 
+                  onClick={onInsightRequest}
+                  className="w-full bg-[#6D42EF] hover:bg-[#6D42EF]/90"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Analyze Text
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </motion.div>
       )}
     </AnimatePresence>

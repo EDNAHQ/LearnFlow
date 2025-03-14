@@ -20,38 +20,22 @@ export const useTextSelection = () => {
       
       if (text && text.length > 5 && text.length < 500) {
         setSelectedText(text);
-        
-        // Get selection position for the floating button
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        
-        // Position the button near the end of the selection
-        setSelectionPosition({
-          x: rect.right,
-          y: rect.bottom + window.scrollY
-        });
-        
         setShowSelectionButton(true);
-      } else {
-        // Clear selection data if text is too short or too long
-        clearSelectionData();
       }
-    } else {
-      // No selection, clear data
-      clearSelectionData();
     }
   }, []);
 
-  const clearSelectionData = () => {
+  const clearSelectionData = useCallback(() => {
     setSelectedText("");
     setShowSelectionButton(false);
     setSelectionPosition(null);
-  };
+  }, []);
 
-  const handleShowInsights = () => {
-    setShowInsightsDialog(true);
-    setShowSelectionButton(false);
-  };
+  const handleShowInsights = useCallback(() => {
+    if (selectedText) {
+      setShowInsightsDialog(true);
+    }
+  }, [selectedText]);
 
   const clearSelection = useCallback(() => {
     setSelectedText("");
@@ -69,33 +53,34 @@ export const useTextSelection = () => {
     }
   }, []);
 
-  // Add document-level listeners for both mouse and touch events
   useEffect(() => {
-    // For mouse users
-    document.addEventListener("mouseup", handleTextSelection);
-    
-    // For touch device users
-    document.addEventListener("touchend", handleTextSelection);
-    
-    // Clear selection when clicking elsewhere
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as HTMLElement;
-      // Only clear if not clicking on our selection button or dialog
-      if (!target.closest('.selection-button') && !target.closest('[role="dialog"]')) {
-        clearSelectionData();
+    // Simplified approach: just show the button whenever there's a selection
+    const checkForSelection = () => {
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        const text = selection.toString().trim();
+        if (text && text.length > 5 && text.length < 500) {
+          setSelectedText(text);
+          setShowSelectionButton(true);
+        } else {
+          clearSelectionData();
+        }
       }
     };
+
+    // Check periodically for text selection
+    const selectionInterval = setInterval(checkForSelection, 500);
     
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
+    // Also check on user interaction
+    document.addEventListener("mouseup", checkForSelection);
+    document.addEventListener("touchend", checkForSelection);
     
     return () => {
-      document.removeEventListener("mouseup", handleTextSelection);
-      document.removeEventListener("touchend", handleTextSelection);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
+      clearInterval(selectionInterval);
+      document.removeEventListener("mouseup", checkForSelection);
+      document.removeEventListener("touchend", checkForSelection);
     };
-  }, [handleTextSelection]);
+  }, [clearSelectionData]);
 
   return {
     selectedText,
