@@ -25,13 +25,16 @@ const ContentDisplay = ({
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
 
+  // Ensure content is a string
+  const safeContent = typeof content === 'string' ? content : 'No content available';
+
   return (
     <div className="w-full relative">
       <Tabs value={mode} className="w-full">
         <TabsContent value="text">
           <TextModeDisplay 
             title={title}
-            content={content}
+            content={safeContent}
             index={index}
             detailedContent={detailedContent}
             pathId={pathId}
@@ -42,7 +45,7 @@ const ContentDisplay = ({
         <TabsContent value="slides">
           <SlideModeDisplay 
             title={title}
-            content={content}
+            content={safeContent}
             detailedContent={detailedContent}
           />
         </TabsContent>

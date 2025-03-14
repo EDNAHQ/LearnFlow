@@ -54,6 +54,13 @@ const ContentPage = () => {
 
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
+  // Ensure we have valid content to display
+  const safeContent = currentStepData?.content 
+    ? (typeof currentStepData.content === 'string' 
+      ? currentStepData.content 
+      : JSON.stringify(currentStepData.content))
+    : "No content available for this step.";
+
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
@@ -82,12 +89,12 @@ const ContentPage = () => {
           <div className="mb-6 w-full">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-gray-800 w-full">
-                {currentStepData?.title}
+                {currentStepData?.title || "Loading..."}
               </h2>
             </div>
             <ContentDisplay 
               title={currentStepData?.title || ""}
-              content={currentStepData?.content || "No content available for this step."}
+              content={safeContent}
               index={currentStep}
               detailedContent={currentStepData?.detailed_content}
               pathId={pathId}
