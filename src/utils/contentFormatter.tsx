@@ -2,8 +2,62 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { QuestionMarkCircle } from "lucide-react";
 
-export const formatContent = (text: string) => {
+// Helper component for question prompts
+const QuestionPrompt = ({ 
+  questionText, 
+  topic,
+  onInsightRequest 
+}: { 
+  questionText: string; 
+  topic: string;
+  onInsightRequest: (question: string) => void;
+}) => {
+  return (
+    <span 
+      className="inline-flex items-center text-[#6D42EF] underline cursor-pointer gap-1 group"
+      onClick={() => onInsightRequest(questionText)}
+    >
+      {questionText}
+      <QuestionMarkCircle className="h-3.5 w-3.5 inline-block opacity-70 group-hover:opacity-100" />
+    </span>
+  );
+};
+
+// Function to process text and identify potential question prompts
+const processTextWithQuestions = (text: string, topic: string, onInsightRequest: (question: string) => void) => {
+  // This regex looks for text patterns that are likely to be questions
+  // It matches text ending with "?" that is between 15-100 characters
+  const questionRegex = /(\b[^.!?]{15,100}\?)/g;
+  
+  if (!questionRegex.test(text)) {
+    return text;
+  }
+  
+  // Replace questions with the interactive component
+  const parts = text.split(questionRegex);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (i % 2 === 1) { // This is a question part
+          return (
+            <QuestionPrompt 
+              key={i} 
+              questionText={part} 
+              topic={topic}
+              onInsightRequest={onInsightRequest} 
+            />
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+};
+
+export const formatContent = (text: string, topic?: string, onInsightRequest?: (question: string) => void) => {
   return (
     <ReactMarkdown
       components={{
@@ -19,9 +73,13 @@ export const formatContent = (text: string) => {
         h4: ({ node, ...props }) => (
           <h4 className="text-lg font-semibold mt-5 mb-2 text-brand-purple/80" {...props} />
         ),
-        p: ({ node, ...props }) => (
-          <p className="my-4 text-lg leading-relaxed text-pretty" {...props} />
-        ),
+        p: ({ node, ...props }) => {
+          if (topic && onInsightRequest && typeof props.children === 'string') {
+            const processedText = processTextWithQuestions(props.children.toString(), topic, onInsightRequest);
+            return <p className="my-4 text-lg leading-relaxed text-pretty">{processedText}</p>;
+          }
+          return <p className="my-4 text-lg leading-relaxed text-pretty" {...props} />;
+        },
         ul: ({ node, ...props }) => (
           <ul className="my-5 pl-6 space-y-3 list-disc" {...props} />
         ),

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lightbulb, Send, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,29 +11,44 @@ interface AIInsightsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   topic: string;
+  question?: string;
 }
 
 const AIInsightsDialog = ({ 
   selectedText, 
   open, 
   onOpenChange,
-  topic
+  topic,
+  question = ""
 }: AIInsightsDialogProps) => {
   const [insight, setInsight] = useState<string>("");
-  const [question, setQuestion] = useState<string>("");
+  const [userQuestion, setUserQuestion] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
-  const generateInsight = async () => {
+  // Set the user question from props when dialog opens
+  useEffect(() => {
+    if (open && question) {
+      setUserQuestion(question);
+      // Auto-generate insight when opened with a question
+      generateInsight(question);
+    } else if (!open) {
+      setInsight("");
+      setUserQuestion("");
+      setError(null);
+    }
+  }, [open, question]);
+  
+  const generateInsight = async (questionText = userQuestion) => {
     setIsLoading(true);
     setError(null);
     
     try {
       const { data, error } = await supabase.functions.invoke("generate-ai-insight", {
         body: {
-          selectedText: selectedText,
+          selectedText: selectedText || "Current section content",
           topic: topic,
-          question: question.trim() ? question : undefined,
+          question: questionText.trim() ? questionText : undefined,
         },
       });
       
@@ -50,7 +65,7 @@ const AIInsightsDialog = ({
   
   const handleClose = () => {
     setInsight("");
-    setQuestion("");
+    setUserQuestion("");
     setError(null);
     onOpenChange(false);
   };
@@ -74,32 +89,34 @@ const AIInsightsDialog = ({
         </DialogHeader>
         
         <div className="py-2">
-          <div className="bg-gray-50 p-3 rounded-md mb-3 text-sm">
-            <div className="text-gray-500 text-xs mb-1">Selected text:</div>
-            <div className="text-gray-700 italic">
-              "{selectedText.length > 150 
-                ? selectedText.substring(0, 150) + "..." 
-                : selectedText}"
+          {selectedText && (
+            <div className="bg-gray-50 p-3 rounded-md mb-3 text-sm">
+              <div className="text-gray-500 text-xs mb-1">Selected text:</div>
+              <div className="text-gray-700 italic">
+                "{selectedText.length > 150 
+                  ? selectedText.substring(0, 150) + "..." 
+                  : selectedText}"
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="mb-4">
             <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-1">
-              Ask something about this text:
+              {question ? "Your question:" : "Ask something about this content:"}
             </label>
             <Textarea
               id="question"
               placeholder="E.g., Can you explain this concept further? How does this relate to...?"
               className="w-full resize-none"
               rows={3}
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              value={userQuestion}
+              onChange={(e) => setUserQuestion(e.target.value)}
             />
           </div>
           
           {!insight && (
             <Button 
-              onClick={generateInsight} 
+              onClick={() => generateInsight()}
               className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 w-full"
               disabled={isLoading}
             >
@@ -132,7 +149,6 @@ const AIInsightsDialog = ({
                 <Button 
                   onClick={() => {
                     setInsight("");
-                    setQuestion("");
                   }}
                   variant="outline" 
                   className="mr-2"

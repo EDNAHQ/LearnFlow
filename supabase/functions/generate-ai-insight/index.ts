@@ -21,37 +21,36 @@ serve(async (req) => {
     // Parse request body
     const { selectedText, topic, question } = await req.json();
 
-    if (!selectedText || !topic) {
+    if (!topic) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
+        JSON.stringify({ error: 'Missing required topic parameter' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Generating insights for selected text on topic: ${topic}`);
+    console.log(`Generating insights for ${question ? 'question about' : 'selected text on'} topic: ${topic}`);
     
     // Generate insights using OpenAI
     let prompt = '';
     
     if (question) {
-      // If a specific question was asked about the highlighted text
+      // If a specific question was asked about the content
       prompt = `
       You are an expert educator specialized in the topic of "${topic}".
       
-      A learner has highlighted the following text while studying:
-      
-      """
-      ${selectedText}
-      """
-      
-      They have a specific question about this text:
+      A learner has a specific question about the content they're studying:
       "${question}"
       
-      Please provide a clear, educational response to their question (150-200 words maximum).
+      ${selectedText ? `This question relates to the following text:
+      """
+      ${selectedText}
+      """` : 'Answer this question in the context of the broader topic.'}
+      
+      Please provide a clear, educational response to their question (150-250 words maximum).
       Focus specifically on answering their question while providing context from the broader topic of ${topic}.
       Include a concrete example or application if relevant.
       
-      Keep your response friendly, educational, and specifically focused on their question about the highlighted text.
+      Keep your response friendly, educational, and specifically focused on their question.
       `;
     } else {
       // Default insight generation without a specific question

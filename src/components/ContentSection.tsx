@@ -22,13 +22,12 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInsightsDialog, setShowInsightsDialog] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const { 
     selectedText, 
-    showInsightsDialog, 
-    setShowInsightsDialog,
-    selectionPosition,
     showSelectionButton,
-    handleShowInsights,
+    selectionPosition,
     handleTextSelection
   } = useTextSelection();
   
@@ -75,15 +74,17 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const handleDialogOpenChange = (open: boolean) => {
     setShowInsightsDialog(open);
     if (!open) {
-      // Clear the text selection when dialog is closed
-      if (window.getSelection) {
-        if (window.getSelection()?.empty) {
-          window.getSelection()?.empty();
-        } else if (window.getSelection()?.removeAllRanges) {
-          window.getSelection()?.removeAllRanges();
-        }
-      }
+      setCurrentQuestion("");
     }
+  };
+
+  const handleShowInsights = () => {
+    setShowInsightsDialog(true);
+  };
+
+  const handleQuestionClick = (question: string) => {
+    setCurrentQuestion(question);
+    setShowInsightsDialog(true);
   };
 
   return (
@@ -102,7 +103,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           onTouchEnd={handleTextSelection}
         >
           <div className="content-section w-full">
-            {formatContent(loadedDetailedContent)}
+            {formatContent(loadedDetailedContent, topic, handleQuestionClick)}
           </div>
           
           <ContentHelperTip />
@@ -123,6 +124,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           open={showInsightsDialog}
           onOpenChange={handleDialogOpenChange}
           topic={topic}
+          question={currentQuestion}
         />
       )}
     </div>
