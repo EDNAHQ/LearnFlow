@@ -91,14 +91,11 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
             // Append the span to the paragraph
             paragraph.appendChild(insightSpan);
             
-            // Use React to render the ContentMarginNote component
-            const root = React.createElement(ContentMarginNote, { 
-              insight: note.insight, 
-              key: note.id 
-            });
-            
-            // Render the component
-            ReactDOM.render(root, insightSpan);
+            // Use ReactDOM to render the ContentMarginNote component
+            ReactDOM.render(
+              <ContentMarginNote insight={note.insight} key={note.id} />,
+              insightSpan
+            );
             
             notesAdded++;
             break;
