@@ -25,8 +25,15 @@ const ContentDisplay = ({
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
 
-  // Simple and direct content processing - no complex extraction
-  const safeContent = content || "No content available";
+  // Ensure content is always a string
+  const safeContent = typeof content === 'string' 
+    ? content 
+    : (typeof content === 'object' ? JSON.stringify(content) : String(content || "No content available"));
+
+  // Same for detailed content
+  const safeDetailedContent = typeof detailedContent === 'string'
+    ? detailedContent
+    : (typeof detailedContent === 'object' ? JSON.stringify(detailedContent) : null);
 
   return (
     <div className="w-full relative">
@@ -36,7 +43,7 @@ const ContentDisplay = ({
             title={title}
             content={safeContent}
             index={index}
-            detailedContent={detailedContent}
+            detailedContent={safeDetailedContent}
             pathId={pathId}
             topic={topic}
           />
@@ -46,7 +53,7 @@ const ContentDisplay = ({
           <SlideModeDisplay 
             title={title}
             content={safeContent}
-            detailedContent={detailedContent}
+            detailedContent={safeDetailedContent}
           />
         </TabsContent>
         

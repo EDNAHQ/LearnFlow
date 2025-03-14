@@ -55,17 +55,9 @@ const ContentPage = () => {
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
   // Ensure content is a string
-  const getContentAsString = (content: any): string => {
-    if (content === undefined || content === null) {
-      return "No content available";
-    }
-    if (typeof content === 'object') {
-      return JSON.stringify(content);
-    }
-    return String(content);
-  };
-
-  const safeContent = getContentAsString(currentStepData?.content);
+  const safeContent = typeof currentStepData?.content === 'string' 
+    ? currentStepData.content 
+    : (currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available");
 
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
@@ -77,7 +69,7 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="w-full max-w-[860px] mx-auto py-8 px-4 md:px-8">
+      <div className="w-full max-w-[1100px] mx-auto py-8 px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

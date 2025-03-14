@@ -13,8 +13,10 @@ const SlideModeDisplay = ({
   content, 
   detailedContent 
 }: SlideModeDisplayProps) => {
-  // Simply use detailed content if available, otherwise use content
-  const displayContent = detailedContent || content;
+  // Always ensure we're working with strings
+  const displayContent = typeof detailedContent === 'string' 
+    ? detailedContent 
+    : (typeof content === 'string' ? content : String(content || ""));
   
   return (
     <div className="bg-[#1A1A1A] rounded-xl shadow-md overflow-hidden w-full mx-auto">

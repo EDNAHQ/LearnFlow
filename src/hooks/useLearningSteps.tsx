@@ -35,6 +35,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
         if (error) {
           console.error("Error fetching learning steps:", error);
+          toast.error("Failed to load learning content");
           return;
         }
 
@@ -46,25 +47,26 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
             ...step,
             content: typeof step.content === 'string' 
               ? step.content 
-              : JSON.stringify(step.content)
+              : (step.content ? JSON.stringify(step.content) : "No content available"),
+            detailed_content: typeof step.detailed_content === 'string'
+              ? step.detailed_content
+              : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
           }));
           
           setSteps(processedData);
-          
-          // Removed content generation notification logic
         } else {
           console.log("No learning steps found for path:", pathId);
+          toast.error("No learning content found");
         }
       } catch (error) {
         console.error("Error fetching learning steps:", error);
+        toast.error("Failed to load learning content");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchLearningSteps();
-    
-    // Periodic content check removed to prevent notifications
   }, [pathId, topic]);
 
   const markStepAsComplete = async (stepId: string) => {

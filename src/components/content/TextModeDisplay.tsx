@@ -19,9 +19,10 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
-  // Simply use detailed content if available, otherwise use content
-  // Both should be strings by this point
-  const displayContent = detailedContent || content;
+  // Always ensure we're working with strings
+  const displayContent = typeof detailedContent === 'string' 
+    ? detailedContent 
+    : (typeof content === 'string' ? content : String(content || ""));
 
   return (
     <div className="w-full">
