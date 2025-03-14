@@ -13,9 +13,8 @@ const SlideModeDisplay = ({
   content, 
   detailedContent 
 }: SlideModeDisplayProps) => {
-  // Use detailed content if available, otherwise clean up the content string
-  const displayContent = detailedContent || 
-    (content.includes(':') ? content.split(':').slice(1).join(':').trim() : content);
+  // Use detailed content if available, otherwise use the content
+  const displayContent = detailedContent || content;
   
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full mx-auto">

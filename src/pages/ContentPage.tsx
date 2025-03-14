@@ -59,19 +59,19 @@ const ContentPage = () => {
       <ContentHeader 
         onBack={handleBack}
         onHome={goToProjects}
-        generatingContent={generatingContent}
-        generatedSteps={generatedSteps}
+        generatingContent={false}
+        generatedSteps={0}
         totalSteps={steps.length}
       />
 
-      <div className="w-full py-8 px-4">
+      <div className="w-full py-8 px-4 md:px-8 lg:px-16">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full"
+          className="w-full max-w-7xl mx-auto"
         >
-          <div className="flex justify-between items-center mb-6 w-full max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-6 w-full">
             <ContentProgress 
               topic={topic} 
               currentStep={currentStep} 
@@ -80,14 +80,14 @@ const ContentPage = () => {
           </div>
 
           <div className="mb-6 w-full">
-            <div className="flex items-center justify-between mb-3 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-gray-800 w-full">
                 {currentStepData?.title}
               </h2>
             </div>
             <ContentDisplay 
               title={currentStepData?.title || ""}
-              content={currentStepData?.id + ":" + (currentStepData?.content || "No content available for this step.")}
+              content={currentStepData?.content || "No content available for this step."}
               index={currentStep}
               detailedContent={currentStepData?.detailed_content}
               pathId={pathId}
@@ -95,7 +95,7 @@ const ContentPage = () => {
             />
           </div>
 
-          <div className="max-w-7xl mx-auto">
+          <div>
             <ContentNavigation 
               currentStep={currentStep}
               totalSteps={steps.length}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +35,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
         if (error) {
           console.error("Error fetching learning steps:", error);
-          toast.error("Failed to load learning steps");
           return;
         }
 
@@ -62,16 +62,14 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
               }
             });
             
-            // Remove toast notification
+            // Remove toast notifications
             console.log(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`);
           }
         } else {
           console.log("No learning steps found for path:", pathId);
-          toast.info("No learning steps found for this project.");
         }
       } catch (error) {
         console.error("Error fetching learning steps:", error);
-        toast.error("Failed to load learning steps");
       } finally {
         setIsLoading(false);
       }
@@ -104,13 +102,8 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
                 return updatedSteps;
               });
               
-              // Remove toast notification
-              console.log(`Generating content (${stepsWithContent}/${steps.length} steps completed)`);
-              
               if (stepsWithContent === steps.length) {
                 setGeneratingContent(false);
-                // We can keep this final toast if desired, or remove it
-                // toast.success("All learning content has been generated!");
                 console.log("All learning content has been generated!");
               }
             }

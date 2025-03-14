@@ -19,16 +19,14 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
-  // Extract the actual content by removing any step ID prefixes
-  const cleanedContent = content.includes(':') 
-    ? content.split(':').slice(1).join(':').trim() 
-    : content;
+  // Make sure we're passing clean content to ContentSection
+  const displayContent = detailedContent || content;
 
   return (
     <div className="w-full">
       <ContentSection 
         title={title}
-        content={cleanedContent}
+        content={displayContent}
         index={index}
         detailedContent={detailedContent}
         pathId={pathId}
