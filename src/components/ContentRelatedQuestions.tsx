@@ -16,7 +16,7 @@ const ContentRelatedQuestions = ({
 }: ContentRelatedQuestionsProps) => {
   // Always display the section, even when empty
   return (
-    <div className="mt-8 border-t border-gray-700 pt-6">
+    <div className="mt-8 border-t border-gray-200 pt-6">
       <h3 className="text-lg font-semibold text-brand-purple mb-4 flex items-center gap-2">
         <HelpCircle className="h-5 w-5 text-[#E84393]" />
         Explore Further
@@ -29,7 +29,7 @@ const ContentRelatedQuestions = ({
               <span className="inline-block w-6 text-gray-400 shrink-0">
                 {index}.
               </span>
-              <Skeleton className="h-6 w-full bg-gray-800" />
+              <Skeleton className="h-6 w-full bg-gray-100" />
             </div>
           ))}
         </div>
@@ -41,7 +41,7 @@ const ContentRelatedQuestions = ({
                 onClick={() => onQuestionClick(question)}
                 className="text-[#6D42EF] hover:text-[#E84393] underline cursor-pointer text-left flex items-start group transition-colors"
               >
-                <span className="inline-block w-6 text-gray-400 shrink-0">
+                <span className="inline-block w-6 text-gray-600 shrink-0">
                   {index + 1}.
                 </span>
                 <span>{question}</span>
@@ -50,7 +50,7 @@ const ContentRelatedQuestions = ({
           ))}
         </ul>
       ) : (
-        <p className="text-gray-400 italic">
+        <p className="text-gray-600 italic">
           Ask your own questions about this topic using the AI Insights feature!
         </p>
       )}

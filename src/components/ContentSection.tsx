@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
@@ -101,7 +100,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-800 p-6 md:p-8 mb-8 w-full mx-auto overflow-hidden",
+        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full mx-auto overflow-hidden",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
@@ -119,7 +118,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         <ContentLoader />
       ) : (
         <div 
-          className="prose prose-gray dark:prose-invert max-w-none w-full"
+          className="prose prose-gray max-w-none w-full"
           onMouseUp={handleTextSelection}
           onTouchEnd={handleTextSelection}
         >
