@@ -1,71 +1,105 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ContentQuestionsGeneratorProps {
   content: string;
-  topic: string | undefined;
+  topic?: string;
   title: string;
   stepId: string;
   onQuestionsGenerated: (questions: string[]) => void;
 }
 
-const ContentQuestionsGenerator = ({ 
-  content, 
-  topic, 
-  title, 
-  stepId, 
-  onQuestionsGenerated 
+const ContentQuestionsGenerator = ({
+  content,
+  topic,
+  title,
+  stepId,
+  onQuestionsGenerated
 }: ContentQuestionsGeneratorProps) => {
-  const [questionsGenerated, setQuestionsGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  
-  // Reset state when content or topic changes
-  useEffect(() => {
-    setQuestionsGenerated(false);
-  }, [content, topic]);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Generate questions based on the content
+  // Generate fallback questions if the API fails
+  const generateFallbackQuestions = () => {
+    console.log("Generating fallback questions for:", title);
+    
+    // Create generic questions related to the topic
+    const fallbackQuestions = [
+      `What are the key concepts of ${topic || title}?`,
+      `How does ${title} relate to real-world applications?`,
+      `What are common misconceptions about ${title}?`,
+      `How has our understanding of ${topic || title} evolved over time?`,
+      `What future developments might we see in ${topic || title}?`
+    ];
+    
+    onQuestionsGenerated(fallbackQuestions);
+  };
+  
   useEffect(() => {
     const generateQuestions = async () => {
-      if (!content || !topic || questionsGenerated || isGenerating) {
-        return;
-      }
+      if (!content || !topic || isGenerating) return;
       
       setIsGenerating(true);
       console.log(`Generating questions for: ${title} (ID: ${stepId})`);
       
       try {
-        const { data, error } = await supabase.functions.invoke('generate-related-questions', {
-          body: { content, topic, title }
+        const response = await supabase.functions.invoke('generate-learning-content', {
+          body: {
+            content: content.substring(0, 4000), // Limit content length
+            topic,
+            title,
+            generateQuestions: true
+          }
         });
         
-        if (error) {
-          console.error("Error generating questions:", error);
-          onQuestionsGenerated([]);
+        if (response.error) {
+          console.error("Error generating questions:", response.error);
+          
+          // Use fallback questions after 1 retry
+          if (retryCount > 0) {
+            generateFallbackQuestions();
+          } else {
+            // Retry once
+            setRetryCount(prev => prev + 1);
+            setIsGenerating(false);
+          }
           return;
         }
         
-        if (data && data.questions && Array.isArray(data.questions)) {
-          console.log(`Received ${data.questions.length} questions for: ${title}`);
-          onQuestionsGenerated(data.questions);
-        } else {
-          console.error("Invalid response format from generate-related-questions:", data);
-          onQuestionsGenerated([]);
+        const data = response.data;
+        
+        if (!data || !data.questions || !Array.isArray(data.questions)) {
+          console.error("Invalid response format for questions:", data);
+          generateFallbackQuestions();
+          return;
         }
+        
+        console.log(`Generated ${data.questions.length} questions for: ${title}`);
+        onQuestionsGenerated(data.questions);
       } catch (error) {
-        console.error("Error calling generate-related-questions function:", error);
-        onQuestionsGenerated([]);
+        console.error("Error generating questions:", error);
+        generateFallbackQuestions();
       } finally {
-        setIsGenerating(true);
-        setQuestionsGenerated(true);
+        setIsGenerating(false);
       }
     };
     
-    generateQuestions();
-  }, [content, topic, title, stepId, questionsGenerated, isGenerating, onQuestionsGenerated]);
-
-  return null; // This is a non-visual component
+    // Reset state when content changes
+    setIsGenerating(false);
+    setRetryCount(0);
+    
+    // Small delay to prevent too many requests at once
+    const timer = setTimeout(() => {
+      generateQuestions();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [content, topic, title, stepId, onQuestionsGenerated, retryCount]);
+  
+  // This is a "headless" component that doesn't render UI
+  return null;
 };
 
 export default ContentQuestionsGenerator;

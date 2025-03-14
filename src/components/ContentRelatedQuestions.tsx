@@ -14,13 +14,9 @@ const ContentRelatedQuestions = ({
   isLoading, 
   onQuestionClick 
 }: ContentRelatedQuestionsProps) => {
-  // If no questions and not loading, don't render anything
-  if (!isLoading && (!questions || questions.length === 0)) {
-    return null;
-  }
-
+  // Always display the section, even when empty
   return (
-    <div className="mt-8 border-t border-gray-100 pt-6">
+    <div className="mt-8 border-t border-gray-700 pt-6">
       <h3 className="text-lg font-semibold text-brand-purple mb-4 flex items-center gap-2">
         <HelpCircle className="h-5 w-5 text-[#E84393]" />
         Explore Further
@@ -33,11 +29,11 @@ const ContentRelatedQuestions = ({
               <span className="inline-block w-6 text-gray-400 shrink-0">
                 {index}.
               </span>
-              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full bg-gray-800" />
             </div>
           ))}
         </div>
-      ) : (
+      ) : questions && questions.length > 0 ? (
         <ul className="space-y-3">
           {questions.map((question, index) => (
             <li key={index}>
@@ -53,6 +49,10 @@ const ContentRelatedQuestions = ({
             </li>
           ))}
         </ul>
+      ) : (
+        <p className="text-gray-400 italic">
+          Ask your own questions about this topic using the AI Insights feature!
+        </p>
       )}
     </div>
   );
