@@ -20,7 +20,7 @@ const ContentHeader = ({
   totalSteps
 }: ContentHeaderProps) => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-[#1A1A1A]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1A1A1A]/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-black">
       <div className="container flex h-14 items-center">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
