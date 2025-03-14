@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ContentQuestionsGeneratorProps {
@@ -17,55 +17,55 @@ const ContentQuestionsGenerator = ({
   stepId, 
   onQuestionsGenerated 
 }: ContentQuestionsGeneratorProps) => {
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [questionsGenerated, setQuestionsGenerated] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Reset state when content or topic changes
+  useEffect(() => {
+    setQuestionsGenerated(false);
+  }, [content, topic]);
 
-  // Generate related questions once content is loaded
-  const generateRelatedQuestions = useCallback(async () => {
-    if (!content || !topic || questionsGenerated || loadingQuestions) {
-      return;
-    }
-    
-    setLoadingQuestions(true);
-    try {
+  // Generate questions based on the content
+  useEffect(() => {
+    const generateQuestions = async () => {
+      if (!content || !topic || questionsGenerated || isGenerating) {
+        return;
+      }
+      
+      setIsGenerating(true);
       console.log(`Generating questions for: ${title} (ID: ${stepId})`);
       
-      const response = await supabase.functions.invoke('generate-learning-content', {
-        body: {
-          content: content,
-          topic,
-          title,
-          generateQuestions: true
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-related-questions', {
+          body: { content, topic, title }
+        });
+        
+        if (error) {
+          console.error("Error generating questions:", error);
+          onQuestionsGenerated([]);
+          return;
         }
-      });
-      
-      if (response.data?.questions && Array.isArray(response.data.questions)) {
-        console.log(`Received ${response.data.questions.length} questions for: ${title}`);
-        onQuestionsGenerated(response.data.questions);
+        
+        if (data && data.questions && Array.isArray(data.questions)) {
+          console.log(`Received ${data.questions.length} questions for: ${title}`);
+          onQuestionsGenerated(data.questions);
+        } else {
+          console.error("Invalid response format from generate-related-questions:", data);
+          onQuestionsGenerated([]);
+        }
+      } catch (error) {
+        console.error("Error calling generate-related-questions function:", error);
+        onQuestionsGenerated([]);
+      } finally {
+        setIsGenerating(true);
+        setQuestionsGenerated(true);
       }
-    } catch (error) {
-      console.error("Error generating related questions:", error);
-      onQuestionsGenerated([]);
-    } finally {
-      setLoadingQuestions(false);
-      setQuestionsGenerated(true);
-    }
-  }, [content, topic, title, stepId, questionsGenerated, loadingQuestions, onQuestionsGenerated]);
+    };
+    
+    generateQuestions();
+  }, [content, topic, title, stepId, questionsGenerated, isGenerating, onQuestionsGenerated]);
 
-  // Trigger question generation once content is loaded
-  useEffect(() => {
-    if (content && topic) {
-      if (!questionsGenerated && !loadingQuestions) {
-        generateRelatedQuestions();
-      }
-    }
-  }, [content, topic, questionsGenerated, loadingQuestions, generateRelatedQuestions]);
-
-  return (
-    <div style={{ display: 'none' }}>
-      {loadingQuestions && <span>Loading questions...</span>}
-    </div>
-  );
+  return null; // This is a non-visual component
 };
 
 export default ContentQuestionsGenerator;

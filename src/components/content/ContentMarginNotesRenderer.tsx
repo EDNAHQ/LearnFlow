@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from "react";
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import ContentMarginNote from "@/components/ContentMarginNote";
 import { MarginNote, generateMarginNotes } from "@/utils/marginNotesUtils";
 
@@ -15,6 +15,33 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
   const [loadingMarginNotes, setLoadingMarginNotes] = useState(false);
   const [marginNotesGenerated, setMarginNotesGenerated] = useState(false);
   const [insightsAdded, setInsightsAdded] = useState(false);
+  const rootRefs = useRef<Map<HTMLElement, ReactDOM.Root>>(new Map());
+
+  // Reset states when content changes
+  useEffect(() => {
+    setMarginNototes = [];
+    setMarginNotesGenerated(false);
+    setInsightsAdded(false);
+    
+    // Cleanup previous React roots
+    cleanup();
+    
+    return () => {
+      cleanup();
+    };
+  }, [content, topic]);
+  
+  const cleanup = () => {
+    // Unmount all React roots to prevent memory leaks
+    rootRefs.current.forEach((root) => {
+      try {
+        root.unmount();
+      } catch (e) {
+        console.error("Error unmounting React root:", e);
+      }
+    });
+    rootRefs.current.clear();
+  };
 
   // Generate margin notes once content is loaded
   const generateContentMarginNotes = async () => {
@@ -91,12 +118,11 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
             // Append the span to the paragraph
             paragraph.appendChild(insightSpan);
             
-            // Use ReactDOM.render to add the ContentMarginNote component
+            // Use ReactDOM.createRoot instead of the deprecated render method
             try {
-              ReactDOM.render(
-                <ContentMarginNote insight={note.insight} key={note.id} />,
-                insightSpan
-              );
+              const root = ReactDOM.createRoot(insightSpan);
+              rootRefs.current.set(insightSpan, root);
+              root.render(<ContentMarginNote insight={note.insight} key={note.id} />);
               notesAdded++;
             } catch (error) {
               console.error("Error rendering margin note:", error);
@@ -112,7 +138,8 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
     };
     
     // Increased delay to ensure content is fully rendered on all devices
-    setTimeout(addInsightsToContent, 800);
+    const timer = setTimeout(addInsightsToContent, 800);
+    return () => clearTimeout(timer);
   }, [marginNotes, content, insightsAdded]);
 
   return null; // This is a non-visual component

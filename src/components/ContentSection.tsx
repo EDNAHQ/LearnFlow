@@ -41,12 +41,13 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   
   // Extract step ID from content if it's in expected format
   const stepId = content.includes(':') ? content.split(":")[0] : '';
-
+  
+  // Reset state when content changes
   useEffect(() => {
-    // Initialize with detailed content if available
-    if (detailedContent && typeof detailedContent === 'string') {
-      setLoadedDetailedContent(detailedContent);
-    }
+    setIsVisible(false);
+    setLoadedDetailedContent(null);
+    setRelatedQuestions([]);
+    setLoadingQuestions(true);
     
     // Animation effect for fading in the content
     const timer = setTimeout(() => {
@@ -54,7 +55,14 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }, index * 200);
 
     return () => clearTimeout(timer);
-  }, [detailedContent, index]);
+  }, [content, detailedContent, index, topic]);
+
+  useEffect(() => {
+    // Initialize with detailed content if available
+    if (detailedContent && typeof detailedContent === 'string') {
+      setLoadedDetailedContent(detailedContent);
+    }
+  }, [detailedContent]);
 
   // Handle content detail loading
   const handleContentLoaded = useCallback((loadedContent: string) => {
