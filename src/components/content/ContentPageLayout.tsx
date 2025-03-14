@@ -16,7 +16,7 @@ const ContentPageLayout = ({
   topRef 
 }: ContentPageLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 w-full">
+    <div className="min-h-screen bg-[#1A1A1A] text-white w-full">
       <div ref={topRef}></div>
       
       {children}
@@ -24,7 +24,7 @@ const ContentPageLayout = ({
       <div className="fixed bottom-6 right-6">
         <Button 
           onClick={onGoToProjects}
-          className="bg-[#1A1A1A] text-white hover:bg-[#333333] shadow-md rounded-full p-3 h-auto"
+          className="bg-brand-purple text-white hover:bg-[#5835CB] shadow-md rounded-full p-3 h-auto"
         >
           <Home className="h-5 w-5" />
         </Button>

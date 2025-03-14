@@ -84,7 +84,7 @@ const ContentPage = () => {
 
           <div className="mb-6 w-full">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-gray-800 w-full">
+              <h2 className="text-xl font-semibold text-white w-full">
                 {currentStepData?.title || "Loading..."}
               </h2>
             </div>
