@@ -7,6 +7,7 @@ import ContentHelperTip from "./ContentHelperTip";
 import { formatContent } from "@/utils/contentFormatter";
 import { useTextSelection } from "@/hooks/useTextSelection";
 import AIInsightsDialog from "./AIInsightsDialog";
+import TextSelectionButton from "./TextSelectionButton";
 
 interface ContentSectionProps {
   title: string;
@@ -24,8 +25,11 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   const { 
     selectedText, 
     showInsightsDialog, 
-    setShowInsightsDialog, 
-    handleTextSelection 
+    setShowInsightsDialog,
+    selectionPosition,
+    showSelectionButton,
+    handleShowInsights,
+    handleTextSelection
   } = useTextSelection();
   
   const stepId = content.split(":")[0]; // Extract step ID from content
@@ -95,6 +99,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         <div 
           className="prose prose-gray max-w-none w-full"
           onMouseUp={handleTextSelection}
+          onTouchEnd={handleTextSelection}
         >
           <div className="content-section w-full">
             {formatContent(loadedDetailedContent)}
@@ -103,6 +108,13 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           <ContentHelperTip />
         </div>
       )}
+      
+      {/* Floating Selection Button */}
+      <TextSelectionButton 
+        position={selectionPosition}
+        onInsightRequest={handleShowInsights}
+        visible={showSelectionButton}
+      />
       
       {/* AI Insights Dialog */}
       {topic && (

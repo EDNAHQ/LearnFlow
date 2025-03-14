@@ -9,6 +9,8 @@ interface TextSelectionPosition {
 export const useTextSelection = () => {
   const [selectedText, setSelectedText] = useState<string>("");
   const [showInsightsDialog, setShowInsightsDialog] = useState<boolean>(false);
+  const [selectionPosition, setSelectionPosition] = useState<TextSelectionPosition | null>(null);
+  const [showSelectionButton, setShowSelectionButton] = useState<boolean>(false);
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -18,26 +20,44 @@ export const useTextSelection = () => {
       
       if (text && text.length > 5 && text.length < 500) {
         setSelectedText(text);
-        setShowInsightsDialog(true);
-      } else if (text.length > 0 && text.length <= 5) {
-        // If text is too short, clear selection but don't show dialog
-        console.log("Text selection too short (minimum 6 characters)");
-        setSelectedText("");
+        
+        // Get selection position for the floating button
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        // Position the button near the end of the selection
+        setSelectionPosition({
+          x: rect.right,
+          y: rect.bottom + window.scrollY
+        });
+        
+        setShowSelectionButton(true);
+      } else {
+        // Clear selection data if text is too short or too long
+        clearSelectionData();
       }
+    } else {
+      // No selection, clear data
+      clearSelectionData();
     }
   }, []);
 
-  // Add document-level listener for mouseup to capture selections outside specific components
-  useEffect(() => {
-    document.addEventListener("mouseup", handleTextSelection);
-    return () => {
-      document.removeEventListener("mouseup", handleTextSelection);
-    };
-  }, [handleTextSelection]);
+  const clearSelectionData = () => {
+    setSelectedText("");
+    setShowSelectionButton(false);
+    setSelectionPosition(null);
+  };
+
+  const handleShowInsights = () => {
+    setShowInsightsDialog(true);
+    setShowSelectionButton(false);
+  };
 
   const clearSelection = useCallback(() => {
     setSelectedText("");
     setShowInsightsDialog(false);
+    setShowSelectionButton(false);
+    setSelectionPosition(null);
     
     // Clear text selection
     if (window.getSelection) {
@@ -49,10 +69,41 @@ export const useTextSelection = () => {
     }
   }, []);
 
+  // Add document-level listeners for both mouse and touch events
+  useEffect(() => {
+    // For mouse users
+    document.addEventListener("mouseup", handleTextSelection);
+    
+    // For touch device users
+    document.addEventListener("touchend", handleTextSelection);
+    
+    // Clear selection when clicking elsewhere
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // Only clear if not clicking on our selection button or dialog
+      if (!target.closest('.selection-button') && !target.closest('[role="dialog"]')) {
+        clearSelectionData();
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    
+    return () => {
+      document.removeEventListener("mouseup", handleTextSelection);
+      document.removeEventListener("touchend", handleTextSelection);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [handleTextSelection]);
+
   return {
     selectedText,
     showInsightsDialog,
     setShowInsightsDialog,
+    selectionPosition,
+    showSelectionButton,
+    handleShowInsights,
     handleTextSelection,
     clearSelection
   };
