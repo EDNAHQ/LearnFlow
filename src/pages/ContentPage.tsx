@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -158,7 +157,7 @@ const ContentPage = () => {
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
-            <ModeToggle />
+            {/* ModeToggle removed from here as requested */}
           </div>
 
           <div className="mb-6 w-full max-w-[860px] mx-auto">
