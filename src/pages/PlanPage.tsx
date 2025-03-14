@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ const PlanPage = () => {
   const [pathId, setPathId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [pathTitle, setPathTitle] = useState<string | null>(null);
+  const [generatingTitle, setGeneratingTitle] = useState<boolean>(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,6 +75,20 @@ const PlanPage = () => {
             
           if (!error && data) {
             setPathId(data.path_id);
+            
+            // Check if there's already a title
+            const { data: pathData, error: pathError } = await supabase
+              .from('learning_paths')
+              .select('title')
+              .eq('id', data.path_id)
+              .single();
+              
+            if (!pathError && pathData && pathData.title) {
+              setPathTitle(pathData.title);
+            } else {
+              // Generate a title for the learning path
+              await generateTitle(storedTopic, data.path_id);
+            }
           }
         }
       } catch (error) {
@@ -90,6 +107,28 @@ const PlanPage = () => {
       fetchPlan();
     }
   }, [navigate, user]);
+
+  const generateTitle = async (topic: string, pathId: string) => {
+    setGeneratingTitle(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-learning-title', {
+        body: { topic, pathId },
+      });
+      
+      if (error) {
+        console.error("Error generating title:", error);
+        return;
+      }
+      
+      if (data && data.title) {
+        setPathTitle(data.title);
+      }
+    } catch (error) {
+      console.error("Error in title generation:", error);
+    } finally {
+      setGeneratingTitle(false);
+    }
+  };
 
   const handleApprove = async () => {
     if (pathId) {
@@ -168,11 +207,7 @@ const PlanPage = () => {
               </Button>
             </div>
             
-            <div className="text-brand-purple font-medium text-lg">
-              LearnFlow
-            </div>
-            
-            <div>
+            <div className="flex items-center">
               <UserNav />
             </div>
           </div>
@@ -191,7 +226,14 @@ const PlanPage = () => {
                 <Sparkles className="h-6 w-6 text-brand-purple" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brand-purple">Your Learning Journey</h1>
+            
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-brand-purple">
+              {pathTitle || "Your Learning Journey"}
+              {generatingTitle && (
+                <span className="ml-2 inline-block w-4 h-4 rounded-full border-2 border-brand-purple/30 border-t-brand-purple animate-spin align-middle"></span>
+              )}
+            </h1>
+            
             <p className="text-gray-600 max-w-lg mx-auto mb-2">
               A personalized 10-step plan to master <span className="text-brand-gold font-medium">{topic}</span>
             </p>
