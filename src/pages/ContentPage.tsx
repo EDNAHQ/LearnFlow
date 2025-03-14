@@ -67,7 +67,7 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="w-full max-w-[1100px] mx-auto py-8 px-4 md:px-8">
+      <div className="container max-w-[860px] mx-auto py-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

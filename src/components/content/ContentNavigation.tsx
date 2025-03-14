@@ -22,7 +22,7 @@ const ContentNavigation = ({
   projectCompleted
 }: ContentNavigationProps) => {
   return (
-    <div className="flex justify-between">
+    <div className="flex justify-between w-full max-w-[860px] mx-auto">
       <Button
         variant="secondary"
         onClick={onPrevious}

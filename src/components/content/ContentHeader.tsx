@@ -20,12 +20,12 @@ const ContentHeader = ({
   totalSteps
 }: ContentHeaderProps) => {
   return (
-    <div className="bg-gradient-to-r from-[#1A1A1A] to-[#2A2A2A] shadow-sm">
-      <div className="container max-w-[860px] mx-auto py-5 px-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-[#1A1A1A]/95 backdrop-blur supports-[backdrop-filter]:bg-[#1A1A1A]/60">
+      <div className="container flex h-14 items-center">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex items-center justify-between w-full"
         >
           <div className="flex items-center gap-3">
             <Button
@@ -64,7 +64,7 @@ const ContentHeader = ({
           </div>
         </motion.div>
       </div>
-    </div>
+    </header>
   );
 };
 
