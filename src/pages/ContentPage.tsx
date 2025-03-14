@@ -16,6 +16,7 @@ const ContentPage = () => {
   const { setMode } = useContentMode();
   const {
     topic,
+    pathTitle,
     currentStep,
     pathId,
     steps,
@@ -79,6 +80,7 @@ const ContentPage = () => {
           <div className="flex justify-between items-center mb-6 w-full">
             <ContentProgress 
               topic={topic} 
+              pathTitle={pathTitle}
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
@@ -86,7 +88,7 @@ const ContentPage = () => {
 
           <div className="mb-6 w-full">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-white w-full">
+              <h2 className="text-xl font-semibold text-gray-800 w-full">
                 {currentStepData?.title || "Loading..."}
               </h2>
             </div>

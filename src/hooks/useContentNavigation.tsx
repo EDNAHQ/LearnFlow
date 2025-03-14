@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export const useContentNavigation = () => {
   const [topic, setTopic] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [pathId, setPathId] = useState<string | null>(null);
+  const [pathTitle, setPathTitle] = useState<string | null>(null);
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
@@ -31,6 +33,27 @@ export const useContentNavigation = () => {
 
     setTopic(storedTopic);
     setPathId(storedPathId);
+    
+    // Fetch the path title if available
+    const fetchPathTitle = async () => {
+      if (storedPathId) {
+        try {
+          const { data, error } = await supabase
+            .from('learning_paths')
+            .select('title')
+            .eq('id', storedPathId)
+            .single();
+            
+          if (!error && data && data.title) {
+            setPathTitle(data.title);
+          }
+        } catch (error) {
+          console.error("Error fetching path title:", error);
+        }
+      }
+    };
+    
+    fetchPathTitle();
   }, [navigate, user]);
 
   const {
@@ -81,6 +104,7 @@ export const useContentNavigation = () => {
 
   return {
     topic,
+    pathTitle,
     currentStep,
     pathId,
     steps,

@@ -1,27 +1,33 @@
 
-import { motion } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
 
 interface ContentProgressProps {
   topic: string;
+  pathTitle: string | null;
   currentStep: number;
   totalSteps: number;
 }
 
-const ContentProgress = ({ topic, currentStep, totalSteps }: ContentProgressProps) => {
+const ContentProgress = ({ 
+  topic, 
+  pathTitle,
+  currentStep, 
+  totalSteps 
+}: ContentProgressProps) => {
+  const progress = ((currentStep + 1) / totalSteps) * 100;
+  
+  // Use the AI-generated title if available, otherwise use the topic
+  const displayTitle = pathTitle || topic;
+  
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold mb-3 text-gray-800 flex items-center gap-3 justify-between w-full">
-        <span>{topic}</span>
-        <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] px-4 py-1.5 rounded-full font-semibold">
+      <div className="flex items-center justify-between mb-1.5">
+        <h1 className="text-xl font-semibold">{displayTitle}</h1>
+        <div className="text-sm font-medium">
           Step {currentStep + 1} of {totalSteps}
         </div>
-      </h1>
-      <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-        <div 
-          className="bg-[#6D42EF] h-full rounded-full transition-all duration-300"
-          style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-        ></div>
       </div>
+      <Progress value={progress} className="h-1.5" />
     </div>
   );
 };

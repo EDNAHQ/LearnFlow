@@ -20,6 +20,7 @@ const ContentDetailLoader = ({
   onContentLoaded 
 }: ContentDetailLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   
   // Update loaded content when detailed content prop changes
   useEffect(() => {
@@ -32,10 +33,12 @@ const ContentDetailLoader = ({
   // If no detailed content, try to load it
   useEffect(() => {
     const loadContent = async () => {
-      // Only load if we don't have detailed content and aren't already loading
-      if (!detailedContent && stepId && topic && !isLoading) {
+      // Only load if we don't have detailed content, have required data, aren't already loading,
+      // and haven't attempted to load before
+      if (!detailedContent && stepId && topic && !isLoading && !hasAttemptedLoad) {
         console.log("Generating content for step:", stepId);
         setIsLoading(true);
+        setHasAttemptedLoad(true);
         
         try {
           // Extract description from content
@@ -66,7 +69,7 @@ const ContentDetailLoader = ({
     };
     
     loadContent();
-  }, [detailedContent, stepId, title, content, topic, isLoading, onContentLoaded]);
+  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded]);
 
   return null; // This is a non-visual component
 };

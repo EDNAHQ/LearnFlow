@@ -58,9 +58,6 @@ const ContentHeader = ({
                 <span>Generating ({generatedSteps}/{totalSteps})</span>
               </div>
             )}
-            <div className="text-sm font-medium text-white">
-              LearnFlow
-            </div>
           </div>
         </motion.div>
       </div>
