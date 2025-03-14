@@ -17,15 +17,20 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
   const [slides, setSlides] = useState<string[]>([]);
   const { setMode } = useContentMode();
 
+  // Ensure content is always a string
+  const safeContent = typeof content === 'string' 
+    ? content 
+    : (content ? JSON.stringify(content) : "No content available");
+
   useEffect(() => {
-    if (content) {
-      const paragraphs = content
+    if (safeContent) {
+      const paragraphs = safeContent
         .split(/\n\n|\n===+\n/)
         .map(p => p.trim())
         .filter(p => p.length > 0);
       
       let processedSlides = paragraphs;
-      if (paragraphs.length <= 3 && content.length > 1000) {
+      if (paragraphs.length <= 3 && safeContent.length > 1000) {
         processedSlides = [];
         paragraphs.forEach(paragraph => {
           if (paragraph.length > 400) {
@@ -51,7 +56,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
       setSlides(processedSlides);
       console.log("Slides created:", processedSlides.length);
     }
-  }, [content]);
+  }, [safeContent]);
 
   const goToNextSlide = useCallback(() => {
     if (currentSlide < slides.length - 1) {
@@ -92,7 +97,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNextSlide, goToPreviousSlide, showOverview]);
 
-  if (!content || slides.length === 0) {
+  if (!safeContent || slides.length === 0) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-lg shadow-md border border-gray-200">

@@ -13,10 +13,15 @@ const SlideModeDisplay = ({
   content, 
   detailedContent 
 }: SlideModeDisplayProps) => {
-  // Always ensure we're working with strings
+  // Convert content to string no matter what the input type is
+  const safeContent = typeof content === 'string' 
+    ? content 
+    : (content ? JSON.stringify(content) : "No content available");
+  
+  // Same for detailed content, with preference for detailed content when available
   const displayContent = typeof detailedContent === 'string' 
     ? detailedContent 
-    : (typeof content === 'string' ? content : String(content || ""));
+    : safeContent;
   
   return (
     <div className="bg-[#1A1A1A] rounded-xl shadow-md overflow-hidden w-full mx-auto">

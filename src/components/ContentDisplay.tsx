@@ -25,15 +25,15 @@ const ContentDisplay = ({
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
 
-  // Ensure content is always a string
+  // Transform content to ensure it's a string
   const safeContent = typeof content === 'string' 
     ? content 
-    : (typeof content === 'object' ? JSON.stringify(content) : String(content || "No content available"));
-
-  // Same for detailed content
+    : (content ? JSON.stringify(content) : "No content available");
+  
+  // Similar handling for detailed content
   const safeDetailedContent = typeof detailedContent === 'string'
     ? detailedContent
-    : (typeof detailedContent === 'object' ? JSON.stringify(detailedContent) : null);
+    : (detailedContent ? JSON.stringify(detailedContent) : null);
 
   return (
     <div className="w-full relative">

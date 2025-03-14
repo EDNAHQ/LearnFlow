@@ -19,18 +19,23 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
-  // Always ensure we're working with strings
-  const displayContent = typeof detailedContent === 'string' 
+  // Convert content to string no matter what the input type is
+  const safeContent = typeof content === 'string' 
+    ? content 
+    : (content ? JSON.stringify(content) : "No content available");
+  
+  // Same for detailed content
+  const safeDetailedContent = typeof detailedContent === 'string' 
     ? detailedContent 
-    : (typeof content === 'string' ? content : String(content || ""));
+    : (detailedContent ? JSON.stringify(detailedContent) : null);
 
   return (
     <div className="w-full">
       <ContentSection 
         title={title}
-        content={displayContent}
+        content={safeContent}
         index={index}
-        detailedContent={detailedContent}
+        detailedContent={safeDetailedContent}
         pathId={pathId}
         topic={topic}
       />

@@ -24,7 +24,9 @@ interface ContentSectionProps {
 
 const ContentSection = ({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(detailedContent || null);
+  const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(
+    typeof detailedContent === 'string' ? detailedContent : null
+  );
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
@@ -38,7 +40,10 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   } = useTextSelection();
   
   const contentRef = useRef<HTMLDivElement>(null);
-  const stepId = content.split(":")[0]; // Extract step ID from content
+  // Extract step ID from content if it's in expected format
+  const stepId = typeof content === 'string' && content.includes(':') 
+    ? content.split(":")[0] 
+    : '';
 
   // Animation effect for fading in the content
   useEffect(() => {
@@ -77,6 +82,11 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     setShowInsightsDialog(true);
   };
 
+  // Ensure content is always a string
+  const safeContent = typeof content === 'string' 
+    ? content 
+    : (content ? JSON.stringify(content) : "No content available");
+
   return (
     <div 
       className={cn(
@@ -88,7 +98,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
       <ContentDetailLoader
         stepId={stepId}
         title={title}
-        content={content}
+        content={safeContent}
         topic={topic}
         detailedContent={detailedContent}
         onContentLoaded={handleContentLoaded}

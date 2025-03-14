@@ -23,25 +23,37 @@ const ContentDetailLoader = ({
   
   // Update loaded content when detailed content prop changes
   useEffect(() => {
-    if (detailedContent) {
+    if (detailedContent && typeof detailedContent === 'string') {
       onContentLoaded(detailedContent);
     }
   }, [detailedContent, onContentLoaded]);
 
   // If no detailed content, try to load it directly
   useEffect(() => {
+    // Make sure we have valid inputs and we're not already loading
     if (!detailedContent && stepId && topic && !isLoading) {
       const loadContent = async () => {
         setIsLoading(true);
         try {
-          const description = content.split(":")[1] || "";
+          // Extract description from content if in the expected format
+          const description = typeof content === 'string' && content.includes(':') 
+            ? content.split(":")[1]?.trim() || "" 
+            : String(content || "");
+            
           const generatedContent = await generateStepContent(
             { id: stepId, title, description },
             topic
           );
-          onContentLoaded(generatedContent);
+          
+          if (typeof generatedContent === 'string') {
+            onContentLoaded(generatedContent);
+          } else {
+            console.error("Generated content is not a string:", generatedContent);
+            onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
+          }
         } catch (error) {
           console.error("Error loading content:", error);
+          onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
         } finally {
           setIsLoading(false);
         }

@@ -20,8 +20,6 @@ const ContentPage = () => {
     pathId,
     steps,
     isLoading,
-    generatingContent,
-    generatedSteps,
     handleMarkComplete,
     handleBack,
     goToProjects,

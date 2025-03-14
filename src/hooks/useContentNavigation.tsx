@@ -34,8 +34,6 @@ export const useContentNavigation = () => {
   const {
     steps,
     isLoading,
-    generatingContent,
-    generatedSteps,
     markStepAsComplete,
   } = useLearningSteps(pathId, topic);
 
@@ -76,8 +74,8 @@ export const useContentNavigation = () => {
     pathId,
     steps,
     isLoading,
-    generatingContent,
-    generatedSteps,
+    generatingContent: false,
+    generatedSteps: 0,
     handleMarkComplete,
     handleBack,
     goToProjects,

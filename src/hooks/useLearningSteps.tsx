@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { generateStepContent } from "@/utils/learningUtils";
 
 export interface LearningStepData {
   id: string;
@@ -42,7 +41,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
         if (data && data.length > 0) {
           console.log(`Retrieved ${data.length} learning steps for path:`, pathId);
           
-          // Process step content to ensure it's always a string
+          // Process data to ensure all values are properly formatted as strings
           const processedData = data.map(step => ({
             ...step,
             content: typeof step.content === 'string' 
