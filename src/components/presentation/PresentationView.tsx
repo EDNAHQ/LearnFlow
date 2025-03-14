@@ -8,7 +8,7 @@ import { useContentMode } from "@/hooks/useContentMode";
 
 interface PresentationViewProps {
   content: string;
-  title?: string; // Make title optional to match the usage in ContentDisplay
+  title?: string;
 }
 
 const PresentationView = ({ content, title }: PresentationViewProps) => {
@@ -17,13 +17,33 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
   const [slides, setSlides] = useState<string[]>([]);
   const { setMode } = useContentMode();
 
-  // Ensure content is always a string
-  const safeContent = typeof content === 'string' 
-    ? content 
-    : (content ? JSON.stringify(content) : "No content available");
+  // Ensure content is always a properly formatted string
+  const safeContent = (() => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    
+    try {
+      // Handle nested objects by properly stringifying them
+      if (content === null || content === undefined) {
+        return "No content available";
+      }
+      
+      if (typeof content === 'object') {
+        return JSON.stringify(content, null, 2);
+      }
+      
+      return String(content);
+    } catch (error) {
+      console.error("Error stringifying content:", error);
+      return "Error displaying content";
+    }
+  })();
 
   useEffect(() => {
     if (safeContent) {
+      console.log("Processing content for slides:", typeof safeContent);
+      
       const paragraphs = safeContent
         .split(/\n\n|\n===+\n/)
         .map(p => p.trim())
