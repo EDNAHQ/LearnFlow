@@ -25,8 +25,26 @@ const ContentDisplay = ({
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
 
-  // Ensure content is a string
-  const safeContent = typeof content === 'string' ? content : 'No content available';
+  // Ensure content is a string and extract it properly
+  const processContent = (rawContent: any): string => {
+    if (typeof rawContent === 'object') {
+      return JSON.stringify(rawContent);
+    }
+    
+    if (typeof rawContent !== 'string') {
+      return 'No content available';
+    }
+    
+    // Extract actual content if in the format "id: content"
+    const colonIndex = rawContent.indexOf(':');
+    if (colonIndex > -1) {
+      return rawContent.substring(colonIndex + 1).trim();
+    }
+    
+    return rawContent;
+  };
+
+  const safeContent = processContent(content);
 
   return (
     <div className="w-full relative">

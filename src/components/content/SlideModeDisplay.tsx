@@ -13,17 +13,9 @@ const SlideModeDisplay = ({
   content, 
   detailedContent 
 }: SlideModeDisplayProps) => {
-  // Extract the actual content if it contains a colon (step ID format)
-  const extractContent = (rawContent: string) => {
-    const colonIndex = rawContent.indexOf(':');
-    return colonIndex > -1 ? rawContent.substring(colonIndex + 1).trim() : rawContent;
-  };
-
-  // Process the content to ensure we're not displaying "[object Object]"
-  const processedContent = typeof content === 'string' ? extractContent(content) : 'No content available';
-  
-  // Use detailed content if available, otherwise use the processed content
-  const displayContent = detailedContent || processedContent;
+  // Use detailed content if available, otherwise use the content
+  // Content should already be cleaned by ContentDisplay component
+  const displayContent = detailedContent || content;
   
   return (
     <div className="bg-[#1A1A1A] rounded-xl shadow-md overflow-hidden w-full mx-auto">

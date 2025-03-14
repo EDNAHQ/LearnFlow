@@ -54,12 +54,24 @@ const ContentPage = () => {
 
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
-  // Ensure we have valid content to display
-  const safeContent = currentStepData?.content 
-    ? (typeof currentStepData.content === 'string' 
-      ? currentStepData.content 
-      : JSON.stringify(currentStepData.content))
-    : "No content available for this step.";
+  // Process content to ensure we never display [object Object]
+  const processStepContent = (stepData: any) => {
+    if (!stepData) return "No content available for this step.";
+    
+    if (!stepData.content) return "No content available for this step.";
+    
+    if (typeof stepData.content === 'object') {
+      try {
+        return JSON.stringify(stepData.content);
+      } catch (error) {
+        return "Content could not be displayed.";
+      }
+    }
+    
+    return stepData.content;
+  };
+
+  const safeContent = processStepContent(currentStepData);
 
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>

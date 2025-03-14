@@ -40,7 +40,16 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
         if (data && data.length > 0) {
           console.log(`Retrieved ${data.length} learning steps for path:`, pathId);
-          setSteps(data);
+          
+          // Process step content to ensure it's always a string
+          const processedData = data.map(step => ({
+            ...step,
+            content: typeof step.content === 'string' 
+              ? step.content 
+              : JSON.stringify(step.content)
+          }));
+          
+          setSteps(processedData);
           
           const stepsWithContent = data.filter(step => step.detailed_content).length;
           setGeneratedSteps(stepsWithContent);
@@ -48,22 +57,18 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           if (stepsWithContent < data.length) {
             setGeneratingContent(true);
             
-            // Manually trigger content generation for all steps without content
+            // Quietly generate content without toast notifications
             data.forEach(step => {
               if (!step.detailed_content) {
-                console.log(`Triggering content generation for step: ${step.title}`);
                 generateStepContent(
-                  { id: step.id, title: step.title, description: step.content || "" },
+                  { id: step.id, title: step.title, description: typeof step.content === 'string' ? step.content : JSON.stringify(step.content) },
                   topic || "",
-                  true // Set to true to silence toast notifications
+                  true // Silence notifications
                 ).catch(err => {
                   console.error(`Error generating content for step ${step.id}:`, err);
                 });
               }
             });
-            
-            // Remove toast notifications
-            console.log(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`);
           }
         } else {
           console.log("No learning steps found for path:", pathId);
@@ -104,7 +109,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
               
               if (stepsWithContent === steps.length) {
                 setGeneratingContent(false);
-                console.log("All learning content has been generated!");
               }
             }
           }
