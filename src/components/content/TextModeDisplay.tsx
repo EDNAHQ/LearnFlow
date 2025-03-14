@@ -19,49 +19,29 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
-  // Improved content processing to handle all possible types
-  const safeContent = (() => {
-    if (typeof content === 'string') {
-      return content;
+  // Convert content to string, ensuring we handle all possible types
+  const processContent = (value: any): string => {
+    if (value === null || value === undefined) {
+      return "No content available";
     }
-    
+
+    if (typeof value === 'string') {
+      return value;
+    }
+
     try {
-      if (content === null || content === undefined) {
-        return "No content available";
+      if (typeof value === 'object') {
+        return JSON.stringify(value, null, 2);
       }
-      
-      if (typeof content === 'object') {
-        return JSON.stringify(content, null, 2);
-      }
-      
-      return String(content);
+      return String(value);
     } catch (error) {
-      console.error("Error processing content in TextModeDisplay:", error);
+      console.error("Error processing content:", error);
       return "Error displaying content";
     }
-  })();
-  
-  // Same for detailed content
-  const safeDetailedContent = (() => {
-    if (typeof detailedContent === 'string' && detailedContent) {
-      return detailedContent;
-    }
-    
-    if (!detailedContent) {
-      return null; // Keep null if not provided
-    }
-    
-    try {
-      if (typeof detailedContent === 'object') {
-        return JSON.stringify(detailedContent, null, 2);
-      }
-      
-      return String(detailedContent);
-    } catch (error) {
-      console.error("Error processing detailedContent in TextModeDisplay:", error);
-      return null;
-    }
-  })();
+  };
+
+  const safeContent = processContent(content);
+  const safeDetailedContent = detailedContent ? processContent(detailedContent) : null;
 
   return (
     <div className="w-full">

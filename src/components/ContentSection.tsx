@@ -24,9 +24,7 @@ interface ContentSectionProps {
 
 const ContentSection = ({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(
-    typeof detailedContent === 'string' ? detailedContent : null
-  );
+  const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
@@ -40,23 +38,33 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   } = useTextSelection();
   
   const contentRef = useRef<HTMLDivElement>(null);
+  
   // Extract step ID from content if it's in expected format
-  const stepId = typeof content === 'string' && content.includes(':') 
-    ? content.split(":")[0] 
-    : '';
+  const stepId = content.includes(':') ? content.split(":")[0] : '';
 
-  // Animation effect for fading in the content
   useEffect(() => {
+    // Initialize with detailed content if available
+    if (detailedContent && typeof detailedContent === 'string') {
+      setLoadedDetailedContent(detailedContent);
+    }
+    
+    // Animation effect for fading in the content
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, index * 200);
 
     return () => clearTimeout(timer);
-  }, [index]);
+  }, [detailedContent, index]);
 
   // Handle content detail loading
-  const handleContentLoaded = useCallback((content: string) => {
-    setLoadedDetailedContent(content);
+  const handleContentLoaded = useCallback((loadedContent: string) => {
+    if (typeof loadedContent === 'string') {
+      console.log("Content loaded successfully", loadedContent.substring(0, 100) + "...");
+      setLoadedDetailedContent(loadedContent);
+    } else {
+      console.error("Content loaded is not a string:", typeof loadedContent);
+      setLoadedDetailedContent("Error: Content could not be loaded properly");
+    }
   }, []);
 
   // Handle related questions
@@ -82,11 +90,6 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     setShowInsightsDialog(true);
   };
 
-  // Ensure content is always a string
-  const safeContent = typeof content === 'string' 
-    ? content 
-    : (content ? JSON.stringify(content) : "No content available");
-
   return (
     <div 
       className={cn(
@@ -98,7 +101,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
       <ContentDetailLoader
         stepId={stepId}
         title={title}
-        content={safeContent}
+        content={content}
         topic={topic}
         detailedContent={detailedContent}
         onContentLoaded={handleContentLoaded}
@@ -115,8 +118,9 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           <div 
             className="content-section relative"
             ref={contentRef}
-            dangerouslySetInnerHTML={{ __html: formatContent(loadedDetailedContent, topic, handleQuestionClick) }}
-          />
+          >
+            {formatContent(loadedDetailedContent, topic, handleQuestionClick)}
+          </div>
           
           {/* Questions Generator - Generates questions based on content */}
           <ContentQuestionsGenerator 

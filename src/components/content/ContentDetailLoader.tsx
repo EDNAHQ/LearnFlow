@@ -24,21 +24,24 @@ const ContentDetailLoader = ({
   // Update loaded content when detailed content prop changes
   useEffect(() => {
     if (detailedContent && typeof detailedContent === 'string') {
+      console.log("Using provided detailed content");
       onContentLoaded(detailedContent);
     }
   }, [detailedContent, onContentLoaded]);
 
-  // If no detailed content, try to load it directly
+  // If no detailed content, try to load it
   useEffect(() => {
-    // Make sure we have valid inputs and we're not already loading
-    if (!detailedContent && stepId && topic && !isLoading) {
-      const loadContent = async () => {
+    const loadContent = async () => {
+      // Only load if we don't have detailed content and aren't already loading
+      if (!detailedContent && stepId && topic && !isLoading) {
+        console.log("Generating content for step:", stepId);
         setIsLoading(true);
+        
         try {
-          // Extract description from content if in the expected format
-          const description = typeof content === 'string' && content.includes(':') 
-            ? content.split(":")[1]?.trim() || "" 
-            : String(content || "");
+          // Extract description from content
+          const description = content.includes(':') 
+            ? content.split(":")[1]?.trim() || ""
+            : content;
             
           const generatedContent = await generateStepContent(
             { id: stepId, title, description },
@@ -46,6 +49,7 @@ const ContentDetailLoader = ({
           );
           
           if (typeof generatedContent === 'string') {
+            console.log("Content generated successfully");
             onContentLoaded(generatedContent);
           } else {
             console.error("Generated content is not a string:", generatedContent);
@@ -57,10 +61,10 @@ const ContentDetailLoader = ({
         } finally {
           setIsLoading(false);
         }
-      };
-      
-      loadContent();
-    }
+      }
+    };
+    
+    loadContent();
   }, [detailedContent, stepId, title, content, topic, isLoading, onContentLoaded]);
 
   return null; // This is a non-visual component

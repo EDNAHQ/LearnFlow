@@ -3,7 +3,6 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HelpCircle } from "lucide-react";
 
 // Helper component for question prompts
@@ -58,7 +57,17 @@ const processTextWithQuestions = (text: string, topic: string, onInsightRequest:
   );
 };
 
-export const formatContent = (text: string, topic?: string, onInsightRequest?: (question: string) => void) => {
+export const formatContent = (
+  text: string, 
+  topic?: string, 
+  onInsightRequest?: (question: string) => void
+): React.ReactNode => {
+  // Ensure text is actually a string
+  if (typeof text !== 'string') {
+    console.error("formatContent received non-string input:", text);
+    text = String(text || "Content could not be displayed properly");
+  }
+
   return (
     <ReactMarkdown
       components={{
@@ -74,14 +83,15 @@ export const formatContent = (text: string, topic?: string, onInsightRequest?: (
         h4: ({ node, ...props }) => (
           <h4 className="text-lg font-semibold mt-5 mb-2 text-brand-purple/80" {...props} />
         ),
-        p: ({ node, ...props }) => {
-          if (topic && onInsightRequest && typeof props.children === 'string') {
-            const processedText = processTextWithQuestions(props.children.toString(), topic, onInsightRequest);
+        p: ({ node, children, ...props }) => {
+          // Process paragraph content for questions if needed
+          if (topic && onInsightRequest && typeof children === 'string') {
+            const processedText = processTextWithQuestions(children, topic, onInsightRequest);
             return (
               <p className="my-4 text-lg leading-relaxed text-pretty relative group">{processedText}</p>
             );
           }
-          return <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props} />;
+          return <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props}>{children}</p>;
         },
         ul: ({ node, ...props }) => (
           <ul className="my-5 pl-6 space-y-3 list-disc" {...props} />
