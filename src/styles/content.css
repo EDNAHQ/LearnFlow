@@ -4,6 +4,7 @@
 .content-section {
   width: 100%;
   min-width: 100%;
+  position: relative;
 }
 
 /* Enhanced code block styling with language tag */
@@ -46,4 +47,22 @@
 
 .content-callout-title {
   @apply font-bold text-brand-purple mb-2;
+}
+
+/* Paragraph with margin notes */
+.content-section p[data-has-note] {
+  @apply relative;
+}
+
+/* Provide a slight highlight for paragraphs with notes */
+.content-section p[data-has-note]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 3px;
+  background: linear-gradient(to bottom, #6D42EF, #E84393);
+  border-radius: 3px;
+  opacity: 0.5;
 }

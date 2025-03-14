@@ -77,9 +77,11 @@ export const formatContent = (text: string, topic?: string, onInsightRequest?: (
         p: ({ node, ...props }) => {
           if (topic && onInsightRequest && typeof props.children === 'string') {
             const processedText = processTextWithQuestions(props.children.toString(), topic, onInsightRequest);
-            return <p className="my-4 text-lg leading-relaxed text-pretty">{processedText}</p>;
+            return (
+              <p className="my-4 text-lg leading-relaxed text-pretty relative group">{processedText}</p>
+            );
           }
-          return <p className="my-4 text-lg leading-relaxed text-pretty" {...props} />;
+          return <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props} />;
         },
         ul: ({ node, ...props }) => (
           <ul className="my-5 pl-6 space-y-3 list-disc" {...props} />
