@@ -19,11 +19,16 @@ const TextModeDisplay = ({
   pathId, 
   topic 
 }: TextModeDisplayProps) => {
+  // Extract the actual content by removing any step ID prefixes
+  const cleanedContent = content.includes(':') 
+    ? content.split(':').slice(1).join(':').trim() 
+    : content;
+
   return (
     <div className="px-0 sm:px-4">
       <ContentSection 
         title={title}
-        content={content}
+        content={cleanedContent}
         index={index}
         detailedContent={detailedContent}
         pathId={pathId}
