@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,17 +55,15 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
                 generateStepContent(
                   { id: step.id, title: step.title, description: step.content || "" },
                   topic || "",
-                  false
+                  true // Set to true to silence toast notifications
                 ).catch(err => {
                   console.error(`Error generating content for step ${step.id}:`, err);
                 });
               }
             });
             
-            toast.info(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`, {
-              duration: 5000,
-              id: "content-generation-toast"
-            });
+            // Remove toast notification
+            console.log(`Generating detailed content for your learning path (${stepsWithContent}/${data.length} steps completed)`);
           }
         } else {
           console.log("No learning steps found for path:", pathId);
@@ -107,16 +104,14 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
                 return updatedSteps;
               });
               
-              toast.info(`Generating content (${stepsWithContent}/${steps.length} steps completed)`, {
-                duration: 5000,
-                id: "content-generation-toast"
-              });
+              // Remove toast notification
+              console.log(`Generating content (${stepsWithContent}/${steps.length} steps completed)`);
               
               if (stepsWithContent === steps.length) {
                 setGeneratingContent(false);
-                toast.success("All learning content has been generated!", {
-                  id: "content-generation-complete"
-                });
+                // We can keep this final toast if desired, or remove it
+                // toast.success("All learning content has been generated!");
+                console.log("All learning content has been generated!");
               }
             }
           }

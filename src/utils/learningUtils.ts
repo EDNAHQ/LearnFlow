@@ -92,7 +92,6 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   // Now generate the learning plan steps using AI
   try {
     console.log("Calling edge function to generate learning plan");
-    toast.info("Generating your personalized learning plan...");
     
     // Call the edge function to generate a learning plan
     const response = await supabase.functions.invoke('generate-learning-content', {
@@ -104,7 +103,6 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     
     if (response.error) {
       console.error("Edge function error:", response.error);
-      toast.error("Unable to generate learning plan. Please try again later.");
       throw new Error("Failed to generate learning plan using AI");
     }
     
@@ -112,7 +110,6 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     
     if (!data || !data.steps || !Array.isArray(data.steps)) {
       console.error("Invalid response format:", data);
-      toast.error("Received an invalid response from our AI. Please try again.");
       throw new Error("Invalid learning plan generated");
     }
     
@@ -155,19 +152,16 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     }
     
     if (steps.length === 0) {
-      toast.error("Failed to save any learning steps. Please try again.");
       throw new Error("No learning steps were created");
     }
     
     console.log(`Successfully created ${steps.length} learning steps`);
-    toast.success(`Your learning plan for ${topic} is ready!`);
     
     // No need to start background generation here - it will start after plan approval
     
     return steps;
   } catch (error) {
     console.error("Error generating learning plan:", error);
-    toast.error("Failed to generate your learning plan. Please try again.");
     throw new Error("Failed to generate learning plan");
   }
 };
@@ -245,10 +239,6 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     try {
       console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
       
-      if (!silent) {
-        toast.info(`Generating content for: ${step.title}`, { duration: 3000 });
-      }
-      
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
           stepId: step.id,
@@ -281,9 +271,6 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     }
   } catch (error) {
     console.error("Error generating step content:", error);
-    if (!silent) {
-      toast.error("Failed to generate content. Please try again later.");
-    }
     throw new Error("Failed to generate content for this step");
   }
 };
