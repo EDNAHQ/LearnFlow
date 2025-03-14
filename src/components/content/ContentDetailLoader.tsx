@@ -45,7 +45,8 @@ const ContentDetailLoader = ({
             
           const generatedContent = await generateStepContent(
             { id: stepId, title, description },
-            topic
+            topic,
+            true // Add silent parameter to avoid UI updates
           );
           
           if (typeof generatedContent === 'string') {

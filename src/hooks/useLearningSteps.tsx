@@ -53,6 +53,11 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           }));
           
           setSteps(processedData);
+          
+          // Check for background generation status
+          const stepsWithoutContent = processedData.filter(step => !step.detailed_content).length;
+          setGeneratedSteps(processedData.length - stepsWithoutContent);
+          setGeneratingContent(stepsWithoutContent > 0);
         } else {
           console.log("No learning steps found for path:", pathId);
           toast.error("No learning content found");
@@ -66,6 +71,46 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
     };
 
     fetchLearningSteps();
+    
+    // Set up subscription to track generation progress
+    const subscription = supabase
+      .channel(`steps-${pathId}`)
+      .on('postgres_changes', 
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'learning_steps',
+          filter: `path_id=eq.${pathId}`
+        }, 
+        (payload) => {
+          console.log('Step updated:', payload);
+          // Update only the changed step in the state
+          setSteps(prevSteps => 
+            prevSteps.map(step => 
+              step.id === payload.new.id 
+                ? {
+                    ...step,
+                    detailed_content: payload.new.detailed_content
+                  }
+                : step
+            )
+          );
+          
+          // Update generation progress
+          setGeneratedSteps(prev => {
+            const newValue = prev + 1;
+            if (newValue >= steps.length) {
+              setGeneratingContent(false);
+            }
+            return newValue;
+          });
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [pathId, topic]);
 
   const markStepAsComplete = async (stepId: string) => {

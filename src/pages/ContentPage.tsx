@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
 import { useContentNavigation } from "@/hooks/useContentNavigation";
@@ -25,7 +25,9 @@ const ContentPage = () => {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef
+    topRef,
+    generatingContent,
+    generatedSteps
   } = useContentNavigation();
 
   // Set "text" (Read) mode by default when component mounts
@@ -62,8 +64,8 @@ const ContentPage = () => {
       <ContentHeader 
         onBack={handleBack}
         onHome={goToProjects}
-        generatingContent={false}
-        generatedSteps={0}
+        generatingContent={generatingContent}
+        generatedSteps={generatedSteps}
         totalSteps={steps.length}
       />
 

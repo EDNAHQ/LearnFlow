@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";
@@ -245,7 +246,8 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           topic,
           title: step.title,
           stepNumber: stepData.order_index + 1,
-          totalSteps: 10
+          totalSteps: 10,
+          silent // Pass the silent parameter to suppress notifications
         }
       });
       

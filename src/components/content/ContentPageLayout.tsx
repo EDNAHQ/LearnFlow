@@ -16,7 +16,7 @@ const ContentPageLayout = ({
   topRef 
 }: ContentPageLayoutProps) => {
   return (
-    <div className="min-h-screen bg-white text-black w-full">
+    <div className="min-h-screen bg-[#1A1A1A] text-white w-full">
       <div ref={topRef}></div>
       
       {children}

@@ -11,6 +11,8 @@ export const useContentNavigation = () => {
   const [topic, setTopic] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [pathId, setPathId] = useState<string | null>(null);
+  const [generatingContent, setGeneratingContent] = useState<boolean>(false);
+  const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,6 +38,15 @@ export const useContentNavigation = () => {
     isLoading,
     markStepAsComplete,
   } = useLearningSteps(pathId, topic);
+
+  // Check if background generation is happening
+  useEffect(() => {
+    if (steps.length > 0) {
+      const stepsWithoutContent = steps.filter(step => !step.detailed_content).length;
+      setGeneratedSteps(steps.length - stepsWithoutContent);
+      setGeneratingContent(stepsWithoutContent > 0);
+    }
+  }, [steps]);
 
   const handleMarkComplete = async () => {
     if (!steps[currentStep]) return;
@@ -74,8 +85,8 @@ export const useContentNavigation = () => {
     pathId,
     steps,
     isLoading,
-    generatingContent: false,
-    generatedSteps: 0,
+    generatingContent,
+    generatedSteps,
     handleMarkComplete,
     handleBack,
     goToProjects,
