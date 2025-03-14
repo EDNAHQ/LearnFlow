@@ -1,6 +1,6 @@
 
 import React from "react";
-import { HelpCircle, Loader2 } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ContentRelatedQuestionsProps {

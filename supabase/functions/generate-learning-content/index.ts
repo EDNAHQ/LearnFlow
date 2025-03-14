@@ -33,6 +33,8 @@ serve(async (req) => {
         );
       }
 
+      console.log(`Generating questions for topic: ${topic}, title: ${title}`);
+      
       // Generate related questions using OpenAI
       const prompt = `
       You are an expert educator helping students explore a topic in more depth.
@@ -42,14 +44,15 @@ serve(async (req) => {
       CONTENT:
       ${content.substring(0, 4000)}
       
-      Based on this content, generate exactly 5 thought-provoking questions that would help a learner explore this topic more deeply.
+      Based on this specific content, generate exactly 5 thought-provoking questions that would help a learner explore this topic more deeply.
       
       Requirements for the questions:
-      1. Each question should address an important concept or idea from the content
+      1. Each question should address an important concept or idea from THIS SPECIFIC content
       2. Questions should encourage critical thinking, not just recall facts
       3. Questions should be concise but specific (15-30 words each)
       4. Each question should explore a different aspect of the content
       5. Make sure questions end with a question mark
+      6. Questions must be DIRECTLY related to the content provided, not generic questions about the topic
       
       Your response should be structured as an array of question strings formatted as valid JSON.
       Example format:
@@ -62,7 +65,7 @@ serve(async (req) => {
       }
       `;
 
-      console.log("Calling OpenAI API to generate related questions for topic:", topic);
+      console.log(`Calling OpenAI API to generate related questions for: ${title}`);
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -75,7 +78,7 @@ serve(async (req) => {
           messages: [
             { 
               role: 'system', 
-              content: `You are an expert educator creating thoughtful questions to explore topics in depth.` 
+              content: `You are an expert educator creating thoughtful questions to explore topics in depth based on specific content.` 
             },
             { role: 'user', content: prompt }
           ],
@@ -90,12 +93,12 @@ serve(async (req) => {
         throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
       }
 
-      console.log("OpenAI response received successfully for questions");
+      console.log(`OpenAI response received successfully for questions about: ${title}`);
       
       try {
         // Parse the generated questions
         const generatedContent = data.choices[0].message.content;
-        console.log("Generated questions content:", generatedContent);
+        console.log(`Generated questions content length: ${generatedContent.length}`);
         
         const parsedContent = JSON.parse(generatedContent);
         
@@ -104,7 +107,7 @@ serve(async (req) => {
           throw new Error('Invalid response format: questions is not an array');
         }
         
-        console.log(`Successfully parsed ${parsedContent.questions.length} questions`);
+        console.log(`Successfully parsed ${parsedContent.questions.length} questions for: ${title}`);
         
         return new Response(
           JSON.stringify({ questions: parsedContent.questions }),
@@ -123,7 +126,7 @@ serve(async (req) => {
             const parsedJson = JSON.parse(extractedJson);
             
             if (Array.isArray(parsedJson.questions) && parsedJson.questions.length > 0) {
-              console.log("Successfully recovered JSON from malformed response");
+              console.log(`Successfully recovered JSON from malformed response for: ${title}`);
               return new Response(
                 JSON.stringify({ questions: parsedJson.questions }),
                 { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

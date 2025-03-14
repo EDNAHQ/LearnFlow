@@ -47,6 +47,13 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     return () => clearTimeout(timer);
   }, [index]);
 
+  // Reset questions state when content or topic changes
+  useEffect(() => {
+    setRelatedQuestions([]);
+    setQuestionsGenerated(false);
+    setLoadingQuestions(false);
+  }, [content, topic]);
+
   useEffect(() => {
     // Update loaded content when detailed content prop changes
     if (detailedContent) {
@@ -77,14 +84,16 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     }
   }, [loadedDetailedContent, stepId, title, content, topic, isLoading]);
 
-  // Generate related questions once content is loaded - but only once
+  // Generate related questions once content is loaded - but only once per content
   const generateRelatedQuestions = useCallback(async () => {
-    if (!loadedDetailedContent || !topic || questionsGenerated || relatedQuestions.length > 0) {
+    if (!loadedDetailedContent || !topic || questionsGenerated || loadingQuestions) {
       return;
     }
     
     setLoadingQuestions(true);
     try {
+      console.log(`Generating questions for: ${title} (ID: ${stepId})`);
+      
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
           content: loadedDetailedContent,
@@ -95,6 +104,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
       });
       
       if (response.data?.questions && Array.isArray(response.data.questions)) {
+        console.log(`Received ${response.data.questions.length} questions for: ${title}`);
         setRelatedQuestions(response.data.questions);
       }
     } catch (error) {
@@ -103,7 +113,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
       setLoadingQuestions(false);
       setQuestionsGenerated(true);
     }
-  }, [loadedDetailedContent, topic, title, questionsGenerated, relatedQuestions.length]);
+  }, [loadedDetailedContent, topic, title, stepId, questionsGenerated, loadingQuestions]);
 
   // Trigger question generation once content is loaded
   useEffect(() => {
