@@ -1,6 +1,5 @@
 
 import { useEffect, useState, useRef } from "react";
-import { toast } from "sonner";
 import ReactDOM from 'react-dom';
 import ContentMarginNote from "@/components/ContentMarginNote";
 import { MarginNote, generateMarginNotes } from "@/utils/marginNotesUtils";
@@ -33,9 +32,7 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
       
       if (notes.length > 0) {
         setMarginNotes(notes);
-        toast.success(`${notes.length} AI insights added to enhance your learning`, {
-          position: "bottom-right",
-        });
+        // Toast notification removed as requested
       } else {
         setMarginNotes([]);
       }
@@ -57,7 +54,7 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
     }
   }, [content, topic, marginNotesGenerated, loadingMarginNotes]);
 
-  // Add insights inline to paragraphs
+  // Add insights inline to paragraphs - improved for cross-device compatibility
   useEffect(() => {
     if (!contentRef.current || marginNotes.length === 0 || insightsAdded) return;
     
@@ -84,20 +81,27 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
             // Add the insight button at the end of the paragraph
             paragraph.classList.add('has-margin-note');
             
-            // Create a span to hold the insight button
+            // Create a span to hold the insight button and ensure it's properly positioned
             const insightSpan = document.createElement('span');
             insightSpan.className = 'insight-indicator';
+            insightSpan.style.display = 'inline-block';
+            insightSpan.style.verticalAlign = 'middle';
+            insightSpan.style.marginLeft = '8px';
             
             // Append the span to the paragraph
             paragraph.appendChild(insightSpan);
             
-            // Use ReactDOM to render the ContentMarginNote component
-            ReactDOM.render(
-              <ContentMarginNote insight={note.insight} key={note.id} />,
-              insightSpan
-            );
+            // Use ReactDOM.render to add the ContentMarginNote component
+            try {
+              ReactDOM.render(
+                <ContentMarginNote insight={note.insight} key={note.id} />,
+                insightSpan
+              );
+              notesAdded++;
+            } catch (error) {
+              console.error("Error rendering margin note:", error);
+            }
             
-            notesAdded++;
             break;
           }
         }
@@ -107,8 +111,8 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
       setInsightsAdded(true);
     };
     
-    // Short delay to ensure content is fully rendered
-    setTimeout(addInsightsToContent, 500);
+    // Increased delay to ensure content is fully rendered on all devices
+    setTimeout(addInsightsToContent, 800);
   }, [marginNotes, content, insightsAdded]);
 
   return null; // This is a non-visual component
