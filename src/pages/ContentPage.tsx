@@ -64,14 +64,14 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="container py-8 px-2 sm:px-4">
+      <div className="w-full py-8 px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full mx-auto"
+          className="w-full"
         >
-          <div className="flex justify-between items-center mb-6 w-full">
+          <div className="flex justify-between items-center mb-6 w-full max-w-7xl mx-auto">
             <ContentProgress 
               topic={topic} 
               currentStep={currentStep} 
@@ -79,8 +79,8 @@ const ContentPage = () => {
             />
           </div>
 
-          <div className="mb-6 w-full max-w-[860px] mx-auto px-2 sm:px-8">
-            <div className="flex items-center justify-between mb-3">
+          <div className="mb-6 w-full">
+            <div className="flex items-center justify-between mb-3 max-w-7xl mx-auto">
               <h2 className="text-xl font-semibold text-gray-800 w-full">
                 {currentStepData?.title}
               </h2>
@@ -95,15 +95,17 @@ const ContentPage = () => {
             />
           </div>
 
-          <ContentNavigation 
-            currentStep={currentStep}
-            totalSteps={steps.length}
-            onPrevious={handleBack}
-            onComplete={handleComplete}
-            isLastStep={isLastStep}
-            isSubmitting={isSubmitting}
-            projectCompleted={projectCompleted}
-          />
+          <div className="max-w-7xl mx-auto">
+            <ContentNavigation 
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              onPrevious={handleBack}
+              onComplete={handleComplete}
+              isLastStep={isLastStep}
+              isSubmitting={isSubmitting}
+              projectCompleted={projectCompleted}
+            />
+          </div>
         </motion.div>
       </div>
     </ContentPageLayout>

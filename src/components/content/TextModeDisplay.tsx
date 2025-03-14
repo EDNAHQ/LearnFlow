@@ -25,7 +25,7 @@ const TextModeDisplay = ({
     : content;
 
   return (
-    <div className="px-0 sm:px-4">
+    <div className="w-full">
       <ContentSection 
         title={title}
         content={cleanedContent}

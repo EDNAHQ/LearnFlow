@@ -26,7 +26,7 @@ const ContentDisplay = ({
   const { mode } = useContentMode();
 
   return (
-    <div className="w-full max-w-[860px] mx-auto relative">
+    <div className="w-full relative">
       <Tabs value={mode} className="w-full">
         <TabsContent value="text">
           <TextModeDisplay 

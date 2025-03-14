@@ -18,7 +18,7 @@ const SlideModeDisplay = ({
     (content.includes(':') ? content.split(':').slice(1).join(':').trim() : content);
   
   return (
-    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full max-w-[860px] mx-auto">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden w-full mx-auto">
       <PresentationView 
         content={displayContent} 
         title={title}
