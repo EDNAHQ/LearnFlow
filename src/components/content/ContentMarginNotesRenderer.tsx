@@ -19,7 +19,7 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
 
   // Reset states when content changes
   useEffect(() => {
-    setMarginNototes = [];
+    setMarginNotes([]);
     setMarginNotesGenerated(false);
     setInsightsAdded(false);
     
