@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -69,7 +68,7 @@ const ContentPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full"
+          className="w-full mx-auto"
         >
           <div className="flex justify-between items-center mb-6 w-full">
             <ContentProgress 
@@ -77,12 +76,11 @@ const ContentPage = () => {
               currentStep={currentStep} 
               totalSteps={steps.length} 
             />
-            {/* ModeToggle removed from here as requested */}
           </div>
 
-          <div className="mb-6 w-full max-w-[860px] mx-auto">
+          <div className="mb-6 w-full max-w-[860px] mx-auto px-8">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold text-gray-800 w-full max-w-[860px]">
+              <h2 className="text-xl font-semibold text-gray-800 w-full">
                 {currentStepData?.title}
               </h2>
             </div>

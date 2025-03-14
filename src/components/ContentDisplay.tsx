@@ -20,9 +20,9 @@ const ContentDisplay = ({ title, content, index, detailedContent, pathId, topic 
   const { mode } = useContentMode();
 
   return (
-    <div className="w-full max-w-[860px] mx-auto">
+    <div className="w-full max-w-[860px] mx-auto relative">
       <Tabs value={mode} className="w-full">
-        <TabsContent value="text">
+        <TabsContent value="text" className="px-4">
           <ContentSection 
             title={title}
             content={content}

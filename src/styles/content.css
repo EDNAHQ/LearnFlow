@@ -1,68 +1,15 @@
 
-/* Content section styling for ReactMarkdown component */
-
-.content-section {
-  width: 100%;
-  min-width: 100%;
+/* Add this to your content.css file */
+.has-margin-note {
   position: relative;
+  background-color: rgba(109, 66, 239, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-right: 3rem; /* Make room for the margin note */
+  border-right: 3px solid rgba(109, 66, 239, 0.2);
 }
 
-/* Enhanced code block styling with language tag */
-.content-section pre {
+.margin-notes-container {
   position: relative;
-  width: 100%;
-}
-
-.content-section pre code {
-  padding-top: 2rem; /* Space for language tag */
-  width: 100%;
-}
-
-.language-tag {
-  @apply absolute top-0 right-0 px-3 py-1 bg-brand-purple text-xs font-semibold text-white rounded-bl-md;
-}
-
-/* Custom styles for specific content types */
-.content-section blockquote::before {
-  content: '"';
-  position: absolute;
-  top: -0.5rem;
-  left: -0.5rem;
-  font-size: 3rem;
-  color: rgba(109, 66, 239, 0.2);
-  font-family: serif;
-}
-
-/* List items should display properly */
-.content-section ul li,
-.content-section ol li {
-  display: list-item;
-  width: 100%;
-}
-
-/* Styles for special content features */
-.content-callout {
-  @apply bg-brand-purple/5 border-l-4 border-brand-purple p-4 rounded-r-lg my-6 w-full;
-}
-
-.content-callout-title {
-  @apply font-bold text-brand-purple mb-2;
-}
-
-/* Paragraph with margin notes */
-.content-section p[data-has-note] {
-  @apply relative;
-}
-
-/* Provide a slight highlight for paragraphs with notes */
-.content-section p[data-has-note]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -8px;
-  width: 3px;
-  background: linear-gradient(to bottom, #6D42EF, #E84393);
-  border-radius: 3px;
-  opacity: 0.5;
+  z-index: 20;
 }
