@@ -60,14 +60,15 @@ export const useContentNavigation = () => {
     steps,
     isLoading,
     markStepAsComplete,
+    setSteps
   } = useLearningSteps(pathId, topic);
 
-  // Check if background generation is happening
+  // Check if steps have content
   useEffect(() => {
     if (steps.length > 0) {
-      const stepsWithoutContent = steps.filter(step => !step.detailed_content).length;
-      setGeneratedSteps(steps.length - stepsWithoutContent);
-      setGeneratingContent(stepsWithoutContent > 0);
+      const stepsWithContent = steps.filter(step => step.detailed_content).length;
+      setGeneratedSteps(stepsWithContent);
+      setGeneratingContent(stepsWithContent < steps.length);
     }
   }, [steps]);
 
@@ -116,6 +117,7 @@ export const useContentNavigation = () => {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef
+    topRef,
+    setSteps
   };
 };

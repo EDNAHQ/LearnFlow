@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import ContentProgress from "@/components/content/ContentProgress";
 import ContentDisplay from "@/components/ContentDisplay";
 import ContentNavigation from "@/components/content/ContentNavigation";
+import ContentLoader from "@/components/content/ContentLoader";
 
 interface ContentMainDisplayProps {
   topic: string | null;
@@ -35,6 +36,8 @@ const ContentMainDisplay = ({
 }: ContentMainDisplayProps) => {
   if (!topic) return null;
   
+  const isGeneratingContent = currentStepData && !currentStepData.detailed_content;
+  
   return (
     <div className="container max-w-[860px] mx-auto py-8">
       <motion.div
@@ -58,15 +61,20 @@ const ContentMainDisplay = ({
               {currentStepData?.title || "Loading..."}
             </h2>
           </div>
-          <ContentDisplay 
-            title={currentStepData?.title || ""}
-            content={safeContent}
-            index={currentStep}
-            detailedContent={currentStepData?.detailed_content}
-            pathId={pathId}
-            topic={topic}
-            isFirstStep={currentStep === 0}
-          />
+          
+          {isGeneratingContent ? (
+            <ContentLoader message={`Generating content for "${currentStepData?.title}"...`} />
+          ) : (
+            <ContentDisplay 
+              title={currentStepData?.title || ""}
+              content={safeContent}
+              index={currentStep}
+              detailedContent={currentStepData?.detailed_content}
+              pathId={pathId}
+              topic={topic}
+              isFirstStep={currentStep === 0}
+            />
+          )}
         </div>
 
         <div>
@@ -78,6 +86,7 @@ const ContentMainDisplay = ({
             isLastStep={isLastStep}
             isSubmitting={isSubmitting}
             projectCompleted={projectCompleted}
+            isGeneratingContent={isGeneratingContent}
           />
         </div>
       </motion.div>
