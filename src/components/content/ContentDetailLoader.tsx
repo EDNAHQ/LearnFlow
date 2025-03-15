@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { generateStepContent } from "@/utils/learningUtils";
+import { generateStepContent } from "@/utils/learning";
 import { toast } from "sonner";
 
 interface ContentDetailLoaderProps {
