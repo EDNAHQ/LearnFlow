@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
@@ -20,10 +19,9 @@ interface ContentSectionProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
-  isFirstStep?: boolean;
 }
 
-const ContentSection = ({ title, content, index, detailedContent, topic, isFirstStep = false }: ContentSectionProps) => {
+const ContentSection = ({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
@@ -41,10 +39,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic, isFirst
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Extract step ID from content if it's in expected format
-  // Important: Don't fabricate IDs that look like UUIDs but aren't
-  const stepId = typeof content === 'string' && content.includes(':') 
-    ? content.split(":")[0].trim() 
-    : ''; 
+  const stepId = content.includes(':') ? content.split(":")[0] : '';
   
   // Reset state when content changes
   useEffect(() => {
@@ -117,11 +112,10 @@ const ContentSection = ({ title, content, index, detailedContent, topic, isFirst
         topic={topic}
         detailedContent={detailedContent}
         onContentLoaded={handleContentLoaded}
-        isFirstStep={isFirstStep}
       />
       
       {!loadedDetailedContent ? (
-        <ContentLoader message={isFirstStep ? "Preparing your first step..." : "Loading content..."} />
+        <ContentLoader />
       ) : (
         <div 
           className="prose prose-gray max-w-none w-full"

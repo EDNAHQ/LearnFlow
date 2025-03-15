@@ -54,10 +54,10 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           
           setSteps(processedData);
           
-          // Check for steps with content
-          const stepsWithContent = processedData.filter(step => step.detailed_content).length;
-          setGeneratedSteps(stepsWithContent);
-          setGeneratingContent(stepsWithContent < processedData.length);
+          // Check for background generation status
+          const stepsWithoutContent = processedData.filter(step => !step.detailed_content).length;
+          setGeneratedSteps(processedData.length - stepsWithoutContent);
+          setGeneratingContent(stepsWithoutContent > 0);
         } else {
           console.log("No learning steps found for path:", pathId);
           toast.error("No learning content found");
@@ -72,7 +72,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
     fetchLearningSteps();
     
-    // Set up subscription to track changes in steps
+    // Set up subscription to track generation progress
     const subscription = supabase
       .channel(`steps-${pathId}`)
       .on('postgres_changes', 
@@ -84,30 +84,26 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
         }, 
         (payload) => {
           console.log('Step updated:', payload);
-          
-          // Update the changed step in state
+          // Update only the changed step in the state
           setSteps(prevSteps => 
             prevSteps.map(step => 
               step.id === payload.new.id 
                 ? {
                     ...step,
-                    detailed_content: payload.new.detailed_content,
-                    completed: payload.new.completed
+                    detailed_content: payload.new.detailed_content
                   }
                 : step
             )
           );
           
-          // Check if this update included adding content
-          if (payload.new.detailed_content && (!payload.old.detailed_content || payload.old.detailed_content === null)) {
-            setGeneratedSteps(prev => {
-              const newCount = prev + 1;
-              if (newCount >= steps.length) {
-                setGeneratingContent(false);
-              }
-              return newCount;
-            });
-          }
+          // Update generation progress
+          setGeneratedSteps(prev => {
+            const newValue = prev + 1;
+            if (newValue >= steps.length) {
+              setGeneratingContent(false);
+            }
+            return newValue;
+          });
         }
       )
       .subscribe();

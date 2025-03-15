@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { generateStepContent } from "@/utils/learning";
-import { toast } from "sonner";
+import { generateStepContent } from "@/utils/learningUtils";
 
 interface ContentDetailLoaderProps {
   stepId: string;
@@ -10,7 +9,6 @@ interface ContentDetailLoaderProps {
   topic: string | undefined;
   detailedContent: string | null | undefined;
   onContentLoaded: (content: string) => void;
-  isFirstStep?: boolean;
 }
 
 const ContentDetailLoader = ({ 
@@ -19,94 +17,56 @@ const ContentDetailLoader = ({
   content, 
   topic, 
   detailedContent, 
-  onContentLoaded,
-  isFirstStep = false
+  onContentLoaded 
 }: ContentDetailLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 2;
   
   // Update loaded content when detailed content prop changes
   useEffect(() => {
     if (detailedContent && typeof detailedContent === 'string') {
-      console.log(`Using provided detailed content for step: ${stepId}`);
+      console.log("Using provided detailed content");
       onContentLoaded(detailedContent);
     }
-  }, [detailedContent, onContentLoaded, stepId]);
+  }, [detailedContent, onContentLoaded]);
 
   // If no detailed content, try to load it
   useEffect(() => {
     const loadContent = async () => {
-      // Only proceed if the stepId is a valid UUID (not "step-X")
-      const isValidStepId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stepId);
-      
-      // Only load if we don't have detailed content, have required data, aren't already loading,
-      // and haven't exceeded retry attempts
-      if (!detailedContent && isValidStepId && topic && !isLoading && retryCount < MAX_RETRIES) {
-        console.log(`Generating content for step ID: ${stepId} (isFirstStep: ${isFirstStep}, attempt: ${retryCount + 1}/${MAX_RETRIES})`);
+      // Only load if we don't have detailed content and aren't already loading
+      if (!detailedContent && stepId && topic && !isLoading) {
+        console.log("Generating content for step:", stepId);
         setIsLoading(true);
-        setHasAttemptedLoad(true);
         
         try {
           // Extract description from content
-          const stepDescription = content.includes(':') 
+          const description = content.includes(':') 
             ? content.split(":")[1]?.trim() || ""
             : content;
             
           const generatedContent = await generateStepContent(
-            { id: stepId, title, description: stepDescription },
+            { id: stepId, title, description },
             topic,
-            !isFirstStep // Only use silent mode for non-first steps
+            true // Add silent parameter to avoid UI updates
           );
           
-          if (typeof generatedContent === 'string' && generatedContent.length > 50) {
-            console.log(`Content generated successfully for step: ${stepId} (${generatedContent.length} chars)`);
+          if (typeof generatedContent === 'string') {
+            console.log("Content generated successfully");
             onContentLoaded(generatedContent);
-            
-            if (isFirstStep) {
-              toast.success("Content is ready!", {
-                id: "first-step-ready",
-                duration: 3000
-              });
-            }
           } else {
-            console.error(`Generated content is invalid for step ${stepId}:`, generatedContent);
-            setRetryCount(prev => prev + 1);
-            
-            // If this is the last retry, provide a fallback
-            if (retryCount + 1 >= MAX_RETRIES) {
-              const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**Key Points to Know:**\n\n- This section covers ${title}\n- ${stepDescription}\n\nOur team is working to resolve this issue as quickly as possible.`;
-              onContentLoaded(fallbackContent);
-              console.log(`Using fallback content for step: ${stepId} after ${MAX_RETRIES} failed attempts`);
-            }
+            console.error("Generated content is not a string:", generatedContent);
+            onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
           }
         } catch (error) {
-          console.error(`Error loading content for step ${stepId}:`, error);
-          setRetryCount(prev => prev + 1);
-          
-          // If this is the last retry, provide a fallback
-          if (retryCount + 1 >= MAX_RETRIES) {
-            const stepDescription = content.includes(':') 
-              ? content.split(":")[1]?.trim() || ""
-              : content;
-            const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**What You Should Know:**\n\n- This section covers ${title}\n- ${stepDescription}\n\nOur team is working to resolve this issue as quickly as possible.`;
-            onContentLoaded(fallbackContent);
-            console.log(`Using fallback content for step: ${stepId} after error`);
-          }
+          console.error("Error loading content:", error);
+          onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
         } finally {
           setIsLoading(false);
         }
-      } else if (!isValidStepId && !detailedContent) {
-        // If stepId is not valid, use a fallback content without trying to generate
-        console.warn(`Invalid step ID format: "${stepId}". Using fallback content without attempting generation.`);
-        const fallbackContent = `# ${title}\n\n${content}\n\nThis content is being prepared. Please check back in a moment.`;
-        onContentLoaded(fallbackContent);
       }
     };
     
     loadContent();
-  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded, isFirstStep, retryCount]);
+  }, [detailedContent, stepId, title, content, topic, isLoading, onContentLoaded]);
 
   return null; // This is a non-visual component
 };

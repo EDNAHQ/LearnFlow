@@ -5,25 +5,19 @@ import { Home, ArrowLeft, Loader2 } from "lucide-react";
 import { ModeToggle } from "@/components/ModeToggle";
 
 interface ContentHeaderProps {
-  topic: string | null;
-  pathId: string | null;
-  isLoading: boolean;
-  onBack?: () => void;
-  onHome?: () => void;
-  generatingContent?: boolean;
-  generatedSteps?: number;
-  totalSteps?: number;
+  onBack: () => void;
+  onHome: () => void;
+  generatingContent: boolean;
+  generatedSteps: number;
+  totalSteps: number;
 }
 
 const ContentHeader = ({
-  topic,
-  pathId,
-  isLoading,
   onBack,
   onHome,
-  generatingContent = false,
-  generatedSteps = 0,
-  totalSteps = 0
+  generatingContent,
+  generatedSteps,
+  totalSteps
 }: ContentHeaderProps) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-black">
@@ -56,13 +50,17 @@ const ContentHeader = ({
           </div>
 
           <div className="flex items-center gap-3">
+            <ModeToggle />
+            
             {generatingContent && (
-              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-white px-3 py-1 rounded-full animate-pulse">
-                <Loader2 className="w-3 h-3 animate-spin text-[#E84393]" />
+              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
+                <Loader2 className="w-3 h-3 animate-spin" />
                 <span>Generating ({generatedSteps}/{totalSteps})</span>
               </div>
             )}
-            <ModeToggle />
+            <div className="text-sm font-medium text-white">
+              LearnFlow
+            </div>
           </div>
         </motion.div>
       </div>

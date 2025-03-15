@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowLeft, ArrowRightCircle, CheckCircle, Loader2 } from "lucide-react";
 
 interface ContentNavigationProps {
   currentStep: number;
@@ -9,9 +8,8 @@ interface ContentNavigationProps {
   onPrevious: () => void;
   onComplete: () => void;
   isLastStep: boolean;
-  isSubmitting?: boolean;
-  projectCompleted?: boolean;
-  isGeneratingContent?: boolean;
+  isSubmitting: boolean;
+  projectCompleted: boolean;
 }
 
 const ContentNavigation = ({
@@ -20,54 +18,50 @@ const ContentNavigation = ({
   onPrevious,
   onComplete,
   isLastStep,
-  isSubmitting = false,
-  projectCompleted = false,
-  isGeneratingContent = false
+  isSubmitting,
+  projectCompleted
 }: ContentNavigationProps) => {
   return (
-    <motion.div 
-      className="flex justify-between items-center"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <div className="flex justify-between w-full max-w-[860px] mx-auto">
       <Button
+        variant="secondary"
         onClick={onPrevious}
-        variant="outline"
-        className="flex items-center gap-1"
-        disabled={isSubmitting}
+        disabled={currentStep === 0}
+        className="text-gray-800"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 mr-2" />
         Previous
       </Button>
-
-      <Button
-        onClick={onComplete}
-        className="ml-auto flex items-center gap-1.5 bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
-        disabled={isSubmitting || projectCompleted || isGeneratingContent}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {isLastStep ? "Finalizing..." : "Saving..."}
-          </>
-        ) : projectCompleted ? (
-          <>
-            <CheckCircle2 className="w-4 h-4" />
-            Completed
-          </>
-        ) : isGeneratingContent ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Generating...
-          </>
-        ) : (
-          <>
-            {isLastStep ? "Complete Project" : "Mark Complete"}
-            <ArrowRight className="w-4 h-4" />
-          </>
-        )}
-      </Button>
-    </motion.div>
+      
+      {!isLastStep ? (
+        <Button
+          className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white"
+          onClick={onComplete}
+        >
+          Mark Complete
+          <ArrowRightCircle className="w-4 h-4 ml-2" />
+        </Button>
+      ) : (
+        <Button
+          className={`bg-[#F5B623] hover:bg-[#F5B623]/90 text-white ${projectCompleted ? 'cursor-not-allowed' : ''}`}
+          onClick={onComplete}
+          disabled={isSubmitting || projectCompleted}
+        >
+          {isSubmitting ? (
+            <>
+              Submitting...
+              <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+            </>
+          ) : projectCompleted ? (
+            <>
+              Completed <CheckCircle className="w-4 h-4 ml-2" />
+            </>
+          ) : (
+            "Complete Project"
+          )}
+        </Button>
+      )}
+    </div>
   );
 };
 

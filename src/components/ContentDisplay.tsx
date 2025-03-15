@@ -13,7 +13,6 @@ interface ContentDisplayProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
-  isFirstStep?: boolean;
 }
 
 const ContentDisplay = ({ 
@@ -22,8 +21,7 @@ const ContentDisplay = ({
   index, 
   detailedContent, 
   pathId, 
-  topic,
-  isFirstStep = false
+  topic 
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
 
@@ -32,6 +30,11 @@ const ContentDisplay = ({
     ? content 
     : (content ? JSON.stringify(content) : "No content available");
   
+  // Similar handling for detailed content
+  const safeDetailedContent = typeof detailedContent === 'string'
+    ? detailedContent
+    : (detailedContent ? JSON.stringify(detailedContent) : null);
+
   return (
     <div className="w-full relative">
       <Tabs value={mode} className="w-full">
@@ -40,10 +43,9 @@ const ContentDisplay = ({
             title={title}
             content={safeContent}
             index={index}
-            detailedContent={detailedContent}
+            detailedContent={safeDetailedContent}
             pathId={pathId}
             topic={topic}
-            isFirstStep={isFirstStep}
           />
         </TabsContent>
         
@@ -51,7 +53,7 @@ const ContentDisplay = ({
           <SlideModeDisplay 
             title={title}
             content={safeContent}
-            detailedContent={detailedContent}
+            detailedContent={safeDetailedContent}
           />
         </TabsContent>
         

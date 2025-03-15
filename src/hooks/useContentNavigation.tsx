@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
-import { supabase } from "@/integrations/supabase/client";
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
@@ -12,7 +11,6 @@ export const useContentNavigation = () => {
   const [topic, setTopic] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [pathId, setPathId] = useState<string | null>(null);
-  const [pathTitle, setPathTitle] = useState<string | null>(null);
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
@@ -33,42 +31,20 @@ export const useContentNavigation = () => {
 
     setTopic(storedTopic);
     setPathId(storedPathId);
-    
-    // Fetch the path title if available
-    const fetchPathTitle = async () => {
-      if (storedPathId) {
-        try {
-          const { data, error } = await supabase
-            .from('learning_paths')
-            .select('title')
-            .eq('id', storedPathId)
-            .single();
-            
-          if (!error && data && data.title) {
-            setPathTitle(data.title);
-          }
-        } catch (error) {
-          console.error("Error fetching path title:", error);
-        }
-      }
-    };
-    
-    fetchPathTitle();
   }, [navigate, user]);
 
   const {
     steps,
     isLoading,
     markStepAsComplete,
-    setSteps
   } = useLearningSteps(pathId, topic);
 
-  // Check if steps have content
+  // Check if background generation is happening
   useEffect(() => {
     if (steps.length > 0) {
-      const stepsWithContent = steps.filter(step => step.detailed_content).length;
-      setGeneratedSteps(stepsWithContent);
-      setGeneratingContent(stepsWithContent < steps.length);
+      const stepsWithoutContent = steps.filter(step => !step.detailed_content).length;
+      setGeneratedSteps(steps.length - stepsWithoutContent);
+      setGeneratingContent(stepsWithoutContent > 0);
     }
   }, [steps]);
 
@@ -105,7 +81,6 @@ export const useContentNavigation = () => {
 
   return {
     topic,
-    pathTitle,
     currentStep,
     pathId,
     steps,
@@ -117,7 +92,6 @@ export const useContentNavigation = () => {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef,
-    setSteps
+    topRef
   };
 };

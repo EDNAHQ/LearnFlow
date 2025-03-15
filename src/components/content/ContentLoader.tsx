@@ -1,5 +1,5 @@
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Book } from "lucide-react";
 
 interface ContentLoaderProps {
   message?: string;
@@ -7,15 +7,13 @@ interface ContentLoaderProps {
 
 const ContentLoader = ({ message = "Content is being generated..." }: ContentLoaderProps) => {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 bg-[#1A1A1A] rounded-lg border border-gray-800 shadow-sm">
+    <div className="flex flex-col items-center justify-center py-12">
       <div className="relative">
-        <Loader2 className="w-16 h-16 animate-spin mb-4 text-[#6D42EF]" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-6 h-6 bg-[#E84393] rounded-full opacity-30"></div>
-        </div>
+        <Loader2 className="w-12 h-12 animate-spin mb-3 text-[#6D42EF]" />
+        <Book className="w-5 h-5 text-[#E84393] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
       </div>
-      <h3 className="text-lg font-semibold mb-2 text-white">{message}</h3>
-      <p className="text-sm text-gray-400 max-w-md text-center">We're creating high-quality learning content just for you. This should only take a few moments.</p>
+      <p className="text-gray-500 mt-4">{message}</p>
+      <p className="text-xs text-gray-400 mt-1">This may take a few moments</p>
     </div>
   );
 };
