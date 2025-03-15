@@ -65,7 +65,7 @@ const ContentDetailLoader = ({
             onContentLoaded(generatedContent);
             
             if (isFirstStep) {
-              toast.success("First step is ready! The rest will continue generating in the background.", {
+              toast.success("Content is ready!", {
                 id: "first-step-ready",
                 duration: 3000
               });

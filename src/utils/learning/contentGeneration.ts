@@ -35,6 +35,13 @@ export const generateStepContent = async (
     
     console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
     
+    if (!silent) {
+      toast.loading(`Generating content for "${step.title}"...`, {
+        id: `generating-step-${step.id}`,
+        duration: 10000
+      });
+    }
+    
     // Start the edge function to generate content
     const response = await supabase.functions.invoke('generate-learning-content', {
       body: {
@@ -48,6 +55,13 @@ export const generateStepContent = async (
     
     if (response.error) {
       console.error("Edge function error:", response.error);
+      
+      if (!silent) {
+        toast.error(`Failed to generate content. Please try again.`, {
+          id: `generating-step-${step.id}`
+        });
+      }
+      
       throw new Error("Failed to generate content");
     }
     
@@ -55,6 +69,13 @@ export const generateStepContent = async (
     
     if (!data || !data.content) {
       console.error("Invalid content format returned:", data);
+      
+      if (!silent) {
+        toast.error(`Invalid content format. Please try again.`, {
+          id: `generating-step-${step.id}`
+        });
+      }
+      
       throw new Error("Invalid content format");
     }
     
@@ -66,12 +87,34 @@ export const generateStepContent = async (
       
     if (updateError) {
       console.error("Error saving content to database:", updateError);
+      
+      if (!silent) {
+        toast.error(`Failed to save content. Please try again.`, {
+          id: `generating-step-${step.id}`
+        });
+      }
+      
       throw new Error("Failed to save content");
+    }
+    
+    if (!silent) {
+      toast.success(`Content for "${step.title}" is ready!`, {
+        id: `generating-step-${step.id}`,
+        duration: 3000
+      });
     }
     
     return data.content;
   } catch (error) {
     console.error("Error generating step content:", error);
+    
+    if (!silent) {
+      toast.error(`Failed to generate content. ${error.message}`, {
+        id: `generating-step-${step.id}`,
+        duration: 5000
+      });
+    }
+    
     throw new Error("Failed to generate content for this step");
   }
 };

@@ -15,7 +15,7 @@ const ContentLoader = ({ message = "Content is being generated..." }: ContentLoa
         </div>
       </div>
       <h3 className="text-lg font-semibold mb-2 text-white">{message}</h3>
-      <p className="text-sm text-gray-400 max-w-md text-center">This should only take a few seconds.</p>
+      <p className="text-sm text-gray-400 max-w-md text-center">We're creating high-quality learning content just for you. This should only take a few moments.</p>
     </div>
   );
 };

@@ -19,7 +19,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { stepId, topic, title, stepDescription, generatePlan, silent } = await req.json();
+    const { stepId, topic, title, stepNumber, totalSteps, generatePlan, silent } = await req.json();
     
     // Create a Supabase client for admin operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -236,23 +236,36 @@ serve(async (req) => {
 
         // Generate content with OpenAI
         const prompt = `
-        You are an expert educator creating learning content about "${topic}". 
+        You are an expert educator creating comprehensive learning content about "${topic}". 
         
-        The title of this section is: "${title}"
+        The title of this learning step (step ${stepNumber} of ${totalSteps}) is: "${title}"
         
-        Please generate detailed, educational content for this section. The content should be:
-        - Focused on ${topic}
-        - Educational and well-structured
-        - Around 500-700 words
+        Create detailed, high-quality educational content for this section. Your content should be:
+        - Deeply informative about ${topic}
+        - Educational with concrete examples
+        - Well-structured with clear headings
+        - 800-1200 words in length
+        - Professional but engaging tone
         
         Include:
         
-        1. A clear introduction to this aspect of ${topic}
-        2. Key concepts and principles that are relevant to "${title}"
-        3. Practical examples or applications where applicable
-        4. Summary of key takeaways
+        1. A brief introduction explaining what this specific aspect of ${topic} is about
+        2. Detailed explanations of the key concepts with real examples
+        3. How this fits into the broader ${topic} landscape
+        4. Common challenges and solutions related to "${title}"
+        5. Practical applications or implementations where relevant
+        6. Best practices and tips for mastery
+        7. A concise summary of the key takeaways
         
-        Format with markdown for headings, lists, and emphasis.
+        Use markdown formatting:
+        - # for main title (use the step title)
+        - ## for major section headings
+        - ### for subsections
+        - Lists with bullets (-)
+        - Code blocks with \`\`\` if relevant
+        
+        Make your content original, accurate, and valuable for someone wanting to master ${topic}.
+        DO NOT be repetitive or use placeholder text. Provide actual valuable content and examples.
         `;
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -264,11 +277,11 @@ serve(async (req) => {
           body: JSON.stringify({
             model: 'o3-mini',
             messages: [
-              { role: 'system', content: 'You are an expert educator creating focused learning content.' },
+              { role: 'system', content: 'You are an expert educator who creates comprehensive, accurate, and detailed learning content.' },
               { role: 'user', content: prompt }
             ],
             temperature: 0.7,
-            max_tokens: 2000
+            max_tokens: 3000
           }),
         });
 
@@ -307,27 +320,19 @@ serve(async (req) => {
 
 ## Introduction to ${title}
 
-This section covers important aspects of ${title} within ${topic}. As we explore this topic, we'll look at key concepts, practical applications, and common challenges.
+This section covers important concepts related to ${title} within the broader field of ${topic}. We're working on generating more detailed content for this section.
 
 ## Key Concepts
 
-Understanding ${title} requires familiarizing yourself with several core principles:
-
-- The fundamental elements that make up ${title}
-- How these elements interact within the ${topic} ecosystem
-- Why ${title} is important for mastering ${topic}
+Understanding ${title} requires familiarizing yourself with several core principles and techniques.
 
 ## Practical Applications
 
-${title} has several real-world applications, including:
-
-1. Solving common problems in ${topic}
-2. Improving efficiency in related processes
-3. Enabling new capabilities within the field
+${title} has numerous real-world applications that demonstrate its importance in ${topic}.
 
 ## Summary
 
-${title} is a critical component of ${topic}. By understanding its core principles and applications, you'll be better equipped to apply this knowledge effectively.`;
+${title} is a critical component of ${topic}. By understanding its principles and applications, you'll develop a stronger foundation in this field.`;
 
         // Save fallback content to the database
         const { error: updateError } = await supabase
