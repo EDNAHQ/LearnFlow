@@ -15,6 +15,7 @@ export type Database = {
           id: string
           is_approved: boolean | null
           is_completed: boolean | null
+          title: string | null
           topic: string
           updated_at: string
           user_id: string
@@ -24,6 +25,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
+          title?: string | null
           topic: string
           updated_at?: string
           user_id: string
@@ -33,6 +35,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
+          title?: string | null
           topic?: string
           updated_at?: string
           user_id?: string

@@ -9,7 +9,7 @@ interface ContentLoadingProps {
 
 const ContentLoading = ({ message = "Loading learning steps...", goToProjects }: ContentLoadingProps) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#1A1A1A] text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
       <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#6D42EF]" />
       <p className="text-lg">{message}</p>
       <Button 
