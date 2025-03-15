@@ -47,12 +47,12 @@ const ContentDetailLoader = ({
         
         try {
           // Extract description from content
-          const description = content.includes(':') 
+          const stepDescription = content.includes(':') 
             ? content.split(":")[1]?.trim() || ""
             : content;
             
           const generatedContent = await generateStepContent(
-            { id: stepId, title, description },
+            { id: stepId, title, description: stepDescription },
             topic,
             !isFirstStep // Only use silent mode for non-first steps
           );
@@ -73,7 +73,7 @@ const ContentDetailLoader = ({
             
             // If this is the last retry, provide a fallback
             if (retryCount + 1 >= MAX_RETRIES) {
-              const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**Key Points to Know:**\n\n- This section covers ${title}\n- ${description}\n\nOur team is working to resolve this issue as quickly as possible.`;
+              const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**Key Points to Know:**\n\n- This section covers ${title}\n- ${stepDescription}\n\nOur team is working to resolve this issue as quickly as possible.`;
               onContentLoaded(fallbackContent);
               console.log(`Using fallback content for step: ${stepId} after ${MAX_RETRIES} failed attempts`);
             }
@@ -84,7 +84,10 @@ const ContentDetailLoader = ({
           
           // If this is the last retry, provide a fallback
           if (retryCount + 1 >= MAX_RETRIES) {
-            const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**What You Should Know:**\n\n- This section covers ${title}\n- ${description}\n\nOur team is working to resolve this issue as quickly as possible.`;
+            const stepDescription = content.includes(':') 
+              ? content.split(":")[1]?.trim() || ""
+              : content;
+            const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**What You Should Know:**\n\n- This section covers ${title}\n- ${stepDescription}\n\nOur team is working to resolve this issue as quickly as possible.`;
             onContentLoaded(fallbackContent);
             console.log(`Using fallback content for step: ${stepId} after error`);
           }

@@ -5,10 +5,9 @@ import ContentLoader from "@/components/content/ContentLoader";
 import ContentDetailLoader from "@/components/content/ContentDetailLoader";
 import ContentQuestionsGenerator from "@/components/content/ContentQuestionsGenerator";
 import ContentRelatedQuestions from "@/components/ContentRelatedQuestions";
-import { contentStyles } from "@/utils/contentFormatter";
 
 interface TextModeDisplayProps {
-  stepData: any;
+  stepData?: any;
   title: string;
   topic?: string;
   safeContent: string;
@@ -74,12 +73,16 @@ const TextModeDisplay = ({
       )}
       
       <div className={isReady ? "opacity-100 transition-opacity duration-500" : "opacity-0 absolute"}>
-        <ReactMarkdown className={contentStyles}>
+        <ReactMarkdown className="prose prose-img:rounded-lg prose-headings:font-bold prose-a:text-blue-600 max-w-none">
           {content || `# ${title}\n\n${safeContent}`}
         </ReactMarkdown>
         
         {isReady && questions.length > 0 && (
-          <ContentRelatedQuestions questions={questions} />
+          <ContentRelatedQuestions 
+            questions={questions} 
+            isLoading={false}
+            onQuestionClick={() => {}}
+          />
         )}
       </div>
       

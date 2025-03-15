@@ -22,7 +22,12 @@ const ContentErrorBoundary = ({
   }
 
   if (!topic || !pathId) {
-    return <ContentError goToProjects={goToProjects} />;
+    return (
+      <ContentError 
+        goToProjects={goToProjects} 
+        message="Oops! We couldn't find your learning topic or project."
+      />
+    );
   }
 
   return <>{children}</>;

@@ -37,18 +37,22 @@ const ContentDisplay = ({
     ? detailedContent
     : (detailedContent ? JSON.stringify(detailedContent) : null);
 
+  // Create step data object to pass to TextModeDisplay
+  const stepData = {
+    id: `step-${index}`,
+    title: title,
+    detailed_content: safeDetailedContent
+  };
+
   return (
     <div className="w-full relative">
       <Tabs value={mode} className="w-full">
         <TabsContent value="text">
           <TextModeDisplay 
+            stepData={stepData}
             title={title}
-            content={safeContent}
-            index={index}
-            detailedContent={safeDetailedContent}
-            pathId={pathId}
             topic={topic}
-            isFirstStep={isFirstStep}
+            safeContent={safeContent}
           />
         </TabsContent>
         
