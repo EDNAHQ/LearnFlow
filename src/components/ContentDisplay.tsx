@@ -24,6 +24,7 @@ const ContentDisplay = ({
   topic 
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
+  const isFirstStep = index === 0;
 
   // Transform content to ensure it's a string
   const safeContent = typeof content === 'string' 
@@ -46,6 +47,7 @@ const ContentDisplay = ({
             detailedContent={safeDetailedContent}
             pathId={pathId}
             topic={topic}
+            isFirstStep={isFirstStep}
           />
         </TabsContent>
         

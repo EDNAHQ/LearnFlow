@@ -9,6 +9,7 @@ interface TextModeDisplayProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
+  isFirstStep?: boolean;
 }
 
 const TextModeDisplay = ({ 
@@ -17,7 +18,8 @@ const TextModeDisplay = ({
   index, 
   detailedContent, 
   pathId, 
-  topic 
+  topic,
+  isFirstStep = false
 }: TextModeDisplayProps) => {
   // Convert content to string, ensuring we handle all possible types
   const processContent = (value: any): string => {
@@ -52,6 +54,7 @@ const TextModeDisplay = ({
         detailedContent={safeDetailedContent}
         pathId={pathId}
         topic={topic}
+        isFirstStep={isFirstStep}
       />
     </div>
   );

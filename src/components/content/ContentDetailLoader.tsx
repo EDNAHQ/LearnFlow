@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { generateStepContent } from "@/utils/learningUtils";
+import { toast } from "sonner";
 
 interface ContentDetailLoaderProps {
   stepId: string;
@@ -9,6 +10,7 @@ interface ContentDetailLoaderProps {
   topic: string | undefined;
   detailedContent: string | null | undefined;
   onContentLoaded: (content: string) => void;
+  isFirstStep?: boolean;
 }
 
 const ContentDetailLoader = ({ 
@@ -17,7 +19,8 @@ const ContentDetailLoader = ({
   content, 
   topic, 
   detailedContent, 
-  onContentLoaded 
+  onContentLoaded,
+  isFirstStep = false
 }: ContentDetailLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
@@ -36,7 +39,7 @@ const ContentDetailLoader = ({
       // Only load if we don't have detailed content, have required data, aren't already loading,
       // and haven't attempted to load before
       if (!detailedContent && stepId && topic && !isLoading && !hasAttemptedLoad) {
-        console.log("Generating content for step:", stepId);
+        console.log(`Generating content for step: ${stepId} (isFirstStep: ${isFirstStep})`);
         setIsLoading(true);
         setHasAttemptedLoad(true);
         
@@ -49,12 +52,19 @@ const ContentDetailLoader = ({
           const generatedContent = await generateStepContent(
             { id: stepId, title, description },
             topic,
-            true // Add silent parameter to avoid UI updates
+            !isFirstStep // Only use silent mode for non-first steps
           );
           
           if (typeof generatedContent === 'string') {
             console.log("Content generated successfully");
             onContentLoaded(generatedContent);
+            
+            if (isFirstStep) {
+              toast.success("First step is ready! The rest will continue generating in the background.", {
+                id: "first-step-ready",
+                duration: 3000
+              });
+            }
           } else {
             console.error("Generated content is not a string:", generatedContent);
             onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
@@ -69,7 +79,7 @@ const ContentDetailLoader = ({
     };
     
     loadContent();
-  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded]);
+  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded, isFirstStep]);
 
   return null; // This is a non-visual component
 };

@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
@@ -19,9 +20,10 @@ interface ContentSectionProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
+  isFirstStep?: boolean;
 }
 
-const ContentSection = ({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
+const ContentSection = ({ title, content, index, detailedContent, topic, isFirstStep = false }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
@@ -112,10 +114,11 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         topic={topic}
         detailedContent={detailedContent}
         onContentLoaded={handleContentLoaded}
+        isFirstStep={isFirstStep}
       />
       
       {!loadedDetailedContent ? (
-        <ContentLoader />
+        <ContentLoader message={isFirstStep ? "Preparing your first step..." : "Loading content..."} />
       ) : (
         <div 
           className="prose prose-gray max-w-none w-full"
