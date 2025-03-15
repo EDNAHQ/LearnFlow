@@ -1,5 +1,5 @@
 
-import { BookOpen, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ContentErrorProps {
@@ -19,7 +19,7 @@ const ContentError = ({
         </div>
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">{message}</h2>
         <p className="text-gray-600 mb-8 text-lg">
-          There might be an issue with your connection or our servers. Please go back to your projects and try again.
+          There might be an issue with our content generation system. Please try again.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 

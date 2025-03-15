@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";
 import { generateLearningTitle } from "./generateLearningTitle";
-import { startBackgroundContentGeneration } from "./contentGeneration";
 
 // Generate a learning plan for a given topic
 export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
@@ -52,13 +51,6 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     if (existingSteps && existingSteps.length > 0) {
       console.log(`Found ${existingSteps.length} existing steps for path ${pathId}`);
       
-      // Start background generation for steps without detailed content
-      startBackgroundContentGeneration(existingSteps.map(step => ({
-        id: step.id,
-        title: step.title,
-        description: step.content || ""
-      })), topic, pathId);
-      
       return existingSteps.map(step => ({
         id: step.id,
         title: step.title,
@@ -94,7 +86,7 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     }
   }
   
-  // Now generate the learning plan steps using AI
+  // Generate the learning plan steps using AI
   try {
     console.log("Calling edge function to generate learning plan");
     

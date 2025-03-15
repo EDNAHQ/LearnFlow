@@ -19,9 +19,7 @@ export function useContentPageLogic() {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef,
-    generatingContent,
-    generatedSteps
+    topRef
   } = useContentNavigation();
 
   // Set "text" (Read) mode by default when component mounts
@@ -36,7 +34,7 @@ export function useContentPageLogic() {
     if (isLoading) {
       timeoutId = setTimeout(() => {
         toast.error(
-          "Content is taking longer than expected to load. You may want to try again later.", 
+          "Content is taking longer than expected to load. Please refresh the page.", 
           { 
             id: "content-loading-timeout",
             duration: 5000
@@ -49,19 +47,6 @@ export function useContentPageLogic() {
       clearTimeout(timeoutId);
     };
   }, [isLoading]);
-
-  // Show toast if we're still generating content after first step is loaded
-  useEffect(() => {
-    if (!isLoading && generatingContent && steps.length > 0) {
-      toast.info(
-        `Generated ${generatedSteps} of ${steps.length} steps. The rest will continue in the background.`,
-        {
-          id: "background-generation-status",
-          duration: 4000
-        }
-      );
-    }
-  }, [isLoading, generatingContent, generatedSteps, steps.length]);
 
   const {
     completePath,
@@ -92,8 +77,6 @@ export function useContentPageLogic() {
     isLastStep,
     currentStepData,
     topRef,
-    generatingContent,
-    generatedSteps,
     safeContent,
     isSubmitting,
     projectCompleted

@@ -32,11 +32,6 @@ const ContentDisplay = ({
     ? content 
     : (content ? JSON.stringify(content) : "No content available");
   
-  // Similar handling for detailed content
-  const safeDetailedContent = typeof detailedContent === 'string'
-    ? detailedContent
-    : (detailedContent ? JSON.stringify(detailedContent) : null);
-
   return (
     <div className="w-full relative">
       <Tabs value={mode} className="w-full">
@@ -45,7 +40,7 @@ const ContentDisplay = ({
             title={title}
             content={safeContent}
             index={index}
-            detailedContent={safeDetailedContent}
+            detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
             isFirstStep={isFirstStep}
@@ -56,7 +51,7 @@ const ContentDisplay = ({
           <SlideModeDisplay 
             title={title}
             content={safeContent}
-            detailedContent={safeDetailedContent}
+            detailedContent={detailedContent}
           />
         </TabsContent>
         
