@@ -22,15 +22,22 @@ const ContentPage = () => {
     topRef,
     safeContent,
     isSubmitting,
-    projectCompleted
+    projectCompleted,
+    generatingContent,
+    generatedSteps
   } = useContentPageLogic();
 
   return (
-    <ContentPageLayout ref={topRef}>
+    <ContentPageLayout ref={topRef} onGoToProjects={goToProjects}>
       <ContentHeader 
         topic={topic} 
         pathId={pathId}
         isLoading={isLoading}
+        onBack={handleBack}
+        onHome={goToProjects}
+        generatingContent={generatingContent}
+        generatedSteps={generatedSteps}
+        totalSteps={steps.length}
       />
       
       <ContentErrorBoundary 

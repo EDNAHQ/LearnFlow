@@ -5,19 +5,25 @@ import { Home, ArrowLeft, Loader2 } from "lucide-react";
 import { ModeToggle } from "@/components/ModeToggle";
 
 interface ContentHeaderProps {
-  onBack: () => void;
-  onHome: () => void;
-  generatingContent: boolean;
-  generatedSteps: number;
-  totalSteps: number;
+  topic: string | null;
+  pathId: string | null;
+  isLoading: boolean;
+  onBack?: () => void;
+  onHome?: () => void;
+  generatingContent?: boolean;
+  generatedSteps?: number;
+  totalSteps?: number;
 }
 
 const ContentHeader = ({
+  topic,
+  pathId,
+  isLoading,
   onBack,
   onHome,
-  generatingContent,
-  generatedSteps,
-  totalSteps
+  generatingContent = false,
+  generatedSteps = 0,
+  totalSteps = 0
 }: ContentHeaderProps) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-black">
