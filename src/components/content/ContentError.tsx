@@ -12,25 +12,28 @@ const ContentError = ({
   message = "Oops! It seems like we couldn't retrieve the learning topic."
 }: ContentErrorProps) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-4">
-      <div className="bg-red-50 rounded-xl p-8 max-w-md text-center border border-red-100 shadow-lg">
-        <div className="bg-red-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6">
-          <AlertTriangle className="w-10 h-10 text-red-500" />
+    <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white text-gray-800 p-4">
+      <div className="bg-red-50 rounded-xl p-8 max-w-lg text-center border border-red-100 shadow-lg">
+        <div className="bg-red-100 w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6">
+          <AlertTriangle className="w-12 h-12 text-red-500" />
         </div>
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">{message}</h2>
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-600 mb-8 text-lg">
           There might be an issue with your connection or our servers. Please go back to your projects and try again.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             onClick={goToProjects} 
-            className="bg-[#6D42EF] hover:bg-[#5835CB] text-white"
+            className="bg-[#6D42EF] hover:bg-[#5835CB] text-white text-lg py-6 px-8"
+            size="lg"
           >
             Go to Projects
           </Button>
           <Button 
             onClick={() => window.location.reload()} 
             variant="outline"
+            size="lg"
+            className="text-lg py-6 px-8"
           >
             Refresh Page
           </Button>

@@ -56,14 +56,13 @@ const ContentHeader = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <ModeToggle />
-            
             {generatingContent && (
-              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
-                <Loader2 className="w-3 h-3 animate-spin" />
+              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-white px-3 py-1 rounded-full animate-pulse">
+                <Loader2 className="w-3 h-3 animate-spin text-[#E84393]" />
                 <span>Generating ({generatedSteps}/{totalSteps})</span>
               </div>
             )}
+            <ModeToggle />
           </div>
         </motion.div>
       </div>

@@ -7,50 +7,67 @@ import ContentQuestionsGenerator from "@/components/content/ContentQuestionsGene
 import ContentRelatedQuestions from "@/components/ContentRelatedQuestions";
 
 interface TextModeDisplayProps {
-  stepData?: any;
   title: string;
+  content: string;
+  detailedContent?: string | null;
   topic?: string;
-  safeContent: string;
+  index: number;
+  pathId?: string;
+  isFirstStep?: boolean;
 }
 
 const TextModeDisplay = ({ 
-  stepData,
   title,
+  content,
+  detailedContent,
   topic,
-  safeContent
+  index,
+  pathId,
+  isFirstStep = false
 }: TextModeDisplayProps) => {
-  const [content, setContent] = useState<string>("");
+  const [renderedContent, setRenderedContent] = useState<string>("");
   const [questions, setQuestions] = useState<string[]>([]);
   const [isReady, setIsReady] = useState<boolean>(false);
   const [loadStartTime, setLoadStartTime] = useState<number>(Date.now());
 
+  // Extract step ID from content if it's in expected format
+  const stepId = typeof content === 'string' && content.includes(':') 
+    ? content.split(":")[0].trim() 
+    : '';
+
   const handleContentLoaded = (loadedContent: string) => {
-    setContent(loadedContent);
+    setRenderedContent(loadedContent);
     // Only mark as ready if we have substantial content
     if (loadedContent && loadedContent.length > 100) {
       setIsReady(true);
     }
   };
 
-  // Reset state when step changes
+  // Reset state when content changes
   useEffect(() => {
-    setContent("");
+    setRenderedContent("");
     setQuestions([]);
     setIsReady(false);
     setLoadStartTime(Date.now());
-  }, [stepData?.id]);
+    
+    // Initialize with detailed content if available
+    if (detailedContent && typeof detailedContent === 'string') {
+      setRenderedContent(detailedContent);
+      setIsReady(true);
+    }
+  }, [content, detailedContent, index]);
 
   // Add timeout to show content even if not fully ready
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (!isReady && content.length > 0) {
+      if (!isReady && renderedContent.length > 0) {
         console.log("Content load timeout - showing partial content");
         setIsReady(true);
       }
     }, 5000); // Show content after 5 seconds even if not "ready"
     
     return () => clearTimeout(timeoutId);
-  }, [isReady, content]);
+  }, [isReady, renderedContent]);
 
   // If loading takes too long, show whatever content we have
   useEffect(() => {
@@ -74,7 +91,7 @@ const TextModeDisplay = ({
       
       <div className={isReady ? "opacity-100 transition-opacity duration-500" : "opacity-0 absolute"}>
         <ReactMarkdown className="prose prose-img:rounded-lg prose-headings:font-bold prose-a:text-blue-600 max-w-none">
-          {content || `# ${title}\n\n${safeContent}`}
+          {renderedContent || `# ${title}\n\n${content}`}
         </ReactMarkdown>
         
         {isReady && questions.length > 0 && (
@@ -86,22 +103,25 @@ const TextModeDisplay = ({
         )}
       </div>
       
-      <ContentDetailLoader
-        stepId={stepData?.id}
-        title={stepData?.title || title}
-        content={safeContent}
-        topic={topic}
-        detailedContent={stepData?.detailed_content}
-        onContentLoaded={handleContentLoaded}
-        isFirstStep={true}
-      />
-      
-      {content.length > 200 && (
-        <ContentQuestionsGenerator
+      {/* Only attempt to load content if we have a valid step ID */}
+      {stepId && (
+        <ContentDetailLoader
+          stepId={stepId}
+          title={title}
           content={content}
           topic={topic}
-          title={stepData?.title || title}
-          stepId={stepData?.id}
+          detailedContent={detailedContent}
+          onContentLoaded={handleContentLoaded}
+          isFirstStep={isFirstStep}
+        />
+      )}
+      
+      {renderedContent.length > 200 && (
+        <ContentQuestionsGenerator
+          content={renderedContent}
+          topic={topic}
+          title={title}
+          stepId={stepId}
           onQuestionsGenerated={setQuestions}
         />
       )}

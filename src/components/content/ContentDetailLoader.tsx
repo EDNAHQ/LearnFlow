@@ -38,10 +38,13 @@ const ContentDetailLoader = ({
   // If no detailed content, try to load it
   useEffect(() => {
     const loadContent = async () => {
+      // Only proceed if the stepId is a valid UUID (not "step-X")
+      const isValidStepId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stepId);
+      
       // Only load if we don't have detailed content, have required data, aren't already loading,
       // and haven't exceeded retry attempts
-      if (!detailedContent && stepId && topic && !isLoading && retryCount < MAX_RETRIES) {
-        console.log(`Generating content for step: ${stepId} (isFirstStep: ${isFirstStep}, attempt: ${retryCount + 1}/${MAX_RETRIES})`);
+      if (!detailedContent && isValidStepId && topic && !isLoading && retryCount < MAX_RETRIES) {
+        console.log(`Generating content for step ID: ${stepId} (isFirstStep: ${isFirstStep}, attempt: ${retryCount + 1}/${MAX_RETRIES})`);
         setIsLoading(true);
         setHasAttemptedLoad(true);
         
@@ -94,6 +97,11 @@ const ContentDetailLoader = ({
         } finally {
           setIsLoading(false);
         }
+      } else if (!isValidStepId && !detailedContent) {
+        // If stepId is not valid, use a fallback content without trying to generate
+        console.warn(`Invalid step ID format: "${stepId}". Using fallback content without attempting generation.`);
+        const fallbackContent = `# ${title}\n\n${content}\n\nThis content is being prepared. Please check back in a moment.`;
+        onContentLoaded(fallbackContent);
       }
     };
     

@@ -41,7 +41,10 @@ const ContentSection = ({ title, content, index, detailedContent, topic, isFirst
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Extract step ID from content if it's in expected format
-  const stepId = content.includes(':') ? content.split(":")[0] : '';
+  // Important: Don't fabricate IDs that look like UUIDs but aren't
+  const stepId = typeof content === 'string' && content.includes(':') 
+    ? content.split(":")[0].trim() 
+    : ''; 
   
   // Reset state when content changes
   useEffect(() => {
