@@ -296,30 +296,37 @@ serve(async (req) => {
 
       console.log(`Generating content for step: ${title} (${stepNumber || '?'}/${totalSteps || '?'})`);
       
-      // Generate content with OpenAI with improved focus
+      // Enhanced prompt for more engaging, comprehensive content with better paragraph structure
       const prompt = `
-      You are an expert educator creating highly specialized learning content about "${topic}". 
+      You are an expert educator creating in-depth, engaging educational content about "${topic}".
       
-      This is part of a learning path about ${topic}.
+      This is part ${stepNumber || "?"} of a learning path about ${topic}, titled: "${title}"
       
-      The title of this section is: "${title}"
+      Create rich, informative educational content that deeply explores this topic. Your content should be:
       
-      Please generate detailed, educational content for this specific section. The content should be:
-      - Laser-focused on the exact aspect of ${topic} indicated in the title
-      - Relevant only to ${topic} without tangential discussions
-      - Educational and well-structured
+      1. COMPREHENSIVE: Cover the subject thoroughly with clear explanations
+      2. ENGAGING: Use a conversational tone that draws the reader in
+      3. WELL-STRUCTURED: Organize with clear sections, paragraphs, and transitions
+      4. PRACTICAL: Include real-world examples and applications where relevant
       
-      Include:
+      Content structure:
+      - Begin with an engaging introduction that clearly states what this section covers
+      - Develop 4-6 distinct points or concepts related to the topic, each in its own paragraph(s)
+      - For each major concept:
+        * Explain the core idea clearly
+        * Provide relevant examples or analogies 
+        * Connect it to the broader topic of ${topic}
+      - Include practical applications or real-world relevance
+      - Address common misconceptions or challenges
+      - End with a concise summary of key takeaways
       
-      1. A clear introduction to this specific aspect of ${topic}
-      2. Key concepts and principles that are directly relevant to "${title}" within the context of ${topic}
-      3. Practical examples or applications that demonstrate this specific aspect of ${topic}
-      4. Common misconceptions or challenges related specifically to this aspect of ${topic}
-      5. Summary of key takeaways that relate strictly to this aspect of ${topic}
+      Formatting requirements:
+      - Write in clear paragraphs with logical transitions between ideas
+      - Use proper formatting and spacing between paragraphs
+      - Aim for ~800-1000 words of substantial, valuable content
+      - Write in a way that's accessible but intellectually stimulating
       
-      Make it educational, engaging, and around 500-700 words. Format with paragraphs for readability.
-      
-      Remember to stay strictly on topic and focused on ${topic} as it relates to "${title}" - avoid introducing tangential concepts or going off on unrelated tangents.
+      Remember to stay precisely focused on "${title}" as it relates to ${topic}.
       `;
 
       try {
@@ -336,10 +343,11 @@ serve(async (req) => {
             messages: [
               { 
                 role: 'system', 
-                content: `You are an expert educator creating highly focused learning content. Your content should always be extremely specific to the requested topic and title without introducing unrelated concepts.` 
+                content: `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications.` 
               },
               { role: 'user', content: prompt }
             ],
+            max_tokens: 1500  // Increased token limit for more substantial content
           }),
         });
 
