@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { generateStepContent } from "@/utils/learningUtils";
+import { generateStepContent } from "@/utils/learning";
 
 interface ContentDetailLoaderProps {
   stepId: string;

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MainNav } from "@/components/MainNav";
 import LearningStep, { Step } from "@/components/LearningStep";
-import { generateLearningPlan } from "@/utils/learningUtils";
+import { generateLearningPlan } from "@/utils/learning";
 import { deleteLearningPath } from "@/utils/projectUtils";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, RefreshCw, LogIn, Sparkles, Trash2 } from "lucide-react";
