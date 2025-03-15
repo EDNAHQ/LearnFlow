@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 import { toast } from "sonner";

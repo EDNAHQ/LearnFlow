@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
 import { useContentNavigation } from "@/hooks/useContentNavigation";
@@ -99,6 +99,7 @@ const ContentPage = () => {
               detailedContent={currentStepData?.detailed_content}
               pathId={pathId}
               topic={topic}
+              isFirstStep={currentStep === 0}
             />
           </div>
 

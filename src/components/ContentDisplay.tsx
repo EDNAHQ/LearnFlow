@@ -13,6 +13,7 @@ interface ContentDisplayProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
+  isFirstStep?: boolean;
 }
 
 const ContentDisplay = ({ 
@@ -21,10 +22,10 @@ const ContentDisplay = ({
   index, 
   detailedContent, 
   pathId, 
-  topic 
+  topic,
+  isFirstStep = false
 }: ContentDisplayProps) => {
   const { mode } = useContentMode();
-  const isFirstStep = index === 0;
 
   // Transform content to ensure it's a string
   const safeContent = typeof content === 'string' 
