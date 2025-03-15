@@ -12,6 +12,7 @@ const ContentLoading = ({ message = "Loading learning steps...", goToProjects }:
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
       <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#6D42EF]" />
       <p className="text-lg">{message}</p>
+      <p className="text-sm text-gray-500 mt-2">This should only take a few seconds. If it takes longer, there might be an issue.</p>
       <Button 
         onClick={goToProjects} 
         className="bg-[#6D42EF] hover:bg-[#5835CB] mt-4"

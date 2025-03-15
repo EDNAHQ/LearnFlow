@@ -1,61 +1,107 @@
 
-import React from "react";
-import ContentSection from "../ContentSection";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import ContentLoader from "@/components/content/ContentLoader";
+import ContentDetailLoader from "@/components/content/ContentDetailLoader";
+import ContentQuestionsGenerator from "@/components/content/ContentQuestionsGenerator";
+import ContentRelatedQuestions from "@/components/ContentRelatedQuestions";
+import { contentStyles } from "@/utils/contentFormatter";
 
 interface TextModeDisplayProps {
+  stepData: any;
   title: string;
-  content: string;
-  index: number;
-  detailedContent?: string | null;
-  pathId?: string;
   topic?: string;
-  isFirstStep?: boolean;
+  safeContent: string;
 }
 
 const TextModeDisplay = ({ 
-  title, 
-  content, 
-  index, 
-  detailedContent, 
-  pathId, 
+  stepData,
+  title,
   topic,
-  isFirstStep = false
+  safeContent
 }: TextModeDisplayProps) => {
-  // Convert content to string, ensuring we handle all possible types
-  const processContent = (value: any): string => {
-    if (value === null || value === undefined) {
-      return "No content available";
-    }
+  const [content, setContent] = useState<string>("");
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [loadStartTime, setLoadStartTime] = useState<number>(Date.now());
 
-    if (typeof value === 'string') {
-      return value;
-    }
-
-    try {
-      if (typeof value === 'object') {
-        return JSON.stringify(value, null, 2);
-      }
-      return String(value);
-    } catch (error) {
-      console.error("Error processing content:", error);
-      return "Error displaying content";
+  const handleContentLoaded = (loadedContent: string) => {
+    setContent(loadedContent);
+    // Only mark as ready if we have substantial content
+    if (loadedContent && loadedContent.length > 100) {
+      setIsReady(true);
     }
   };
 
-  const safeContent = processContent(content);
-  const safeDetailedContent = detailedContent ? processContent(detailedContent) : null;
+  // Reset state when step changes
+  useEffect(() => {
+    setContent("");
+    setQuestions([]);
+    setIsReady(false);
+    setLoadStartTime(Date.now());
+  }, [stepData?.id]);
 
+  // Add timeout to show content even if not fully ready
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!isReady && content.length > 0) {
+        console.log("Content load timeout - showing partial content");
+        setIsReady(true);
+      }
+    }, 5000); // Show content after 5 seconds even if not "ready"
+    
+    return () => clearTimeout(timeoutId);
+  }, [isReady, content]);
+
+  // If loading takes too long, show whatever content we have
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!isReady) {
+        console.log("Content load timeout - forcing display");
+        setIsReady(true);
+      }
+    }, 10000); // Force content display after 10 seconds
+    
+    return () => clearTimeout(timeoutId);
+  }, [isReady]);
+
+  const loadTimeElapsed = Date.now() - loadStartTime;
+  
   return (
-    <div className="w-full">
-      <ContentSection 
-        title={title}
+    <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none px-4 md:px-8 relative">
+      {!isReady && (
+        <ContentLoader message={loadTimeElapsed > 5000 ? "Still working on generating content..." : "Preparing your content..."} />
+      )}
+      
+      <div className={isReady ? "opacity-100 transition-opacity duration-500" : "opacity-0 absolute"}>
+        <ReactMarkdown className={contentStyles}>
+          {content || `# ${title}\n\n${safeContent}`}
+        </ReactMarkdown>
+        
+        {isReady && questions.length > 0 && (
+          <ContentRelatedQuestions questions={questions} />
+        )}
+      </div>
+      
+      <ContentDetailLoader
+        stepId={stepData?.id}
+        title={stepData?.title || title}
         content={safeContent}
-        index={index}
-        detailedContent={safeDetailedContent}
-        pathId={pathId}
         topic={topic}
-        isFirstStep={isFirstStep}
+        detailedContent={stepData?.detailed_content}
+        onContentLoaded={handleContentLoaded}
+        isFirstStep={true}
       />
+      
+      {content.length > 200 && (
+        <ContentQuestionsGenerator
+          content={content}
+          topic={topic}
+          title={stepData?.title || title}
+          stepId={stepData?.id}
+          onQuestionsGenerated={setQuestions}
+        />
+      )}
     </div>
   );
 };

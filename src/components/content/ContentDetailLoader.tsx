@@ -24,22 +24,24 @@ const ContentDetailLoader = ({
 }: ContentDetailLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 2;
   
   // Update loaded content when detailed content prop changes
   useEffect(() => {
     if (detailedContent && typeof detailedContent === 'string') {
-      console.log("Using provided detailed content");
+      console.log(`Using provided detailed content for step: ${stepId}`);
       onContentLoaded(detailedContent);
     }
-  }, [detailedContent, onContentLoaded]);
+  }, [detailedContent, onContentLoaded, stepId]);
 
   // If no detailed content, try to load it
   useEffect(() => {
     const loadContent = async () => {
       // Only load if we don't have detailed content, have required data, aren't already loading,
-      // and haven't attempted to load before
-      if (!detailedContent && stepId && topic && !isLoading && !hasAttemptedLoad) {
-        console.log(`Generating content for step: ${stepId} (isFirstStep: ${isFirstStep})`);
+      // and haven't exceeded retry attempts
+      if (!detailedContent && stepId && topic && !isLoading && retryCount < MAX_RETRIES) {
+        console.log(`Generating content for step: ${stepId} (isFirstStep: ${isFirstStep}, attempt: ${retryCount + 1}/${MAX_RETRIES})`);
         setIsLoading(true);
         setHasAttemptedLoad(true);
         
@@ -55,8 +57,8 @@ const ContentDetailLoader = ({
             !isFirstStep // Only use silent mode for non-first steps
           );
           
-          if (typeof generatedContent === 'string') {
-            console.log("Content generated successfully");
+          if (typeof generatedContent === 'string' && generatedContent.length > 50) {
+            console.log(`Content generated successfully for step: ${stepId} (${generatedContent.length} chars)`);
             onContentLoaded(generatedContent);
             
             if (isFirstStep) {
@@ -66,12 +68,26 @@ const ContentDetailLoader = ({
               });
             }
           } else {
-            console.error("Generated content is not a string:", generatedContent);
-            onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
+            console.error(`Generated content is invalid for step ${stepId}:`, generatedContent);
+            setRetryCount(prev => prev + 1);
+            
+            // If this is the last retry, provide a fallback
+            if (retryCount + 1 >= MAX_RETRIES) {
+              const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**Key Points to Know:**\n\n- This section covers ${title}\n- ${description}\n\nOur team is working to resolve this issue as quickly as possible.`;
+              onContentLoaded(fallbackContent);
+              console.log(`Using fallback content for step: ${stepId} after ${MAX_RETRIES} failed attempts`);
+            }
           }
         } catch (error) {
-          console.error("Error loading content:", error);
-          onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
+          console.error(`Error loading content for step ${stepId}:`, error);
+          setRetryCount(prev => prev + 1);
+          
+          // If this is the last retry, provide a fallback
+          if (retryCount + 1 >= MAX_RETRIES) {
+            const fallbackContent = `# ${title}\n\nWe're experiencing some technical difficulties generating the detailed content for this step. Please try refreshing the page or check back later.\n\n**What You Should Know:**\n\n- This section covers ${title}\n- ${description}\n\nOur team is working to resolve this issue as quickly as possible.`;
+            onContentLoaded(fallbackContent);
+            console.log(`Using fallback content for step: ${stepId} after error`);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -79,7 +95,7 @@ const ContentDetailLoader = ({
     };
     
     loadContent();
-  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded, isFirstStep]);
+  }, [detailedContent, stepId, title, content, topic, isLoading, hasAttemptedLoad, onContentLoaded, isFirstStep, retryCount]);
 
   return null; // This is a non-visual component
 };
