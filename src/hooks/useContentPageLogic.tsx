@@ -19,7 +19,9 @@ export function useContentPageLogic() {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef
+    topRef,
+    generatingContent,
+    generatedSteps
   } = useContentNavigation();
 
   // Set "text" (Read) mode by default when component mounts
@@ -79,6 +81,8 @@ export function useContentPageLogic() {
     topRef,
     safeContent,
     isSubmitting,
-    projectCompleted
+    projectCompleted,
+    generatingContent,
+    generatedSteps
   };
 }
