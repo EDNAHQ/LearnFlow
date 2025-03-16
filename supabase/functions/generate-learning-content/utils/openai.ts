@@ -19,7 +19,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   
   try {
     const params: any = {
-      model: "gpt-4o-mini",
+      model: "gpt-4o-mini",  // Use the recommended model
       messages: [
         { 
           role: 'system', 
@@ -30,8 +30,10 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       max_tokens: maxTokens
     };
 
-    if (responseFormat) {
+    // Always set response_format for json_object to ensure proper formatting
+    if (responseFormat === "json_object") {
       params.response_format = { type: responseFormat };
+      console.log("Using JSON response format");
     }
 
     console.log("OpenAI request params:", JSON.stringify({
@@ -42,6 +44,20 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
 
     const completion = await openai.chat.completions.create(params);
     console.log("OpenAI response received");
+    
+    if (responseFormat === "json_object") {
+      // Validate JSON response
+      try {
+        const content = completion.choices[0].message.content;
+        JSON.parse(content || "{}"); // Validate JSON parsing
+        console.log("Successfully validated JSON response");
+      } catch (jsonError) {
+        console.error("Invalid JSON in OpenAI response:", jsonError);
+        console.error("Response content:", completion.choices[0].message.content);
+        throw new Error("Invalid JSON response from OpenAI");
+      }
+    }
+    
     return completion;
   } catch (error) {
     console.error('Error calling OpenAI API:', error);

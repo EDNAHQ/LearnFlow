@@ -29,11 +29,31 @@ const ContentPage = () => {
     generatingContent,
     generatedSteps
   } = useContentNavigation();
+  
+  const [initialLoading, setInitialLoading] = useState(true);
 
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
     setMode("text");
+    
+    // Set a timeout to disable initial loading state after content is loaded
+    // or after a maximum timeout (30 seconds)
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 30000);
+    
+    return () => clearTimeout(timer);
   }, [setMode]);
+  
+  // Update initial loading state when steps are loaded
+  useEffect(() => {
+    if (steps.length > 0 && !isLoading) {
+      // Make sure we show the nuggets screen for at least 5 seconds for a better experience
+      setTimeout(() => {
+        setInitialLoading(false);
+      }, 5000);
+    }
+  }, [steps, isLoading]);
 
   const {
     completePath,
@@ -44,7 +64,8 @@ const ContentPage = () => {
     onComplete: goToProjects
   });
 
-  if (isLoading) {
+  // Always show nugget loading screen for initial experience
+  if (initialLoading || isLoading) {
     return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} />;
   }
 

@@ -14,6 +14,16 @@ export const useContentNavigation = () => {
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Show initial loading state for at least 3 seconds
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -24,8 +34,11 @@ export const useContentNavigation = () => {
     const storedTopic = sessionStorage.getItem("learn-topic");
     const storedPathId = sessionStorage.getItem("learning-path-id");
 
+    console.log("Content navigation - stored values:", { storedTopic, storedPathId });
+
     if (!storedTopic || !storedPathId) {
       navigate("/projects");
+      toast.error("Learning session not found. Please start a new learning path.");
       return;
     }
 
@@ -37,16 +50,15 @@ export const useContentNavigation = () => {
     steps,
     isLoading,
     markStepAsComplete,
+    generatingContent: bgGenerating,
+    generatedSteps: bgGenerated,
   } = useLearningSteps(pathId, topic);
 
-  // Check if background generation is happening
+  // Update generation status from useLearningSteps
   useEffect(() => {
-    if (steps.length > 0) {
-      const stepsWithoutContent = steps.filter(step => !step.detailed_content).length;
-      setGeneratedSteps(steps.length - stepsWithoutContent);
-      setGeneratingContent(stepsWithoutContent > 0);
-    }
-  }, [steps]);
+    setGeneratingContent(bgGenerating);
+    setGeneratedSteps(bgGenerated);
+  }, [bgGenerating, bgGenerated]);
 
   const handleMarkComplete = async () => {
     if (!steps[currentStep]) return;
@@ -84,7 +96,7 @@ export const useContentNavigation = () => {
     currentStep,
     pathId,
     steps,
-    isLoading,
+    isLoading: isLoading || initialLoading, // Include initial loading state
     generatingContent,
     generatedSteps,
     handleMarkComplete,

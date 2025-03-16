@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Loader2, Lightbulb } from "lucide-react";
+import { Loader2, Lightbulb, Brain, Sparkles, BookOpen, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,26 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [nuggetIcons] = useState([
+    <Lightbulb className="w-6 h-6 mr-3 text-[#E84393] flex-shrink-0" />,
+    <Brain className="w-6 h-6 mr-3 text-[#F5B623] flex-shrink-0" />,
+    <Sparkles className="w-6 h-6 mr-3 text-[#6D42EF] flex-shrink-0" />,
+    <BookOpen className="w-6 h-6 mr-3 text-[#4AC29A] flex-shrink-0" />,
+    <Zap className="w-6 h-6 mr-3 text-[#FF9900] flex-shrink-0" />
+  ]);
+
+  // Simulate progress
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + 0.5;
+        return newProgress >= 100 ? 100 : newProgress;
+      });
+    }, 150);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchNuggets = async () => {
@@ -38,7 +58,12 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
             `${topic} concepts are used in various real-world applications.`,
             `Understanding ${topic} fundamentals helps in mastering advanced topics.`,
             `Regular practice is key to mastering ${topic}.`,
-            `${topic} knowledge connects to many other fields of study.`
+            `${topic} knowledge connects to many other fields of study.`,
+            `The human brain forms new neural connections when learning ${topic}.`,
+            `Breaking ${topic} into smaller chunks makes it easier to understand.`,
+            `Teaching someone else about ${topic} significantly improves your own understanding.`,
+            `Taking short breaks while studying ${topic} can improve retention.`,
+            `Visualizing ${topic} concepts can help you understand them better.`
           ]);
         }
       } catch (err) {
@@ -50,7 +75,12 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
           `${topic} concepts are used in various real-world applications.`,
           `Understanding ${topic} fundamentals helps in mastering advanced topics.`,
           `Regular practice is key to mastering ${topic}.`,
-          `${topic} knowledge connects to many other fields of study.`
+          `${topic} knowledge connects to many other fields of study.`,
+          `The human brain forms new neural connections when learning ${topic}.`,
+          `Breaking ${topic} into smaller chunks makes it easier to understand.`,
+          `Teaching someone else about ${topic} significantly improves your own understanding.`,
+          `Taking short breaks while studying ${topic} can improve retention.`,
+          `Visualizing ${topic} concepts can help you understand them better.`
         ]);
       } finally {
         setLoading(false);
@@ -65,25 +95,61 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
     if (nuggets.length > 0) {
       const interval = setInterval(() => {
         setCurrentNuggetIndex(prev => (prev + 1) % nuggets.length);
-      }, 8000); // Change every 8 seconds
+      }, 6000); // Change every 6 seconds
       
       return () => clearInterval(interval);
     }
   }, [nuggets]);
 
+  // Function to manually navigate nuggets
+  const goToNugget = (index: number) => {
+    setCurrentNuggetIndex(index);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#1A1A1A] text-gray-100 p-6">
       <div className="max-w-md w-full">
         <div className="flex flex-col items-center mb-8">
-          <Loader2 className="w-10 h-10 animate-spin mb-4 text-[#6D42EF]" />
-          <h2 className="text-xl font-bold mb-2">
-            Preparing your {topic} learning journey...
+          <motion.div 
+            className="relative mb-4"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+          >
+            <Loader2 className="w-12 h-12 animate-spin text-[#6D42EF]" />
+            <motion.div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              <BookOpen className="w-5 h-5 text-[#E84393]" />
+            </motion.div>
+          </motion.div>
+          
+          <h2 className="text-2xl font-bold mb-2 text-center">
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              Crafting your {topic} learning journey
+            </motion.span>
           </h2>
+          
           <p className="text-gray-400 text-center mb-6">
             We're creating personalized content for you. In the meantime, enjoy these insights:
           </p>
 
-          <div className="w-full h-[180px] mb-6 flex items-center justify-center">
+          {/* Progress bar */}
+          <div className="w-full h-2 bg-gray-800 rounded-full mb-6 overflow-hidden">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-[#6D42EF] to-[#E84393]"
+              initial={{ width: '0%' }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+
+          <div className="w-full h-[200px] mb-6 flex items-center justify-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentNuggetIndex}
@@ -93,11 +159,11 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
                 transition={{ duration: 0.5 }}
                 className="w-full"
               >
-                <Card className="bg-gradient-to-br from-[#25252A] to-[#1D1D22] border-[#6D42EF]/20 overflow-hidden">
+                <Card className="bg-gradient-to-br from-[#25252A] to-[#1D1D22] border-[#6D42EF]/20 overflow-hidden shadow-xl transform transition-all hover:scale-[1.01]">
                   <CardContent className="p-6">
                     <div className="flex">
-                      <Lightbulb className="w-6 h-6 mr-3 text-[#E84393] flex-shrink-0" />
-                      <p className="text-gray-100">
+                      {nuggetIcons[currentNuggetIndex % nuggetIcons.length]}
+                      <p className="text-gray-100 text-lg">
                         {nuggets[currentNuggetIndex]}
                       </p>
                     </div>
@@ -107,26 +173,39 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
             </AnimatePresence>
           </div>
 
-          {/* Nugget indicators */}
-          <div className="flex space-x-2 mb-6">
+          {/* Enhanced nugget indicators with click navigation */}
+          <div className="flex space-x-3 mb-6">
             {nuggets.map((_, index) => (
-              <div 
+              <button
                 key={index}
-                className={`h-2 w-2 rounded-full ${
+                onClick={() => goToNugget(index)}
+                className={`h-3 transition-all ${
                   index === currentNuggetIndex 
-                    ? 'bg-[#6D42EF]' 
-                    : 'bg-gray-600'
+                    ? 'w-6 bg-[#6D42EF] rounded-full' 
+                    : 'w-3 bg-gray-600 rounded-full hover:bg-gray-500'
                 }`}
               />
             ))}
           </div>
 
-          <Button 
-            onClick={goToProjects} 
-            className="bg-transparent border border-[#6D42EF] text-[#6D42EF] hover:bg-[#6D42EF]/10"
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
           >
-            Back to Projects
-          </Button>
+            <Button 
+              onClick={goToProjects} 
+              className="bg-transparent border border-[#6D42EF] text-[#6D42EF] hover:bg-[#6D42EF]/10"
+            >
+              Back to Projects
+            </Button>
+          </motion.div>
+          
+          <p className="text-gray-500 text-sm mt-4">
+            {progress < 100 ? 
+              `Generating content... ${Math.round(progress)}%` : 
+              "Content ready! You'll be redirected automatically."}
+          </p>
         </div>
       </div>
     </div>
