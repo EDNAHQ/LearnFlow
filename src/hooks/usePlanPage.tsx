@@ -97,7 +97,8 @@ export const usePlanPage = () => {
           id: "background-generation-start"
         });
         
-        navigate("/content");
+        // Navigate to the content page with the path ID to match the route structure
+        navigate(`/content/${pathId}`);
       } catch (error) {
         console.error("Error in handleApprove:", error);
         toast.error("Something went wrong. Please try again.");
