@@ -32,7 +32,7 @@ const ContentPage = () => {
     generatedSteps
   } = useContentNavigation();
   
-  // Use the custom hook instead of calling the component as a function
+  // Use the custom hook directly
   const { completePath, isSubmitting, projectCompleted } = useProjectCompletion(
     pathId, 
     () => goToProjects() // Directly use goToProjects as the onComplete callback

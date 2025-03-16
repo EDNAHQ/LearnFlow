@@ -13,19 +13,19 @@ export const useProjectCompletion = (pathId: string | null, onComplete?: () => v
     try {
       setIsSubmitting(true);
       
-      try {
-        const { error: updateError } = await supabase
-          .from('learning_paths')
-          .update({ is_approved: true, is_completed: true })
-          .eq('id', pathId);
-        
-        if (updateError) {
-          console.error("Error updating path:", updateError);
-          throw updateError;
-        }
-      } catch (error) {
-        console.error("Error updating path:", error);
-        throw error;
+      // First update the learning paths table
+      const { error: updateError } = await supabase
+        .from('learning_paths')
+        .update({ 
+          is_approved: true, 
+          is_completed: true 
+        })
+        .eq('id', pathId);
+      
+      if (updateError) {
+        console.error("Error updating path:", updateError);
+        toast.error("Failed to complete project");
+        return false;
       }
       
       toast.success("Congratulations! Learning project completed! 🎉");
