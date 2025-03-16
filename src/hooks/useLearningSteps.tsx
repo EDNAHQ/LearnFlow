@@ -55,9 +55,11 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           setSteps(processedData);
           
           // Check for background generation status
-          const stepsWithoutContent = processedData.filter(step => !step.detailed_content).length;
-          setGeneratedSteps(processedData.length - stepsWithoutContent);
-          setGeneratingContent(stepsWithoutContent > 0);
+          const stepsWithDetailedContent = processedData.filter(step => !!step.detailed_content).length;
+          setGeneratedSteps(stepsWithDetailedContent);
+          setGeneratingContent(stepsWithDetailedContent < processedData.length);
+          
+          console.log(`Content generation status: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
         } else {
           console.log("No learning steps found for path:", pathId);
           toast.error("No learning content found");
@@ -84,29 +86,37 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
         }, 
         (payload) => {
           console.log('Step updated:', payload);
-          // Update only the changed step in the state
-          setSteps(prevSteps => 
-            prevSteps.map(step => 
-              step.id === payload.new.id 
-                ? {
-                    ...step,
-                    detailed_content: payload.new.detailed_content
-                  }
-                : step
-            )
-          );
           
-          // Update generation progress
-          setGeneratedSteps(prev => {
-            const newValue = prev + 1;
-            if (newValue >= steps.length) {
-              setGeneratingContent(false);
-            }
-            return newValue;
-          });
+          // Only count as generated if detailed_content is present
+          if (payload.new.detailed_content) {
+            // Update only the changed step in the state
+            setSteps(prevSteps => 
+              prevSteps.map(step => 
+                step.id === payload.new.id 
+                  ? {
+                      ...step,
+                      detailed_content: payload.new.detailed_content
+                    }
+                  : step
+              )
+            );
+            
+            // Update generation progress
+            setGeneratedSteps(prev => {
+              const newValue = prev + 1;
+              console.log(`Generation progress updated: ${newValue}/${steps.length} steps`);
+              if (newValue >= steps.length) {
+                setGeneratingContent(false);
+                console.log("All content generation complete");
+              }
+              return newValue;
+            });
+          }
         }
       )
       .subscribe();
+      
+    console.log("Subscription to learning steps updates established");
       
     return () => {
       subscription.unsubscribe();

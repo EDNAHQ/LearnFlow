@@ -75,18 +75,29 @@ export const useContentNavigation = () => {
     setGeneratingContent(bgGenerating);
     setGeneratedSteps(bgGenerated);
     
-    // Only set initialLoading to false when content generation is complete
+    console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
+    
+    // Only set initialLoading to false when content generation is complete or after a timeout
     if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
       console.log("All content generated, ending loading state");
       setInitialLoading(false);
     }
   }, [bgGenerating, bgGenerated, steps.length]);
 
-  // Don't automatically disable initial loading - wait for content generation
+  // Add a timeout to eventually disable initial loading after 30 seconds
+  // This is a safety measure in case content generation takes too long
   useEffect(() => {
-    // Keep initialLoading true until content generation is complete
-    return () => {};
-  }, []);
+    if (initialLoading) {
+      const timer = setTimeout(() => {
+        if (initialLoading && steps.length > 0 && bgGenerated > 0) {
+          console.log("Loading timeout reached, ending loading state despite incomplete generation");
+          setInitialLoading(false);
+        }
+      }, 30000); // 30 seconds timeout
+      
+      return () => clearTimeout(timer);
+    }
+  }, [initialLoading, steps.length, bgGenerated]);
 
   const handleMarkComplete = async () => {
     if (!steps[currentStep]) return;

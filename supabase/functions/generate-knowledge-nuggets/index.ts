@@ -34,16 +34,23 @@ serve(async (req) => {
       apiKey: OPENAI_API_KEY
     });
     
-    // Call OpenAI to generate knowledge nuggets
+    // Call OpenAI to generate knowledge nuggets with improved prompt
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { 
           role: 'system', 
-          content: `You are an AI assistant that generates interesting knowledge nuggets about educational topics. 
-          Generate 5 short, engaging facts or insights about the given topic that would be interesting to someone 
-          who is about to learn about it in depth. Each nugget should be concise (under 100 characters) and provide 
-          a unique insight or perspective. Return the nuggets as a JSON array of strings.`
+          content: `You are an expert educator specializing in creating engaging, insightful knowledge nuggets. 
+          Your goal is to generate 5 fascinating, thought-provoking facts or insights about the given topic 
+          that will genuinely surprise and intrigue learners. Each nugget should:
+          
+          1. Be concise (under 120 characters) but impactful
+          2. Reveal a non-obvious or counterintuitive aspect about the topic
+          3. Connect the topic to real-world applications or surprising contexts
+          4. Use clear, precise language with specific examples where possible
+          5. Spark curiosity and the desire to learn more
+          
+          Avoid generic statements, obvious facts, or vague claims. Return the nuggets as a JSON array of strings.`
         },
         { role: 'user', content: `Topic: ${topic}` }
       ],
