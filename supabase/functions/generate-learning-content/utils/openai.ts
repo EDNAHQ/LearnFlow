@@ -27,8 +27,10 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
         },
         { role: 'user', content: prompt }
       ],
-      max_tokens: maxTokens
     };
+
+    // Use max_completion_tokens instead of max_tokens for o3-mini model
+    params.max_completion_tokens = maxTokens;
 
     // Always set response_format for json_object to ensure proper formatting
     if (responseFormat === "json_object") {
@@ -39,7 +41,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
     console.log("OpenAI request params:", JSON.stringify({
       model: params.model,
       response_format: params.response_format,
-      max_tokens: params.max_tokens
+      max_completion_tokens: params.max_completion_tokens
     }));
 
     const completion = await openai.chat.completions.create(params);
