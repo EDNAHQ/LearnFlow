@@ -67,9 +67,7 @@ const ContentPage = () => {
         pathId, 
         onComplete: () => {
           setProjectCompleted(true);
-          setTimeout(() => {
-            goToProjects();
-          }, 2000);
+          goToProjects(); // Directly navigate to projects
         } 
       });
       
@@ -111,13 +109,13 @@ const ContentPage = () => {
               totalSteps={steps.length} 
             />
           </div>
+          
+          {/* Add the title of the current step here */}
+          <h1 className="text-2xl font-bold mb-4 text-gray-800">
+            {currentStepData?.title || "Loading..."}
+          </h1>
 
           <div className="mb-4 w-full">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold text-white w-full">
-                {currentStepData?.title || "Loading..."}
-              </h2>
-            </div>
             <ContentDisplay 
               title={currentStepData?.title || ""}
               content={safeContent}

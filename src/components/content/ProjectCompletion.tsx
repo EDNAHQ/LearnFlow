@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,16 +31,13 @@ const ProjectCompletion = ({ pathId, onComplete }: ProjectCompletionProps) => {
         console.error("Error updating path:", error);
       }
       
-      // Keep only the final completion toast
       toast.success("Congratulations! Learning project completed! 🎉");
       setProjectCompleted(true);
       
-      setTimeout(() => {
-        onComplete();
-      }, 2000);
+      // Immediately call onComplete to navigate back to projects page
+      onComplete();
     } catch (error) {
       console.error("Error marking project as complete:", error);
-      // Remove error toast
       toast.error("Failed to mark project as complete");
     } finally {
       setIsSubmitting(false);
