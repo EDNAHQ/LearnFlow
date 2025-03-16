@@ -61,7 +61,7 @@ const KnowledgeNuggetLoading = ({
       
       return () => clearTimeout(timer);
     }
-  }, [nuggets, currentNuggetIndex]); // Added currentNuggetIndex as a dependency to reset timer when nugget changes
+  }, [nuggets]); // Removed currentNuggetIndex as dependency to prevent timer resets
 
   // Function to manually navigate nuggets
   const goToNugget = (index: number) => {

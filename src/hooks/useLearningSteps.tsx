@@ -74,9 +74,10 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
     fetchLearningSteps();
     
-    // Set up subscription to track generation progress
-    const subscription = supabase
-      .channel(`steps-${pathId}`)
+    // Set up subscription to track generation progress - IMPROVED FOR RELIABILITY
+    const channel = supabase.channel(`steps-${pathId}`);
+    
+    const subscription = channel
       .on('postgres_changes', 
         { 
           event: 'UPDATE', 
@@ -88,8 +89,14 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           console.log('Step updated:', payload);
           
           // Only count as generated if detailed_content is present
-          if (payload.new.detailed_content) {
-            // Update only the changed step in the state
+          if (payload.new && payload.new.detailed_content) {
+            console.log('Received update with detailed content:', payload.new.id);
+            
+            // Refresh all steps to ensure we have the latest data
+            // This ensures we don't miss any updates
+            fetchLearningSteps();
+            
+            // Also update the individual step in state for immediate feedback
             setSteps(prevSteps => 
               prevSteps.map(step => 
                 step.id === payload.new.id 
@@ -103,23 +110,31 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
             
             // Update generation progress
             setGeneratedSteps(prev => {
-              const newValue = prev + 1;
-              console.log(`Generation progress updated: ${newValue}/${steps.length} steps`);
-              if (newValue >= steps.length) {
+              // Count how many steps actually have detailed content now
+              const newCount = steps.filter(s => 
+                s.id === payload.new.id ? true : !!s.detailed_content
+              ).length;
+              
+              console.log(`Generation progress updated: ${newCount}/${steps.length} steps`);
+              
+              if (newCount >= steps.length) {
                 setGeneratingContent(false);
                 console.log("All content generation complete");
               }
-              return newValue;
+              
+              return newCount;
             });
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Subscription status: ${status}`);
+      });
       
     console.log("Subscription to learning steps updates established");
       
     return () => {
-      subscription.unsubscribe();
+      channel.unsubscribe();
     };
   }, [pathId, topic]);
 
