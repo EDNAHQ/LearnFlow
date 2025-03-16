@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface TopicInputProps {
@@ -22,59 +22,66 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
   };
 
   return (
-    <motion.form 
-      onSubmit={handleSubmit} 
-      className="w-full mx-auto relative z-20"
-      initial={{ opacity: 0, y: 10 }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6 }}
+      className="w-full"
     >
-      <div className={`relative group transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-30">
-          <Search className="h-5 w-5 md:h-6 md:w-6" />
-        </div>
-        <Input
-          id="topic-input-field"
-          type="text"
-          placeholder="Enter a specific topic you want to learn about..."
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          className="input-light pl-12 pr-14 h-14 md:h-16 text-base md:text-lg shadow-sm transition-all duration-300 focus:shadow-md border-gray-200 focus:border-brand-purple/50 relative z-20 rounded-xl"
-          disabled={loading}
-        />
-        <motion.div 
-          className="text-xs md:text-sm text-gray-500 mt-2 md:mt-2.5 ml-2 flex items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1.5 text-brand-gold" />
-          For best results, enter a specific topic (e.g., "Python decorators" instead of just "Python")
-        </motion.div>
-        <Button 
-          type="submit" 
-          size="icon" 
-          disabled={!topic.trim() || loading}
-          className={`absolute right-2 md:right-3 top-1/2 -translate-y-1/2 h-10 w-10 md:h-11 md:w-11 transition-all duration-300 z-30
-            ${!topic.trim() ? 'bg-gray-400' : 'bg-brand-purple hover:bg-brand-purple/90 shadow-sm hover:shadow-md'}`}
-          style={{ top: "calc(50% - 10px)" }}
-        >
-          <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
-        </Button>
+      <div className="text-center mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+          What would you like to learn?
+        </h2>
+        <p className="text-gray-600">
+          Enter any topic to get a personalized learning experience
+        </p>
       </div>
-      {loading && (
+      
+      <form onSubmit={handleSubmit} className="relative">
+        <div className={`relative transition-all duration-300 ${isFocused ? 'transform scale-[1.02]' : ''}`}>
+          <Input
+            type="text"
+            placeholder="Try "Machine Learning", "JavaScript", "Quantum Physics"..."
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            className={`pl-5 pr-14 py-7 text-lg rounded-xl shadow-lg border-2 ${isFocused ? 'border-brand-purple' : 'border-transparent'} bg-white transition-all duration-300`}
+            disabled={loading}
+          />
+          
+          <Button 
+            type="submit" 
+            disabled={!topic.trim() || loading}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 h-12 w-12 rounded-lg transition-all duration-300
+              ${!topic.trim() ? 'bg-gray-300' : 'bg-brand-purple hover:bg-brand-purple/90'}`}
+          >
+            <ArrowRight className="h-6 w-6" />
+          </Button>
+        </div>
+        
+        {loading && (
+          <motion.div 
+            className="mt-4 text-brand-purple flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="mr-2 h-5 w-5 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin"></div>
+            Creating your learning experience...
+          </motion.div>
+        )}
+        
         <motion.div 
-          className="mt-3 md:mt-4 text-sm md:text-base text-brand-purple flex items-center justify-center"
+          className="mt-4 flex items-center justify-center text-sm text-gray-500"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <div className="mr-2 size-4 md:size-5 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin"></div>
-          Creating your personalized learning journey...
+          <Sparkles className="h-4 w-4 mr-2 text-brand-gold" />
+          Powered by AI • Personalized for you
         </motion.div>
-      )}
-    </motion.form>
+      </form>
+    </motion.div>
   );
 };
 

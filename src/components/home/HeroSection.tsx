@@ -2,9 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import HeroHeading from "./HeroHeading";
-import TopicInputSection from "./TopicInputSection";
-import HeroDecorations from "./HeroDecorations";
+import TopicInput from "@/components/TopicInput";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -23,36 +21,39 @@ const HeroSection = () => {
     }, 1000);
   };
 
-  const handleStartLearning = () => {
-    // If user is logged in, scroll to the topic input
-    if (user) {
-      // Since our new design has the input centered, we can just focus it
-      const topicInput = document.getElementById('topic-input-field');
-      if (topicInput) {
-        topicInput.focus();
-      }
-    } else {
-      // If not logged in, navigate to auth page
-      navigate("/auth");
-    }
-  };
-
   return (
-    <section className="w-full py-16 md:py-24 relative">
-      {/* Decorative background elements */}
-      <HeroDecorations />
-      
-      <div className="container flex flex-col items-center relative">
-        {/* Top section - Centered Heading */}
-        <div className="w-full text-center mb-10 md:mb-12">
-          <HeroHeading onStartLearning={handleStartLearning} />
-        </div>
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-10">
+      {/* Background elements */}
+      <div className="absolute inset-0 -z-10">
+        {/* Main gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-brand-purple/5 to-brand-pink/5"></div>
         
-        {/* Center section - Prominent Topic Input */}
-        <div className="w-full max-w-3xl mx-auto">
-          <TopicInputSection loading={loading} onSubmit={handleSubmit} />
+        {/* Decorative elements */}
+        <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/10 blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-72 h-72 rounded-full bg-brand-purple/10 blur-3xl"></div>
+        <div className="absolute top-1/3 left-1/4 w-40 h-40 rounded-full bg-brand-pink/10 blur-2xl"></div>
+      </div>
+
+      <div className="container max-w-5xl mx-auto px-4 relative z-10">
+        <div className="flex flex-col items-center justify-center text-center">
+          {/* Headline */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
+              Learn anything with AI
+            </span>
+          </h1>
+          
+          {/* Topic input container */}
+          <div className="w-full max-w-3xl mx-auto mt-8 mb-6">
+            <TopicInput onSubmit={handleSubmit} loading={loading} />
+          </div>
         </div>
       </div>
+      
+      {/* Floating animated elements */}
+      <div className="absolute top-1/4 right-1/4 w-3 h-3 rounded-full bg-brand-purple/50 animate-pulse-soft"></div>
+      <div className="absolute bottom-1/3 left-1/3 w-2 h-2 rounded-full bg-brand-pink/50 animate-pulse-soft delay-150"></div>
+      <div className="absolute top-2/3 right-1/3 w-4 h-4 rounded-full bg-brand-gold/50 animate-pulse-soft delay-300"></div>
     </section>
   );
 };
