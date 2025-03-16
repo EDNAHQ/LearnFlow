@@ -30,35 +30,25 @@ const NuggetsFetcher: React.FC<NuggetsFetcherProps> = ({
         if (data && data.nuggets && data.nuggets.length > 0) {
           onNuggetsLoaded(data.nuggets);
         } else {
-          // Fallback nuggets if the API doesn't return any
+          // Fallback nuggets if the API doesn't return any - made longer
           onNuggetsLoaded([
-            `Hooks let components "hook into" React's lifecycle and state without classes.`,
-            `Custom hooks enable sharing stateful logic between components without duplication.`,
-            `React's useState hook is implemented using a linked list data structure internally.`,
-            `The dependency array in useEffect works similarly to a manual memoization technique.`,
-            `React's rules of hooks prevent conditional hook execution for internal consistency.`,
-            `The useReducer hook is inspired by Redux's state management pattern.`,
-            `Hooks can reduce bundle size by enabling more efficient tree-shaking in builds.`,
-            `The Context API combined with hooks offers an alternative to prop drilling.`,
-            `React's internal fiber architecture was redesigned to support hooks efficiently.`,
-            `Debugging hooks often requires special tools like React DevTools for deeper insight.`
+            `Hooks let components "hook into" React's lifecycle and state without classes. This enables more functional programming approaches and encourages composition over inheritance.`,
+            `Custom hooks enable sharing stateful logic between components without duplication. They follow the principle of "write once, use everywhere" and can abstract complex state management patterns.`,
+            `React's useState hook is implemented using a linked list data structure internally. This implementation detail allows hooks to maintain their order between renders, which is crucial for their reliability.`,
+            `The dependency array in useEffect works similarly to a manual memoization technique. It prevents unnecessary re-execution of side effects by checking referential equality of dependencies between renders.`,
+            `React's rules of hooks prevent conditional hook execution for internal consistency. Breaking these rules can lead to bugs that are difficult to track down as the internal hook state management relies on consistent execution order.`
           ]);
         }
       } catch (err) {
         console.error('Error fetching nuggets:', err);
         onError('Failed to load knowledge nuggets');
-        // Set fallback nuggets
+        // Set fallback nuggets - made longer
         onNuggetsLoaded([
-          `Hooks let components "hook into" React's lifecycle and state without classes.`,
-          `Custom hooks enable sharing stateful logic between components without duplication.`,
-          `React's useState hook is implemented using a linked list data structure internally.`,
-          `The dependency array in useEffect works similarly to a manual memoization technique.`,
-          `React's rules of hooks prevent conditional hook execution for internal consistency.`,
-          `The useReducer hook is inspired by Redux's state management pattern.`,
-          `Hooks can reduce bundle size by enabling more efficient tree-shaking in builds.`,
-          `The Context API combined with hooks offers an alternative to prop drilling.`,
-          `React's internal fiber architecture was redesigned to support hooks efficiently.`,
-          `Debugging hooks often requires special tools like React DevTools for deeper insight.`
+          `Hooks let components "hook into" React's lifecycle and state without classes. This enables more functional programming approaches and encourages composition over inheritance.`,
+          `Custom hooks enable sharing stateful logic between components without duplication. They follow the principle of "write once, use everywhere" and can abstract complex state management patterns.`,
+          `React's useState hook is implemented using a linked list data structure internally. This implementation detail allows hooks to maintain their order between renders, which is crucial for their reliability.`,
+          `The dependency array in useEffect works similarly to a manual memoization technique. It prevents unnecessary re-execution of side effects by checking referential equality of dependencies between renders.`,
+          `React's rules of hooks prevent conditional hook execution for internal consistency. Breaking these rules can lead to bugs that are difficult to track down as the internal hook state management relies on consistent execution order.`
         ]);
       } finally {
         setLoading(false);

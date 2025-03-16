@@ -72,15 +72,17 @@ export const useContentNavigation = () => {
 
   // Update generation status from useLearningSteps
   useEffect(() => {
-    setGeneratingContent(bgGenerating);
-    setGeneratedSteps(bgGenerated);
-    
-    console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
-    
-    // Only set initialLoading to false when content generation is complete or after a timeout
-    if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
-      console.log("All content generated, ending loading state");
-      setInitialLoading(false);
+    if (steps.length > 0) {
+      setGeneratingContent(bgGenerating);
+      setGeneratedSteps(bgGenerated);
+      
+      console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
+      
+      // Only set initialLoading to false when content generation is complete or after a timeout
+      if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
+        console.log("All content generated, ending loading state");
+        setInitialLoading(false);
+      }
     }
   }, [bgGenerating, bgGenerated, steps.length]);
 

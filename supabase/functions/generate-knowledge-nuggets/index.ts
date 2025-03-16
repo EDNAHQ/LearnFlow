@@ -44,7 +44,7 @@ serve(async (req) => {
           Your goal is to generate 5 fascinating, thought-provoking facts or insights about the given topic 
           that will genuinely surprise and intrigue learners. Each nugget should:
           
-          1. Be concise (under 120 characters) but impactful
+          1. Be concise (under 240 characters) but impactful
           2. Reveal a non-obvious or counterintuitive aspect about the topic
           3. Connect the topic to real-world applications or surprising contexts
           4. Use clear, precise language with specific examples where possible

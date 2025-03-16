@@ -53,11 +53,11 @@ const KnowledgeNuggetLoading = ({
   }, [generatingContent, totalSteps]);
 
   useEffect(() => {
-    // Auto-rotate through nuggets
+    // Auto-rotate through nuggets - extended to 8 seconds
     if (nuggets.length > 0) {
       const interval = setInterval(() => {
         setCurrentNuggetIndex(prev => (prev + 1) % nuggets.length);
-      }, 6000); // Change every 6 seconds
+      }, 8000); // Change every 8 seconds
       
       return () => clearInterval(interval);
     }
