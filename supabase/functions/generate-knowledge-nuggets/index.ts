@@ -36,7 +36,7 @@ serve(async (req) => {
     
     // Call OpenAI to generate knowledge nuggets with improved prompt
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "o3-mini",
       messages: [
         { 
           role: 'system', 

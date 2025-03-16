@@ -19,7 +19,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   
   try {
     const params: any = {
-      model: "gpt-4o-mini",  // Use the recommended model
+      model: "o3-mini",  // Updated model name here
       messages: [
         { 
           role: 'system', 
