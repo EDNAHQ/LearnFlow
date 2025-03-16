@@ -81,25 +81,39 @@ serve(async (req) => {
       `;
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",  // Using gpt-4o-mini as a more reliable alternative to o3-mini
-      messages: [
-        { 
-          role: 'system', 
-          content: `You are an expert educator creating concise and insightful explanations about topics related to ${topic}.`
-        },
-        { role: 'user', content: prompt }
-      ],
-    });
+    // Try with gpt-4o-mini first as it's more reliable
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { 
+            role: 'system', 
+            content: `You are an expert educator creating concise and insightful explanations about topics related to ${topic}.`
+          },
+          { role: 'user', content: prompt }
+        ],
+      });
 
-    const insight = completion.choices[0].message.content;
-    
-    console.log(`Successfully generated insight (${insight.length} characters)`);
+      const insight = completion.choices[0].message.content;
+      
+      console.log(`Successfully generated insight (${insight.length} characters)`);
 
-    return new Response(
-      JSON.stringify({ insight }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      return new Response(
+        JSON.stringify({ insight }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (error) {
+      console.error('Error with gpt-4o-mini model:', error);
+      
+      // If there's an error with gpt-4o-mini, we could try falling back to o3-mini
+      // but since we're already using the more reliable model first, we'll just
+      // return the error for now
+      
+      return new Response(
+        JSON.stringify({ error: error.message || 'Error generating insight' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error) {
     console.error('Error in generate-ai-insight function:', error);
     

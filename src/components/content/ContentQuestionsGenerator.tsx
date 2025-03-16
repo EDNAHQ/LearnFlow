@@ -45,6 +45,7 @@ const ContentQuestionsGenerator = ({
       console.log(`Generating questions for: ${title} (ID: ${stepId})`);
       
       try {
+        // First attempt with regular settings (will use o3-mini with fallback)
         const response = await supabase.functions.invoke('generate-learning-content', {
           body: {
             content: content.substring(0, 4000), // Limit content length
