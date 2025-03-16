@@ -12,7 +12,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   console.log("Calling OpenAI API");
   
   const body: any = {
-    model: 'gpt-4o-mini',  // Updated to use the current recommended model
+    model: 'gpt-4o-mini',
     messages: [
       { 
         role: 'system', 
@@ -20,7 +20,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       },
       { role: 'user', content: prompt }
     ],
-    max_tokens: maxTokens
+    max_completion_tokens: maxTokens  // Changed from max_tokens to max_completion_tokens
   };
 
   if (responseFormat) {
