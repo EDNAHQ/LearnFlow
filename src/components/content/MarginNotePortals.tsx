@@ -17,7 +17,11 @@ const MarginNotePortals = ({ paragraphsWithNotes }: MarginNotePortalsProps) => {
         // Only render if the span exists in the DOM
         if (insightSpan && document.body.contains(insightSpan)) {
           return createPortal(
-            <ContentMarginNote insight={note.insight} key={note.id} />,
+            <ContentMarginNote 
+              insight={note.insight} 
+              key={note.id} 
+              className="content-margin-note"
+            />,
             insightSpan
           );
         }

@@ -6,12 +6,25 @@
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   border-left: 3px solid rgba(109, 66, 239, 0.2);
+  /* Prevent continuous expansion */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .insight-indicator {
   display: inline-flex;
   vertical-align: text-top;
   margin-left: 0.5rem;
+  /* Set specific dimensions to prevent expansion */
+  width: 24px;
+  height: 24px;
+  position: relative;
+}
+
+/* Ensure the content margin note has a fixed size */
+.content-margin-note {
+  width: auto !important;
+  max-width: 100% !important;
 }
 
 /* Mobile responsiveness */

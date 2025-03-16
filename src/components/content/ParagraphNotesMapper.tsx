@@ -10,6 +10,7 @@ interface ParagraphNotesMapperProps {
 
 const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: ParagraphNotesMapperProps) => {
   const isUnmounting = useRef(false);
+  const mappingComplete = useRef(false);
   
   useEffect(() => {
     return () => {
@@ -17,9 +18,15 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
     };
   }, []);
 
+  // Reset mapping state when notes change
+  useEffect(() => {
+    mappingComplete.current = false;
+  }, [marginNotes]);
+
   // Find paragraphs for notes and prepare for portal rendering
   useEffect(() => {
-    if (!contentRef.current || marginNotes.length === 0 || isUnmounting.current) return;
+    // Skip if already mapped, content ref is missing, or no margin notes
+    if (mappingComplete.current || !contentRef.current || marginNotes.length === 0 || isUnmounting.current) return;
     
     const timer = setTimeout(() => {
       if (isUnmounting.current || !contentRef.current) return;
@@ -42,12 +49,12 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
           const paragraph = paragraphs[i];
           const paragraphText = paragraph.textContent?.toLowerCase() || '';
           
+          // Skip if this paragraph already has a note
+          if (paragraph.classList.contains('has-margin-note')) {
+            continue;
+          }
+          
           if (paragraphText.includes(paragraphFragment)) {
-            // Skip if this paragraph already has a note
-            if ([...newParagraphsWithNotes.keys()].includes(paragraph)) {
-              continue;
-            }
-            
             // Add the paragraph and note to our Map
             newParagraphsWithNotes.set(paragraph, note);
             paragraph.classList.add('has-margin-note');
@@ -63,6 +70,8 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
         }
       });
       
+      // Mark mapping as complete to prevent multiple mappings
+      mappingComplete.current = true;
       onMapComplete(newParagraphsWithNotes);
       
     }, 500);
