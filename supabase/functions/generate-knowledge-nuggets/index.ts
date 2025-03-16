@@ -44,7 +44,7 @@ serve(async (req) => {
           Your goal is to generate 5 fascinating, thought-provoking facts or insights about the given topic 
           that will genuinely surprise and intrigue learners. Each nugget should:
           
-          1. Be longer and more substantial (400-480 characters) but still impactful
+          1. Be concise (160-200 characters) but still impactful
           2. Reveal a non-obvious or counterintuitive aspect about the topic
           3. Connect the topic to real-world applications or surprising contexts
           4. Use clear, precise language with specific examples where possible
@@ -53,6 +53,7 @@ serve(async (req) => {
           IMPORTANT RESTRICTIONS:
           - NEVER use the words "realm" or "delve" in any context
           - Focus purely on the content without meta-references
+          - Keep each nugget to 1-2 sentences maximum
           
           Avoid generic statements, obvious facts, or vague claims. Return the nuggets as a JSON array of strings.`
         },

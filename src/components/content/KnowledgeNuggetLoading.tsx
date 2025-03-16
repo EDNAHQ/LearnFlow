@@ -111,7 +111,7 @@ const KnowledgeNuggetLoading = ({
             onError={handleFetchError}
           />
 
-          <div className="w-full h-[200px] mb-6 flex items-center justify-center">
+          <div className="w-full h-[160px] mb-6 flex items-center justify-center">
             {nuggets.length > 0 && (
               <NuggetCard 
                 nugget={nuggets[currentNuggetIndex]} 
