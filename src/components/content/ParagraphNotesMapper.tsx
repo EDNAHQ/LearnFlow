@@ -11,6 +11,7 @@ interface ParagraphNotesMapperProps {
 const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: ParagraphNotesMapperProps) => {
   const isUnmounting = useRef(false);
   const mappingComplete = useRef(false);
+  const [hasStartedMapping, setHasStartedMapping] = useState(false);
   
   useEffect(() => {
     return () => {
@@ -21,12 +22,16 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
   // Reset mapping state when notes change
   useEffect(() => {
     mappingComplete.current = false;
+    setHasStartedMapping(false);
   }, [marginNotes]);
 
   // Find paragraphs for notes and prepare for portal rendering
   useEffect(() => {
-    // Skip if already mapped, content ref is missing, or no margin notes
-    if (mappingComplete.current || !contentRef.current || marginNotes.length === 0 || isUnmounting.current) return;
+    // Skip if already mapped, already started mapping, content ref is missing, or no margin notes
+    if (mappingComplete.current || hasStartedMapping || !contentRef.current || marginNotes.length === 0 || isUnmounting.current) return;
+    
+    // Set flag to prevent multiple concurrent mapping attempts
+    setHasStartedMapping(true);
     
     const timer = setTimeout(() => {
       if (isUnmounting.current || !contentRef.current) return;
@@ -57,13 +62,17 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
           if (paragraphText.includes(paragraphFragment)) {
             // Add the paragraph and note to our Map
             newParagraphsWithNotes.set(paragraph, note);
+            
+            // Add class to paragraph directly
             paragraph.classList.add('has-margin-note');
             
-            // Create a span to hold the portal
-            const insightSpan = document.createElement('span');
-            insightSpan.className = 'insight-indicator';
-            insightSpan.setAttribute('data-note-id', note.id);
-            paragraph.appendChild(insightSpan);
+            // Create a span to hold the portal only if it doesn't exist yet
+            if (!paragraph.querySelector(`.insight-indicator[data-note-id="${note.id}"]`)) {
+              const insightSpan = document.createElement('span');
+              insightSpan.className = 'insight-indicator';
+              insightSpan.setAttribute('data-note-id', note.id);
+              paragraph.appendChild(insightSpan);
+            }
             
             break;
           }
@@ -77,7 +86,7 @@ const ParagraphNotesMapper = ({ contentRef, marginNotes, onMapComplete }: Paragr
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [marginNotes, contentRef, onMapComplete]);
+  }, [marginNotes, contentRef, onMapComplete, hasStartedMapping]);
 
   return null;
 };

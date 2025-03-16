@@ -14,8 +14,8 @@ const MarginNotePortals = ({ paragraphsWithNotes }: MarginNotePortalsProps) => {
         // Find the insight span we created
         const insightSpan = paragraph.querySelector(`.insight-indicator[data-note-id="${note.id}"]`);
         
-        // Only render if the span exists in the DOM
-        if (insightSpan && document.body.contains(insightSpan)) {
+        // Only render if the span exists in the DOM and hasn't been populated yet
+        if (insightSpan && document.body.contains(insightSpan) && !insightSpan.hasChildNodes()) {
           return createPortal(
             <ContentMarginNote 
               insight={note.insight} 

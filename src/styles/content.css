@@ -10,6 +10,7 @@
   max-width: 100%;
   overflow: hidden;
   display: inline-block;
+  box-sizing: border-box;
 }
 
 .insight-indicator {
@@ -21,6 +22,7 @@
   height: 24px;
   position: relative;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 /* Ensure the content margin note has a fixed size */
@@ -28,6 +30,7 @@
   width: auto !important;
   max-width: 100% !important;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 /* Mobile responsiveness */
