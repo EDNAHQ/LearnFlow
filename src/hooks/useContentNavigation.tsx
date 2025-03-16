@@ -1,9 +1,11 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { startBackgroundContentGeneration } from "@/utils/learning/backgroundContentGeneration";
+import { Step } from "@/components/LearningStep";
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
@@ -53,8 +55,15 @@ export const useContentNavigation = () => {
       setGeneratingContent(true);
       contentGenerationStarted.current = true;
       
+      // Map the learning step data to match the Step interface
+      const stepsForGeneration: Step[] = steps.map(step => ({
+        id: step.id,
+        title: step.title,
+        description: step.content || "" // Use content as description
+      }));
+      
       // Start background generation for all steps
-      startBackgroundContentGeneration(steps, topic, pathId)
+      startBackgroundContentGeneration(stepsForGeneration, topic, pathId)
         .catch(err => {
           console.error("Error starting background generation:", err);
         });

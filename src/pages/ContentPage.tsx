@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useContentMode } from "@/hooks/useContentMode";
 import { useContentNavigation } from "@/hooks/useContentNavigation";
@@ -30,6 +30,10 @@ const ContentPage = () => {
     generatedSteps
   } = useContentNavigation();
   
+  // For project completion state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projectCompleted, setProjectCompleted] = useState(false);
+  
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
     setMode("text");
@@ -51,6 +55,30 @@ const ContentPage = () => {
   if (!topic || !pathId) {
     return <ContentError goToProjects={goToProjects} />;
   }
+
+  // Complete path function
+  const completePath = async () => {
+    if (!pathId) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const { completePath: completePathFunc } = ProjectCompletion({ 
+        pathId, 
+        onComplete: () => {
+          setProjectCompleted(true);
+          setTimeout(() => {
+            goToProjects();
+          }, 2000);
+        } 
+      });
+      
+      await completePathFunc();
+    } catch (error) {
+      console.error("Error completing path:", error);
+      setIsSubmitting(false);
+    }
+  };
 
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
