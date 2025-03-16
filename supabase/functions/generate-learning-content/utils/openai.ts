@@ -19,7 +19,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   
   try {
     const params: any = {
-      model: "o3-mini",  // Updated model name here
+      model: "o3-mini",
       messages: [
         { 
           role: 'system', 
@@ -32,10 +32,16 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
     // Use max_completion_tokens instead of max_tokens for o3-mini model
     params.max_completion_tokens = maxTokens;
 
-    // Always set response_format for json_object to ensure proper formatting
+    // Set response_format for json_object requests
     if (responseFormat === "json_object") {
       params.response_format = { type: responseFormat };
       console.log("Using JSON response format");
+      
+      // Add extra JSON instructions to both system and user messages
+      params.messages[0].content += "\n\nYOU MUST RESPOND WITH VALID JSON IN THE EXACT FORMAT SPECIFIED. Do not include markdown formatting, code blocks, or any text outside the JSON object. The response must be parseable by JSON.parse().";
+      
+      // Add JSON structure reminder to the end of the prompt
+      params.messages[1].content += "\n\nIMPORTANT: Respond with ONLY a valid JSON object. No explanations, no markdown, just pure JSON.";
     }
 
     console.log("OpenAI request params:", JSON.stringify({
@@ -48,7 +54,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
     console.log("OpenAI response received");
     
     if (responseFormat === "json_object") {
-      // Validate JSON response
+      // Validate and sanitize JSON response
       try {
         const content = completion.choices[0].message.content;
         if (!content || content.trim() === '') {
@@ -56,8 +62,59 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
           throw new Error("Empty content received from OpenAI");
         }
         
-        JSON.parse(content || "{}"); // Validate JSON parsing
-        console.log("Successfully validated JSON response");
+        // Try to sanitize the JSON if needed
+        let sanitizedContent = content;
+        
+        // Fix common JSON issues
+        if (!sanitizedContent.trim().startsWith('{')) {
+          // Extract JSON from possible text
+          const jsonMatch = sanitizedContent.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            sanitizedContent = jsonMatch[0];
+            console.log("Extracted JSON object from response");
+          }
+        }
+        
+        // Replace any escaped quotes or problematic characters
+        sanitizedContent = sanitizedContent
+          .replace(/\\"/g, '"') // Replace escaped quotes
+          .replace(/\\n/g, ' ') // Replace newlines with spaces
+          .replace(/\t/g, ' '); // Replace tabs with spaces
+        
+        // Fix unterminated strings (a common issue)
+        let fixAttempt = sanitizedContent;
+        try {
+          JSON.parse(fixAttempt);
+        } catch (parseError) {
+          if (parseError.message.includes('Unterminated string')) {
+            console.log("Attempting to fix unterminated string...");
+            // Add missing quotes to the end of strings (crude but can work in simple cases)
+            fixAttempt = fixAttempt.replace(/"([^"]*?)(\s*}|\s*,\s*"|\s*])/g, '"$1"$2');
+            console.log("Fixed potential unterminated strings");
+          }
+        }
+        
+        // Test if our fix worked
+        try {
+          JSON.parse(fixAttempt);
+          sanitizedContent = fixAttempt;
+          console.log("Successfully fixed JSON issues");
+        } catch (e) {
+          // If fix didn't work, we'll continue with our original sanitized content
+          console.log("Fix attempt failed, continuing with original sanitized content");
+        }
+        
+        // Final parsing test
+        try {
+          JSON.parse(sanitizedContent);
+          console.log("Successfully validated JSON response");
+          // Replace original content with sanitized version
+          completion.choices[0].message.content = sanitizedContent;
+        } catch (jsonError) {
+          console.error("JSON validation failed after sanitization:", jsonError);
+          console.error("Sanitized content causing error:", sanitizedContent);
+          throw new Error("Invalid JSON response from OpenAI");
+        }
       } catch (jsonError) {
         console.error("Invalid JSON in OpenAI response:", jsonError);
         console.error("Response content:", completion.choices[0].message.content);

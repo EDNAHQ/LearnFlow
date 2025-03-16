@@ -23,9 +23,7 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
   Each step should build logically on the previous one, creating a coherent progression from fundamentals to advanced concepts, 
   all while staying strictly within the boundaries of ${topic}.
   
-  Your response should be structured as an array of step objects with 'title' and 'description' fields, formatted as valid JSON.
-  
-  Example format:
+  YOUR RESPONSE MUST BE VALID JSON with this exact structure:
   {
     "steps": [
       {
@@ -36,17 +34,23 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
         "title": "Second Step Title About ${topic}",
         "description": "Brief description focusing specifically on ${topic}"
       }
+      // ... and so on, exactly 10 steps total
     ]
   }
   
-  Make sure to include exactly 10 steps, starting with fundamentals and moving to more advanced concepts,
-  all directly related to ${topic}.
+  Ensure you format this as valid JSON with no trailing commas. Include exactly 10 steps, starting with fundamentals and moving to more advanced concepts.
+  The response must be parseable by JSON.parse().
   `;
 
   console.log("Generating focused learning plan for topic:", topic);
   
   try {
-    const systemMessage = `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts. YOU MUST RETURN VALID JSON.`;
+    const systemMessage = `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts. 
+    
+    YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS. 
+    
+    Do not include markdown formatting, code blocks, or any text outside the JSON object. 
+    The response must be parseable by JSON.parse().`;
     
     // Explicitly request JSON response format
     const data = await callOpenAI(prompt, systemMessage, "json_object");
@@ -59,52 +63,8 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
       console.log("Generated content type:", typeof generatedContent);
       console.log("Generated content preview:", generatedContent.substring(0, 100) + "...");
       
-      let parsedContent;
-      try {
-        // Add additional validation to ensure content is not empty
-        if (!generatedContent || typeof generatedContent !== 'string' || generatedContent.trim() === '') {
-          console.error("Empty or invalid content received from OpenAI");
-          return new Response(
-            JSON.stringify({ 
-              error: "Empty or invalid content received from OpenAI",
-              rawContent: generatedContent ? `${typeof generatedContent}: ${generatedContent.substring(0, 200)}...` : "null or undefined" 
-            }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        
-        parsedContent = JSON.parse(generatedContent);
-        console.log("JSON parsed successfully");
-      } catch (parseError) {
-        console.error("JSON parse error:", parseError);
-        console.error("Raw content causing parse error:", generatedContent);
-        
-        // Try to extract JSON from markdown if wrapped
-        const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            parsedContent = JSON.parse(jsonMatch[0]);
-            console.log("Extracted JSON from markdown successfully");
-          } catch (e) {
-            console.error("Failed to extract JSON from markdown:", e);
-            return new Response(
-              JSON.stringify({ 
-                error: "Invalid JSON format received from AI",
-                rawContent: generatedContent.substring(0, 200) + "..." 
-              }),
-              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        } else {
-          return new Response(
-            JSON.stringify({ 
-              error: "Could not parse AI response as JSON",
-              rawContent: generatedContent.substring(0, 200) + "..." 
-            }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-      }
+      // Parse the content
+      const parsedContent = JSON.parse(generatedContent);
       
       if (!parsedContent || !Array.isArray(parsedContent.steps)) {
         console.error("Invalid response format - steps is not an array:", parsedContent);

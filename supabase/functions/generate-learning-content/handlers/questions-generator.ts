@@ -30,21 +30,31 @@ export async function generateQuestions(content: string, topic: string, title: s
   5. Make sure questions end with a question mark
   6. Questions must be DIRECTLY related to the content provided, not generic questions about the topic
   
-  Your response should be structured as an array of question strings formatted as valid JSON.
-  Example format:
+  YOUR RESPONSE MUST BE VALID JSON with this exact structure:
   {
     "questions": [
-      "How does concept X relate to concept Y in the context of ${topic}?",
-      "What would happen if we applied principle Z to a different scenario?",
-      "Why is the relationship between A and B important for understanding ${topic}?"
+      "First question related to the content?",
+      "Second question related to the content?",
+      "Third question related to the content?",
+      "Fourth question related to the content?",
+      "Fifth question related to the content?"
     ]
   }
+  
+  Ensure you format this as valid JSON with no trailing commas. The response must be parseable by JSON.parse().
+  Do not include any text outside of this JSON structure.
   `;
 
   console.log(`Calling OpenAI API to generate related questions for: ${title}`);
   
   try {
-    const systemMessage = `You are an expert educator creating thoughtful questions to explore topics in depth based on specific content.`;
+    const systemMessage = `You are an expert educator creating thoughtful questions to explore topics in depth based on specific content. 
+    
+    YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS. 
+    
+    Do not include markdown formatting, code blocks, or any text outside the JSON object. 
+    The response must be parseable by JSON.parse().`;
+    
     const data = await callOpenAI(prompt, systemMessage, "json_object");
     
     console.log(`OpenAI response received successfully for questions about: ${title}`);
@@ -70,31 +80,36 @@ export async function generateQuestions(content: string, topic: string, title: s
     } catch (parseError) {
       console.error('Error parsing generated questions:', parseError, data.choices[0].message.content);
       
-      // Attempt to fix malformed JSON
-      try {
-        const content = data.choices[0].message.content;
-        // Try to extract JSON part if it's wrapped in markdown or other text
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const extractedJson = jsonMatch[0];
-          const parsedJson = JSON.parse(extractedJson);
-          
-          if (Array.isArray(parsedJson.questions) && parsedJson.questions.length > 0) {
-            console.log(`Successfully recovered JSON from malformed response for: ${title}`);
-            return new Response(
-              JSON.stringify({ questions: parsedJson.questions }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        }
-      } catch (recoveryError) {
-        console.error("Recovery attempt failed:", recoveryError);
-      }
-      
-      throw new Error(`Failed to parse questions: ${parseError.message}`);
+      // Fallback: return generic questions
+      return new Response(
+        JSON.stringify({ 
+          questions: [
+            `What are the key concepts of ${title} as presented in this content?`,
+            `How does ${title} relate to real-world applications?`,
+            `What challenges might arise when implementing ${title}?`,
+            `How could the concepts in ${title} be expanded upon or improved?`,
+            `What connections exist between ${title} and other areas of ${topic}?`
+          ]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
   } catch (error) {
     console.error(`Error generating questions for ${title}:`, error);
-    throw error;
+    
+    // Fallback: return generic questions on error
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        questions: [
+          `What are the key concepts of ${title} as presented in this content?`,
+          `How does ${title} relate to real-world applications?`,
+          `What challenges might arise when implementing ${title}?`,
+          `How could the concepts in ${title} be expanded upon or improved?`,
+          `What connections exist between ${title} and other areas of ${topic}?`
+        ]
+      }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 }

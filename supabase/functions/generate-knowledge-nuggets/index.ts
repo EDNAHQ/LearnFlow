@@ -55,30 +55,88 @@ serve(async (req) => {
           - Focus purely on the content without meta-references
           - Keep each nugget to 1-2 sentences maximum
           
-          Avoid generic statements, obvious facts, or vague claims. Return the nuggets as a JSON array of strings.`
+          YOUR RESPONSE MUST BE VALID JSON with this exact structure:
+          {"nuggets": ["nugget 1", "nugget 2", "nugget 3", "nugget 4", "nugget 5"]}
+          
+          DO NOT include any text outside the JSON object. No markdown formatting, no code blocks, no explanations.
+          The response must be parseable by JSON.parse().`
         },
-        { role: 'user', content: `Topic: ${topic}` }
+        { 
+          role: 'user', 
+          content: `Topic: ${topic}
+          
+          Return EXACTLY 5 knowledge nuggets in a JSON object with the "nuggets" key containing an array of strings.
+          IMPORTANT: Respond with ONLY a valid JSON object. No explanations, no markdown, just pure JSON.` 
+        }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
+      // Note: Removed temperature parameter as it's not supported with o3-mini
     });
 
-    const content = completion.choices[0].message.content;
-    const nuggets = JSON.parse(content).nuggets;
-
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        nuggets,
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    // Extract and validate the content
+    let content = completion.choices[0].message.content;
     
+    // Extra safety: ensure we have valid JSON
+    try {
+      // Try to extract JSON object if it's wrapped in other text
+      if (!content.trim().startsWith('{')) {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          content = jsonMatch[0];
+        }
+      }
+      
+      // Parse to validate JSON structure
+      const responseData = JSON.parse(content);
+      
+      // Ensure nuggets array exists and has items
+      if (!responseData.nuggets || !Array.isArray(responseData.nuggets)) {
+        throw new Error("Response missing nuggets array");
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          nuggets: responseData.nuggets,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (jsonError) {
+      console.error("JSON parsing error:", jsonError);
+      console.error("Problematic content:", content);
+      
+      // Return fallback nuggets on error
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: "Failed to parse AI response",
+          nuggets: [
+            `Components in modern frameworks follow a composition pattern where smaller, focused pieces combine to create complex UIs.`,
+            `Custom hooks in React extract and share stateful logic between components without forcing component hierarchy changes.`,
+            `React's useState implementation uses a linked list internally to maintain state between renders.`,
+            `The dependency array in useEffect is a performance optimization that prevents unnecessary effect executions.`,
+            `JavaScript's event loop manages asynchronous operations by processing the call stack, callback queue, and microtask queue.`
+          ]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error) {
     console.error('Error in generate-knowledge-nuggets function:', error);
     
+    // Return default nuggets on any error
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message || 'Internal server error',
+        nuggets: [
+          `Components in modern frameworks follow a composition pattern where smaller, focused pieces combine to create complex UIs.`,
+          `Custom hooks in React extract and share stateful logic between components without forcing component hierarchy changes.`,
+          `React's useState implementation uses a linked list internally to maintain state between renders.`,
+          `The dependency array in useEffect is a performance optimization that prevents unnecessary effect executions.`,
+          `JavaScript's event loop manages asynchronous operations by processing the call stack, callback queue, and microtask queue.`
+        ]
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

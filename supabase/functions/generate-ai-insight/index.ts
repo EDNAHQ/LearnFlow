@@ -82,7 +82,7 @@ serve(async (req) => {
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",  // Using gpt-4o-mini as a more reliable alternative to o3-mini
       messages: [
         { 
           role: 'system', 
