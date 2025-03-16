@@ -27,7 +27,7 @@ const KnowledgeNuggetLoading = ({
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
-
+  
   // Set progress based on content generation
   useEffect(() => {
     if (totalSteps > 0) {
@@ -53,15 +53,15 @@ const KnowledgeNuggetLoading = ({
   }, [generatingContent, totalSteps]);
 
   useEffect(() => {
-    // Auto-rotate through nuggets - extended to 8 seconds
+    // Auto-rotate through nuggets - exactly 8 seconds per nugget
     if (nuggets.length > 0) {
-      const interval = setInterval(() => {
+      const timer = setTimeout(() => {
         setCurrentNuggetIndex(prev => (prev + 1) % nuggets.length);
-      }, 8000); // Change every 8 seconds
+      }, 8000); // Exactly 8 seconds per nugget
       
-      return () => clearInterval(interval);
+      return () => clearTimeout(timer);
     }
-  }, [nuggets]);
+  }, [nuggets, currentNuggetIndex]); // Added currentNuggetIndex as a dependency to reset timer when nugget changes
 
   // Function to manually navigate nuggets
   const goToNugget = (index: number) => {
