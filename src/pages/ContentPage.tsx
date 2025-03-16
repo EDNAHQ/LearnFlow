@@ -7,7 +7,7 @@ import ContentDisplay from "@/components/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
 import ContentProgress from "@/components/content/ContentProgress";
 import ContentNavigation from "@/components/content/ContentNavigation";
-import ContentLoading from "@/components/content/ContentLoading";
+import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading";
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import ProjectCompletion from "@/components/content/ProjectCompletion";
@@ -45,7 +45,7 @@ const ContentPage = () => {
   });
 
   if (isLoading) {
-    return <ContentLoading goToProjects={goToProjects} />;
+    return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} />;
   }
 
   if (!topic || !pathId) {
