@@ -15,13 +15,16 @@ export const ProjectCard = ({ project, onDeleteProject, isDeleting }: ProjectCar
   const navigate = useNavigate();
   
   const handleProjectClick = (project: ProjectCardProps['project']) => {
+    // Store topic for reference (still useful for components that need it)
     sessionStorage.setItem("learn-topic", project.topic);
-    sessionStorage.setItem("learning-path-id", project.id);
-
+    
+    // Navigate to the new URL structure instead of just setting sessionStorage
     if (project.is_approved) {
-      navigate("/content");
+      navigate(`/content/${project.id}`);
     } else {
       navigate("/plan");
+      // Still need to store path ID for plan page
+      sessionStorage.setItem("learning-path-id", project.id);
     }
   };
 

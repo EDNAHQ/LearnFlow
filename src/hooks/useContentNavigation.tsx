@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -9,10 +8,10 @@ import { Step } from "@/components/LearningStep";
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
+  const { pathId, stepId } = useParams();
   const { user } = useAuth();
   const [topic, setTopic] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [pathId, setPathId] = useState<string | null>(null);
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
@@ -25,20 +24,36 @@ export const useContentNavigation = () => {
       return;
     }
 
-    const storedTopic = sessionStorage.getItem("learn-topic");
-    const storedPathId = sessionStorage.getItem("learning-path-id");
-
-    console.log("Content navigation - stored values:", { storedTopic, storedPathId });
-
-    if (!storedTopic || !storedPathId) {
+    if (!pathId) {
       navigate("/projects");
-      toast.error("Learning session not found. Please start a new learning path.");
+      toast.error("Learning path not found. Please select a project.");
+      return;
+    }
+
+    // We still need to get the topic from sessionStorage initially
+    // In a more complete solution, we would fetch this from the database based on pathId
+    const storedTopic = sessionStorage.getItem("learn-topic");
+    
+    if (!storedTopic) {
+      // Fetch topic based on pathId from database
+      // For now, we'll keep using sessionStorage as a fallback
+      navigate("/projects");
+      toast.error("Learning topic not found. Please start a new learning path.");
       return;
     }
 
     setTopic(storedTopic);
-    setPathId(storedPathId);
-  }, [navigate, user]);
+  }, [navigate, user, pathId]);
+
+  // Set step from URL parameter if available
+  useEffect(() => {
+    if (stepId) {
+      const stepIndex = parseInt(stepId, 10);
+      if (!isNaN(stepIndex) && stepIndex >= 0) {
+        setCurrentStep(stepIndex);
+      }
+    }
+  }, [stepId]);
 
   const {
     steps,
@@ -46,7 +61,7 @@ export const useContentNavigation = () => {
     markStepAsComplete,
     generatingContent: bgGenerating,
     generatedSteps: bgGenerated,
-  } = useLearningSteps(pathId, topic);
+  } = useLearningSteps(pathId || null, topic);
 
   // Start background content generation when steps are loaded
   useEffect(() => {
@@ -107,19 +122,25 @@ export const useContentNavigation = () => {
     const success = await markStepAsComplete(steps[currentStep].id);
     
     if (success && currentStep < steps.length - 1) {
-      setCurrentStep(prev => {
-        setTimeout(() => {
-          topRef.current?.scrollIntoView({ behavior: 'smooth' });
-          window.scrollTo(0, 0);
-        }, 100);
-        return prev + 1;
-      });
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      
+      // Update URL with the new step
+      navigate(`/content/${pathId}/step/${nextStep}`);
+      
+      setTimeout(() => {
+        topRef.current?.scrollIntoView({ behavior: 'smooth' });
+        window.scrollTo(0, 0);
+      }, 100);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      // Update URL with the previous step
+      navigate(`/content/${pathId}/step/${prevStep}`);
     } else {
       navigate("/projects");
     }
@@ -135,9 +156,9 @@ export const useContentNavigation = () => {
   return {
     topic,
     currentStep,
-    pathId,
+    pathId: pathId || null,
     steps,
-    isLoading: isLoading || initialLoading, // Include initial loading state
+    isLoading: isLoading || initialLoading,
     generatingContent,
     generatedSteps,
     handleMarkComplete,

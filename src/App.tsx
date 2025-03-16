@@ -35,7 +35,9 @@ const App = () => (
                   <Route path="/" element={<Navigate to="/home" />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
-                  <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
+                  {/* Updated content routes with parameters */}
+                  <Route path="/content/:pathId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
+                  <Route path="/content/:pathId/step/:stepId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
                   <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
                   <Route path="/podcast" element={<PodcastPage />} />
                   <Route path="/why-free" element={<WhyFreePage />} />

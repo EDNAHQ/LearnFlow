@@ -1,6 +1,7 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/useContentMode";
 import { useContentNavigation } from "@/hooks/useContentNavigation";
 import ContentDisplay from "@/components/ContentDisplay";
@@ -13,11 +14,12 @@ import ContentPageLayout from "@/components/content/ContentPageLayout";
 import ProjectCompletion from "@/components/content/ProjectCompletion";
 
 const ContentPage = () => {
+  const { pathId } = useParams();
+  const navigate = useNavigate();
   const { setMode } = useContentMode();
   const {
     topic,
     currentStep,
-    pathId,
     steps,
     isLoading,
     handleMarkComplete,
