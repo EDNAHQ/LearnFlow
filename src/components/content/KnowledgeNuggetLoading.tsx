@@ -9,9 +9,18 @@ import { motion, AnimatePresence } from "framer-motion";
 interface KnowledgeNuggetLoadingProps {
   topic: string | null;
   goToProjects: () => void;
+  generatingContent?: boolean;
+  generatedSteps?: number;
+  totalSteps?: number;
 }
 
-const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingProps) => {
+const KnowledgeNuggetLoading = ({ 
+  topic, 
+  goToProjects,
+  generatingContent = true,
+  generatedSteps = 0,
+  totalSteps = 10
+}: KnowledgeNuggetLoadingProps) => {
   const [nuggets, setNuggets] = useState<string[]>([]);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,17 +34,29 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
     <Zap className="w-6 h-6 mr-3 text-[#FF9900] flex-shrink-0" />
   ]);
 
-  // Simulate progress
+  // Set progress based on content generation
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        const newProgress = prev + 0.5;
-        return newProgress >= 100 ? 100 : newProgress;
-      });
-    }, 150);
-    
-    return () => clearInterval(interval);
-  }, []);
+    if (totalSteps > 0) {
+      const calculatedProgress = (generatedSteps / totalSteps) * 100;
+      setProgress(calculatedProgress);
+    }
+  }, [generatedSteps, totalSteps]);
+
+  // Fallback progress animation when steps aren't available
+  useEffect(() => {
+    if (generatingContent && totalSteps === 0) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          // Slowly increase but never reach 100% until generation is complete
+          const increment = (100 - prev) * 0.01;
+          const newProgress = prev + (increment < 0.5 ? 0.5 : increment);
+          return newProgress >= 95 ? 95 : newProgress;
+        });
+      }, 500);
+      
+      return () => clearInterval(interval);
+    }
+  }, [generatingContent, totalSteps]);
 
   useEffect(() => {
     const fetchNuggets = async () => {
@@ -49,7 +70,7 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
 
         if (error) throw new Error(error.message);
         
-        if (data.nuggets && data.nuggets.length > 0) {
+        if (data && data.nuggets && data.nuggets.length > 0) {
           setNuggets(data.nuggets);
         } else {
           // Fallback nuggets if the API doesn't return any
@@ -104,6 +125,15 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
   // Function to manually navigate nuggets
   const goToNugget = (index: number) => {
     setCurrentNuggetIndex(index);
+  };
+  
+  // Format progress message
+  const getProgressMessage = () => {
+    if (!generatingContent && progress >= 100) {
+      return "Content ready! You'll be redirected automatically.";
+    }
+    
+    return `Generating content... ${Math.round(progress)}%`;
   };
 
   return (
@@ -202,10 +232,14 @@ const KnowledgeNuggetLoading = ({ topic, goToProjects }: KnowledgeNuggetLoadingP
           </motion.div>
           
           <p className="text-gray-500 text-sm mt-4">
-            {progress < 100 ? 
-              `Generating content... ${Math.round(progress)}%` : 
-              "Content ready! You'll be redirected automatically."}
+            {getProgressMessage()}
           </p>
+          
+          {generatingContent && (
+            <p className="text-gray-400 text-xs mt-2">
+              Generated {generatedSteps} of {totalSteps} content pieces
+            </p>
+          )}
         </div>
       </div>
     </div>

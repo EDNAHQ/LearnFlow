@@ -1,9 +1,9 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { startBackgroundContentGeneration } from "@/utils/learning/backgroundContentGeneration";
 
 export const useContentNavigation = () => {
   const navigate = useNavigate();
@@ -15,15 +15,7 @@ export const useContentNavigation = () => {
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    // Show initial loading state for at least 3 seconds
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const contentGenerationStarted = useRef<boolean>(false);
 
   useEffect(() => {
     if (!user) {
@@ -54,11 +46,38 @@ export const useContentNavigation = () => {
     generatedSteps: bgGenerated,
   } = useLearningSteps(pathId, topic);
 
+  // Start background content generation when steps are loaded
+  useEffect(() => {
+    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current) {
+      console.log(`Starting background content generation for ${steps.length} steps`);
+      setGeneratingContent(true);
+      contentGenerationStarted.current = true;
+      
+      // Start background generation for all steps
+      startBackgroundContentGeneration(steps, topic, pathId)
+        .catch(err => {
+          console.error("Error starting background generation:", err);
+        });
+    }
+  }, [steps, pathId, topic]);
+
   // Update generation status from useLearningSteps
   useEffect(() => {
     setGeneratingContent(bgGenerating);
     setGeneratedSteps(bgGenerated);
-  }, [bgGenerating, bgGenerated]);
+    
+    // Only set initialLoading to false when content generation is complete
+    if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
+      console.log("All content generated, ending loading state");
+      setInitialLoading(false);
+    }
+  }, [bgGenerating, bgGenerated, steps.length]);
+
+  // Don't automatically disable initial loading - wait for content generation
+  useEffect(() => {
+    // Keep initialLoading true until content generation is complete
+    return () => {};
+  }, []);
 
   const handleMarkComplete = async () => {
     if (!steps[currentStep]) return;
