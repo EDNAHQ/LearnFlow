@@ -12,7 +12,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   console.log("Calling OpenAI API");
   
   const body: any = {
-    model: 'gpt-4o-mini',
+    model: 'o3-mini',
     messages: [
       { 
         role: 'system', 
