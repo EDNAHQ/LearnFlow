@@ -12,7 +12,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   console.log("Calling OpenAI API");
   
   const body: any = {
-    model: 'o3-mini',
+    model: 'gpt-4o-mini',  // Updated to use the current recommended model
     messages: [
       { 
         role: 'system', 
@@ -27,22 +27,27 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
     body.response_format = { type: responseFormat };
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error('OpenAI API error:', errorData);
-    throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error calling OpenAI API:', error);
+    throw new Error(`Failed to call OpenAI API: ${error.message}`);
   }
-
-  return await response.json();
 }
 
 // Helper function to check if content already exists in Supabase

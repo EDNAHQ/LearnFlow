@@ -56,9 +56,26 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
       const generatedContent = data.choices[0].message.content;
       console.log("Generated content:", generatedContent);
       
-      const parsedContent = JSON.parse(generatedContent);
+      let parsedContent;
+      try {
+        parsedContent = JSON.parse(generatedContent);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        // Try to extract JSON from markdown if wrapped
+        const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsedContent = JSON.parse(jsonMatch[0]);
+          } catch (e) {
+            console.error("Failed to extract JSON from markdown:", e);
+            throw new Error("Invalid JSON format received from AI");
+          }
+        } else {
+          throw new Error("Could not parse AI response as JSON");
+        }
+      }
       
-      if (!Array.isArray(parsedContent.steps)) {
+      if (!parsedContent || !Array.isArray(parsedContent.steps)) {
         console.error("Invalid response format - steps is not an array:", parsedContent);
         throw new Error('Invalid response format: steps is not an array');
       }
@@ -76,32 +93,16 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
       );
     } catch (parseError) {
       console.error('Error parsing generated content:', parseError, data.choices[0].message.content);
-      
-      // Attempt to fix malformed JSON
-      try {
-        const content = data.choices[0].message.content;
-        // Try to extract JSON part if it's wrapped in markdown or other text
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const extractedJson = jsonMatch[0];
-          const parsedJson = JSON.parse(extractedJson);
-          
-          if (Array.isArray(parsedJson.steps) && parsedJson.steps.length >= 5) {
-            console.log("Successfully recovered JSON from malformed response");
-            return new Response(
-              JSON.stringify({ steps: parsedJson.steps }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        }
-      } catch (recoveryError) {
-        console.error("Recovery attempt failed:", recoveryError);
-      }
-      
-      throw new Error(`Failed to parse learning plan: ${parseError.message}`);
+      return new Response(
+        JSON.stringify({ error: `Failed to parse learning plan: ${parseError.message}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
   } catch (error) {
     console.error("Error generating learning plan:", error);
-    throw error;
+    return new Response(
+      JSON.stringify({ error: `Failed to generate learning plan: ${error.message}` }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 }
