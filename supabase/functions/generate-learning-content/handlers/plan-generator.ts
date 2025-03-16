@@ -46,7 +46,9 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
   console.log("Generating focused learning plan for topic:", topic);
   
   try {
-    const systemMessage = `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts.`;
+    const systemMessage = `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts. YOU MUST RETURN VALID JSON.`;
+    
+    // Explicitly request JSON response format
     const data = await callOpenAI(prompt, systemMessage, "json_object");
     
     console.log("OpenAI response received successfully");
@@ -54,35 +56,61 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
     try {
       // Parse the generated steps
       const generatedContent = data.choices[0].message.content;
-      console.log("Generated content:", generatedContent);
+      console.log("Generated content type:", typeof generatedContent);
+      console.log("Generated content preview:", generatedContent.substring(0, 100) + "...");
       
       let parsedContent;
       try {
         parsedContent = JSON.parse(generatedContent);
+        console.log("JSON parsed successfully");
       } catch (parseError) {
         console.error("JSON parse error:", parseError);
+        console.error("Raw content causing parse error:", generatedContent);
+        
         // Try to extract JSON from markdown if wrapped
         const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           try {
             parsedContent = JSON.parse(jsonMatch[0]);
+            console.log("Extracted JSON from markdown successfully");
           } catch (e) {
             console.error("Failed to extract JSON from markdown:", e);
-            throw new Error("Invalid JSON format received from AI");
+            return new Response(
+              JSON.stringify({ 
+                error: "Invalid JSON format received from AI",
+                rawContent: generatedContent.substring(0, 200) + "..." 
+              }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
           }
         } else {
-          throw new Error("Could not parse AI response as JSON");
+          return new Response(
+            JSON.stringify({ 
+              error: "Could not parse AI response as JSON",
+              rawContent: generatedContent.substring(0, 200) + "..." 
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       }
       
       if (!parsedContent || !Array.isArray(parsedContent.steps)) {
         console.error("Invalid response format - steps is not an array:", parsedContent);
-        throw new Error('Invalid response format: steps is not an array');
+        return new Response(
+          JSON.stringify({ 
+            error: 'Invalid response format: steps is not an array',
+            receivedContent: JSON.stringify(parsedContent).substring(0, 200) + "..."
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
       if (parsedContent.steps.length < 5) {
         console.error("Insufficient learning plan steps:", parsedContent.steps.length);
-        throw new Error('Insufficient learning plan generated');
+        return new Response(
+          JSON.stringify({ error: 'Insufficient learning plan generated', steps: parsedContent.steps }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
       console.log(`Successfully parsed ${parsedContent.steps.length} steps`);
@@ -92,9 +120,16 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (parseError) {
-      console.error('Error parsing generated content:', parseError, data.choices[0].message.content);
+      console.error('Error parsing generated content:', parseError);
+      console.error('Raw response content:', data.choices[0].message.content);
+      
       return new Response(
-        JSON.stringify({ error: `Failed to parse learning plan: ${parseError.message}` }),
+        JSON.stringify({ 
+          error: `Failed to parse learning plan: ${parseError.message}`,
+          rawResponse: typeof data.choices[0].message.content === 'string' 
+            ? data.choices[0].message.content.substring(0, 200) + "..."
+            : JSON.stringify(data.choices[0].message.content) 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

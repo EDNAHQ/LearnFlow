@@ -19,7 +19,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
   
   try {
     const params: any = {
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { 
           role: 'system', 
@@ -34,7 +34,14 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       params.response_format = { type: responseFormat };
     }
 
+    console.log("OpenAI request params:", JSON.stringify({
+      model: params.model,
+      response_format: params.response_format,
+      max_tokens: params.max_tokens
+    }));
+
     const completion = await openai.chat.completions.create(params);
+    console.log("OpenAI response received");
     return completion;
   } catch (error) {
     console.error('Error calling OpenAI API:', error);
