@@ -69,14 +69,14 @@ const ContentPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="container max-w-[860px] mx-auto py-8">
+      <div className="container max-w-[860px] mx-auto py-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <div className="flex justify-between items-center mb-6 w-full">
+          <div className="flex justify-between items-center mb-3 w-full">
             <ContentProgress 
               topic={topic} 
               currentStep={currentStep} 
@@ -84,8 +84,8 @@ const ContentPage = () => {
             />
           </div>
 
-          <div className="mb-6 w-full">
-            <div className="flex items-center justify-between mb-3">
+          <div className="mb-4 w-full">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-semibold text-white w-full">
                 {currentStepData?.title || "Loading..."}
               </h2>
