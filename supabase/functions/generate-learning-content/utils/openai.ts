@@ -1,5 +1,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -11,39 +12,30 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
 
   console.log("Calling OpenAI API");
   
-  const body: any = {
-    model: 'o3-mini',
-    messages: [
-      { 
-        role: 'system', 
-        content: systemMessage
-      },
-      { role: 'user', content: prompt }
-    ],
-    max_completion_tokens: maxTokens  // Changed from max_tokens to max_completion_tokens
-  };
-
-  if (responseFormat) {
-    body.response_format = { type: responseFormat };
-  }
-
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    apiKey: openAIApiKey
+  });
+  
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    const params: any = {
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: 'system', 
+          content: systemMessage
+        },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: maxTokens
+    };
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    if (responseFormat) {
+      params.response_format = { type: responseFormat };
     }
 
-    return await response.json();
+    const completion = await openai.chat.completions.create(params);
+    return completion;
   } catch (error) {
     console.error('Error calling OpenAI API:', error);
     throw new Error(`Failed to call OpenAI API: ${error.message}`);

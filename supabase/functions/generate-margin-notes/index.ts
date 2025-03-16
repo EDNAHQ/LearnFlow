@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const corsHeaders = {
@@ -37,6 +38,11 @@ serve(async (req) => {
 
     console.log(`Generating margin notes for ${selectedParagraphs.length} paragraphs on topic: ${topic}`);
     
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: openAIApiKey
+    });
+    
     // Generate a margin note for each paragraph
     for (const [index, paragraph] of selectedParagraphs.entries()) {
       const prompt = `
@@ -57,32 +63,18 @@ serve(async (req) => {
         Focus on quality over quantity. Be concise and direct.
       `;
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'o3-mini',
-          messages: [
-            { 
-              role: 'system', 
-              content: `You create extremely concise and valuable learning insights about ${topic}.`
-            },
-            { role: 'user', content: prompt }
-          ],
-        }),
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { 
+            role: 'system', 
+            content: `You create extremely concise and valuable learning insights about ${topic}.`
+          },
+          { role: 'user', content: prompt }
+        ],
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('OpenAI API error:', errorData);
-        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
-      const insight = data.choices[0].message.content;
+      const insight = completion.choices[0].message.content;
       
       marginNotes.push({
         id: `note-${index + 1}`,

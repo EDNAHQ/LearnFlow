@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
@@ -28,37 +29,30 @@ serve(async (req) => {
 
     console.log(`Generating knowledge nuggets for topic: ${topic}`);
     
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY
+    });
+    
     // Call OpenAI to generate knowledge nuggets
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'o3-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are an AI assistant that generates interesting knowledge nuggets about educational topics. 
-            Generate 5 short, engaging facts or insights about the given topic that would be interesting to someone 
-            who is about to learn about it in depth. Each nugget should be concise (under 100 characters) and provide 
-            a unique insight or perspective. Return the nuggets as a JSON array of strings.`
-          },
-          { role: 'user', content: `Topic: ${topic}` }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-      }),
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are an AI assistant that generates interesting knowledge nuggets about educational topics. 
+          Generate 5 short, engaging facts or insights about the given topic that would be interesting to someone 
+          who is about to learn about it in depth. Each nugget should be concise (under 100 characters) and provide 
+          a unique insight or perspective. Return the nuggets as a JSON array of strings.`
+        },
+        { role: 'user', content: `Topic: ${topic}` }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API error: ${JSON.stringify(errorData)}`);
-    }
-
-    const data = await response.json();
-    const nuggets = JSON.parse(data.choices[0].message.content).nuggets;
+    const content = completion.choices[0].message.content;
+    const nuggets = JSON.parse(content).nuggets;
 
     return new Response(
       JSON.stringify({ 

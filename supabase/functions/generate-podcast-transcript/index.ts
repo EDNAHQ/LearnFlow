@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
@@ -34,19 +35,18 @@ serve(async (req) => {
       .replace(/#{1,6}\s+/g, '') // Remove heading markers
       .replace(/\*\*/g, ''); // Remove bold markers
 
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY
+    });
+
     // Use OpenAI to convert content to dialog format
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'o3-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: `You are an AI assistant that converts educational content into an engaging podcast script. 
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: 'system', 
+          content: `You are an AI assistant that converts educational content into an engaging podcast script. 
 Format the output EXACTLY like this:
 
 **Podcast Script: [TITLE]**
@@ -58,23 +58,16 @@ Format the output EXACTLY like this:
 **Host 2:** And I'm Jamie! Today, we're going to unravel the mystery behind APIs—those magical interfaces that allow different software applications to communicate.
 
 Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.`
-          },
-          { 
-            role: 'user', 
-            content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into a podcast script:\n\n${cleanContent}`
-          }
-        ],
-        temperature: 0.7,
-      }),
+        },
+        { 
+          role: 'user', 
+          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into a podcast script:\n\n${cleanContent}`
+        }
+      ],
+      temperature: 0.7,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenAI API error: ${JSON.stringify(errorData)}`);
-    }
-
-    const data = await response.json();
-    const transcript = data.choices[0].message.content;
+    const transcript = completion.choices[0].message.content;
 
     return new Response(
       JSON.stringify({ 
