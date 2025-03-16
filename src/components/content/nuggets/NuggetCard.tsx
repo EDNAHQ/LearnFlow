@@ -26,13 +26,13 @@ const NuggetCard: React.FC<NuggetCardProps> = ({ nugget, iconIndex }) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.5 }}
-        className="w-full"
+        className="w-full max-w-2xl mx-auto"
       >
-        <Card className="bg-white border border-gray-200 overflow-hidden shadow-md transform transition-all hover:shadow-lg">
-          <CardContent className="p-5">
-            <div className="flex">
+        <Card className="bg-white border border-gray-200 overflow-hidden shadow-md transform transition-all hover:shadow-lg min-h-[160px] flex">
+          <CardContent className="p-5 flex-1 flex items-start">
+            <div className="flex w-full">
               {NUGGET_ICONS[iconIndex % NUGGET_ICONS.length]}
-              <p className="text-gray-800 text-base leading-relaxed max-h-[140px] overflow-hidden">
+              <p className="text-gray-800 text-base leading-relaxed">
                 {nugget}
               </p>
             </div>

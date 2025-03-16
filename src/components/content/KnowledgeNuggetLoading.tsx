@@ -79,7 +79,7 @@ const KnowledgeNuggetLoading = ({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-6">
-      <div className="max-w-md w-full">
+      <div className="max-w-3xl w-full">
         <div className="flex flex-col items-center mb-8">
           <LoadingAnimation />
           
@@ -111,7 +111,7 @@ const KnowledgeNuggetLoading = ({
             onError={handleFetchError}
           />
 
-          <div className="w-full h-[160px] mb-6 flex items-center justify-center">
+          <div className="w-full min-h-[200px] mb-6 flex items-center justify-center py-4">
             {nuggets.length > 0 && (
               <NuggetCard 
                 nugget={nuggets[currentNuggetIndex]} 
