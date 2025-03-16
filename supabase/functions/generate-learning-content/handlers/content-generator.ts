@@ -32,15 +32,15 @@ export async function generateStepContent(
       );
     }
 
-    console.log(`Generating content for step: ${title} (${stepNumber || '?'}/${totalSteps || '?'})`);
+    console.log(`Generating content for step: ${title}`);
     
-    // Enhanced prompt for more engaging, comprehensive content with better paragraph structure
+    // Enhanced prompt that avoids specific words and removes part references
     const prompt = `
     You are an expert educator creating in-depth, engaging educational content about "${topic}".
     
-    This is part ${stepNumber || "?"} of a learning path about ${topic}, titled: "${title}"
+    Focus on creating rich content for this topic: "${title}"
     
-    Create rich, informative educational content that deeply explores this topic. Your content should be:
+    Create informative educational content that thoroughly explores this topic. Your content should be:
     
     1. COMPREHENSIVE: Cover the subject thoroughly with clear explanations
     2. ENGAGING: Use a conversational tone that draws the reader in
@@ -48,7 +48,7 @@ export async function generateStepContent(
     4. PRACTICAL: Include real-world examples and applications where relevant
     
     Content structure:
-    - Begin with an engaging introduction that clearly states what this section covers
+    - Begin directly with the core content - no introductions identifying this as "part X" or "section Y"
     - Develop 4-6 distinct points or concepts related to the topic, each in its own paragraph(s)
     - For each major concept:
       * Explain the core idea clearly
@@ -64,10 +64,16 @@ export async function generateStepContent(
     - Aim for ~800-1000 words of substantial, valuable content
     - Write in a way that's accessible but intellectually stimulating
     
+    Important language restrictions:
+    - AVOID using the words "realm" and "delve" entirely
+    - Do not refer to this content as "part 1", "part 2", etc.
+    - Do not include introductory lines like "In this section..."
+    - Focus purely on explaining the topic without meta-references
+    
     Remember to stay precisely focused on "${title}" as it relates to ${topic}.
     `;
 
-    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications.`;
+    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Never use the words "realm" or "delve" in your content.`;
     const data = await callOpenAI(prompt, systemMessage, undefined, 1500);
     
     const generatedContent = data.choices[0].message.content;

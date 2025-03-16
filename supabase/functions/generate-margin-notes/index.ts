@@ -59,6 +59,10 @@ serve(async (req) => {
         3. A clarification of a complex point
         4. A "did you know" insight
         
+        IMPORTANT RESTRICTIONS:
+        - NEVER use the words "realm" or "delve" in your answer
+        - Keep your response direct and focused on the content
+        
         Make it extremely brief but valuable - it will appear in a small popup beside the text.
         Focus on quality over quantity. Be concise and direct.
       `;
@@ -68,7 +72,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `You create extremely concise and valuable learning insights about ${topic}.`
+            content: `You create extremely concise and valuable learning insights about ${topic}. IMPORTANT: Never use the words "realm" or "delve" in your responses.`
           },
           { role: 'user', content: prompt }
         ],

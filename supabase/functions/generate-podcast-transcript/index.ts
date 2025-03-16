@@ -53,11 +53,16 @@ Format the output EXACTLY like this:
 
 **[Intro Music Fades Out]**
 
-**Host 1:** Welcome back to Tech Talk, where we dive deep into the fascinating world of technology and how it shapes our lives! I'm your host, Alex.
+**Host 1:** Welcome back to Tech Talk, where we explore the fascinating world of technology and how it shapes our lives! I'm your host, Alex.
 
-**Host 2:** And I'm Jamie! Today, we're going to unravel the mystery behind APIs—those magical interfaces that allow different software applications to communicate.
+**Host 2:** And I'm Jamie! Today, we're going to discuss APIs—those interfaces that allow different software applications to communicate.
 
-Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.`
+Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.
+
+IMPORTANT RESTRICTIONS:
+- NEVER use the words "realm" or "delve" in your script
+- Don't include meta-references like "in this episode" or "part X of our series"
+- Focus purely on the educational content in a conversational style`
         },
         { 
           role: 'user', 

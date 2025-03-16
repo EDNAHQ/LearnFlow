@@ -30,25 +30,25 @@ const NuggetsFetcher: React.FC<NuggetsFetcherProps> = ({
         if (data && data.nuggets && data.nuggets.length > 0) {
           onNuggetsLoaded(data.nuggets);
         } else {
-          // Fallback nuggets if the API doesn't return any - made longer
+          // Fallback nuggets if the API doesn't return any - made longer and avoiding restricted words
           onNuggetsLoaded([
-            `Hooks let components "hook into" React's lifecycle and state without classes. This enables more functional programming approaches and encourages composition over inheritance.`,
-            `Custom hooks enable sharing stateful logic between components without duplication. They follow the principle of "write once, use everywhere" and can abstract complex state management patterns.`,
-            `React's useState hook is implemented using a linked list data structure internally. This implementation detail allows hooks to maintain their order between renders, which is crucial for their reliability.`,
-            `The dependency array in useEffect works similarly to a manual memoization technique. It prevents unnecessary re-execution of side effects by checking referential equality of dependencies between renders.`,
-            `React's rules of hooks prevent conditional hook execution for internal consistency. Breaking these rules can lead to bugs that are difficult to track down as the internal hook state management relies on consistent execution order.`
+            `Components in modern frameworks follow a composition pattern where smaller, focused pieces combine to create complex UIs. This architectural approach improves code reusability and maintenance by isolating functionality into discrete, testable units that can be assembled into larger structures.`,
+            `Custom hooks in React extract and share stateful logic between components without forcing component hierarchy changes. This pattern solves the problem of logic duplication across components by creating reusable functionality modules that leverage React's core hooks while maintaining a functional programming approach.`,
+            `React's useState implementation uses a linked list internally to maintain state between renders. This implementation choice allows React to preserve the order of hooks calls, which is why hooks cannot be conditionally called - the internal mechanism depends on consistent execution order for reliable state management.`,
+            `The dependency array in useEffect is a performance optimization that prevents unnecessary effect executions by comparing array values with previous renders. When React detects no changes in the dependencies, it skips re-running the effect function, significantly improving application performance for effects with expensive operations.`,
+            `JavaScript's event loop manages asynchronous operations by processing the call stack, callback queue, and microtask queue in a specific order. This single-threaded concurrency model explains why promises resolve before setTimeout callbacks, even when both are ready simultaneously - microtasks always take priority in the execution sequence.`
           ]);
         }
       } catch (err) {
         console.error('Error fetching nuggets:', err);
         onError('Failed to load knowledge nuggets');
-        // Set fallback nuggets - made longer
+        // Set fallback nuggets - made longer and avoiding restricted words
         onNuggetsLoaded([
-          `Hooks let components "hook into" React's lifecycle and state without classes. This enables more functional programming approaches and encourages composition over inheritance.`,
-          `Custom hooks enable sharing stateful logic between components without duplication. They follow the principle of "write once, use everywhere" and can abstract complex state management patterns.`,
-          `React's useState hook is implemented using a linked list data structure internally. This implementation detail allows hooks to maintain their order between renders, which is crucial for their reliability.`,
-          `The dependency array in useEffect works similarly to a manual memoization technique. It prevents unnecessary re-execution of side effects by checking referential equality of dependencies between renders.`,
-          `React's rules of hooks prevent conditional hook execution for internal consistency. Breaking these rules can lead to bugs that are difficult to track down as the internal hook state management relies on consistent execution order.`
+          `Components in modern frameworks follow a composition pattern where smaller, focused pieces combine to create complex UIs. This architectural approach improves code reusability and maintenance by isolating functionality into discrete, testable units that can be assembled into larger structures.`,
+          `Custom hooks in React extract and share stateful logic between components without forcing component hierarchy changes. This pattern solves the problem of logic duplication across components by creating reusable functionality modules that leverage React's core hooks while maintaining a functional programming approach.`,
+          `React's useState implementation uses a linked list internally to maintain state between renders. This implementation choice allows React to preserve the order of hooks calls, which is why hooks cannot be conditionally called - the internal mechanism depends on consistent execution order for reliable state management.`,
+          `The dependency array in useEffect is a performance optimization that prevents unnecessary effect executions by comparing array values with previous renders. When React detects no changes in the dependencies, it skips re-running the effect function, significantly improving application performance for effects with expensive operations.`,
+          `JavaScript's event loop manages asynchronous operations by processing the call stack, callback queue, and microtask queue in a specific order. This single-threaded concurrency model explains why promises resolve before setTimeout callbacks, even when both are ready simultaneously - microtasks always take priority in the execution sequence.`
         ]);
       } finally {
         setLoading(false);
