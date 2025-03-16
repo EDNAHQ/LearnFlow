@@ -24,52 +24,53 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
   return (
     <motion.form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-full mx-auto relative z-20"
+      className="w-full mx-auto relative z-20"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className={`relative group transition-all duration-300 ${isFocused ? 'scale-[1.01]' : ''}`}>
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-30">
-          <Search className="h-4 w-4 md:h-5 md:w-5" />
+      <div className={`relative group transition-all duration-300 ${isFocused ? 'scale-[1.02]' : ''}`}>
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-30">
+          <Search className="h-5 w-5 md:h-6 md:w-6" />
         </div>
         <Input
+          id="topic-input-field"
           type="text"
           placeholder="Enter a specific topic you want to learn about..."
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="input-light pl-9 pr-10 md:pl-10 md:pr-12 h-10 md:h-14 text-sm md:text-base shadow-sm transition-all duration-300 focus:shadow-md border-gray-200 focus:border-brand-purple/50 relative z-20"
+          className="input-light pl-12 pr-14 h-14 md:h-16 text-base md:text-lg shadow-sm transition-all duration-300 focus:shadow-md border-gray-200 focus:border-brand-purple/50 relative z-20 rounded-xl"
           disabled={loading}
         />
         <motion.div 
-          className="text-[10px] md:text-xs text-gray-500 mt-1 md:mt-1.5 ml-1 flex items-center"
+          className="text-xs md:text-sm text-gray-500 mt-2 md:mt-2.5 ml-2 flex items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Sparkles className="h-2.5 w-2.5 md:h-3 md:w-3 mr-1 text-brand-gold" />
+          <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1.5 text-brand-gold" />
           For best results, enter a specific topic (e.g., "Python decorators" instead of just "Python")
         </motion.div>
         <Button 
           type="submit" 
           size="icon" 
           disabled={!topic.trim() || loading}
-          className={`absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 h-7 w-7 md:h-8 md:w-8 transition-all duration-300 z-30
+          className={`absolute right-2 md:right-3 top-1/2 -translate-y-1/2 h-10 w-10 md:h-11 md:w-11 transition-all duration-300 z-30
             ${!topic.trim() ? 'bg-gray-400' : 'bg-brand-purple hover:bg-brand-purple/90 shadow-sm hover:shadow-md'}`}
-          style={{ top: "calc(50% - 7px)" }}
+          style={{ top: "calc(50% - 10px)" }}
         >
-          <ArrowRight className="h-3.5 w-3.5 md:h-5 md:w-5" />
+          <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
       </div>
       {loading && (
         <motion.div 
-          className="mt-2 md:mt-3 text-xs md:text-sm text-brand-purple flex items-center justify-center"
+          className="mt-3 md:mt-4 text-sm md:text-base text-brand-purple flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="mr-2 size-3 md:size-4 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin"></div>
+          <div className="mr-2 size-4 md:size-5 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin"></div>
           Creating your personalized learning journey...
         </motion.div>
       )}

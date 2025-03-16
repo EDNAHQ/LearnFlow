@@ -26,10 +26,10 @@ const HeroSection = () => {
   const handleStartLearning = () => {
     // If user is logged in, scroll to the topic input
     if (user) {
-      // Scroll to the topic input section
-      const topicInput = document.getElementById('topic-input-section');
+      // Since our new design has the input centered, we can just focus it
+      const topicInput = document.getElementById('topic-input-field');
       if (topicInput) {
-        topicInput.scrollIntoView({ behavior: 'smooth' });
+        topicInput.focus();
       }
     } else {
       // If not logged in, navigate to auth page
@@ -38,16 +38,20 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="w-full py-12 md:py-24 relative">
+    <section className="w-full py-16 md:py-24 relative">
       {/* Decorative background elements */}
       <HeroDecorations />
       
-      <div className="container grid md:grid-cols-2 gap-12 items-center relative">
-        {/* Left side - Heading and CTA buttons */}
-        <HeroHeading onStartLearning={handleStartLearning} />
+      <div className="container flex flex-col items-center relative">
+        {/* Top section - Centered Heading */}
+        <div className="w-full text-center mb-10 md:mb-12">
+          <HeroHeading onStartLearning={handleStartLearning} />
+        </div>
         
-        {/* Right side - Topic input and popular topics */}
-        <TopicInputSection loading={loading} onSubmit={handleSubmit} />
+        {/* Center section - Prominent Topic Input */}
+        <div className="w-full max-w-3xl mx-auto">
+          <TopicInputSection loading={loading} onSubmit={handleSubmit} />
+        </div>
       </div>
     </section>
   );

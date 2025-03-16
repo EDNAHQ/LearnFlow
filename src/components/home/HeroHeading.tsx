@@ -15,10 +15,10 @@ const HeroHeading = ({ onStartLearning }: HeroHeadingProps) => {
   
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="relative z-20"
+      className="relative z-20 flex flex-col items-center"
     >
       <motion.div 
         initial={{ opacity: 0 }}
@@ -33,7 +33,7 @@ const HeroHeading = ({ onStartLearning }: HeroHeadingProps) => {
       </motion.div>
       
       <motion.h1 
-        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight"
+        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight text-center max-w-4xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.7 }}
@@ -44,7 +44,7 @@ const HeroHeading = ({ onStartLearning }: HeroHeadingProps) => {
       </motion.h1>
       
       <motion.p
-        className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 md:mb-8 max-w-xl"
+        className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.7 }}
