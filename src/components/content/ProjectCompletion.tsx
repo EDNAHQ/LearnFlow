@@ -1,14 +1,9 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface ProjectCompletionProps {
-  pathId: string | null;
-  onComplete: () => void;
-}
-
-const ProjectCompletion = ({ pathId, onComplete }: ProjectCompletionProps) => {
+// Separate the logic into a custom hook that can be used anywhere
+export const useProjectCompletion = (pathId: string | null, onComplete?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [projectCompleted, setProjectCompleted] = useState<boolean>(false);
 
@@ -21,24 +16,31 @@ const ProjectCompletion = ({ pathId, onComplete }: ProjectCompletionProps) => {
       try {
         const { error: updateError } = await supabase
           .from('learning_paths')
-          .update({ is_approved: true })
+          .update({ is_approved: true, is_completed: true })
           .eq('id', pathId);
         
         if (updateError) {
           console.error("Error updating path:", updateError);
+          throw updateError;
         }
       } catch (error) {
         console.error("Error updating path:", error);
+        throw error;
       }
       
       toast.success("Congratulations! Learning project completed! 🎉");
       setProjectCompleted(true);
       
-      // Immediately call onComplete to navigate back to projects page
-      onComplete();
+      // Call onComplete if provided
+      if (onComplete) {
+        onComplete();
+      }
+      
+      return true;
     } catch (error) {
       console.error("Error marking project as complete:", error);
       toast.error("Failed to mark project as complete");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -49,6 +51,20 @@ const ProjectCompletion = ({ pathId, onComplete }: ProjectCompletionProps) => {
     isSubmitting,
     projectCompleted
   };
+};
+
+// Keep the component for backward compatibility
+interface ProjectCompletionProps {
+  pathId: string | null;
+  onComplete: () => void;
+}
+
+const ProjectCompletion = ({ pathId, onComplete }: ProjectCompletionProps) => {
+  // Use our custom hook
+  const projectCompletionState = useProjectCompletion(pathId, onComplete);
+  
+  // Return the hook's state and functions
+  return projectCompletionState;
 };
 
 export default ProjectCompletion;

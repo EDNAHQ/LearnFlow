@@ -11,7 +11,7 @@ import ContentNavigation from "@/components/content/ContentNavigation";
 import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading";
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
-import ProjectCompletion from "@/components/content/ProjectCompletion";
+import { useProjectCompletion } from "@/components/content/ProjectCompletion";
 
 const ContentPage = () => {
   const { pathId } = useParams();
@@ -32,9 +32,11 @@ const ContentPage = () => {
     generatedSteps
   } = useContentNavigation();
   
-  // For project completion state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projectCompleted, setProjectCompleted] = useState(false);
+  // Use the custom hook instead of calling the component as a function
+  const { completePath, isSubmitting, projectCompleted } = useProjectCompletion(
+    pathId, 
+    () => goToProjects() // Directly use goToProjects as the onComplete callback
+  );
   
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
@@ -57,28 +59,6 @@ const ContentPage = () => {
   if (!topic || !pathId) {
     return <ContentError goToProjects={goToProjects} />;
   }
-
-  // Complete path function
-  const completePath = async () => {
-    if (!pathId) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      const { completePath: completePathFunc } = ProjectCompletion({ 
-        pathId, 
-        onComplete: () => {
-          setProjectCompleted(true);
-          goToProjects(); // Directly navigate to projects
-        } 
-      });
-      
-      await completePathFunc();
-    } catch (error) {
-      console.error("Error completing path:", error);
-      setIsSubmitting(false);
-    }
-  };
 
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
