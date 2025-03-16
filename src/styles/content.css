@@ -9,6 +9,7 @@
   /* Prevent continuous expansion */
   max-width: 100%;
   overflow: hidden;
+  display: inline-block;
 }
 
 .insight-indicator {
@@ -19,12 +20,14 @@
   width: 24px;
   height: 24px;
   position: relative;
+  flex-shrink: 0;
 }
 
 /* Ensure the content margin note has a fixed size */
 .content-margin-note {
   width: auto !important;
   max-width: 100% !important;
+  flex-shrink: 0;
 }
 
 /* Mobile responsiveness */

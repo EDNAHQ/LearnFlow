@@ -8,20 +8,25 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface ContentMarginNoteProps {
   insight: string;
   isLoading?: boolean;
+  className?: string;
 }
 
-const ContentMarginNote = ({ insight, isLoading = false }: ContentMarginNoteProps) => {
+const ContentMarginNote = ({ insight, isLoading = false, className }: ContentMarginNoteProps) => {
   const isMobile = useIsMobile();
   
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button 
-          className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gradient-to-br from-[#6D42EF]/90 to-[#E84393]/90 text-white shadow-sm hover:shadow-md transition-all group touch-manipulation"
+          className={cn(
+            "inline-flex items-center justify-center h-6 w-6 rounded-full bg-gradient-to-br from-[#6D42EF]/90 to-[#E84393]/90 text-white shadow-sm hover:shadow-md transition-all group touch-manipulation",
+            className
+          )}
           aria-label="View additional insight"
           style={{ touchAction: "manipulation" }}
         >
