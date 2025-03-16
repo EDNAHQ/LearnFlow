@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from "react";
-import ReactDOM from 'react-dom/client';
+import { createPortal } from 'react-dom';
 import ContentMarginNote from "@/components/ContentMarginNote";
 import { MarginNote, generateMarginNotes } from "@/utils/marginNotesUtils";
 
@@ -14,64 +14,22 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
   const [marginNotes, setMarginNotes] = useState<MarginNote[]>([]);
   const [loadingMarginNotes, setLoadingMarginNotes] = useState(false);
   const [marginNotesGenerated, setMarginNotesGenerated] = useState(false);
-  const [insightsAdded, setInsightsAdded] = useState(false);
-  const rootRefs = useRef<Map<string, { root: ReactDOM.Root, element: HTMLElement }>>(new Map());
+  const [paragraphsWithNotes, setParagraphsWithNotes] = useState<Map<HTMLElement, MarginNote>>(new Map());
+  const [renderPortals, setRenderPortals] = useState(false);
   const isUnmounting = useRef(false);
-  const cleanupTimeoutRef = useRef<number | null>(null);
 
   // Reset states when content changes
   useEffect(() => {
     setMarginNotes([]);
     setMarginNotesGenerated(false);
-    setInsightsAdded(false);
+    setParagraphsWithNotes(new Map());
+    setRenderPortals(false);
     isUnmounting.current = false;
-    
-    // Clear any pending cleanup
-    if (cleanupTimeoutRef.current) {
-      clearTimeout(cleanupTimeoutRef.current);
-      cleanupTimeoutRef.current = null;
-    }
-    
+
     return () => {
       isUnmounting.current = true;
-      // Schedule cleanup for after this render cycle completes
-      cleanupTimeoutRef.current = window.setTimeout(() => {
-        safeCleanup();
-      }, 100);
     };
   }, [content, topic]);
-  
-  const safeCleanup = () => {
-    // Skip cleanup if component is already unmounting or being re-rendered
-    if (isUnmounting.current) {
-      console.log("Performing cleanup of React roots");
-      
-      // Use a more stable cleanup approach with setTimeout
-      rootRefs.current.forEach(({ root, element }, id) => {
-        try {
-          // First unmount the React root
-          root.unmount();
-          
-          // Then safely remove the DOM element if it still exists in the document
-          if (element && document.body.contains(element) && element.parentNode) {
-            setTimeout(() => {
-              try {
-                if (element.parentNode) {
-                  element.parentNode.removeChild(element);
-                }
-              } catch (e) {
-                console.error("Error removing DOM element during cleanup:", e);
-              }
-            }, 0);
-          }
-        } catch (e) {
-          console.error(`Error during cleanup of React root ${id}:`, e);
-        }
-      });
-      
-      rootRefs.current.clear();
-    }
-  };
 
   // Generate margin notes once content is loaded
   const generateContentMarginNotes = async () => {
@@ -85,7 +43,6 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
       
       const notes = await generateMarginNotes(content, topic);
       
-      // Check if component is still mounted before updating state
       if (isUnmounting.current) return;
       
       console.log(`Generated ${notes.length} margin notes for: ${topic}`);
@@ -121,89 +78,80 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
     }
   }, [content, topic, marginNotesGenerated, loadingMarginNotes]);
 
-  // Add insights inline to paragraphs - improved for stability
+  // Find paragraphs for notes and prepare for portal rendering
   useEffect(() => {
-    if (!contentRef.current || marginNotes.length === 0 || insightsAdded || isUnmounting.current) return;
+    if (!contentRef.current || marginNotes.length === 0 || isUnmounting.current || paragraphsWithNotes.size > 0) return;
     
-    // A longer delay to ensure DOM is fully rendered and stable
     const timer = setTimeout(() => {
-      if (isUnmounting.current) return;
+      if (isUnmounting.current || !contentRef.current) return;
       
-      const addInsightsToContent = () => {
-        const contentDiv = contentRef.current;
-        if (!contentDiv || isUnmounting.current) return;
+      const contentDiv = contentRef.current;
+      // Find all paragraphs in the content
+      const paragraphs = contentDiv.querySelectorAll('p');
+      if (paragraphs.length === 0) return;
+      
+      const newParagraphsWithNotes = new Map<HTMLElement, MarginNote>();
+      
+      // For each margin note, find a matching paragraph
+      marginNotes.forEach((note) => {
+        if (isUnmounting.current) return;
         
-        // Find all paragraphs in the content
-        const paragraphs = contentDiv.querySelectorAll('p');
-        if (paragraphs.length === 0) return;
+        const paragraphFragment = note.paragraph.substring(0, 50).toLowerCase();
         
-        let notesAdded = 0;
-        
-        // For each margin note, find a matching paragraph and add the insight button
-        marginNotes.forEach((note, index) => {
-          if (isUnmounting.current) return;
+        // Try to find a paragraph containing this fragment
+        for (let i = 0; i < paragraphs.length; i++) {
+          const paragraph = paragraphs[i];
+          const paragraphText = paragraph.textContent?.toLowerCase() || '';
           
-          const paragraphFragment = note.paragraph.substring(0, 50).toLowerCase();
-          const noteId = `note-${note.id}-${index}`;
-          
-          // Try to find a paragraph containing this fragment
-          for (let i = 0; i < paragraphs.length; i++) {
-            const paragraph = paragraphs[i];
-            const paragraphText = paragraph.textContent?.toLowerCase() || '';
-            
-            if (paragraphText.includes(paragraphFragment)) {
-              // Skip if this paragraph already has this note
-              if (paragraph.querySelector(`[data-note-id="${noteId}"]`)) {
-                continue;
-              }
-              
-              // Add the insight button at the end of the paragraph
-              paragraph.classList.add('has-margin-note');
-              
-              // Create a span to hold the insight button and ensure it's properly positioned
-              const insightSpan = document.createElement('span');
-              insightSpan.className = 'insight-indicator';
-              insightSpan.setAttribute('data-note-id', noteId);
-              insightSpan.style.display = 'inline-block';
-              insightSpan.style.verticalAlign = 'middle';
-              insightSpan.style.marginLeft = '8px';
-              
-              // Only proceed if paragraph still exists in DOM
-              if (document.body.contains(paragraph)) {
-                // Append the span to the paragraph
-                paragraph.appendChild(insightSpan);
-                
-                // Use a unique key for each root to track it
-                if (!isUnmounting.current) {
-                  try {
-                    const root = ReactDOM.createRoot(insightSpan);
-                    rootRefs.current.set(noteId, { root, element: insightSpan });
-                    root.render(<ContentMarginNote insight={note.insight} key={noteId} />);
-                    notesAdded++;
-                  } catch (error) {
-                    console.error("Error rendering margin note:", error);
-                  }
-                }
-              }
-              
-              break;
+          if (paragraphText.includes(paragraphFragment)) {
+            // Skip if this paragraph already has a note
+            if ([...newParagraphsWithNotes.keys()].includes(paragraph)) {
+              continue;
             }
+            
+            // Add the paragraph and note to our Map
+            newParagraphsWithNotes.set(paragraph, note);
+            paragraph.classList.add('has-margin-note');
+            
+            // Create a span to hold the portal
+            const insightSpan = document.createElement('span');
+            insightSpan.className = 'insight-indicator';
+            insightSpan.setAttribute('data-note-id', note.id);
+            paragraph.appendChild(insightSpan);
+            
+            break;
           }
-        });
-        
-        if (!isUnmounting.current) {
-          console.log(`Added ${notesAdded} insight indicators to content`);
-          setInsightsAdded(true);
         }
-      };
+      });
       
-      addInsightsToContent();
-    }, 800); // Increased timeout to ensure DOM stability
+      setParagraphsWithNotes(newParagraphsWithNotes);
+      setRenderPortals(true);
+      
+    }, 500);
     
     return () => clearTimeout(timer);
-  }, [marginNotes, content, insightsAdded]);
+  }, [marginNotes, contentRef]);
 
-  return null; // This is a non-visual component
+  // Render portals for each paragraph with a note
+  if (!renderPortals) return null;
+
+  return (
+    <>
+      {Array.from(paragraphsWithNotes.entries()).map(([paragraph, note]) => {
+        // Find the insight span we created
+        const insightSpan = paragraph.querySelector(`.insight-indicator[data-note-id="${note.id}"]`);
+        
+        // Only render if the span exists in the DOM
+        if (insightSpan && document.body.contains(insightSpan)) {
+          return createPortal(
+            <ContentMarginNote insight={note.insight} key={note.id} />,
+            insightSpan
+          );
+        }
+        return null;
+      })}
+    </>
+  );
 };
 
 export default ContentMarginNotesRenderer;
