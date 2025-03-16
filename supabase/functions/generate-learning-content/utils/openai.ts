@@ -51,6 +51,11 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       // Validate JSON response
       try {
         const content = completion.choices[0].message.content;
+        if (!content || content.trim() === '') {
+          console.error("Empty content received from OpenAI");
+          throw new Error("Empty content received from OpenAI");
+        }
+        
         JSON.parse(content || "{}"); // Validate JSON parsing
         console.log("Successfully validated JSON response");
       } catch (jsonError) {

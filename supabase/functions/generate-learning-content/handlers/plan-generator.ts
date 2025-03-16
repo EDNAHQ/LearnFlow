@@ -61,6 +61,18 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
       
       let parsedContent;
       try {
+        // Add additional validation to ensure content is not empty
+        if (!generatedContent || typeof generatedContent !== 'string' || generatedContent.trim() === '') {
+          console.error("Empty or invalid content received from OpenAI");
+          return new Response(
+            JSON.stringify({ 
+              error: "Empty or invalid content received from OpenAI",
+              rawContent: generatedContent ? `${typeof generatedContent}: ${generatedContent.substring(0, 200)}...` : "null or undefined" 
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
         parsedContent = JSON.parse(generatedContent);
         console.log("JSON parsed successfully");
       } catch (parseError) {
