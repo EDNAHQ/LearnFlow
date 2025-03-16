@@ -41,7 +41,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
         <div className={`relative transition-all duration-300 ${isFocused ? 'transform scale-[1.02]' : ''}`}>
           <Input
             type="text"
-            placeholder="Try \"Machine Learning\", \"JavaScript\", \"Quantum Physics\"..."
+            placeholder='Try "Machine Learning", "JavaScript", "Quantum Physics"...'
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             onFocus={() => setIsFocused(true)}
