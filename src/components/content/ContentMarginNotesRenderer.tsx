@@ -15,8 +15,9 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
   const [loadingMarginNotes, setLoadingMarginNotes] = useState(false);
   const [marginNotesGenerated, setMarginNotesGenerated] = useState(false);
   const [insightsAdded, setInsightsAdded] = useState(false);
-  const rootRefs = useRef<Map<HTMLElement, ReactDOM.Root>>(new Map());
+  const rootRefs = useRef<Map<string, { root: ReactDOM.Root, element: HTMLElement }>>(new Map());
   const isUnmounting = useRef(false);
+  const cleanupTimeoutRef = useRef<number | null>(null);
 
   // Reset states when content changes
   useEffect(() => {
@@ -25,34 +26,51 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
     setInsightsAdded(false);
     isUnmounting.current = false;
     
-    // Safe cleanup of previous React roots
-    if (rootRefs.current.size > 0) {
-      safeCleanup();
+    // Clear any pending cleanup
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
+      cleanupTimeoutRef.current = null;
     }
     
     return () => {
       isUnmounting.current = true;
-      // Defer cleanup to next tick to avoid React rendering conflicts
-      setTimeout(() => {
+      // Schedule cleanup for after this render cycle completes
+      cleanupTimeoutRef.current = window.setTimeout(() => {
         safeCleanup();
-      }, 0);
+      }, 100);
     };
   }, [content, topic]);
   
   const safeCleanup = () => {
-    // Unmount all React roots to prevent memory leaks
-    rootRefs.current.forEach((root, element) => {
-      try {
-        root.unmount();
-        // Only attempt DOM operations if the element is still in the document
-        if (element && element.parentNode) {
-          element.parentNode.removeChild(element);
+    // Skip cleanup if component is already unmounting or being re-rendered
+    if (isUnmounting.current) {
+      console.log("Performing cleanup of React roots");
+      
+      // Use a more stable cleanup approach with setTimeout
+      rootRefs.current.forEach(({ root, element }, id) => {
+        try {
+          // First unmount the React root
+          root.unmount();
+          
+          // Then safely remove the DOM element if it still exists in the document
+          if (element && document.body.contains(element) && element.parentNode) {
+            setTimeout(() => {
+              try {
+                if (element.parentNode) {
+                  element.parentNode.removeChild(element);
+                }
+              } catch (e) {
+                console.error("Error removing DOM element during cleanup:", e);
+              }
+            }, 0);
+          }
+        } catch (e) {
+          console.error(`Error during cleanup of React root ${id}:`, e);
         }
-      } catch (e) {
-        console.error("Error during cleanup of React root:", e);
-      }
-    });
-    rootRefs.current.clear();
+      });
+      
+      rootRefs.current.clear();
+    }
   };
 
   // Generate margin notes once content is loaded
@@ -103,11 +121,11 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
     }
   }, [content, topic, marginNotesGenerated, loadingMarginNotes]);
 
-  // Add insights inline to paragraphs - improved for cross-device compatibility
+  // Add insights inline to paragraphs - improved for stability
   useEffect(() => {
     if (!contentRef.current || marginNotes.length === 0 || insightsAdded || isUnmounting.current) return;
     
-    // Defer adding insights to avoid React rendering conflicts
+    // A longer delay to ensure DOM is fully rendered and stable
     const timer = setTimeout(() => {
       if (isUnmounting.current) return;
       
@@ -122,10 +140,11 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
         let notesAdded = 0;
         
         // For each margin note, find a matching paragraph and add the insight button
-        marginNotes.forEach((note) => {
+        marginNotes.forEach((note, index) => {
           if (isUnmounting.current) return;
           
           const paragraphFragment = note.paragraph.substring(0, 50).toLowerCase();
+          const noteId = `note-${note.id}-${index}`;
           
           // Try to find a paragraph containing this fragment
           for (let i = 0; i < paragraphs.length; i++) {
@@ -133,29 +152,38 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
             const paragraphText = paragraph.textContent?.toLowerCase() || '';
             
             if (paragraphText.includes(paragraphFragment)) {
+              // Skip if this paragraph already has this note
+              if (paragraph.querySelector(`[data-note-id="${noteId}"]`)) {
+                continue;
+              }
+              
               // Add the insight button at the end of the paragraph
               paragraph.classList.add('has-margin-note');
               
               // Create a span to hold the insight button and ensure it's properly positioned
               const insightSpan = document.createElement('span');
               insightSpan.className = 'insight-indicator';
+              insightSpan.setAttribute('data-note-id', noteId);
               insightSpan.style.display = 'inline-block';
               insightSpan.style.verticalAlign = 'middle';
               insightSpan.style.marginLeft = '8px';
               
-              // Append the span to the paragraph
-              paragraph.appendChild(insightSpan);
-              
-              // Use ReactDOM.createRoot instead of the deprecated render method
-              try {
+              // Only proceed if paragraph still exists in DOM
+              if (document.body.contains(paragraph)) {
+                // Append the span to the paragraph
+                paragraph.appendChild(insightSpan);
+                
+                // Use a unique key for each root to track it
                 if (!isUnmounting.current) {
-                  const root = ReactDOM.createRoot(insightSpan);
-                  rootRefs.current.set(insightSpan, root);
-                  root.render(<ContentMarginNote insight={note.insight} key={note.id} />);
-                  notesAdded++;
+                  try {
+                    const root = ReactDOM.createRoot(insightSpan);
+                    rootRefs.current.set(noteId, { root, element: insightSpan });
+                    root.render(<ContentMarginNote insight={note.insight} key={noteId} />);
+                    notesAdded++;
+                  } catch (error) {
+                    console.error("Error rendering margin note:", error);
+                  }
                 }
-              } catch (error) {
-                console.error("Error rendering margin note:", error);
               }
               
               break;
@@ -170,7 +198,7 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef }: ContentMargi
       };
       
       addInsightsToContent();
-    }, 800);
+    }, 800); // Increased timeout to ensure DOM stability
     
     return () => clearTimeout(timer);
   }, [marginNotes, content, insightsAdded]);
