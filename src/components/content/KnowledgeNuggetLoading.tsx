@@ -7,6 +7,7 @@ import NuggetCard from "./nuggets/NuggetCard";
 import NuggetIndicators from "./nuggets/NuggetIndicators";
 import ProgressIndicator from "./nuggets/ProgressIndicator";
 import NuggetsFetcher from "./nuggets/NuggetsFetcher";
+import { useNavigate } from "react-router-dom";
 
 interface KnowledgeNuggetLoadingProps {
   topic: string | null;
@@ -14,6 +15,7 @@ interface KnowledgeNuggetLoadingProps {
   generatingContent?: boolean;
   generatedSteps?: number;
   totalSteps?: number;
+  pathId?: string | null;
 }
 
 const KnowledgeNuggetLoading = ({ 
@@ -21,8 +23,10 @@ const KnowledgeNuggetLoading = ({
   goToProjects,
   generatingContent = true,
   generatedSteps = 0,
-  totalSteps = 10
+  totalSteps = 10,
+  pathId = null
 }: KnowledgeNuggetLoadingProps) => {
+  const navigate = useNavigate();
   const [nuggets, setNuggets] = useState<string[]>([]);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +55,15 @@ const KnowledgeNuggetLoading = ({
       return () => clearInterval(interval);
     }
   }, [generatingContent, totalSteps]);
+
+  // Auto-redirect to first content page when generation is complete
+  useEffect(() => {
+    if (!generatingContent && pathId && totalSteps > 0 && generatedSteps >= totalSteps) {
+      console.log("Content generation complete. Navigating to first content page...");
+      // Navigate to the first step (index 0) of the content
+      navigate(`/content/${pathId}/step/0`);
+    }
+  }, [generatingContent, generatedSteps, totalSteps, pathId, navigate]);
 
   useEffect(() => {
     // Auto-rotate through nuggets - exactly 8 seconds per nugget

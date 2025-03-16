@@ -52,6 +52,7 @@ const ContentPage = () => {
         generatingContent={generatingContent}
         generatedSteps={generatedSteps}
         totalSteps={steps.length}
+        pathId={pathId}
       />
     );
   }
