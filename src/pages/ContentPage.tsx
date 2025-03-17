@@ -48,6 +48,7 @@ const ContentPage = () => {
   
   // Handle generation complete redirect - only once
   useEffect(() => {
+    // Only redirect if we're not already on a step page and generation is complete
     if (!hasRedirected && 
         !isLoading && 
         !generatingContent && 
@@ -61,8 +62,9 @@ const ContentPage = () => {
     }
   }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
   
-  // Always show loading screen when content is loading or generating
-  if (isLoading || (generatingContent && !stepId)) {
+  // Show loading screen ONLY when no stepId is present OR we're in initial loading state
+  // This prevents the redirect loop when already on a step page
+  if ((isLoading || generatingContent) && !stepId) {
     return (
       <KnowledgeNuggetLoading 
         topic={topic} 
