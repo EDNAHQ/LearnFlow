@@ -20,6 +20,11 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
 
+  // Function to count how many steps have detailed content
+  const countGeneratedSteps = (stepsArray: LearningStepData[]) => {
+    return stepsArray.filter(step => !!step.detailed_content).length;
+  };
+
   useEffect(() => {
     if (!pathId) return;
 
@@ -54,8 +59,8 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           
           setSteps(processedData);
           
-          // Check for background generation status
-          const stepsWithDetailedContent = processedData.filter(step => !!step.detailed_content).length;
+          // Count steps with detailed content
+          const stepsWithDetailedContent = countGeneratedSteps(processedData);
           setGeneratedSteps(stepsWithDetailedContent);
           setGeneratingContent(stepsWithDetailedContent < processedData.length);
           
@@ -74,7 +79,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
     fetchLearningSteps();
     
-    // Set up subscription to track generation progress - IMPROVED FOR RELIABILITY
+    // Set up subscription to track generation progress - FIXED FOR REALTIME UPDATES
     const channel = supabase.channel(`steps-${pathId}`);
     
     const subscription = channel
@@ -88,47 +93,51 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
         (payload) => {
           console.log('Step updated:', payload);
           
-          // Only count as generated if detailed_content is present
+          // Only process updates with detailed content
           if (payload.new && payload.new.detailed_content) {
             console.log('Received update with detailed content:', payload.new.id);
             
-            // Refresh all steps to ensure we have the latest data
-            // This ensures we don't miss any updates
-            fetchLearningSteps();
-            
-            // Also update the individual step in state for immediate feedback
-            setSteps(prevSteps => 
-              prevSteps.map(step => 
+            // Update the steps state with the new data
+            setSteps(prevSteps => {
+              // Create updated steps array with the new data
+              const updatedSteps = prevSteps.map(step => 
                 step.id === payload.new.id 
                   ? {
                       ...step,
                       detailed_content: payload.new.detailed_content
                     }
                   : step
-              )
-            );
-            
-            // Update generation progress
-            setGeneratedSteps(prev => {
-              // Count how many steps actually have detailed content now
-              const newCount = steps.filter(s => 
-                s.id === payload.new.id ? true : !!s.detailed_content
-              ).length;
+              );
               
-              console.log(`Generation progress updated: ${newCount}/${steps.length} steps`);
+              // Calculate new counts based on the updated steps
+              const newGeneratedCount = countGeneratedSteps(updatedSteps);
               
-              if (newCount >= steps.length) {
-                setGeneratingContent(false);
-                console.log("All content generation complete");
-              }
+              // Update generated steps count
+              setGeneratedSteps(newGeneratedCount);
               
-              return newCount;
+              // Update generation status
+              setGeneratingContent(newGeneratedCount < updatedSteps.length);
+              
+              console.log(`Generation progress updated: ${newGeneratedCount}/${updatedSteps.length} steps`);
+              
+              return updatedSteps;
             });
           }
         }
       )
       .subscribe((status) => {
         console.log(`Subscription status: ${status}`);
+        
+        // If subscription failed, fall back to polling
+        if (status === 'SUBSCRIPTION_ERROR' || status === 'CLOSED') {
+          console.log('Subscription failed, falling back to polling');
+          // Set up polling as fallback
+          const pollInterval = setInterval(() => {
+            fetchLearningSteps();
+          }, 5000); // Poll every 5 seconds
+          
+          return () => clearInterval(pollInterval);
+        }
       });
       
     console.log("Subscription to learning steps updates established");
