@@ -46,23 +46,21 @@ serve(async (req) => {
       messages: [
         { 
           role: 'system', 
-          content: `You are an AI assistant that converts educational content into an engaging podcast script. 
-Format the output EXACTLY like this:
+          content: `You are an AI assistant that converts educational content into a simple podcast script.
+Format the output EXACTLY like this example and NOTHING ELSE:
 
-**Podcast Script: [TITLE]**
+Host 1: Hello and welcome to our podcast!
+Host 2: Today we're talking about...
+Host 1: That sounds interesting!
+Host 2: Let's get started!
 
-**[Intro Music Fades Out]**
-
-**Host 1:** Welcome back to Tech Talk, where we explore the fascinating world of technology and how it shapes our lives! I'm your host, Alex.
-
-**Host 2:** And I'm Jamie! Today, we're going to discuss APIs—those interfaces that allow different software applications to communicate.
-
-Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.
-
-IMPORTANT RESTRICTIONS:
-- NEVER use the words "realm" or "delve" in your script
-- Don't include meta-references like "in this episode" or "part X of our series"
-- Focus purely on the educational content in a conversational style`
+Important:
+- Use ONLY "Host 1:" and "Host 2:" prefixes exactly as shown
+- Don't add any introduction, title, or additional formatting
+- No spaces between paragraphs
+- Don't use markdown or any special formatting
+- Keep it conversational and educational
+- Aim for about 5-10 minutes of dialog`
         },
         { 
           role: 'user', 
