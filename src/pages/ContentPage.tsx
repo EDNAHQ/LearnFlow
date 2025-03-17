@@ -52,8 +52,8 @@ const ContentPage = () => {
         !isLoading && 
         !generatingContent && 
         pathId && 
-        totalSteps > 0 && 
-        generatedSteps >= totalSteps && 
+        steps.length > 0 && 
+        generatedSteps >= steps.length && 
         !stepId) {
       console.log("Content generation complete. Navigating to first content page...");
       setHasRedirected(true);
