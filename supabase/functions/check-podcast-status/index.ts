@@ -27,6 +27,8 @@ serve(async (req) => {
     }
 
     console.log(`Checking status of podcast job: ${jobId}`);
+    console.log(`User ID: ${PLAYDIALOG_USER_ID ? 'Available' : 'Missing'}`);
+    console.log(`Secret Key: ${PLAYDIALOG_SECRET_KEY ? 'Available' : 'Missing'}`);
     
     // Prepare the headers for Play.ai API
     const headers = {
@@ -37,6 +39,8 @@ serve(async (req) => {
     
     // Check job status
     const statusUrl = `https://api.play.ai/api/v1/tts/${jobId}`;
+    console.log(`Sending status check request to: ${statusUrl}`);
+    
     const statusResponse = await fetch(statusUrl, { headers });
     
     if (!statusResponse.ok) {
@@ -46,6 +50,8 @@ serve(async (req) => {
     }
     
     const statusData = await statusResponse.json();
+    console.log(`Status response:`, JSON.stringify(statusData));
+    
     const status = statusData.output?.status || 'UNKNOWN';
     const podcastUrl = status === 'COMPLETED' ? statusData.output?.url : null;
     

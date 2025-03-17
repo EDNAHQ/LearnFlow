@@ -27,6 +27,8 @@ serve(async (req) => {
     }
 
     console.log(`Starting podcast creation with transcript of length: ${transcript.length}`);
+    console.log(`User ID: ${PLAYDIALOG_USER_ID ? 'Available' : 'Missing'}`);
+    console.log(`Secret Key: ${PLAYDIALOG_SECRET_KEY ? 'Available' : 'Missing'}`);
     
     // Default voices if not provided
     const selectedVoice1 = voice1 || 's3://voice-cloning-zero-shot/baf1ef41-36b6-428c-9bdf-50ba54682bd8/original/manifest.json';
@@ -49,6 +51,8 @@ serve(async (req) => {
       outputFormat: 'mp3',
     };
 
+    console.log('Sending request to Play.ai API...');
+
     // Initiate the podcast generation
     const response = await fetch('https://api.play.ai/api/v1/tts/', {
       method: 'POST',
@@ -57,12 +61,19 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Play.ai API error:', errorData);
-      throw new Error(`Play.ai API error: ${JSON.stringify(errorData)}`);
+      const errorText = await response.text();
+      console.error('Play.ai API error response:', errorText);
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(`Play.ai API error: ${JSON.stringify(errorData)}`);
+      } catch (e) {
+        throw new Error(`Play.ai API error (${response.status}): ${errorText}`);
+      }
     }
 
     const data = await response.json();
+    console.log('Play.ai API response:', JSON.stringify(data));
+    
     const jobId = data.id;
     
     if (!jobId) {

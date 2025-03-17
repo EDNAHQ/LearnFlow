@@ -22,22 +22,28 @@ Host 2: Today we're talking about...
 Host 1: That sounds interesting!
 Host 2: Let's get started!`;
 
+  const placeholderText = `Host 1: Hello and welcome to our podcast!
+Host 2: Today we're talking about code understanding.
+Host 1: That sounds interesting!
+Host 2: Let's get started!
+Host 1: Understanding code starts with...`;
+
   return (
     <div className="space-y-4">
       <Alert className="bg-gray-50">
         <Info className="h-4 w-4 text-gray-500" />
         <AlertTitle>Format Example</AlertTitle>
         <AlertDescription className="text-xs text-gray-500 mt-2">
-          <pre className="whitespace-pre-wrap font-mono">{examples}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-sm">{examples}</pre>
         </AlertDescription>
       </Alert>
       
       <div className="space-y-2">
         <Textarea
-          placeholder="Host 1: Hello and welcome to our podcast!&#10;Host 2: Today we're talking about..."
+          placeholder={placeholderText}
           value={transcript}
           onChange={(e) => onTranscriptChange(e.target.value)}
-          className="min-h-[200px] resize-y font-mono text-sm"
+          className="min-h-[200px] h-[300px] resize-y font-mono text-sm p-4"
           disabled={isGenerating}
         />
       </div>
