@@ -52,7 +52,7 @@ serve(async (req) => {
       
       console.log(`Successfully generated audio: ${audioData.length} bytes`);
       
-      // Return audio data
+      // Return audio data with proper Content-Type
       return new Response(audioData, {
         headers: {
           ...corsHeaders,
@@ -63,11 +63,11 @@ serve(async (req) => {
       console.error('Eleven Labs API error:', elevenlabsError);
       
       // Provide more detailed error information
-      const errorDetails = elevenlabsError.response 
-        ? `Status: ${elevenlabsError.response.status}, Message: ${await elevenlabsError.response.text()}` 
+      const errorResponse = elevenlabsError.response 
+        ? `Status code: ${elevenlabsError.response.status}\nBody: ${await elevenlabsError.response.text()}` 
         : elevenlabsError.message;
         
-      throw new Error(`Eleven Labs API error: ${errorDetails}`);
+      throw new Error(`Eleven Labs API error: ${errorResponse}`);
     }
   } catch (error: any) {
     console.error('Error in text-to-speech function:', error.message);

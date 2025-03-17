@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { Play, Pause, Volume2, Loader2, VolumeX, RefreshCw } from 'lucide-react';
 import { BarLoader } from '@/components/ui/loader';
-import { toast } from 'sonner';
 
 interface TextToSpeechPlayerProps {
   text: string;
@@ -15,6 +14,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
   const { isGenerating, audioUrl, error, generateSpeech, cleanup } = useTextToSpeech();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Handle cleanup on unmount
@@ -24,23 +24,12 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
     };
   }, [cleanup]);
 
-  // Show error toast if there's an error
-  useEffect(() => {
-    if (error) {
-      toast.error(`Audio error: ${error}`);
-    }
-  }, [error]);
-
   // Create audio element when URL is available
   useEffect(() => {
     if (audioUrl && audioRef.current) {
       audioRef.current.src = audioUrl;
-      
-      // Auto-play when audio is generated
-      audioRef.current.play().catch(err => {
-        console.error("Error auto-playing audio:", err);
-        toast.error("Couldn't auto-play audio. Please click play manually.");
-      });
+      audioRef.current.load();
+      setIsAudioLoaded(true);
     }
   }, [audioUrl]);
 
@@ -48,11 +37,9 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
     if (!audioUrl && !isGenerating) {
       // If no audio yet, generate it first
       try {
-        toast.info("Generating audio...");
         await generateSpeech(text);
       } catch (err) {
         console.error("Failed to generate speech:", err);
-        toast.error("Failed to generate speech");
       }
     } else if (audioRef.current) {
       // If audio exists, toggle play/pause
@@ -61,7 +48,6 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
       } else {
         audioRef.current.play().catch(err => {
           console.error("Error playing audio:", err);
-          toast.error("Failed to play audio");
         });
       }
     }
@@ -80,11 +66,9 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
         // Clean up existing audio
         cleanup();
         // Generate new audio
-        toast.info("Regenerating audio...");
         await generateSpeech(text);
       } catch (err) {
         console.error("Failed to regenerate speech:", err);
-        toast.error("Failed to regenerate speech");
       }
     }
   };
@@ -137,15 +121,22 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
             {isGenerating ? 'Generating audio...' : (title || 'Listen to content')}
           </div>
           
-          {audioUrl && (
-            <audio 
-              ref={audioRef} 
-              onEnded={handleAudioEnd}
-              className="hidden"
-            />
-          )}
+          {/* Audio element - always present but hidden */}
+          <audio 
+            ref={audioRef} 
+            onEnded={handleAudioEnd}
+            controls={false}
+            className="hidden"
+          />
           
           {isGenerating && <BarLoader className="w-full mt-2" />}
+          
+          {/* Show audio status message */}
+          {!isGenerating && audioUrl && (
+            <div className="text-xs text-gray-400 mt-1">
+              {isPlaying ? 'Playing audio...' : (isAudioLoaded ? 'Audio ready to play' : 'Loading audio...')}
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-2">
@@ -165,7 +156,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
             onClick={handleMuteToggle}
             variant="ghost" 
             size="icon"
-            disabled={!audioUrl && !isPlaying}
+            disabled={!audioUrl}
             className="h-7 w-7 text-white hover:bg-gray-800"
             title={isMuted ? "Unmute" : "Mute"}
           >
@@ -178,6 +169,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
         </div>
       </div>
       
+      {/* Error message display */}
       {error && (
         <div className="mt-2 text-xs text-red-400">
           Error: {error}. Please try again.

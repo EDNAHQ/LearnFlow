@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,7 +52,6 @@ export function useTextToSpeech() {
     } catch (err: any) {
       console.error('Error generating speech:', err);
       setError(err.message || 'Unknown error occurred');
-      toast.error(`Speech generation failed: ${err.message}`);
       return null;
     } finally {
       setIsGenerating(false);
