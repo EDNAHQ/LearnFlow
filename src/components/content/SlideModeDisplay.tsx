@@ -6,12 +6,16 @@ interface SlideModeDisplayProps {
   title: string;
   content: string;
   detailedContent?: string | null;
+  pathId?: string;
+  topic?: string;
 }
 
 const SlideModeDisplay = ({ 
   title, 
   content, 
-  detailedContent 
+  detailedContent,
+  pathId,
+  topic
 }: SlideModeDisplayProps) => {
   // Convert content to string with better handling of complex objects
   const safeContent = (() => {

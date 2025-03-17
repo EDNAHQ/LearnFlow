@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { content, title, topic } = await req.json();
+    const { content, title, topic, isFullProjectSummary } = await req.json();
 
     if (!content) {
       return new Response(
@@ -27,46 +27,78 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Generating podcast transcript for: ${title || 'Untitled'}`);
+    console.log(`Generating ${isFullProjectSummary ? 'project summary' : 'podcast transcript'} for: ${title || 'Untitled'}`);
     
-    // Remove markdown formatting if needed
-    const cleanContent = content
-      .replace(/```[^`]*```/g, '') // Remove code blocks
-      .replace(/#{1,6}\s+/g, '') // Remove heading markers
-      .replace(/\*\*/g, ''); // Remove bold markers
+    // Process content differently based on whether it's a full project summary
+    let processedContent;
+    let systemPrompt;
+    
+    if (isFullProjectSummary) {
+      try {
+        // Parse the content as JSON if it's a full project summary
+        const parsedSteps = JSON.parse(content);
+        // Extract content from steps for project summary
+        processedContent = parsedSteps.map((step: any) => 
+          `${step.title}:\n${step.content}`
+        ).join('\n\n');
+        
+        console.log(`Parsed ${parsedSteps.length} steps for project summary`);
+        
+        systemPrompt = `You are an AI assistant that creates comprehensive audio summaries of educational content.
+Format the output as a conversational monologue that covers the key points from the entire learning project.
+
+Important:
+- Keep it conversational and educational
+- Focus on the most important concepts from the entire project
+- Organize the information logically
+- Aim for about 5-10 minutes of spoken content
+- Don't use any special formatting or markdown
+- Make it flow naturally for audio listening`;
+
+      } catch (parseError) {
+        console.error('Error parsing project steps:', parseError);
+        processedContent = content.toString();
+      }
+    } else {
+      // Remove markdown formatting for regular podcast transcript
+      processedContent = content
+        .replace(/```[^`]*```/g, '') // Remove code blocks
+        .replace(/#{1,6}\s+/g, '') // Remove heading markers
+        .replace(/\*\*/g, ''); // Remove bold markers
+        
+      systemPrompt = `You are an AI assistant that converts educational content into a simple podcast script.
+Format the output EXACTLY like this example and NOTHING ELSE:
+
+Host 1: Hello and welcome to our podcast!
+Host 2: Today we're talking about...
+Host 1: That sounds interesting!
+Host 2: Let's get started!
+
+Important:
+- Use ONLY "Host 1:" and "Host 2:" prefixes exactly as shown
+- Don't add any introduction, title, or additional formatting
+- No spaces between paragraphs
+- Don't use markdown or any special formatting
+- Keep it conversational and educational
+- Aim for about 5-10 minutes of dialog`;
+    }
 
     // Initialize OpenAI client
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY
     });
 
-    // Use OpenAI to convert content to dialog format
+    // Use OpenAI to convert content to desired format
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { 
           role: 'system', 
-          content: `You are an AI assistant that converts educational content into an engaging podcast script. 
-Format the output EXACTLY like this:
-
-**Podcast Script: [TITLE]**
-
-**[Intro Music Fades Out]**
-
-**Host 1:** Welcome back to Tech Talk, where we explore the fascinating world of technology and how it shapes our lives! I'm your host, Alex.
-
-**Host 2:** And I'm Jamie! Today, we're going to discuss APIs—those interfaces that allow different software applications to communicate.
-
-Use this format with "**Host 1:**" and "**Host 2:**" prefixes exactly. Make the conversation flow naturally and be engaging. Aim for about 5-10 minutes of dialog. Do NOT use markdown formatting - use the exact formatting with asterisks as shown.
-
-IMPORTANT RESTRICTIONS:
-- NEVER use the words "realm" or "delve" in your script
-- Don't include meta-references like "in this episode" or "part X of our series"
-- Focus purely on the educational content in a conversational style`
+          content: systemPrompt
         },
         { 
           role: 'user', 
-          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into a podcast script:\n\n${cleanContent}`
+          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into ${isFullProjectSummary ? 'a comprehensive audio summary' : 'a podcast script'}:\n\n${processedContent}`
         }
       ],
       temperature: 0.7,

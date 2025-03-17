@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Headphones } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { BarLoader } from '@/components/ui/loader';
 import PodcastForm from './PodcastForm';
 import PodcastPreview from './PodcastPreview';
 import PodcastControls from './PodcastControls';
+import { usePodcastGenerator } from '@/hooks/usePodcastGenerator';
 
 interface PodcastCreatorProps {
   initialTranscript?: string;
-  content?: string; // Add content prop to match usage in ContentDisplay
+  content?: string;
   title?: string;
   topic?: string;
   pathId?: string;
@@ -20,129 +20,28 @@ interface PodcastCreatorProps {
 
 const PodcastCreator = ({ 
   initialTranscript = '', 
-  content = '', // Add default value
+  content = '',
   title = '', 
   topic = '',
   pathId = '',
   stepId = ''
 }: PodcastCreatorProps) => {
-  // Use content prop if provided, otherwise use initialTranscript
-  const [transcript, setTranscript] = useState(content || initialTranscript);
-  const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [charCount, setCharCount] = useState(0);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    setCharCount(transcript.length);
-  }, [transcript]);
-
-  useEffect(() => {
-    // Update transcript when either initialTranscript or content changes
-    if (content) {
-      setTranscript(content);
-    } else if (initialTranscript) {
-      setTranscript(initialTranscript);
-    }
-  }, [initialTranscript, content]);
-
-  const checkPodcastStatus = async (initialJobId: string) => {
-    try {
-      const { data, error: statusError } = await supabase.functions.invoke('check-podcast-status', {
-        body: { jobId: initialJobId },
-      });
-
-      if (statusError) {
-        setError(`Error checking status: ${statusError.message}`);
-        setIsGenerating(false);
-        return;
-      }
-
-      if (data.status === 'COMPLETED') {
-        setPodcastUrl(data.podcastUrl);
-        setIsGenerating(false);
-        toast({
-          title: "Podcast Ready!",
-          description: "Your AI-generated podcast is ready to listen to.",
-        });
-      } else if (data.status === 'PROCESSING') {
-        setTimeout(() => checkPodcastStatus(initialJobId), 5000); // Poll every 5 seconds
-      } else {
-        setError(`Podcast generation failed. Status: ${data.status}`);
-        setIsGenerating(false);
-        setJobId(null);
-        toast({
-          variant: "destructive",
-          title: "Podcast Failed",
-          description: "There was an error generating your podcast. Please try again.",
-        });
-      }
-    } catch (e: any) {
-      setError(`Failed to check podcast status: ${e.message}`);
-      setIsGenerating(false);
-      setJobId(null);
-      toast({
-        variant: "destructive",
-        title: "Podcast Failed",
-        description: "There was an error generating your podcast. Please try again.",
-      });
-    }
-  };
-
-  const handleSubmit = async () => {
-    setIsGenerating(true);
-    setError(null);
-    setPodcastUrl(null);
-
-    try {
-      const { data, error: uploadError } = await supabase.functions.invoke('generate-podcast', {
-        body: { transcript },
-      });
-
-      if (uploadError) {
-        console.error("Supabase Function Error:", uploadError);
-        setError(`Supabase function failed: ${uploadError.message}`);
-        setIsGenerating(false);
-        return;
-      }
-
-      if (data && data.jobId) {
-        setJobId(data.jobId);
-        checkPodcastStatus(data.jobId);
-      } else {
-        setError("Failed to start podcast generation: No job ID received.");
-        setIsGenerating(false);
-        toast({
-          variant: "destructive",
-          title: "Podcast Failed",
-          description: "There was an error generating your podcast. Please try again.",
-        })
-      }
-    } catch (e: any) {
-      setError(`Failed to start podcast generation: ${e.message}`);
-      setIsGenerating(false);
-      toast({
-        variant: "destructive",
-        title: "Podcast Failed",
-        description: "There was an error generating your podcast. Please try again.",
-      })
-    }
-  };
-
-  const downloadPodcast = () => {
-    if (podcastUrl) {
-      const link = document.createElement('a');
-      link.href = podcastUrl;
-      link.download = 'podcast.mp3';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+  const {
+    transcript,
+    setTranscript,
+    podcastUrl,
+    isGenerating,
+    isGeneratingTranscript,
+    error,
+    charCount,
+    handleSubmit,
+    downloadPodcast
+  } = usePodcastGenerator({
+    initialTranscript,
+    content,
+    title,
+    topic
+  });
 
   return (
     <Card className="bg-white shadow-lg">
@@ -152,7 +51,7 @@ const PodcastCreator = ({
           {title ? `Create Podcast: ${title}` : 'Create Your Podcast'}
         </CardTitle>
         <CardDescription>
-          {content || initialTranscript 
+          {content 
             ? "We've generated a podcast script for you. Edit it if needed, then create your podcast."
             : "Enter your podcast script formatted with \"Host 1:\" and \"Host 2:\" markers"}
         </CardDescription>
@@ -175,12 +74,19 @@ const PodcastCreator = ({
         
         <TabsContent value="create" className="mt-4">
           <CardContent>
-            <PodcastForm
-              transcript={transcript}
-              isGenerating={isGenerating}
-              charCount={charCount}
-              onTranscriptChange={setTranscript}
-            />
+            {isGeneratingTranscript ? (
+              <div className="text-center py-8">
+                <BarLoader className="mx-auto mb-4" />
+                <p>Generating podcast script...</p>
+              </div>
+            ) : (
+              <PodcastForm
+                transcript={transcript}
+                isGenerating={isGenerating}
+                charCount={charCount}
+                onTranscriptChange={setTranscript}
+              />
+            )}
           </CardContent>
           
           <CardFooter className="flex flex-col items-start">

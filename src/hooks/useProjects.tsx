@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
 import { deleteLearningPath } from "@/utils/projectUtils";
 
 export interface LearningProject {
@@ -33,7 +32,6 @@ export const useProjects = () => {
 
         if (error) {
           console.error("Error fetching learning projects:", error);
-          toast.error("Failed to load your learning projects");
           return;
         }
 
@@ -74,7 +72,6 @@ export const useProjects = () => {
         setProjects(projectsWithProgress);
       } catch (error) {
         console.error("Error in fetchProjects:", error);
-        toast.error("Something went wrong while loading your projects");
       } finally {
         setLoading(false);
       }
@@ -89,11 +86,10 @@ export const useProjects = () => {
       const success = await deleteLearningPath(projectId);
       if (success) {
         setProjects(projects.filter(project => project.id !== projectId));
-        toast.success("Project deleted successfully");
+        console.log("Project deleted successfully");
       }
     } catch (error) {
       console.error("Error deleting project:", error);
-      toast.error("Failed to delete project");
     } finally {
       setIsDeleting(false);
     }

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
+import { BackgroundPaths } from "@/components/ui/background-paths";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -23,10 +24,13 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-10">
-      {/* Background elements */}
+      {/* Background elements - enhanced with BackgroundPaths */}
       <div className="absolute inset-0 -z-10">
         {/* Main gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-brand-purple/5 to-brand-pink/5"></div>
+        
+        {/* Animated floating paths */}
+        <BackgroundPaths />
         
         {/* Decorative elements */}
         <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/10 blur-3xl"></div>

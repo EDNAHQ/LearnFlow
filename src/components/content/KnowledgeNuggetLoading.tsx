@@ -1,12 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import LoadingAnimation from "./nuggets/LoadingAnimation";
-import NuggetCard from "./nuggets/NuggetCard";
-import NuggetIndicators from "./nuggets/NuggetIndicators";
 import ProgressIndicator from "./nuggets/ProgressIndicator";
-import NuggetsFetcher from "./nuggets/NuggetsFetcher";
 
 interface KnowledgeNuggetLoadingProps {
   topic: string | null;
@@ -25,9 +22,6 @@ const KnowledgeNuggetLoading = ({
   totalSteps = 10,
   pathId = null
 }: KnowledgeNuggetLoadingProps) => {
-  const [nuggets, setNuggets] = useState<string[]>([]);
-  const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
 
   // Set progress based on content generation
@@ -37,29 +31,6 @@ const KnowledgeNuggetLoading = ({
       setProgress(calculatedProgress);
     }
   }, [generatedSteps, totalSteps]);
-
-  // Super simple card rotation - runs once on mount, cleans up on unmount
-  useEffect(() => {
-    // Only start the interval if we have nuggets
-    if (nuggets.length === 0) return;
-    
-    console.log("Starting nugget rotation interval");
-    
-    // Set up the interval to change nuggets every 8 seconds
-    const interval = setInterval(() => {
-      setCurrentNuggetIndex(prevIndex => {
-        const nextIndex = (prevIndex + 1) % nuggets.length;
-        console.log(`Rotating nugget: ${prevIndex} -> ${nextIndex}`);
-        return nextIndex;
-      });
-    }, 8000);
-    
-    // Clean up interval on component unmount
-    return () => {
-      console.log("Cleaning up nugget rotation interval");
-      clearInterval(interval);
-    };
-  }, [nuggets]); // Only depends on nuggets array, will only restart if nuggets change
 
   // Fallback progress animation when steps aren't available
   useEffect(() => {
@@ -76,20 +47,6 @@ const KnowledgeNuggetLoading = ({
       return () => clearInterval(interval);
     }
   }, [generatingContent, totalSteps]);
-
-  // Function to manually navigate nuggets
-  const goToNugget = (index: number) => {
-    setCurrentNuggetIndex(index);
-  };
-
-  // Handlers for NuggetsFetcher
-  const handleNuggetsLoaded = (loadedNuggets: string[]) => {
-    setNuggets(loadedNuggets);
-  };
-
-  const handleFetchError = (errorMessage: string) => {
-    setError(errorMessage);
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-6">
@@ -108,7 +65,7 @@ const KnowledgeNuggetLoading = ({
           </h2>
           
           <p className="text-gray-600 text-center mb-6">
-            We're creating personalized content for you. In the meantime, enjoy these insights:
+            We're creating personalized content for you.
           </p>
 
           <ProgressIndicator 
@@ -118,35 +75,11 @@ const KnowledgeNuggetLoading = ({
             totalSteps={totalSteps}
           />
 
-          {/* Non-visual component that fetches nuggets */}
-          <NuggetsFetcher 
-            topic={topic} 
-            onNuggetsLoaded={handleNuggetsLoaded}
-            onError={handleFetchError}
-          />
-
-          <div className="w-full min-h-[200px] mb-6 flex items-center justify-center py-4">
-            <AnimatePresence mode="wait">
-              {nuggets.length > 0 && (
-                <NuggetCard 
-                  key={currentNuggetIndex}
-                  nugget={nuggets[currentNuggetIndex]} 
-                  iconIndex={currentNuggetIndex}
-                />
-              )}
-            </AnimatePresence>
-          </div>
-
-          <NuggetIndicators 
-            nuggets={nuggets}
-            currentIndex={currentNuggetIndex}
-            onSelectNugget={goToNugget}
-          />
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
+            className="mt-8"
           >
             <Button 
               onClick={goToProjects} 

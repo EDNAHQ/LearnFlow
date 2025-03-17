@@ -1,7 +1,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 
-type ContentMode = "text" | "e-book" | "presentation" | "podcast" | "slides";
+type ContentMode = "text" | "e-book" | "presentation" | "podcast" | "slides" | "audio";
 
 interface ContentModeContextProps {
   mode: ContentMode;
@@ -25,6 +25,7 @@ export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
     setMode(prev => {
       if (prev === "text" || prev === "e-book") return "slides";
       if (prev === "slides" || prev === "presentation") return "podcast";
+      if (prev === "podcast") return "audio";
       return "text";
     });
   };

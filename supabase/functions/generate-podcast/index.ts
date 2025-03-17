@@ -10,26 +10,14 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Add request logging to debug
-  console.log("create-podcast function called");
-  console.log(`Request method: ${req.method}`);
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Parse request body
-    const requestBody = await req.json();
-    console.log(`Request body received: ${JSON.stringify({
-      transcript: requestBody.transcript ? `${requestBody.transcript.substring(0, 50)}... (${requestBody.transcript.length} chars)` : 'none',
-      voice1: requestBody.voice1 || 'default',
-      voice2: requestBody.voice2 || 'default'
-    })}`);
-    
-    const { transcript, voice1, voice2 } = requestBody;
+    const { transcript, voice1, voice2 } = await req.json();
 
     if (!transcript) {
       console.error('No transcript provided');
@@ -140,7 +128,7 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('Error in create-podcast function:', error);
+    console.error('Error in generate-podcast function:', error);
     
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
