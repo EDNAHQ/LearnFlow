@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -132,7 +131,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
           <AudioModeDisplay
             content={detailedContent || displayContent}
             title={displayTitle}
-            pathId={pathId}
+            pathId={pathId || ''}
             stepId={displayStepId}
             topic={topic || ''}
           />
