@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 
 export interface LearningStepData {
   id: string;
@@ -129,7 +130,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
         console.log(`Subscription status: ${status}`);
         
         // If subscription failed, fall back to polling
-        if (status === 'SUBSCRIPTION_ERROR' || status === 'CLOSED') {
+        if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
           console.log('Subscription failed, falling back to polling');
           // Set up polling as fallback
           const pollInterval = setInterval(() => {
