@@ -133,6 +133,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             content={detailedContent || displayContent}
             title={displayTitle}
             pathId={pathId}
+            stepId={displayStepId}
             topic={topic}
           />
         )}
