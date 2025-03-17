@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateLearningPlan } from "@/utils/learning";
 import { deleteLearningPath } from "@/utils/projectUtils";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 
@@ -63,7 +62,6 @@ export const usePlanPage = () => {
         if (error instanceof Error && error.message === "User is not authenticated") {
           setAuthError(true);
         } else {
-          toast.error("Failed to generate learning plan. Please try again.");
           console.error("Error generating plan:", error);
         }
       } finally {
@@ -86,25 +84,18 @@ export const usePlanPage = () => {
           
         if (error) {
           console.error("Error approving plan:", error);
-          toast.error("Failed to approve plan. Please try again.");
           return;
         }
         
         sessionStorage.setItem("learning-path-id", pathId);
         
-        toast.success("Learning plan approved! Content generation started in background.", {
-          duration: 5000,
-          id: "background-generation-start"
-        });
-        
         // Navigate to the content page with the path ID to match the route structure
         navigate(`/content/${pathId}`);
       } catch (error) {
         console.error("Error in handleApprove:", error);
-        toast.error("Something went wrong. Please try again.");
       }
     } else {
-      toast.error("No learning path found. Please try again.");
+      console.error("No learning path found. Please try again.");
     }
   };
 
@@ -120,7 +111,7 @@ export const usePlanPage = () => {
 
   const handleDeletePlan = async () => {
     if (!pathId) {
-      toast.error("No project ID found");
+      console.error("No project ID found");
       return;
     }
     
@@ -132,7 +123,6 @@ export const usePlanPage = () => {
       }
     } catch (error) {
       console.error("Error deleting plan:", error);
-      toast.error("Failed to delete plan");
     } finally {
       setIsDeleting(false);
     }

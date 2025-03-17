@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 /**
  * Deletes a learning path and all associated steps
@@ -9,7 +8,7 @@ import { toast } from "sonner";
  */
 export const deleteLearningPath = async (pathId: string): Promise<boolean> => {
   if (!pathId) {
-    toast.error("No project ID provided");
+    console.error("No project ID provided");
     return false;
   }
   
@@ -18,7 +17,7 @@ export const deleteLearningPath = async (pathId: string): Promise<boolean> => {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      toast.error("You need to be logged in to delete projects");
+      console.error("You need to be logged in to delete projects");
       return false;
     }
     
@@ -30,7 +29,6 @@ export const deleteLearningPath = async (pathId: string): Promise<boolean> => {
       
     if (stepsError) {
       console.error("Error deleting learning steps:", stepsError);
-      toast.error("Failed to delete learning steps");
       return false;
     }
     
@@ -42,15 +40,12 @@ export const deleteLearningPath = async (pathId: string): Promise<boolean> => {
       
     if (pathError) {
       console.error("Error deleting learning path:", pathError);
-      toast.error("Failed to delete learning path");
       return false;
     }
     
-    toast.success("Project deleted successfully");
     return true;
   } catch (error) {
     console.error("Error in deleteLearningPath:", error);
-    toast.error("Something went wrong while deleting the project");
     return false;
   }
 };

@@ -3,7 +3,6 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -49,7 +48,6 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         setProfileChecked(true);
       } catch (error) {
         console.error("Profile verification failed:", error);
-        toast.error("Failed to verify user profile. Please try again or contact support.");
       } finally {
         setProfileLoading(false);
       }

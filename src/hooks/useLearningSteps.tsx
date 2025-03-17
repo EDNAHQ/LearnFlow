@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 
 export interface LearningStepData {
@@ -40,7 +39,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
         if (error) {
           console.error("Error fetching learning steps:", error);
-          toast.error("Failed to load learning content");
           return;
         }
 
@@ -68,11 +66,9 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           console.log(`Content generation status: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
         } else {
           console.log("No learning steps found for path:", pathId);
-          toast.error("No learning content found");
         }
       } catch (error) {
         console.error("Error fetching learning steps:", error);
-        toast.error("Failed to load learning content");
       } finally {
         setIsLoading(false);
       }
@@ -163,7 +159,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
 
       if (error) {
         console.error("Error marking step as complete:", error);
-        toast.error("Failed to mark step as complete. Please try again.");
 
         setSteps(prevSteps =>
           prevSteps.map(step =>
@@ -175,7 +170,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
       return true;
     } catch (error) {
       console.error("Error marking step as complete:", error);
-      toast.error("Failed to mark step as complete. Please try again.");
       return false;
     }
   };

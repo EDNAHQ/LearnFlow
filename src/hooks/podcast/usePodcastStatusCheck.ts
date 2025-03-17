@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { checkPodcastStatus } from '@/utils/podcast/podcastApiUtils';
 
 export function usePodcastStatusCheck() {
@@ -13,16 +12,10 @@ export function usePodcastStatusCheck() {
     try {
       const data = await checkPodcastStatus(initialJobId);
 
-      // Updated to handle IN_PROGRESS status without treating it as an error
       if (data.status === 'COMPLETED') {
         setPodcastUrl(data.podcastUrl);
         setIsGenerating(false);
-        toast({
-          title: "Podcast Ready!",
-          description: "Your AI-generated podcast is ready to listen to.",
-        });
       } else if (data.status === 'PROCESSING' || data.status === 'IN_PROGRESS') {
-        // Added IN_PROGRESS as a valid processing state
         console.log(`Podcast still processing. Status: ${data.status}`);
         // Continue polling
         setTimeout(() => checkStatus(initialJobId), 5000);
@@ -32,11 +25,6 @@ export function usePodcastStatusCheck() {
         setError(errorMsg);
         setIsGenerating(false);
         setJobId(null);
-        toast({
-          variant: "destructive",
-          title: "Podcast Failed",
-          description: "There was an error generating your podcast. Please try again.",
-        });
       } else {
         console.log(`Unknown podcast status: ${data.status}. Continuing to poll.`);
         // For unknown statuses, continue polling as it might be a temporary state
@@ -48,11 +36,6 @@ export function usePodcastStatusCheck() {
       setError(errorMsg);
       setIsGenerating(false);
       setJobId(null);
-      toast({
-        variant: "destructive",
-        title: "Podcast Failed",
-        description: "There was an error generating your podcast. Please try again.",
-      });
     }
   }, []);
 

@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { useTranscriptGenerator } from './podcast/useTranscriptGenerator';
 import { usePodcastStatusCheck } from './podcast/usePodcastStatusCheck';
 import { createPodcast, downloadPodcastFile } from '@/utils/podcast/podcastApiUtils';
@@ -49,11 +48,6 @@ export function usePodcastGenerator({
       const errorMsg = `Failed to start podcast generation: ${e.message}`;
       console.error(errorMsg);
       setPodcastError(errorMsg);
-      toast({
-        variant: "destructive",
-        title: "Podcast Failed",
-        description: "There was an error generating your podcast. Please try again.",
-      });
     }
   };
 

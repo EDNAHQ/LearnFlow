@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
-import { toast } from "sonner";
 import { startBackgroundContentGeneration } from "./backgroundContentGeneration";
 
 // Generate a learning plan for a given topic
@@ -10,7 +9,6 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    toast.error("You need to log in to create and save learning plans.");
     throw new Error("User is not authenticated");
   }
   

@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { generatePodcastTranscript } from '@/utils/podcast/podcastApiUtils';
 
 export function useTranscriptGenerator(initialTranscript = '', content = '', title = '', topic = '') {
@@ -41,11 +40,6 @@ export function useTranscriptGenerator(initialTranscript = '', content = '', tit
       const errorMsg = `Failed to generate transcript: ${e.message}`;
       console.error(errorMsg);
       setError(errorMsg);
-      toast({
-        variant: "destructive",
-        title: "Script Generation Failed",
-        description: e.message || "There was an error generating your podcast script. Please try again.",
-      });
     } finally {
       setIsGeneratingTranscript(false);
     }

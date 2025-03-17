@@ -1,16 +1,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 /**
  * Generates a podcast transcript from the provided content
  */
 export async function generatePodcastTranscript(content: string, title?: string, topic?: string) {
-  toast({
-    title: "Generating podcast script...",
-    description: "Please wait while we convert your content to podcast format.",
-  });
-  
   console.log("Calling generate-podcast-transcript edge function with content length:", content.length);
   
   const { data, error: genError } = await supabase.functions.invoke('generate-podcast-transcript', {
@@ -24,10 +18,6 @@ export async function generatePodcastTranscript(content: string, title?: string,
   }
   
   if (data?.transcript) {
-    toast({
-      title: "Script ready!",
-      description: "Your podcast script has been generated. Review and edit if needed.",
-    });
     return data.transcript;
   } else {
     throw new Error('No transcript returned from the API');
@@ -52,10 +42,6 @@ export async function createPodcast(transcript: string) {
   }
 
   if (data && data.jobId) {
-    toast({
-      title: "Podcast Generation Started",
-      description: "Your podcast is being created. This may take a few minutes.",
-    });
     return data.jobId;
   } else {
     throw new Error("Failed to start podcast generation: No job ID received.");
