@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -131,7 +132,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
           />
         )}
 
-        {mode === "audio" && (
+        {/* Only render AudioModeDisplay in the dedicated audio section, not in content pages */}
+        {mode === "audio" && window.location.pathname.includes('/audio') && (
           <AudioModeDisplay
             pathId={safePathId}
             stepId={displayStepId}
