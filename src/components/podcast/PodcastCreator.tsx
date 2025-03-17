@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +12,7 @@ import PodcastControls from './PodcastControls';
 
 interface PodcastCreatorProps {
   initialTranscript?: string;
-  content?: string; // Add content prop to match usage in ContentDisplay
+  content?: string;
   title?: string;
   topic?: string;
   pathId?: string;
@@ -20,16 +21,16 @@ interface PodcastCreatorProps {
 
 const PodcastCreator = ({ 
   initialTranscript = '', 
-  content = '', // Add default value
+  content = '',
   title = '', 
   topic = '',
   pathId = '',
   stepId = ''
 }: PodcastCreatorProps) => {
-  // Use content prop if provided, otherwise use initialTranscript
   const [transcript, setTranscript] = useState(content || initialTranscript);
   const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [charCount, setCharCount] = useState(0);
@@ -40,13 +41,52 @@ const PodcastCreator = ({
   }, [transcript]);
 
   useEffect(() => {
-    // Update transcript when either initialTranscript or content changes
-    if (content) {
-      setTranscript(content);
-    } else if (initialTranscript) {
-      setTranscript(initialTranscript);
+    // If we have content but no transcript, generate the transcript
+    if (content && !transcript && !isGeneratingTranscript) {
+      generateTranscript();
     }
-  }, [initialTranscript, content]);
+  }, [content, transcript]);
+
+  const generateTranscript = async () => {
+    if (!content || isGeneratingTranscript) return;
+    
+    setIsGeneratingTranscript(true);
+    setError(null);
+    
+    try {
+      toast({
+        title: "Generating podcast script...",
+        description: "Please wait while we convert your content to podcast format.",
+      });
+      
+      const { data, error: genError } = await supabase.functions.invoke('generate-podcast-transcript', {
+        body: { content, title, topic },
+      });
+      
+      if (genError) {
+        throw new Error(`Error generating transcript: ${genError.message}`);
+      }
+      
+      if (data?.transcript) {
+        setTranscript(data.transcript);
+        toast({
+          title: "Script ready!",
+          description: "Your podcast script has been generated. Review and edit if needed.",
+        });
+      } else {
+        throw new Error('No transcript returned from the API');
+      }
+    } catch (e: any) {
+      setError(`Failed to generate transcript: ${e.message}`);
+      toast({
+        variant: "destructive",
+        title: "Script Generation Failed",
+        description: e.message || "There was an error generating your podcast script. Please try again.",
+      });
+    } finally {
+      setIsGeneratingTranscript(false);
+    }
+  };
 
   const checkPodcastStatus = async (initialJobId: string) => {
     try {
@@ -152,7 +192,7 @@ const PodcastCreator = ({
           {title ? `Create Podcast: ${title}` : 'Create Your Podcast'}
         </CardTitle>
         <CardDescription>
-          {content || initialTranscript 
+          {content 
             ? "We've generated a podcast script for you. Edit it if needed, then create your podcast."
             : "Enter your podcast script formatted with \"Host 1:\" and \"Host 2:\" markers"}
         </CardDescription>
@@ -175,12 +215,19 @@ const PodcastCreator = ({
         
         <TabsContent value="create" className="mt-4">
           <CardContent>
-            <PodcastForm
-              transcript={transcript}
-              isGenerating={isGenerating}
-              charCount={charCount}
-              onTranscriptChange={setTranscript}
-            />
+            {isGeneratingTranscript ? (
+              <div className="text-center py-8">
+                <BarLoader className="mx-auto mb-4" />
+                <p>Generating podcast script...</p>
+              </div>
+            ) : (
+              <PodcastForm
+                transcript={transcript}
+                isGenerating={isGenerating}
+                charCount={charCount}
+                onTranscriptChange={setTranscript}
+              />
+            )}
           </CardContent>
           
           <CardFooter className="flex flex-col items-start">

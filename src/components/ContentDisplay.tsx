@@ -4,7 +4,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useContentMode } from "@/hooks/useContentMode";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
-import PodcastModeDisplay from "./content/PodcastModeDisplay";
+import PodcastCreator from "./podcast/PodcastCreator";
 
 interface ContentDisplayProps {
   title: string;
@@ -58,7 +58,13 @@ const ContentDisplay = ({
         </TabsContent>
         
         <TabsContent value="podcast">
-          <PodcastModeDisplay />
+          <PodcastCreator 
+            title={title}
+            content={safeContent}
+            topic={topic}
+            pathId={pathId}
+            stepId={index.toString()}
+          />
         </TabsContent>
       </Tabs>
     </div>
