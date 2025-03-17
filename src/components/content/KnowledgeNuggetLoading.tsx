@@ -1,13 +1,12 @@
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import LoadingAnimation from "./nuggets/LoadingAnimation";
 import NuggetCard from "./nuggets/NuggetCard";
 import NuggetIndicators from "./nuggets/NuggetIndicators";
 import ProgressIndicator from "./nuggets/ProgressIndicator";
 import NuggetsFetcher from "./nuggets/NuggetsFetcher";
-import { useNavigate } from "react-router-dom";
 
 interface KnowledgeNuggetLoadingProps {
   topic: string | null;
@@ -18,21 +17,19 @@ interface KnowledgeNuggetLoadingProps {
   pathId?: string | null;
 }
 
-const KnowledgeNuggetLoading = ({ 
-  topic, 
+const KnowledgeNuggetLoading = ({
+  topic,
   goToProjects,
   generatingContent = true,
   generatedSteps = 0,
   totalSteps = 10,
   pathId = null
 }: KnowledgeNuggetLoadingProps) => {
-  const navigate = useNavigate();
   const [nuggets, setNuggets] = useState<string[]>([]);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Set progress based on content generation
   useEffect(() => {
     if (totalSteps > 0) {
@@ -40,6 +37,29 @@ const KnowledgeNuggetLoading = ({
       setProgress(calculatedProgress);
     }
   }, [generatedSteps, totalSteps]);
+
+  // Super simple card rotation - runs once on mount, cleans up on unmount
+  useEffect(() => {
+    // Only start the interval if we have nuggets
+    if (nuggets.length === 0) return;
+    
+    console.log("Starting nugget rotation interval");
+    
+    // Set up the interval to change nuggets every 8 seconds
+    const interval = setInterval(() => {
+      setCurrentNuggetIndex(prevIndex => {
+        const nextIndex = (prevIndex + 1) % nuggets.length;
+        console.log(`Rotating nugget: ${prevIndex} -> ${nextIndex}`);
+        return nextIndex;
+      });
+    }, 8000);
+    
+    // Clean up interval on component unmount
+    return () => {
+      console.log("Cleaning up nugget rotation interval");
+      clearInterval(interval);
+    };
+  }, [nuggets]); // Only depends on nuggets array, will only restart if nuggets change
 
   // Fallback progress animation when steps aren't available
   useEffect(() => {
@@ -57,46 +77,9 @@ const KnowledgeNuggetLoading = ({
     }
   }, [generatingContent, totalSteps]);
 
-  // Auto-redirect to first content page when generation is complete
-  useEffect(() => {
-    if (!generatingContent && pathId && totalSteps > 0 && generatedSteps >= totalSteps) {
-      console.log("Content generation complete. Navigating to first content page...");
-      // Navigate to the first step (index 0) of the content
-      navigate(`/content/${pathId}/step/0`);
-    }
-  }, [generatingContent, generatedSteps, totalSteps, pathId, navigate]);
-
-  // Restart the timer whenever currentNuggetIndex changes
-  const startNuggetTimer = () => {
-    // Clear any existing timer first
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    
-    // Start a new timer if we have nuggets
-    if (nuggets.length > 0) {
-      timerRef.current = setTimeout(() => {
-        setCurrentNuggetIndex(prev => (prev + 1) % nuggets.length);
-      }, 8000); // Exactly 8 seconds per nugget
-    }
-  };
-
-  // Start/restart timer when nuggets load or current index changes
-  useEffect(() => {
-    startNuggetTimer();
-    
-    // Cleanup function to clear the timeout when component unmounts or dependencies change
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [nuggets, currentNuggetIndex]);
-
   // Function to manually navigate nuggets
   const goToNugget = (index: number) => {
     setCurrentNuggetIndex(index);
-    // Timer will be restarted automatically via the useEffect above
   };
 
   // Handlers for NuggetsFetcher
@@ -129,7 +112,7 @@ const KnowledgeNuggetLoading = ({
           </p>
 
           <ProgressIndicator 
-            progress={progress} 
+            progress={progress}
             generatingContent={generatingContent}
             generatedSteps={generatedSteps}
             totalSteps={totalSteps}
@@ -143,12 +126,15 @@ const KnowledgeNuggetLoading = ({
           />
 
           <div className="w-full min-h-[200px] mb-6 flex items-center justify-center py-4">
-            {nuggets.length > 0 && (
-              <NuggetCard 
-                nugget={nuggets[currentNuggetIndex]} 
-                iconIndex={currentNuggetIndex}
-              />
-            )}
+            <AnimatePresence mode="wait">
+              {nuggets.length > 0 && (
+                <NuggetCard 
+                  key={currentNuggetIndex}
+                  nugget={nuggets[currentNuggetIndex]} 
+                  iconIndex={currentNuggetIndex}
+                />
+              )}
+            </AnimatePresence>
           </div>
 
           <NuggetIndicators 

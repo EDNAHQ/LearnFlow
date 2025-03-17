@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -14,7 +14,7 @@ import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
 
 const ContentPage = () => {
-  const { pathId } = useParams();
+  const { pathId, stepId } = useParams();
   const navigate = useNavigate();
   const { setMode } = useContentMode();
   const {
@@ -32,10 +32,13 @@ const ContentPage = () => {
     generatedSteps
   } = useContentNavigation();
   
+  // Track if we've already redirected to avoid loops
+  const [hasRedirected, setHasRedirected] = useState(false);
+  
   // Use the custom hook directly
   const { completePath, isSubmitting, projectCompleted } = useProjectCompletion(
     pathId, 
-    () => goToProjects() // Directly use goToProjects as the onComplete callback
+    () => goToProjects()
   );
   
   // Set "text" (Read) mode by default when component mounts
@@ -43,8 +46,23 @@ const ContentPage = () => {
     setMode("text");
   }, [setMode]);
   
-  // Always show nugget loading screen when content is generating
-  if (isLoading || generatingContent) {
+  // Handle generation complete redirect - only once
+  useEffect(() => {
+    if (!hasRedirected && 
+        !isLoading && 
+        !generatingContent && 
+        pathId && 
+        totalSteps > 0 && 
+        generatedSteps >= totalSteps && 
+        !stepId) {
+      console.log("Content generation complete. Navigating to first content page...");
+      setHasRedirected(true);
+      navigate(`/content/${pathId}/step/0`);
+    }
+  }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
+  
+  // Always show loading screen when content is loading or generating
+  if (isLoading || (generatingContent && !stepId)) {
     return (
       <KnowledgeNuggetLoading 
         topic={topic} 
