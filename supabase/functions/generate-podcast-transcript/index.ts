@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     // Parse request body
-    const { content, title, topic } = await req.json();
+    const { content, title, topic, isFullProjectSummary } = await req.json();
 
     if (!content) {
       return new Response(
@@ -27,26 +27,46 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Generating podcast transcript for: ${title || 'Untitled'}`);
+    console.log(`Generating ${isFullProjectSummary ? 'project summary' : 'podcast transcript'} for: ${title || 'Untitled'}`);
     
-    // Remove markdown formatting if needed
-    const cleanContent = content
-      .replace(/```[^`]*```/g, '') // Remove code blocks
-      .replace(/#{1,6}\s+/g, '') // Remove heading markers
-      .replace(/\*\*/g, ''); // Remove bold markers
+    // Process content differently based on whether it's a full project summary
+    let processedContent;
+    let systemPrompt;
+    
+    if (isFullProjectSummary) {
+      try {
+        // Parse the content as JSON if it's a full project summary
+        const parsedSteps = JSON.parse(content);
+        // Extract content from steps for project summary
+        processedContent = parsedSteps.map((step: any) => 
+          `${step.title}:\n${step.content}`
+        ).join('\n\n');
+        
+        console.log(`Parsed ${parsedSteps.length} steps for project summary`);
+        
+        systemPrompt = `You are an AI assistant that creates comprehensive audio summaries of educational content.
+Format the output as a conversational monologue that covers the key points from the entire learning project.
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: OPENAI_API_KEY
-    });
+Important:
+- Keep it conversational and educational
+- Focus on the most important concepts from the entire project
+- Organize the information logically
+- Aim for about 5-10 minutes of spoken content
+- Don't use any special formatting or markdown
+- Make it flow naturally for audio listening`;
 
-    // Use OpenAI to convert content to dialog format
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { 
-          role: 'system', 
-          content: `You are an AI assistant that converts educational content into a simple podcast script.
+      } catch (parseError) {
+        console.error('Error parsing project steps:', parseError);
+        processedContent = content.toString();
+      }
+    } else {
+      // Remove markdown formatting for regular podcast transcript
+      processedContent = content
+        .replace(/```[^`]*```/g, '') // Remove code blocks
+        .replace(/#{1,6}\s+/g, '') // Remove heading markers
+        .replace(/\*\*/g, ''); // Remove bold markers
+        
+      systemPrompt = `You are an AI assistant that converts educational content into a simple podcast script.
 Format the output EXACTLY like this example and NOTHING ELSE:
 
 Host 1: Hello and welcome to our podcast!
@@ -60,11 +80,25 @@ Important:
 - No spaces between paragraphs
 - Don't use markdown or any special formatting
 - Keep it conversational and educational
-- Aim for about 5-10 minutes of dialog`
+- Aim for about 5-10 minutes of dialog`;
+    }
+
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY
+    });
+
+    // Use OpenAI to convert content to desired format
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { 
+          role: 'system', 
+          content: systemPrompt
         },
         { 
           role: 'user', 
-          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into a podcast script:\n\n${cleanContent}`
+          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into ${isFullProjectSummary ? 'a comprehensive audio summary' : 'a podcast script'}:\n\n${processedContent}`
         }
       ],
       temperature: 0.7,
