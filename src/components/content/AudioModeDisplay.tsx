@@ -4,19 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AudioSummaryPlayer from './AudioSummaryPlayer';
 
 interface AudioModeDisplayProps {
-  content?: string;
-  title?: string;
-  pathId?: string;
-  stepId?: string;
-  topic?: string;
+  content: string;
+  title: string;
+  pathId: string;
+  stepId: string;
+  topic: string;
 }
 
 const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   content,
   title,
-  pathId = '',
-  stepId = '',
-  topic = ''
+  pathId,
+  stepId,
+  topic
 }) => {
   return (
     <Card className="bg-white shadow-lg">
