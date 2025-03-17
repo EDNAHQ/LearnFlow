@@ -4,7 +4,7 @@ import { MoveRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BarLoader } from '@/components/ui/loader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { XCircle } from 'lucide-react';
+import { XCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PodcastControlsProps {
@@ -41,7 +41,7 @@ const PodcastControls = ({
           {isGenerating ? (
             <>
               <BarLoader className="w-5 h-5 mr-2" />
-              Processing...
+              Creating Podcast...
             </>
           ) : (
             <>
@@ -51,6 +51,16 @@ const PodcastControls = ({
           )}
         </Button>
       </div>
+      
+      {isGenerating && (
+        <Alert className="mt-4 w-full bg-purple-50 border-purple-200">
+          <Info className="h-4 w-4 text-purple-500" />
+          <AlertTitle className="text-purple-700">Podcast Generation in Progress</AlertTitle>
+          <AlertDescription className="text-purple-600">
+            This may take several minutes. The page will automatically update when your podcast is ready.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {error && (
         <Alert variant="destructive" className="mt-4 w-full">

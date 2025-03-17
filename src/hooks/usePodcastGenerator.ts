@@ -108,6 +108,7 @@ export function usePodcastGenerator({
         return;
       }
 
+      // Updated to handle IN_PROGRESS status without treating it as an error
       if (data.status === 'COMPLETED') {
         setPodcastUrl(data.podcastUrl);
         setIsGenerating(false);
@@ -115,9 +116,12 @@ export function usePodcastGenerator({
           title: "Podcast Ready!",
           description: "Your AI-generated podcast is ready to listen to.",
         });
-      } else if (data.status === 'PROCESSING') {
-        setTimeout(() => checkPodcastStatus(initialJobId), 5000); // Poll every 5 seconds
-      } else {
+      } else if (data.status === 'PROCESSING' || data.status === 'IN_PROGRESS') {
+        // Added IN_PROGRESS as a valid processing state
+        console.log(`Podcast still processing. Status: ${data.status}`);
+        // Continue polling
+        setTimeout(() => checkPodcastStatus(initialJobId), 5000);
+      } else if (data.status === 'FAILED') {
         const errorMsg = `Podcast generation failed. Status: ${data.status}`;
         console.error(errorMsg);
         setError(errorMsg);
@@ -128,6 +132,10 @@ export function usePodcastGenerator({
           title: "Podcast Failed",
           description: "There was an error generating your podcast. Please try again.",
         });
+      } else {
+        console.log(`Unknown podcast status: ${data.status}. Continuing to poll.`);
+        // For unknown statuses, continue polling as it might be a temporary state
+        setTimeout(() => checkPodcastStatus(initialJobId), 5000);
       }
     } catch (e: any) {
       const errorMsg = `Failed to check podcast status: ${e.message}`;
@@ -166,6 +174,10 @@ export function usePodcastGenerator({
 
       if (data && data.jobId) {
         setJobId(data.jobId);
+        toast({
+          title: "Podcast Generation Started",
+          description: "Your podcast is being created. This may take a few minutes.",
+        });
         checkPodcastStatus(data.jobId);
       } else {
         const errorMsg = "Failed to start podcast generation: No job ID received.";

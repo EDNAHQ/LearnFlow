@@ -44,6 +44,17 @@ serve(async (req) => {
     const selectedVoice1 = voice1 || 's3://voice-cloning-zero-shot/baf1ef41-36b6-428c-9bdf-50ba54682bd8/original/manifest.json';
     const selectedVoice2 = voice2 || 's3://voice-cloning-zero-shot/e040bd1b-f190-4bdb-83f0-75ef85b18f84/original/manifest.json';
     
+    // Make sure the transcript has the correct format with host markers
+    let formattedTranscript = transcript;
+    if (!transcript.includes('Host 1:') && !transcript.includes('Host 2:')) {
+      console.log('Adding host markers to transcript');
+      const lines = transcript.split('\n');
+      formattedTranscript = lines.map((line, i) => {
+        // Alternate between hosts
+        return `${i % 2 === 0 ? 'Host 1' : 'Host 2'}: ${line}`;
+      }).join('\n');
+    }
+    
     // Prepare the request to Play.ai API
     const headers = {
       'X-USER-ID': PLAYDIALOG_USER_ID,
@@ -53,7 +64,7 @@ serve(async (req) => {
     
     const payload = {
       model: 'PlayDialog',
-      text: transcript,
+      text: formattedTranscript,
       voice: selectedVoice1,
       voice2: selectedVoice2,
       turnPrefix: 'Host 1:',
@@ -63,7 +74,7 @@ serve(async (req) => {
 
     console.log('Sending request to Play.ai API with payload:', JSON.stringify({
       ...payload,
-      text: transcript.substring(0, 100) + '...' // Don't log the full transcript
+      text: formattedTranscript.substring(0, 100) + '...' // Don't log the full transcript
     }));
     console.log('Using headers:', JSON.stringify({
       'X-USER-ID': PLAYDIALOG_USER_ID,

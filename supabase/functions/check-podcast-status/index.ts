@@ -71,10 +71,21 @@ serve(async (req) => {
     const statusData = await statusResponse.json();
     console.log(`Status response:`, JSON.stringify(statusData));
     
-    const status = statusData.output?.status || 'UNKNOWN';
-    const podcastUrl = status === 'COMPLETED' ? statusData.output?.url : null;
+    // Extract status, handling different status formats from the API
+    let status = statusData.output?.status || statusData.status || 'UNKNOWN';
+    // Map Play.ai specific statuses to our standard statuses
+    if (status === 'queued' || status === 'running') {
+      status = 'PROCESSING';
+    } else if (status === 'completed') {
+      status = 'COMPLETED';
+    } else if (status === 'failed') {
+      status = 'FAILED';
+    }
     
-    console.log(`Job status: ${status}, URL available: ${Boolean(podcastUrl)}`);
+    // Get podcast URL if available
+    const podcastUrl = status === 'COMPLETED' ? (statusData.output?.url || statusData.url) : null;
+    
+    console.log(`Mapped job status: ${status}, URL available: ${Boolean(podcastUrl)}`);
 
     return new Response(
       JSON.stringify({ 
