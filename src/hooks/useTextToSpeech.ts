@@ -31,7 +31,10 @@ export function useTextToSpeech() {
       console.log(`Generating speech for text: ${truncatedText.substring(0, 50)}...`);
       
       const response = await supabase.functions.invoke('text-to-speech', {
-        body: { text: truncatedText, voiceId: voiceId || "pFZP5JQG7iQjIQuC4Bku" }
+        body: { 
+          text: truncatedText, 
+          voiceId: voiceId || "pFZP5JQG7iQjIQuC4Bku" // Default to Lily voice
+        }
       });
       
       if (response.error) {
@@ -42,7 +45,8 @@ export function useTextToSpeech() {
         throw new Error('No audio data received');
       }
       
-      // Response is a binary audio buffer
+      // Create audio blob from response data
+      // The response is already binary data, so we create a blob directly
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(audioBlob);
       
