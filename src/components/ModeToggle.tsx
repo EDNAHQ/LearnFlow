@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { BookOpen, Presentation, Music } from "lucide-react";
+import { BookOpen, Presentation, Music, Headphones } from "lucide-react";
 import { useContentMode } from "@/hooks/useContentMode";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,18 @@ export const ModeToggle = () => {
       >
         <Music className="h-4 w-4 mr-2" />
         Podcast
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setMode("audio")}
+        className={cn(
+          "text-white hover:text-white border border-[#4BB1CF]/30 hover:bg-[#4BB1CF]/20",
+          mode === "audio" && "bg-[#4BB1CF] text-white font-medium border-[#4BB1CF]"
+        )}
+      >
+        <Headphones className="h-4 w-4 mr-2" />
+        Audio
       </Button>
     </div>
   );
