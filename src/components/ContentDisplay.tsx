@@ -117,6 +117,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             content={detailedContent || displayContent}
             title={displayTitle}
             detailedContent={detailedContent}
+            pathId={pathId}
+            topic={topic}
           />
         )}
         
@@ -131,11 +133,11 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
 
         {mode === "audio" && (
           <AudioModeDisplay
-            content={detailedContent || displayContent}
-            title={displayTitle}
             pathId={safePathId}
             stepId={displayStepId}
             topic={safeTopic}
+            content={detailedContent || displayContent}
+            title={displayTitle}
           />
         )}
       </div>
