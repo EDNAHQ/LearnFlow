@@ -88,7 +88,7 @@ const ContentPage = () => {
           </div>
           
           {/* Add the title of the current step here */}
-          <h1 className="text-2xl font-bold mb-4 text-gray-800">
+          <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
             {currentStepData?.title || "Loading..."}
           </h1>
 
