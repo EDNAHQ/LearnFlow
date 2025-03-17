@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading"
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+
 const ContentPage = () => {
   const {
     pathId,
@@ -93,7 +95,14 @@ const ContentPage = () => {
           </h1>
 
           <div className="mb-4 w-full">
-            <ContentDisplay title={currentStepData?.title || ""} content={safeContent} index={currentStep} detailedContent={currentStepData?.detailed_content} pathId={pathId} topic={topic} />
+            <ContentDisplay 
+              content={safeContent} 
+              index={currentStep} 
+              detailedContent={currentStepData?.detailed_content} 
+              pathId={pathId} 
+              topic={topic}
+              title={currentStepData?.title || ""} 
+            />
           </div>
 
           <div>

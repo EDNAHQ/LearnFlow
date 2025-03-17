@@ -3,7 +3,7 @@ import React from "react";
 import ContentSection from "../ContentSection";
 
 interface TextModeDisplayProps {
-  title: string;
+  title?: string;
   content: string;
   index: number;
   detailedContent?: string | null;
@@ -12,7 +12,7 @@ interface TextModeDisplayProps {
 }
 
 const TextModeDisplay = ({ 
-  title, 
+  title = "", 
   content, 
   index, 
   detailedContent, 

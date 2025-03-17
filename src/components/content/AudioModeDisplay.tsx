@@ -12,6 +12,8 @@ interface AudioModeDisplayProps {
 }
 
 const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
+  content,
+  title,
   pathId = '',
   topic = ''
 }) => {

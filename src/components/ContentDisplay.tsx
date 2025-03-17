@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -11,7 +12,12 @@ import PodcastModeDisplay from "./content/PodcastModeDisplay";
 import AudioModeDisplay from '@/components/content/AudioModeDisplay';
 
 interface ContentDisplayProps {
+  content?: string;
+  index?: number;
+  detailedContent?: string | null;
+  pathId?: string;
   topic?: string;
+  title?: string;
 }
 
 interface LearningStep {
@@ -24,9 +30,14 @@ interface LearningStep {
 }
 
 const ContentDisplay: React.FC<ContentDisplayProps> = ({
-  topic
+  content,
+  index = 0,
+  detailedContent,
+  pathId,
+  topic,
+  title
 }) => {
-  const { pathId, stepId } = useParams<{ pathId: string; stepId: string }>();
+  const { stepId } = useParams<{ pathId: string; stepId: string }>();
   const { steps, isLoading, markStepAsComplete } = useLearningSteps(pathId, topic);
   const { mode } = useContentMode();
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
@@ -80,16 +91,20 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     return <div>Loading content...</div>;
   }
 
-  if (!currentStep) {
+  if (!currentStep && !content) {
     return <div>No content available.</div>;
   }
+
+  const displayContent = content || currentStep?.content || '';
+  const displayTitle = title || currentStep?.title || '';
+  const displayStepId = stepId || currentStep?.id || '';
 
   return (
     <div className="w-full max-w-6xl mx-auto">
       <MainNav />
       
       <div className="flex justify-between items-center px-4 py-2 border-b">
-        <h2 className="text-2xl font-bold">{currentStep.title}</h2>
+        <h2 className="text-2xl font-bold">{displayTitle}</h2>
         <div className="flex items-center space-x-2">
           <Button onClick={handlePrev} disabled={currentStepIndex === 0}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -105,48 +120,45 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
       <div className="px-4 pb-8">
         {mode === "text" && (
           <TextModeDisplay
-            content={currentStep?.detailed_content || currentStep?.content}
-            title={currentStep?.title}
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            index={index}
+            detailedContent={detailedContent}
             pathId={pathId}
-            stepId={stepId}
             topic={topic}
           />
         )}
         
         {mode === "slides" && (
           <SlideModeDisplay
-            content={currentStep?.detailed_content || currentStep?.content}
-            title={currentStep?.title}
-            pathId={pathId}
-            stepId={stepId}
-            topic={topic}
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            detailedContent={detailedContent}
           />
         )}
         
         {mode === "podcast" && (
           <PodcastModeDisplay
-            content={currentStep?.detailed_content || currentStep?.content}
-            title={currentStep?.title}
+            content={detailedContent || displayContent}
+            title={displayTitle}
             pathId={pathId}
-            stepId={stepId}
             topic={topic}
           />
         )}
 
         {mode === "audio" && (
           <AudioModeDisplay
-            content={currentStep?.detailed_content || currentStep?.content}
-            title={currentStep?.title}
+            content={detailedContent || displayContent}
+            title={displayTitle}
             pathId={pathId}
-            stepId={stepId}
             topic={topic}
           />
         )}
         
         <div className="mt-6 flex justify-between items-center">
           <p>Step {currentStepIndex + 1} of {steps.length}</p>
-          <Button onClick={handleComplete} disabled={currentStep.completed}>
-            {currentStep.completed ? "Completed" : "Mark as Complete"}
+          <Button onClick={handleComplete} disabled={currentStep?.completed}>
+            {currentStep?.completed ? "Completed" : "Mark as Complete"}
           </Button>
         </div>
       </div>
