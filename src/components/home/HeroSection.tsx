@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
+import HeroHeading from "@/components/home/HeroHeading";
+import AnimatedBackgroundPaths from "@/components/home/FloatingPaths";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -21,12 +23,23 @@ const HeroSection = () => {
     }, 1000);
   };
 
+  const handleStartLearning = () => {
+    const topicElement = document.getElementById('topic-input');
+    if (topicElement) {
+      topicElement.scrollIntoView({ behavior: 'smooth' });
+      topicElement.focus();
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-10">
-      {/* Background elements */}
+      {/* Background elements - including the new animated paths */}
       <div className="absolute inset-0 -z-10">
         {/* Main gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-white via-brand-purple/5 to-brand-pink/5"></div>
+        
+        {/* Animated floating paths */}
+        <AnimatedBackgroundPaths />
         
         {/* Decorative elements */}
         <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/10 blur-3xl"></div>
@@ -36,15 +49,11 @@ const HeroSection = () => {
 
       <div className="container max-w-5xl mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center text-center">
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
-              Learn anything with AI
-            </span>
-          </h1>
+          {/* Hero heading component */}
+          <HeroHeading onStartLearning={handleStartLearning} />
           
           {/* Topic input container */}
-          <div className="w-full max-w-3xl mx-auto mt-8 mb-6">
+          <div id="topic-input" className="w-full max-w-3xl mx-auto mt-16 mb-6">
             <TopicInput onSubmit={handleSubmit} loading={loading} />
           </div>
         </div>
