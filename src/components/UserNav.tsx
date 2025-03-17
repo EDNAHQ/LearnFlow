@@ -10,14 +10,32 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { User, LogOut, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function UserNav() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    try {
+      // Direct supabase call instead of relying on the context method
+      // which may be using a stale session
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error signing out:", error);
+        toast.error("Failed to sign out. Please try again.");
+        return;
+      }
+      
+      // If successful, navigate to auth page
+      toast.success("Successfully signed out");
+      navigate("/auth");
+    } catch (err) {
+      console.error("Exception during sign out:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+    }
   };
 
   if (!user) return null;
