@@ -159,6 +159,7 @@ export function usePodcastGenerator({
     try {
       console.log("Calling generate-podcast edge function with transcript length:", transcript.length);
       
+      // Changed from 'generate-podcast' to 'check-podcast-status' back to the correct function
       const { data, error: uploadError } = await supabase.functions.invoke('generate-podcast', {
         body: { transcript },
       });

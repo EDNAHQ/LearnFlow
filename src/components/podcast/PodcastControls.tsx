@@ -4,7 +4,7 @@ import { MoveRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BarLoader } from '@/components/ui/loader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { XCircle, Info } from 'lucide-react';
+import { XCircle, Info, PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PodcastControlsProps {
@@ -45,7 +45,7 @@ const PodcastControls = ({
             </>
           ) : (
             <>
-              <MoveRight className="mr-2 h-4 w-4" />
+              <PlayCircle className="mr-2 h-4 w-4" />
               Create Podcast
             </>
           )}
@@ -57,7 +57,7 @@ const PodcastControls = ({
           <Info className="h-4 w-4 text-purple-500" />
           <AlertTitle className="text-purple-700">Podcast Generation in Progress</AlertTitle>
           <AlertDescription className="text-purple-600">
-            This may take several minutes. The page will automatically update when your podcast is ready.
+            This may take several minutes. The page will automatically update when your podcast is ready. You can switch to other tabs while waiting.
           </AlertDescription>
         </Alert>
       )}
