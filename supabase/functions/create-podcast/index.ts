@@ -10,16 +10,29 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Add request logging to debug
+  console.log("create-podcast function called");
+  console.log(`Request method: ${req.method}`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Parse request body
-    const { transcript, voice1, voice2 } = await req.json();
+    const requestBody = await req.json();
+    console.log(`Request body received: ${JSON.stringify({
+      transcript: requestBody.transcript ? `${requestBody.transcript.substring(0, 50)}... (${requestBody.transcript.length} chars)` : 'none',
+      voice1: requestBody.voice1 || 'default',
+      voice2: requestBody.voice2 || 'default'
+    })}`);
+    
+    const { transcript, voice1, voice2 } = requestBody;
 
     if (!transcript) {
+      console.error('No transcript provided');
       return new Response(
         JSON.stringify({ error: 'Transcript is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -27,21 +40,43 @@ serve(async (req) => {
     }
 
     console.log(`Starting podcast creation with transcript of length: ${transcript.length}`);
+    console.log(`User ID: ${PLAYDIALOG_USER_ID ? 'Available' : 'Missing'}`);
+    console.log(`Secret Key: ${PLAYDIALOG_SECRET_KEY ? 'Available (length: ' + PLAYDIALOG_SECRET_KEY.length + ')' : 'Missing'}`);
+    
+    // Validate API credentials
+    if (!PLAYDIALOG_USER_ID || !PLAYDIALOG_SECRET_KEY) {
+      console.error('Missing Play.ai API credentials');
+      return new Response(
+        JSON.stringify({ error: 'API credentials are not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Default voices if not provided
     const selectedVoice1 = voice1 || 's3://voice-cloning-zero-shot/baf1ef41-36b6-428c-9bdf-50ba54682bd8/original/manifest.json';
     const selectedVoice2 = voice2 || 's3://voice-cloning-zero-shot/e040bd1b-f190-4bdb-83f0-75ef85b18f84/original/manifest.json';
     
+    // Make sure the transcript has the correct format with host markers
+    let formattedTranscript = transcript;
+    if (!transcript.includes('Host 1:') && !transcript.includes('Host 2:')) {
+      console.log('Adding host markers to transcript');
+      const lines = transcript.split('\n');
+      formattedTranscript = lines.map((line, i) => {
+        // Alternate between hosts
+        return `${i % 2 === 0 ? 'Host 1' : 'Host 2'}: ${line}`;
+      }).join('\n');
+    }
+    
     // Prepare the request to Play.ai API
     const headers = {
       'X-USER-ID': PLAYDIALOG_USER_ID,
-      'Authorization': PLAYDIALOG_SECRET_KEY,
+      'Authorization': `Bearer ${PLAYDIALOG_SECRET_KEY}`,
       'Content-Type': 'application/json',
     };
     
     const payload = {
       model: 'PlayDialog',
-      text: transcript,
+      text: formattedTranscript,
       voice: selectedVoice1,
       voice2: selectedVoice2,
       turnPrefix: 'Host 1:',
@@ -49,20 +84,44 @@ serve(async (req) => {
       outputFormat: 'mp3',
     };
 
+    console.log('Sending request to Play.ai API with payload:', JSON.stringify({
+      ...payload,
+      text: formattedTranscript.substring(0, 100) + '...' // Don't log the full transcript
+    }));
+    console.log('Using headers:', JSON.stringify({
+      'X-USER-ID': PLAYDIALOG_USER_ID,
+      'Authorization': 'Bearer [SECRET_KEY_PROVIDED]',
+      'Content-Type': 'application/json',
+    }));
+
     // Initiate the podcast generation
-    const response = await fetch('https://api.play.ai/api/v1/tts/', {
+    const apiUrl = 'https://api.play.ai/api/v1/tts/';
+    console.log(`Sending request to: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
     });
 
+    const responseStatus = response.status;
+    const responseStatusText = response.statusText;
+    console.log(`Response status: ${responseStatus} ${responseStatusText}`);
+
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Play.ai API error:', errorData);
-      throw new Error(`Play.ai API error: ${JSON.stringify(errorData)}`);
+      const errorText = await response.text();
+      console.error('Play.ai API error response:', errorText);
+      try {
+        const errorData = JSON.parse(errorText);
+        throw new Error(`Play.ai API error: ${JSON.stringify(errorData)}`);
+      } catch (e) {
+        throw new Error(`Play.ai API error (${responseStatus}): ${errorText}`);
+      }
     }
 
     const data = await response.json();
+    console.log('Play.ai API response:', JSON.stringify(data));
+    
     const jobId = data.id;
     
     if (!jobId) {

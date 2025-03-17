@@ -157,14 +157,14 @@ export function usePodcastGenerator({
     setPodcastUrl(null);
 
     try {
-      console.log("Calling generate-podcast edge function with transcript length:", transcript.length);
+      console.log("Calling create-podcast edge function with transcript length:", transcript.length);
       
-      // Changed from 'generate-podcast' to 'check-podcast-status' back to the correct function
-      const { data, error: uploadError } = await supabase.functions.invoke('generate-podcast', {
+      // Changed from 'generate-podcast' to 'create-podcast' to match the correct function name
+      const { data, error: uploadError } = await supabase.functions.invoke('create-podcast', {
         body: { transcript },
       });
 
-      console.log("Response from generate-podcast:", data, uploadError);
+      console.log("Response from create-podcast:", data, uploadError);
 
       if (uploadError) {
         console.error("Supabase Function Error:", uploadError);
