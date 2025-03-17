@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 type AuthMode = "signin" | "signup";
 
@@ -30,6 +31,7 @@ export function AuthForm() {
 
         if (error) throw error;
         
+        toast.success("Account created successfully! Check your email for verification.");
         setSuccess("Sign up successful! Check your email for verification.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -39,10 +41,13 @@ export function AuthForm() {
 
         if (error) throw error;
         
+        toast.success("Signed in successfully!");
         setSuccess("Signed in successfully!");
       }
     } catch (error: any) {
-      setError(error.message || "Authentication failed");
+      const errorMessage = error.message || "Authentication failed";
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
