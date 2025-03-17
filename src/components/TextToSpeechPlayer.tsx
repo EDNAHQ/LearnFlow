@@ -33,7 +33,13 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
   const handleTogglePlay = async () => {
     if (!audioUrl && !isGenerating) {
       try {
-        await generateSpeech(text);
+        const url = await generateSpeech(text);
+        if (url && audioRef.current) {
+          audioRef.current.play().catch(err => {
+            console.error("Error playing audio:", err);
+            toast.error("Failed to play audio");
+          });
+        }
       } catch (err) {
         console.error("Failed to generate speech:", err);
       }

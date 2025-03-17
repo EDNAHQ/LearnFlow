@@ -20,11 +20,16 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    console.log(`Converting text to speech using Eleven Labs API. Text length: ${text.length}, Voice ID: ${voiceId}`)
+    const apiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
+    if (!apiKey) {
+      throw new Error('ELEVEN_LABS_API_KEY is not configured')
+    }
+
+    console.log(`Converting text to speech using Eleven Labs API. Text length: ${text.length}, Voice ID: ${voiceId}, API Key length: ${apiKey.length}`)
     
     // Initialize ElevenLabs client
     const client = new ElevenLabsClient({
-      apiKey: Deno.env.get('ELEVEN_LABS_API_KEY') || '',
+      apiKey: apiKey,
     });
 
     // Generate audio from text
