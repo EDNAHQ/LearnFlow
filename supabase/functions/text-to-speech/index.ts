@@ -52,7 +52,7 @@ serve(async (req) => {
       
       console.log(`Successfully generated audio: ${audioData.length} bytes`);
       
-      // Return audio data with proper Content-Type
+      // Return audio data directly as binary with proper Content-Type
       return new Response(audioData, {
         headers: {
           ...corsHeaders,

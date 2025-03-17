@@ -15,8 +15,8 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const [showControls, setShowControls] = useState(true); // Default to showing controls
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [showDebug, setShowDebug] = useState(false);
 
   // Handle cleanup on unmount
   useEffect(() => {
@@ -128,12 +128,12 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
               {isGenerating ? 'Generating audio...' : (title || 'Listen to content')}
             </div>
             
-            {/* Audio element - visible for debugging */}
+            {/* Audio element - always visible */}
             <audio 
               ref={audioRef} 
               onEnded={handleAudioEnd}
-              controls={showDebug}
-              className={showDebug ? "w-full mt-2" : "hidden"}
+              controls={showControls}
+              className="w-full mt-2"
             />
             
             {isGenerating && <BarLoader className="w-full mt-2" />}
@@ -176,12 +176,12 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
           </Button>
           
           <Button
-            onClick={() => setShowDebug(!showDebug)}
+            onClick={() => setShowControls(!showControls)}
             variant="ghost"
             size="sm"
             className="text-xs text-gray-400 hover:bg-gray-800"
           >
-            {showDebug ? "Hide Controls" : "Show Controls"}
+            {showControls ? "Hide Controls" : "Show Controls"}
           </Button>
         </div>
       </div>

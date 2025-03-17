@@ -20,6 +20,7 @@ import {
   HelpCircle,
   LogOut,
   Brain,
+  Music,
 } from "lucide-react";
 import { UserNav } from "@/components/UserNav";
 
@@ -65,6 +66,28 @@ export function MainNav({ className }: MainNavProps) {
               )}
             >
               Projects
+            </Link>
+            <Link
+              to="/podcast"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                isActive("/podcast")
+                  ? "text-foreground font-semibold"
+                  : "text-foreground/60"
+              )}
+            >
+              Podcast
+            </Link>
+            <Link
+              to="/audio"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                isActive("/audio")
+                  ? "text-foreground font-semibold"
+                  : "text-foreground/60"
+              )}
+            >
+              Audio
             </Link>
             <Link
               to="/why-free"
@@ -113,6 +136,22 @@ export function MainNav({ className }: MainNavProps) {
                 >
                   <User className="h-5 w-5 text-brand-purple" />
                   <span>Projects</span>
+                </Link>
+                <Link
+                  to="/podcast"
+                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
+                  onClick={closeMobileMenu}
+                >
+                  <Music className="h-5 w-5 text-brand-purple" />
+                  <span>Podcast</span>
+                </Link>
+                <Link
+                  to="/audio"
+                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
+                  onClick={closeMobileMenu}
+                >
+                  <Music className="h-5 w-5 text-brand-purple" />
+                  <span>Audio</span>
                 </Link>
                 <Link
                   to="/why-free"

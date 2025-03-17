@@ -45,12 +45,11 @@ export function useTextToSpeech() {
         throw new Error('No audio data received');
       }
       
-      // Create audio blob from response data
-      // The response is already binary data, so we create a blob directly
+      // Create audio blob from the binary data response
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(audioBlob);
       
-      console.log('Speech generated successfully, audio URL created');
+      console.log('Speech generated successfully, audio URL created:', url);
       setAudioUrl(url);
       return url;
     } catch (err: any) {
