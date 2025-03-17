@@ -26,7 +26,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <AudioSummaryPlayer pathId={pathId} stepId={stepId} topic={topic} />
+        <AudioSummaryPlayer pathId={pathId} topic={topic} />
       </CardContent>
     </Card>
   );

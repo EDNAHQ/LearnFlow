@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
-import HeroHeading from "@/components/home/HeroHeading";
 import AnimatedBackgroundPaths from "@/components/home/FloatingPaths";
 
 const HeroSection = () => {
@@ -21,14 +20,6 @@ const HeroSection = () => {
     setTimeout(() => {
       navigate("/plan");
     }, 1000);
-  };
-
-  const handleStartLearning = () => {
-    const topicElement = document.getElementById('topic-input');
-    if (topicElement) {
-      topicElement.scrollIntoView({ behavior: 'smooth' });
-      topicElement.focus();
-    }
   };
 
   return (
@@ -49,11 +40,15 @@ const HeroSection = () => {
 
       <div className="container max-w-5xl mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center text-center">
-          {/* Hero heading component */}
-          <HeroHeading onStartLearning={handleStartLearning} />
+          {/* Headline */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
+              Learn anything with AI
+            </span>
+          </h1>
           
           {/* Topic input container */}
-          <div id="topic-input" className="w-full max-w-3xl mx-auto mt-16 mb-6">
+          <div className="w-full max-w-3xl mx-auto mt-8 mb-6">
             <TopicInput onSubmit={handleSubmit} loading={loading} />
           </div>
         </div>
