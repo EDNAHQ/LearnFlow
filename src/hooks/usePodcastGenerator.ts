@@ -36,6 +36,13 @@ export function usePodcastGenerator({
     }
   }, [content, transcript]);
 
+  // If initialTranscript is provided, use it
+  useEffect(() => {
+    if (initialTranscript && !transcript) {
+      setTranscript(initialTranscript);
+    }
+  }, [initialTranscript]);
+
   const generateTranscript = async () => {
     if (!content || isGeneratingTranscript) return;
     
@@ -48,9 +55,13 @@ export function usePodcastGenerator({
         description: "Please wait while we convert your content to podcast format.",
       });
       
+      console.log("Calling generate-podcast-transcript edge function with content length:", content.length);
+      
       const { data, error: genError } = await supabase.functions.invoke('generate-podcast-transcript', {
         body: { content, title, topic },
       });
+      
+      console.log("Response from generate-podcast-transcript:", data, genError);
       
       if (genError) {
         throw new Error(`Error generating transcript: ${genError.message}`);
@@ -66,7 +77,9 @@ export function usePodcastGenerator({
         throw new Error('No transcript returned from the API');
       }
     } catch (e: any) {
-      setError(`Failed to generate transcript: ${e.message}`);
+      const errorMsg = `Failed to generate transcript: ${e.message}`;
+      console.error(errorMsg);
+      setError(errorMsg);
       toast({
         variant: "destructive",
         title: "Script Generation Failed",
@@ -79,12 +92,18 @@ export function usePodcastGenerator({
 
   const checkPodcastStatus = async (initialJobId: string) => {
     try {
+      console.log("Checking podcast status for job ID:", initialJobId);
+      
       const { data, error: statusError } = await supabase.functions.invoke('check-podcast-status', {
         body: { jobId: initialJobId },
       });
 
+      console.log("Response from check-podcast-status:", data, statusError);
+
       if (statusError) {
-        setError(`Error checking status: ${statusError.message}`);
+        const errorMsg = `Error checking status: ${statusError.message}`;
+        console.error(errorMsg);
+        setError(errorMsg);
         setIsGenerating(false);
         return;
       }
@@ -99,7 +118,9 @@ export function usePodcastGenerator({
       } else if (data.status === 'PROCESSING') {
         setTimeout(() => checkPodcastStatus(initialJobId), 5000); // Poll every 5 seconds
       } else {
-        setError(`Podcast generation failed. Status: ${data.status}`);
+        const errorMsg = `Podcast generation failed. Status: ${data.status}`;
+        console.error(errorMsg);
+        setError(errorMsg);
         setIsGenerating(false);
         setJobId(null);
         toast({
@@ -109,7 +130,9 @@ export function usePodcastGenerator({
         });
       }
     } catch (e: any) {
-      setError(`Failed to check podcast status: ${e.message}`);
+      const errorMsg = `Failed to check podcast status: ${e.message}`;
+      console.error(errorMsg);
+      setError(errorMsg);
       setIsGenerating(false);
       setJobId(null);
       toast({
@@ -126,9 +149,13 @@ export function usePodcastGenerator({
     setPodcastUrl(null);
 
     try {
+      console.log("Calling generate-podcast edge function with transcript length:", transcript.length);
+      
       const { data, error: uploadError } = await supabase.functions.invoke('generate-podcast', {
         body: { transcript },
       });
+
+      console.log("Response from generate-podcast:", data, uploadError);
 
       if (uploadError) {
         console.error("Supabase Function Error:", uploadError);
@@ -141,7 +168,9 @@ export function usePodcastGenerator({
         setJobId(data.jobId);
         checkPodcastStatus(data.jobId);
       } else {
-        setError("Failed to start podcast generation: No job ID received.");
+        const errorMsg = "Failed to start podcast generation: No job ID received.";
+        console.error(errorMsg);
+        setError(errorMsg);
         setIsGenerating(false);
         toast({
           variant: "destructive",
@@ -150,7 +179,9 @@ export function usePodcastGenerator({
         });
       }
     } catch (e: any) {
-      setError(`Failed to start podcast generation: ${e.message}`);
+      const errorMsg = `Failed to start podcast generation: ${e.message}`;
+      console.error(errorMsg);
+      setError(errorMsg);
       setIsGenerating(false);
       toast({
         variant: "destructive",
@@ -162,6 +193,7 @@ export function usePodcastGenerator({
 
   const downloadPodcast = () => {
     if (podcastUrl) {
+      console.log("Downloading podcast from URL:", podcastUrl);
       const link = document.createElement('a');
       link.href = podcastUrl;
       link.download = 'podcast.mp3';

@@ -20,6 +20,7 @@ serve(async (req) => {
     const { jobId } = await req.json();
 
     if (!jobId) {
+      console.error('No job ID provided');
       return new Response(
         JSON.stringify({ error: 'Job ID is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -28,25 +29,43 @@ serve(async (req) => {
 
     console.log(`Checking status of podcast job: ${jobId}`);
     console.log(`User ID: ${PLAYDIALOG_USER_ID ? 'Available' : 'Missing'}`);
-    console.log(`Secret Key: ${PLAYDIALOG_SECRET_KEY ? 'Available' : 'Missing'}`);
+    console.log(`Secret Key: ${PLAYDIALOG_SECRET_KEY ? 'Available (length: ' + PLAYDIALOG_SECRET_KEY.length + ')' : 'Missing'}`);
+    
+    // Validate API credentials
+    if (!PLAYDIALOG_USER_ID || !PLAYDIALOG_SECRET_KEY) {
+      console.error('Missing Play.ai API credentials');
+      return new Response(
+        JSON.stringify({ error: 'API credentials are not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Prepare the headers for Play.ai API
     const headers = {
       'X-USER-ID': PLAYDIALOG_USER_ID,
-      'Authorization': PLAYDIALOG_SECRET_KEY,
+      'Authorization': `Bearer ${PLAYDIALOG_SECRET_KEY}`,
       'Content-Type': 'application/json',
     };
     
     // Check job status
     const statusUrl = `https://api.play.ai/api/v1/tts/${jobId}`;
     console.log(`Sending status check request to: ${statusUrl}`);
+    console.log('Using headers:', JSON.stringify({
+      'X-USER-ID': PLAYDIALOG_USER_ID,
+      'Authorization': 'Bearer [SECRET_KEY_PROVIDED]',
+      'Content-Type': 'application/json',
+    }));
     
     const statusResponse = await fetch(statusUrl, { headers });
+    
+    const responseStatus = statusResponse.status;
+    const responseStatusText = statusResponse.statusText;
+    console.log(`Response status: ${responseStatus} ${responseStatusText}`);
     
     if (!statusResponse.ok) {
       const errorText = await statusResponse.text();
       console.error(`Error checking job status:`, errorText);
-      throw new Error(`Error checking job status: ${statusResponse.status} ${errorText}`);
+      throw new Error(`Error checking job status: ${responseStatus} ${errorText}`);
     }
     
     const statusData = await statusResponse.json();
