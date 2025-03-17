@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, LogIn, Mail, AlertCircle, Google } from "lucide-react";
+import { Loader2, LogIn, Mail, AlertCircle, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 
@@ -112,7 +111,7 @@ export function AuthForm() {
           </>
         ) : (
           <>
-            <Google className="mr-2 h-4 w-4" />
+            <Globe className="mr-2 h-4 w-4" />
             Continue with Google
           </>
         )}
