@@ -19,6 +19,9 @@ const AuthPage = () => {
       if (returnTo === 'current' && document.referrer) {
         // Try to go back to the referring page
         window.history.back();
+      } else if (returnTo) {
+        // Navigate to the specified returnTo path
+        navigate(returnTo);
       } else {
         // Default navigation to home
         navigate("/");
