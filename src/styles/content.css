@@ -1,42 +1,96 @@
 
-/* Add this to your content.css file */
-.has-margin-note {
-  position: relative;
+@import './content-styles.css';
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Language tag for code blocks */
+.language-tag {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  font-size: 0.7rem;
+  background-color: rgba(26, 26, 26, 0.8);
+  color: white;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0 0 4px 4px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+/* Margin notes */
+.margin-notes-column {
+  width: 200px;
+  position: absolute;
+  right: -240px;
+  top: 0;
+}
+
+.margin-note {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #6D42EF;
   background-color: rgba(109, 66, 239, 0.05);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  border-left: 3px solid rgba(109, 66, 239, 0.2);
-  /* Prevent continuous expansion */
-  max-width: 100%;
+  border-left: 2px solid #6D42EF;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.margin-note-connector {
+  position: absolute;
+  height: 1px;
+  background-color: rgba(109, 66, 239, 0.4);
+  transform-origin: left center;
+}
+
+/* Text to Speech Player */
+.text-to-speech-player {
+  border-radius: 0.5rem;
   overflow: hidden;
-  display: inline-block;
-  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
 }
 
-.insight-indicator {
-  display: inline-flex;
-  vertical-align: text-top;
-  margin-left: 0.5rem;
-  /* Set specific dimensions to prevent expansion */
-  width: 24px;
-  height: 24px;
-  position: relative;
-  flex-shrink: 0;
-  box-sizing: border-box;
+.text-to-speech-player:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Ensure the content margin note has a fixed size */
-.content-margin-note {
-  width: auto !important;
-  max-width: 100% !important;
-  flex-shrink: 0;
-  box-sizing: border-box;
+/* Make the content formatting consistent */
+.prose h1, .prose h2, .prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .has-margin-note {
-    margin-right: 0;
-    border-right: none;
-  }
+.prose p {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+}
+
+.prose-p:last-child {
+  margin-bottom: 0;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(90deg, #6D42EF, #B042EF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
