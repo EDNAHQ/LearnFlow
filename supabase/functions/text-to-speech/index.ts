@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { ElevenLabsClient } from "https://esm.sh/elevenlabs@0.2.2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,35 +21,22 @@ serve(async (req) => {
     }
 
     console.log(`Converting text to speech using Eleven Labs API. Text length: ${text.length}, Voice ID: ${voiceId}`)
+    
+    // Initialize ElevenLabs client
+    const client = new ElevenLabsClient({
+      apiKey: Deno.env.get('ELEVEN_LABS_API_KEY') || '',
+    });
 
-    // Make request to Eleven Labs API
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-          },
-        }),
+    // Generate audio from text
+    const audioData = await client.textToSpeech.convert(voiceId, {
+      output_format: "mp3_44100_128",
+      text: text,
+      model_id: "eleven_multilingual_v2",
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75,
       }
-    )
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Eleven Labs API error:', errorText)
-      throw new Error(`Eleven Labs API error: ${response.status} ${errorText}`)
-    }
-
-    // Get audio binary data
-    const audioData = await response.arrayBuffer()
+    });
     
     // Return audio data
     return new Response(audioData, {

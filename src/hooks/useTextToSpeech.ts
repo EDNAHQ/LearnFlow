@@ -33,7 +33,7 @@ export function useTextToSpeech() {
         throw new Error(response.error.message || 'Failed to generate speech');
       }
       
-      // Response data is the audio blob
+      // Response is now a binary audio buffer
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(audioBlob);
       
