@@ -15,6 +15,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   content,
   title,
   pathId = '',
+  stepId = '',
   topic = ''
 }) => {
   return (

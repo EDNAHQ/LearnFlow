@@ -3,9 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
-import { MainNav } from "@/components/MainNav";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
 import PodcastModeDisplay from "./content/PodcastModeDisplay";
@@ -18,6 +15,7 @@ interface ContentDisplayProps {
   pathId?: string;
   topic?: string;
   title?: string;
+  stepId?: string;
 }
 
 interface LearningStep {
@@ -35,9 +33,9 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   detailedContent,
   pathId,
   topic,
-  title
+  title,
+  stepId
 }) => {
-  const { stepId } = useParams<{ pathId: string; stepId: string }>();
   const { steps, isLoading, markStepAsComplete } = useLearningSteps(pathId, topic);
   const { mode } = useContentMode();
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
@@ -100,24 +98,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   const displayStepId = stepId || currentStep?.id || '';
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <MainNav />
-      
-      <div className="flex justify-between items-center px-4 py-2 border-b">
-        <h2 className="text-2xl font-bold">{displayTitle}</h2>
-        <div className="flex items-center space-x-2">
-          <Button onClick={handlePrev} disabled={currentStepIndex === 0}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-          <Button onClick={handleNext} disabled={currentStepIndex === steps.length - 1}>
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      </div>
-      
-      <div className="px-4 pb-8">
+    <div className="w-full">
+      <div className="pb-8">
         {mode === "text" && (
           <TextModeDisplay
             content={detailedContent || displayContent}
@@ -154,13 +136,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             topic={topic}
           />
         )}
-        
-        <div className="mt-6 flex justify-between items-center">
-          <p>Step {currentStepIndex + 1} of {steps.length}</p>
-          <Button onClick={handleComplete} disabled={currentStep?.completed}>
-            {currentStep?.completed ? "Completed" : "Mark as Complete"}
-          </Button>
-        </div>
       </div>
     </div>
   );
