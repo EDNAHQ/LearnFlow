@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -11,10 +10,15 @@ import { Info } from 'lucide-react';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
+  stepId?: string;
   topic: string;
 }
 
-const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
+const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ 
+  pathId, 
+  stepId,
+  topic 
+}) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
   const { 
     isGenerating, 
