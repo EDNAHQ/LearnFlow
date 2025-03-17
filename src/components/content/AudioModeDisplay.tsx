@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import AudioSummaryPlayer from './AudioSummaryPlayer';
+import AudioSummaryPlayer from './audio/AudioSummaryPlayer';
 
 interface AudioModeDisplayProps {
   content: string;
