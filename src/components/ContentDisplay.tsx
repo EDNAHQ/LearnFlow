@@ -95,6 +95,8 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   const displayContent = content || currentStep?.content || '';
   const displayTitle = title || currentStep?.title || '';
   const displayStepId = stepId || currentStep?.id || '';
+  const safePathId = pathId || '';
+  const safeTopic = topic || '';
 
   return (
     <div className="w-full">
@@ -131,9 +133,9 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
           <AudioModeDisplay
             content={detailedContent || displayContent}
             title={displayTitle}
-            pathId={pathId || ''}
+            pathId={safePathId}
             stepId={displayStepId}
-            topic={topic || ''}
+            topic={safeTopic}
           />
         )}
       </div>

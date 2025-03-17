@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -74,6 +73,7 @@ const ContentPage = () => {
 
   // Ensure content is a string
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
+  
   return <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader onBack={handleBack} onHome={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} />
 
@@ -101,7 +101,8 @@ const ContentPage = () => {
               detailedContent={currentStepData?.detailed_content} 
               pathId={pathId} 
               topic={topic}
-              title={currentStepData?.title || ""} 
+              title={currentStepData?.title || ""}
+              stepId={stepId}
             />
           </div>
 
@@ -112,4 +113,5 @@ const ContentPage = () => {
       </div>
     </ContentPageLayout>;
 };
+
 export default ContentPage;
