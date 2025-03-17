@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    console.log(`Converting text to speech using Eleven Labs API. Text length: ${text.length}`)
+    console.log(`Converting text to speech using Eleven Labs API. Text length: ${text.length}, Voice ID: ${voiceId}`)
 
     // Make request to Eleven Labs API
     const response = await fetch(

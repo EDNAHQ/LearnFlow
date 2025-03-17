@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { Play, Pause, Volume2, Loader2 } from 'lucide-react';
 import { BarLoader } from '@/components/ui/loader';
+import { toast } from 'sonner';
 
 interface TextToSpeechPlayerProps {
   text: string;
@@ -22,14 +23,28 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
     };
   }, [cleanup]);
 
+  // Show error toast if there's an error
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   const handleTogglePlay = async () => {
     if (!audioUrl && !isGenerating) {
-      await generateSpeech(text);
+      try {
+        await generateSpeech(text);
+      } catch (err) {
+        console.error("Failed to generate speech:", err);
+      }
     } else if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(err => {
+          console.error("Error playing audio:", err);
+          toast.error("Failed to play audio");
+        });
       }
     }
   };
@@ -94,12 +109,6 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
         
         <Volume2 className="h-4 w-4 opacity-70" />
       </div>
-      
-      {error && (
-        <div className="mt-2 text-xs text-red-400">
-          {error}
-        </div>
-      )}
     </div>
   );
 };

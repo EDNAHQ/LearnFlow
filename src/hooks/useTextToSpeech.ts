@@ -25,15 +25,17 @@ export function useTextToSpeech() {
         ? text.substring(0, 5000) + "... (content truncated for text to speech)"
         : text;
       
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+      const response = await supabase.functions.invoke('text-to-speech', {
         body: { text: truncatedText, voiceId }
       });
       
-      if (error) throw new Error(error.message);
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to generate speech');
+      }
       
-      // Create blob from the response data
-      const blob = new Blob([data], { type: 'audio/mpeg' });
-      const url = URL.createObjectURL(blob);
+      // Response data is the audio blob
+      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const url = URL.createObjectURL(audioBlob);
       
       setAudioUrl(url);
       return url;
