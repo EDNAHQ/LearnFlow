@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -8,7 +9,10 @@ export function useTextToSpeech() {
   const [error, setError] = useState<string | null>(null);
 
   const generateSpeech = async (text: string, voiceId?: string) => {
-    if (!text) return;
+    if (!text) {
+      setError('No text provided for speech generation');
+      return null;
+    }
     
     setIsGenerating(true);
     setError(null);
@@ -21,27 +25,35 @@ export function useTextToSpeech() {
       }
       
       // If text is too long, truncate it
-      const truncatedText = text.length > 5000 
-        ? text.substring(0, 5000) + "... (content truncated for text to speech)"
+      const truncatedText = text.length > 4000 
+        ? text.substring(0, 4000) + "... (content truncated for text to speech)"
         : text;
       
+      console.log(`Generating speech for text: ${truncatedText.substring(0, 50)}...`);
+      
       const response = await supabase.functions.invoke('text-to-speech', {
-        body: { text: truncatedText, voiceId }
+        body: { text: truncatedText, voiceId: voiceId || "pFZP5JQG7iQjIQuC4Bku" }
       });
       
       if (response.error) {
         throw new Error(response.error.message || 'Failed to generate speech');
       }
       
-      // Response is now a binary audio buffer
+      if (!response.data) {
+        throw new Error('No audio data received');
+      }
+      
+      // Response is a binary audio buffer
       const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(audioBlob);
       
+      console.log('Speech generated successfully, audio URL created');
       setAudioUrl(url);
       return url;
     } catch (err: any) {
       console.error('Error generating speech:', err);
-      setError(`Failed to generate speech: ${err.message}`);
+      setError(err.message || 'Unknown error occurred');
+      toast.error(`Speech generation failed: ${err.message}`);
       return null;
     } finally {
       setIsGenerating(false);
@@ -53,6 +65,7 @@ export function useTextToSpeech() {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    setError(null);
   };
 
   return {
