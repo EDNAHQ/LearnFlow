@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import LoadingAnimation from "./nuggets/LoadingAnimation";
@@ -31,6 +31,7 @@ const KnowledgeNuggetLoading = ({
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Set progress based on content generation
   useEffect(() => {
@@ -65,20 +66,37 @@ const KnowledgeNuggetLoading = ({
     }
   }, [generatingContent, generatedSteps, totalSteps, pathId, navigate]);
 
-  useEffect(() => {
-    // Auto-rotate through nuggets - exactly 8 seconds per nugget
+  // Restart the timer whenever currentNuggetIndex changes
+  const startNuggetTimer = () => {
+    // Clear any existing timer first
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    
+    // Start a new timer if we have nuggets
     if (nuggets.length > 0) {
-      const timer = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setCurrentNuggetIndex(prev => (prev + 1) % nuggets.length);
       }, 8000); // Exactly 8 seconds per nugget
-      
-      return () => clearTimeout(timer);
     }
-  }, [nuggets]); // Removed currentNuggetIndex as dependency to prevent timer resets
+  };
+
+  // Start/restart timer when nuggets load or current index changes
+  useEffect(() => {
+    startNuggetTimer();
+    
+    // Cleanup function to clear the timeout when component unmounts or dependencies change
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [nuggets, currentNuggetIndex]);
 
   // Function to manually navigate nuggets
   const goToNugget = (index: number) => {
     setCurrentNuggetIndex(index);
+    // Timer will be restarted automatically via the useEffect above
   };
 
   // Handlers for NuggetsFetcher
