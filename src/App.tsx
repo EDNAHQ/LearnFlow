@@ -3,11 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ContentModeProvider } from "@/hooks/useContentMode";
-import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
 import PlanPage from "./pages/PlanPage";
 import ContentPage from "./pages/ContentPage";
@@ -31,7 +30,7 @@ const App = () => (
               <div className="w-full min-w-full h-full">
                 <Routes>
                   <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/" element={<Navigate to="/home" />} />
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
                   {/* Updated content routes with parameters */}
