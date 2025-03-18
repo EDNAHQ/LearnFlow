@@ -1,72 +1,45 @@
 
-import { useState, useRef, useEffect } from 'react';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { AudioPlayerActions } from './types';
 
-export const useAudioPlayer = (steps: any[], topic: string) => {
-  const { 
-    isGenerating, 
-    isGeneratingScript,
-    audioUrl, 
-    scriptContent,
-    error, 
-    generateSpeech, 
-    generateScript,
-    cleanup 
-  } = useTextToSpeech();
+interface UseAudioActionsParams {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  isPlaying: boolean;
+  isMuted: boolean;
+  editableScript: string;
+  isGenerating: boolean;
+  audioUrl: string | null;
+  setEditableScript: (script: string) => void;
+  setShowScriptEditor: (show: boolean) => void;
+  setShowControls: (show: boolean) => void;
+  setIsMuted: (muted: boolean) => void;
+  generateScript: (steps: any[], topic: string) => Promise<string | null>;
+  generateSpeech: (script: string) => Promise<string | null>;
+  cleanup: () => void;
+  steps: any[];
+  topic: string;
+}
+
+export const useAudioActions = ({
+  audioRef,
+  isPlaying,
+  isMuted,
+  editableScript,
+  isGenerating,
+  audioUrl,
+  setEditableScript,
+  setShowScriptEditor,
+  setShowControls,
+  setIsMuted,
+  generateScript,
+  generateSpeech,
+  cleanup,
+  steps,
+  topic
+}: UseAudioActionsParams): AudioPlayerActions => {
   
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const [editableScript, setEditableScript] = useState<string>('');
-  const [showScriptEditor, setShowScriptEditor] = useState(false);
-  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize script when content changes
-  useEffect(() => {
-    if (scriptContent && !editableScript) {
-      setEditableScript(scriptContent);
-    }
-  }, [scriptContent, editableScript]);
-
-  // Update audio element when URL changes
-  useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.src = audioUrl;
-      audioRef.current.load();
-      setIsAudioLoaded(true);
-      console.log("Audio URL loaded into player:", audioUrl);
-    }
-  }, [audioUrl]);
-
-  // Setup audio event listeners
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, []);
-
-  // Handle cleanup on unmount
-  useEffect(() => {
-    return () => cleanup();
-  }, [cleanup]);
-
   // Script generation function
   const handleGenerateScript = async () => {
-    if (!isGeneratingScript && steps.length > 0) {
+    if (steps.length > 0) {
       console.log("Generating script for entire project...");
       try {
         const script = await generateScript(steps, topic || 'this topic');
@@ -143,22 +116,15 @@ export const useAudioPlayer = (steps: any[], topic: string) => {
 
   // Handle audio end
   const handleAudioEnd = () => {
-    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      if (audioRef.current.currentTime) {
+        audioRef.current.currentTime = 0;
+      }
+    }
   };
 
   return {
-    audioRef,
-    isPlaying,
-    isMuted,
-    isGenerating,
-    isGeneratingScript,
-    isAudioLoaded,
-    showControls,
-    audioUrl,
-    scriptContent,
-    editableScript,
-    showScriptEditor,
-    error,
     setEditableScript,
     setShowScriptEditor,
     setShowControls,

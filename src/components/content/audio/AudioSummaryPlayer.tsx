@@ -6,7 +6,7 @@ import AudioControls from './AudioControls';
 import ScriptEditor from './ScriptEditor';
 import AudioErrorDisplay from './AudioErrorDisplay';
 import AudioElement from './AudioElement';
-import { useAudioPlayer } from '@/hooks/useAudioPlayer';
+import { useAudioPlayer } from '@/hooks/audio/useAudioPlayer';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
