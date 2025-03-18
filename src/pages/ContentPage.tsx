@@ -50,7 +50,7 @@ const ContentPage = () => {
 
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
-    if (mode !== "podcast") {
+    if (mode !== "podcast" && mode !== "audio") {
       setMode("text");
     }
   }, [setMode, mode]);
@@ -63,8 +63,8 @@ const ContentPage = () => {
 
   // Handle generation complete redirect - only once and with strict conditions
   useEffect(() => {
-    // Skip redirect if in podcast mode
-    if (mode === "podcast") return;
+    // Skip redirect if in podcast or audio mode
+    if (mode === "podcast" || mode === "audio") return;
     
     // Only redirect if we're not already on a step page and generation is complete
     if (!hasRedirected && 
@@ -82,8 +82,8 @@ const ContentPage = () => {
   }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading, mode]);
 
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  // Don't show loading for podcast mode
-  if ((isLoading || generatingContent) && !stepId && mode !== "podcast") {
+  // Don't show loading for podcast or audio mode
+  if ((isLoading || generatingContent) && !stepId && mode !== "podcast" && mode !== "audio") {
     return (
       <KnowledgeNuggetLoading 
         topic={topic} 
@@ -107,11 +107,11 @@ const ContentPage = () => {
       ? JSON.stringify(currentStepData.content) 
       : "No content available";
   
-  // Skip step navigation for podcast mode - it works with the entire project
-  const showStepNavigation = mode !== "podcast";
+  // Skip step navigation for podcast and audio modes
+  const showStepNavigation = mode !== "podcast" && mode !== "audio";
   
-  // Use full width layout for podcast mode
-  const contentWidthClass = mode === "podcast" 
+  // Use full width layout for podcast and audio modes
+  const contentWidthClass = (mode === "podcast" || mode === "audio")
     ? "max-w-full px-0" 
     : "max-w-[860px] px-4";
   
@@ -132,13 +132,13 @@ const ContentPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          {mode !== "podcast" && (
+          {showStepNavigation && (
             <div className="flex justify-between items-center mb-3 w-full">
               <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
             </div>
           )}
           
-          {mode !== "podcast" && (
+          {showStepNavigation && (
             <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
               {currentStepData?.title || "Loading..."}
             </h1>

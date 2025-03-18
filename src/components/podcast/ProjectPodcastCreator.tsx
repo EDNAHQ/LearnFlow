@@ -50,7 +50,7 @@ const ProjectPodcastCreator = ({
   }, [podcastUrl, activeTab]);
 
   return (
-    <div className="w-full pb-8">
+    <div className="w-full max-w-[1200px] mx-auto pb-8">
       <div className="text-center mb-6">
         <h1 className="text-3xl font-bold text-brand-purple flex items-center justify-center gap-2">
           <Music className="h-6 w-6" />
@@ -61,7 +61,7 @@ const ProjectPodcastCreator = ({
         </p>
       </div>
 
-      <Card className="bg-white shadow-lg border-0">
+      <Card className="bg-white shadow-lg border-0 w-full">
         <CardHeader className="pb-2">
           <CardTitle className="text-xl">
             {topic}

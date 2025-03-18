@@ -85,14 +85,10 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   };
 
-  if (isLoading && mode !== "podcast") {
-    return <div>Loading content...</div>;
-  }
-
   // Special case for podcast mode - render it even if steps are loading
   if (mode === "podcast") {
     return (
-      <div className="w-full px-4">
+      <div className="w-full">
         <PodcastModeDisplay
           pathId={pathId}
           topic={topic}
@@ -101,15 +97,36 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     );
   }
 
+  // Special case for audio mode - render it even if steps are loading
+  if (mode === "audio") {
+    const displayStepId = stepId || currentStep?.id || '';
+    const safePathId = pathId || '';
+    const safeTopic = topic || '';
+    
+    return (
+      <div className="w-full">
+        <AudioModeDisplay
+          pathId={safePathId}
+          stepId={displayStepId}
+          topic={safeTopic}
+          content={detailedContent || content || ''}
+          title={title || currentStep?.title || ''}
+        />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div className="w-full">Loading content...</div>;
+  }
+
   if (!currentStep && !content) {
-    return <div>No content available.</div>;
+    return <div className="w-full">No content available.</div>;
   }
 
   const displayContent = content || currentStep?.content || '';
   const displayTitle = title || currentStep?.title || '';
   const displayStepId = stepId || currentStep?.id || '';
-  const safePathId = pathId || '';
-  const safeTopic = topic || '';
 
   return (
     <div className="w-full">
@@ -132,16 +149,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
-          />
-        )}
-        
-        {mode === "audio" && (
-          <AudioModeDisplay
-            pathId={safePathId}
-            stepId={displayStepId}
-            topic={safeTopic}
-            content={detailedContent || displayContent}
-            title={displayTitle}
           />
         )}
       </div>

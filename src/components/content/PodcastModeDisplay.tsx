@@ -17,7 +17,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-8">
+      <div className="flex flex-col items-center justify-center py-8 w-full">
         <BarLoader className="mx-auto mb-4" />
         <p className="text-gray-600">Loading project content...</p>
       </div>
@@ -26,14 +26,14 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
 
   if (!pathId || !topic) {
     return (
-      <div className="p-4 bg-red-50 text-red-700 rounded-md">
+      <div className="p-4 bg-red-50 text-red-700 rounded-md w-full">
         Project information is missing. Please go back to your projects and try again.
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-[1000px] mx-auto">
+    <div className="w-full">
       <ProjectPodcastCreator
         pathId={pathId}
         topic={topic}
