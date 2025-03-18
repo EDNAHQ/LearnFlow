@@ -1,9 +1,9 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
-import { startBackgroundContentGeneration } from "@/utils/learning/backgroundContentGeneration";
 import { Step } from "@/components/LearningStep";
 
 export const useContentNavigation = () => {
@@ -16,7 +16,6 @@ export const useContentNavigation = () => {
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   const topRef = useRef<HTMLDivElement>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
-  const contentGenerationStarted = useRef<boolean>(false);
 
   useEffect(() => {
     if (!user) {
@@ -30,13 +29,11 @@ export const useContentNavigation = () => {
       return;
     }
 
-    // We still need to get the topic from sessionStorage initially
-    // In a more complete solution, we would fetch this from the database based on pathId
+    // Get topic from sessionStorage initially
     const storedTopic = sessionStorage.getItem("learn-topic");
     
     if (!storedTopic) {
-      // Fetch topic based on pathId from database
-      // For now, we'll keep using sessionStorage as a fallback
+      // Redirect to projects if no topic is found
       navigate("/projects");
       toast.error("Learning topic not found. Please start a new learning path.");
       return;
@@ -63,37 +60,13 @@ export const useContentNavigation = () => {
     generatedSteps: bgGenerated,
   } = useLearningSteps(pathId || null, topic);
 
-  // Start background content generation when steps are loaded
-  useEffect(() => {
-    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current) {
-      console.log(`Starting background content generation for ${steps.length} steps`);
-      setGeneratingContent(true);
-      contentGenerationStarted.current = true;
-      
-      // Map the learning step data to match the Step interface
-      const stepsForGeneration: Step[] = steps.map(step => ({
-        id: step.id,
-        title: step.title,
-        description: step.content || "" // Use content as description
-      }));
-      
-      // Start background generation for all steps
-      startBackgroundContentGeneration(stepsForGeneration, topic, pathId)
-        .catch(err => {
-          console.error("Error starting background generation:", err);
-        });
-    }
-  }, [steps, pathId, topic]);
-
   // Update generation status from useLearningSteps
   useEffect(() => {
     if (steps.length > 0) {
       setGeneratingContent(bgGenerating);
       setGeneratedSteps(bgGenerated);
       
-      console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
-      
-      // Only set initialLoading to false when content generation is complete or after a timeout
+      // Set initialLoading to false when content generation is complete
       if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
         console.log("All content generated, ending loading state");
         setInitialLoading(false);
@@ -102,7 +75,6 @@ export const useContentNavigation = () => {
   }, [bgGenerating, bgGenerated, steps.length]);
 
   // Add a timeout to eventually disable initial loading after 30 seconds
-  // This is a safety measure in case content generation takes too long
   useEffect(() => {
     if (initialLoading) {
       const timer = setTimeout(() => {
@@ -115,6 +87,15 @@ export const useContentNavigation = () => {
       return () => clearTimeout(timer);
     }
   }, [initialLoading, steps.length, bgGenerated]);
+
+  // Redirect to generation page if needed
+  useEffect(() => {
+    // Only redirect if we're on the base content path (no stepId) and content is being generated
+    if (!stepId && pathId && initialLoading && !steps.some(s => s.detailed_content)) {
+      console.log("Content needs generation, redirecting to dedicated generation page");
+      navigate(`/generate/${pathId}`);
+    }
+  }, [pathId, stepId, initialLoading, steps, navigate]);
 
   const handleMarkComplete = async () => {
     if (!steps[currentStep]) return;

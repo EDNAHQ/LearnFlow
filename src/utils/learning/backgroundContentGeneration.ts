@@ -12,51 +12,30 @@ export const startBackgroundContentGeneration = async (steps: Step[], topic: str
   
   console.log(`Starting background content generation for ${steps.length} steps`);
   
-  // We'll use Promises to track all generation tasks
-  const generationPromises = [];
-  
-  // First, check if we already have scripts for this path
+  // Generate scripts first before individual step content
   try {
-    const { data: pathData, error: pathError } = await supabase
-      .from('learning_paths')
-      .select('podcast_script, audio_script')
-      .eq('id', pathId)
-      .single();
-      
-    // If we don't have scripts yet, generate them immediately
-    if (!pathError && (!pathData?.podcast_script || !pathData?.audio_script)) {
-      console.log('Generating podcast and audio scripts for the project');
-      
-      // Generate scripts in the background
-      const generateScripts = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          // Call the edge function to generate scripts
-          supabase.functions.invoke('generate-learning-content', {
-            body: {
-              stepId: steps[0].id,
-              topic,
-              generateScripts: true,
-              silent: true
-            }
-          })
-            .then(() => {
-              console.log('Successfully generated podcast and audio scripts');
-              resolve();
-            })
-            .catch(err => {
-              console.error('Error generating scripts:', err);
-              resolve(); // Still resolve to continue with other steps
-            });
-        }, 500);
-      });
-      
-      generationPromises.push(generateScripts);
+    console.log('Generating podcast and audio scripts for the project');
+    
+    // Call the edge function to generate scripts
+    const scriptResponse = await supabase.functions.invoke('generate-learning-content', {
+      body: {
+        stepId: steps[0].id,
+        topic,
+        generateScripts: true,
+        silent: true
+      }
+    });
+    
+    if (scriptResponse.error) {
+      console.error("Error generating scripts:", scriptResponse.error);
+    } else {
+      console.log('Successfully initiated script generation');
     }
   } catch (error) {
-    console.error('Error checking for existing scripts:', error);
+    console.error('Error triggering script generation:', error);
   }
   
-  // Process steps concurrently but with a small delay between requests to avoid rate limiting
+  // Process each step sequentially to avoid overwhelming the Edge Functions
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     
@@ -77,32 +56,24 @@ export const startBackgroundContentGeneration = async (steps: Step[], topic: str
       if (!data.detailed_content) {
         console.log(`Generating content for step ${i+1}/${steps.length}: ${step.title}`);
         
-        // Add a small delay between requests to avoid rate limiting
-        const delayTime = i * 1500; // 1.5 seconds between requests
-        
-        const generateWithDelay = new Promise<void>((resolve) => {
-          setTimeout(() => {
-            // Call the function but don't await - let it run in background
-            generateStepContent(step, topic, true)
-              .then(content => {
-                console.log(`Successfully generated content for step ${step.id}`);
-                resolve();
-              })
-              .catch(err => {
-                console.error(`Background generation error for step ${step.id}:`, err);
-                resolve(); // Still resolve to continue with other steps
-              });
-          }, delayTime);
-        });
-        
-        generationPromises.push(generateWithDelay);
+        try {
+          // Wait a bit between requests to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Generate content for this step
+          await generateStepContent(step, topic, true);
+          console.log(`Successfully generated content for step ${step.id}`);
+        } catch (genError) {
+          console.error(`Error generating content for step ${step.id}:`, genError);
+        }
+      } else {
+        console.log(`Content already exists for step ${i+1}: ${step.title}`);
       }
     } catch (error) {
-      console.error(`Error in background generation for step ${step.id}:`, error);
-      // Continue with other steps even if one fails
+      console.error(`Error in content generation for step ${step.id}:`, error);
     }
   }
   
-  // Return a promise that resolves when all generation is complete
-  return Promise.all(generationPromises);
+  console.log(`Completed content generation process for all ${steps.length} steps`);
+  return true;
 };

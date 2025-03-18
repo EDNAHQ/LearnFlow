@@ -15,8 +15,7 @@ import NotFound from "./pages/NotFound";
 import ProjectsPage from "./pages/ProjectsPage";
 import WhyFreePage from "./pages/WhyFreePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import PodcastPage from "./pages/PodcastPage";
-import AudioPage from "./pages/AudioPage";
+import ContentGenerationPage from "./pages/ContentGenerationPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +34,9 @@ const App = () => (
                   <Route path="/" element={<HomePage />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
+                  
+                  {/* Content Generation Page - separate from content display */}
+                  <Route path="/generate/:pathId" element={<ProtectedRoute><ContentGenerationPage /></ProtectedRoute>} />
                   
                   {/* Content routes */}
                   <Route path="/content/:pathId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
