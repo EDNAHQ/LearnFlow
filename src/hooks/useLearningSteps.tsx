@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
 
 export interface LearningStepData {
   id: string;
@@ -20,7 +19,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
   const [generatedSteps, setGeneratedSteps] = useState<number>(0);
   
-  // Use a ref to track last update time to prevent too frequent updates
+  // Track last update time to prevent too frequent updates
   const lastUpdateTime = useRef<number>(0);
   const updateBufferTime = 1000; // 1 second buffer between updates
   
@@ -103,57 +102,22 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           filter: `path_id=eq.${pathId}`
         }, 
         (payload) => {
-          const now = Date.now();
-          if (now - lastUpdateTime.current < updateBufferTime) {
-            return; // Skip this update if too recent
-          }
+          console.log('Received realtime update for step:', payload.new.id);
           
-          console.log('Step updated:', payload.new.id);
-          
-          // Only process updates with detailed content
-          if (payload.new && payload.new.detailed_content) {
-            console.log('Received update with detailed content');
-            
-            // Update the steps state with the new data
-            setSteps(prevSteps => {
-              // Create updated steps array with the new data
-              const updatedSteps = prevSteps.map(step => 
-                step.id === payload.new.id 
-                  ? {
-                      ...step,
-                      detailed_content: payload.new.detailed_content
-                    }
-                  : step
-              );
-              
-              // Calculate new counts based on the updated steps
-              const newGeneratedCount = countGeneratedSteps(updatedSteps);
-              
-              // Update generated steps count
-              setGeneratedSteps(newGeneratedCount);
-              
-              // Update generation status
-              setGeneratingContent(newGeneratedCount < updatedSteps.length);
-              
-              console.log(`Generation progress updated: ${newGeneratedCount}/${updatedSteps.length} steps`);
-              
-              return updatedSteps;
-            });
-            
-            lastUpdateTime.current = Date.now(); // Update last update time
-          }
+          // Force a complete refresh of learning steps
+          fetchLearningSteps.current();
         }
       )
       .subscribe((status) => {
-        console.log(`Subscription status: ${status}`);
+        console.log(`Realtime subscription status: ${status}`);
         
         // If subscription failed, fall back to polling
         if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
           console.log('Subscription failed, falling back to polling');
-          // Set up polling as fallback - with reduced frequency
+          // Set up polling as fallback
           const pollInterval = setInterval(() => {
             fetchLearningSteps.current();
-          }, 10000); // Poll every 10 seconds instead of 5
+          }, 5000); // Poll every 5 seconds
           
           return () => clearInterval(pollInterval);
         }
@@ -162,6 +126,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
     console.log("Subscription to learning steps updates established");
       
     return () => {
+      console.log("Cleaning up subscription");
       channel.unsubscribe();
     };
   }, [pathId]);

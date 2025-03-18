@@ -1,6 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
 
 interface ProgressIndicatorProps {
   progress: number;
@@ -24,15 +25,12 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   };
 
   return (
-    <>
-      <div className="w-full h-2 bg-gray-200 rounded-full mb-6 overflow-hidden">
-        <motion.div 
-          className="h-full bg-gradient-to-r from-[#6D42EF] to-[#E84393]"
-          initial={{ width: '0%' }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
-        />
-      </div>
+    <div className="w-full max-w-md">
+      <Progress 
+        value={progress} 
+        className="h-2 mb-2" 
+        indicatorClassName="bg-gradient-to-r from-[#6D42EF] to-[#E84393]"
+      />
       
       <p className="text-gray-600 text-sm mt-4">
         {getProgressMessage()}
@@ -43,7 +41,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
           Generated {generatedSteps} of {totalSteps} content pieces
         </p>
       )}
-    </>
+    </div>
   );
 };
 

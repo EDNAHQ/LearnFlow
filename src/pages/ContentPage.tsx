@@ -58,6 +58,11 @@ const ContentPage = () => {
     [isLastStep, completePath, handleMarkComplete]
   );
 
+  // Log generation progress for debugging
+  useEffect(() => {
+    console.log(`Content generation progress: ${generatedSteps}/${steps.length}, generating: ${generatingContent}`);
+  }, [generatedSteps, steps.length, generatingContent]);
+
   // Handle generation complete redirect - only once and with strict conditions
   useEffect(() => {
     // Only redirect if we're not already on a step page and generation is complete
@@ -76,9 +81,17 @@ const ContentPage = () => {
   }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
 
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  // This prevents the redirect loop when already on a step page
   if ((isLoading || generatingContent) && !stepId) {
-    return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} pathId={pathId} />;
+    return (
+      <KnowledgeNuggetLoading 
+        topic={topic} 
+        goToProjects={goToProjects} 
+        generatingContent={generatingContent} 
+        generatedSteps={generatedSteps} 
+        totalSteps={steps.length} 
+        pathId={pathId} 
+      />
+    );
   }
   
   if (!topic || !pathId) {
@@ -113,7 +126,6 @@ const ContentPage = () => {
             <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
           </div>
           
-          {/* Add the title of the current step here */}
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
             {currentStepData?.title || "Loading..."}
           </h1>
