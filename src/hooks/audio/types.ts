@@ -44,6 +44,9 @@ export interface AudioActions {
   handleAudioEnd: () => void;
   handleGenerateScript: () => Promise<void>;
   handleGenerateAudio: () => Promise<void>;
+  setEditableScript: (script: string) => void;
+  setShowScriptEditor: (show: boolean) => void;
+  setShowControls: (show: boolean) => void;
 }
 
 export interface UseAudioPlayerResult extends AudioState, AudioActions {
@@ -55,3 +58,7 @@ export interface UseAudioPlayerResult extends AudioState, AudioActions {
   error: string | null;
   setScriptContent: (content: string) => void;
 }
+
+// Aliases for backward compatibility
+export type AudioPlayerState = AudioState;
+export type AudioPlayerActions = AudioActions;

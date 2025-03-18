@@ -1,9 +1,9 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { AudioPlayerState } from './types';
+import { AudioState } from './types';
 
 export const useAudioState = (scriptContent: string | null): {
-  state: AudioPlayerState;
+  state: AudioState;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   setState: {
     setIsPlaying: (isPlaying: boolean) => void;
