@@ -4,6 +4,7 @@ import { corsHeaders } from "./utils/cors.ts";
 import { generateLearningPlan } from "./handlers/plan-generator.ts";
 import { generateQuestions } from "./handlers/questions-generator.ts";
 import { generateStepContent } from "./handlers/content-generator.ts";
+import { generateScripts } from "./handlers/script-generator.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -26,12 +27,23 @@ serve(async (req) => {
       generateQuestions: shouldGenerateQuestions, 
       content, 
       silent,
-      generateScripts
+      generateScripts: shouldGenerateScripts
     } = await req.json();
 
     // If generateQuestions is true, generate related questions for the content
     if (shouldGenerateQuestions) {
       return await generateQuestions(content, topic, title, corsHeaders);
+    }
+    
+    // If generateScripts is true, we'll generate audio and podcast scripts
+    if (shouldGenerateScripts) {
+      return await generateScripts(
+        stepId,
+        topic,
+        supabaseUrl, 
+        supabaseServiceKey, 
+        corsHeaders
+      );
     }
     
     // If generatePlan is true, we'll generate a learning plan
@@ -48,7 +60,7 @@ serve(async (req) => {
         supabaseUrl, 
         supabaseServiceKey, 
         corsHeaders,
-        generateScripts
+        shouldGenerateScripts
       );
     }
   } catch (error) {

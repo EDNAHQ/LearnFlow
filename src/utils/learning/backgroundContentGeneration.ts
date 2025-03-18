@@ -24,14 +24,21 @@ export const startBackgroundContentGeneration = async (steps: Step[], topic: str
       .single();
       
     // If we don't have scripts yet, generate them immediately
-    if (!pathError && (!pathData.podcast_script || !pathData.audio_script)) {
+    if (!pathError && (!pathData?.podcast_script || !pathData?.audio_script)) {
       console.log('Generating podcast and audio scripts for the project');
       
       // Generate scripts in the background
       const generateScripts = new Promise<void>((resolve) => {
         setTimeout(() => {
-          // Generate with scripts flag to true
-          generateStepContent(steps[0], topic, true, true)
+          // Call the edge function to generate scripts
+          supabase.functions.invoke('generate-learning-content', {
+            body: {
+              stepId: steps[0].id,
+              topic,
+              generateScripts: true,
+              silent: true
+            }
+          })
             .then(() => {
               console.log('Successfully generated podcast and audio scripts');
               resolve();

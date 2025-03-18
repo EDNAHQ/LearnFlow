@@ -50,7 +50,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
           return;
         }
         
-        if (data && data.audio_script) {
+        if (data && data?.audio_script) {
           console.log('Found pre-generated audio script');
           setScriptContent(data.audio_script);
         }

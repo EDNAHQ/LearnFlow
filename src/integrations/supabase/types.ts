@@ -11,30 +11,36 @@ export type Database = {
     Tables: {
       learning_paths: {
         Row: {
+          audio_script: string | null
           created_at: string
           id: string
           is_approved: boolean | null
           is_completed: boolean | null
+          podcast_script: string | null
           title: string | null
           topic: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          audio_script?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
+          podcast_script?: string | null
           title?: string | null
           topic: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          audio_script?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_completed?: boolean | null
+          podcast_script?: string | null
           title?: string | null
           topic?: string
           updated_at?: string

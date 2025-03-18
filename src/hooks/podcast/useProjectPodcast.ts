@@ -69,7 +69,9 @@ export function useProjectPodcast(steps: any[], topic: string, initialTranscript
           if (steps[0] && steps[0].path_id) {
             await supabase
               .from('learning_paths')
-              .update({ podcast_script: data.transcript })
+              .update({ 
+                podcast_script: data.transcript 
+              })
               .eq('id', steps[0].path_id);
               
             console.log('Saved podcast script to learning path');

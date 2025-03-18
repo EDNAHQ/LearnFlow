@@ -44,7 +44,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
           return;
         }
         
-        if (data && data.podcast_script) {
+        if (data && data?.podcast_script) {
           console.log('Found pre-generated podcast script');
           setPodcastScript(data.podcast_script);
         }
