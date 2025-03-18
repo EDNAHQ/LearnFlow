@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
 import { BarLoader } from '@/components/ui/loader';
@@ -19,6 +19,9 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   content,
   title
 }) => {
+  // Create a stable component key to prevent remounting
+  const stableKey = useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
+  
   const { steps, isLoading } = useLearningSteps(pathId, topic);
 
   if (isLoading) {
@@ -48,7 +51,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
       </div>
       
       <AudioSummaryPlayer 
-        key={`audio-player-${pathId}-${stepId}`} 
+        key={stableKey}
         pathId={pathId} 
         stepId={stepId} 
         topic={topic} 
@@ -57,5 +60,9 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   );
 };
 
-// Using React.memo to prevent unnecessary re-renders
-export default memo(AudioModeDisplay);
+// Using React.memo with custom comparison to prevent unnecessary re-renders
+export default memo(AudioModeDisplay, (prevProps, nextProps) => {
+  return prevProps.pathId === nextProps.pathId && 
+         prevProps.stepId === nextProps.stepId && 
+         prevProps.topic === nextProps.topic;
+});

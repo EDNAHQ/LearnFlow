@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import PodcastCreator from './PodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
@@ -19,8 +19,11 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   const { isLoading: stepsLoading } = useLearningSteps(pathId, topic);
   const isMobile = useIsMobile();
   
+  // Create stable key for the component
+  const stableKey = useMemo(() => `podcast-creator-content-${pathId}`, [pathId]);
+  
   // Prepare content only once to avoid re-renders
-  const combinedContent = React.useMemo(() => {
+  const combinedContent = useMemo(() => {
     return steps.map(step => step.title + ": " + (step.detailed_content || step.content || '')).join("\n\n");
   }, [steps]);
   
@@ -55,7 +58,7 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
       
       <div className="bg-[#1A1A1A] text-white rounded-xl p-6 shadow-lg min-h-[calc(100vh-20rem)]">
         <PodcastCreator
-          key={`podcast-creator-content-${pathId}`}
+          key={stableKey}
           topic={topic}
           pathId={pathId}
           initialTranscript=""
@@ -67,5 +70,18 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   );
 };
 
-// Using memo to prevent unnecessary re-renders
-export default memo(ProjectPodcastCreator);
+// Using React.memo with custom comparison to prevent unnecessary re-renders
+export default memo(ProjectPodcastCreator, (prevProps, nextProps) => {
+  if (prevProps.pathId !== nextProps.pathId || prevProps.topic !== nextProps.topic) {
+    return false;
+  }
+  
+  // Deep comparison of steps if pathId and topic are the same
+  if (prevProps.steps?.length !== nextProps.steps?.length) {
+    return false;
+  }
+  
+  // For optimization, we'll just check if the steps array is the same reference
+  // A more thorough check would compare each step's id
+  return prevProps.steps === nextProps.steps;
+});

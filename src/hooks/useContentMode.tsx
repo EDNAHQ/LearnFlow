@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 
 export type ContentMode = "text" | "slides" | "podcast" | "audio";
 
@@ -12,9 +12,15 @@ const ContentModeContext = createContext<ContentModeContextType | undefined>(und
 
 export const ContentModeProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<ContentMode>("text");
+  
+  // Use useMemo to prevent unnecessary context value recreations
+  const contextValue = useMemo(() => ({
+    mode,
+    setMode
+  }), [mode]);
 
   return (
-    <ContentModeContext.Provider value={{ mode, setMode }}>
+    <ContentModeContext.Provider value={contextValue}>
       {children}
     </ContentModeContext.Provider>
   );

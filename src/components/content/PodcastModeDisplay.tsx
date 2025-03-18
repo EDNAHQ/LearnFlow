@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import ProjectPodcastCreator from '../podcast/ProjectPodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
@@ -13,6 +13,9 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   pathId,
   topic
 }) => {
+  // Use a stable key to prevent re-renders
+  const stableKey = useMemo(() => `podcast-creator-${pathId}`, [pathId]);
+  
   const { steps, isLoading } = useLearningSteps(pathId, topic);
 
   if (isLoading) {
@@ -35,7 +38,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   return (
     <div className="w-full min-h-[calc(100vh-12rem)]">
       <ProjectPodcastCreator
-        key={`podcast-creator-${pathId}`}
+        key={stableKey}
         pathId={pathId}
         topic={topic}
         steps={steps}
@@ -44,5 +47,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   );
 };
 
-// Using React.memo to prevent unnecessary re-renders
-export default memo(PodcastModeDisplay);
+// Using React.memo to prevent unnecessary re-renders with a custom equality check
+export default memo(PodcastModeDisplay, (prevProps, nextProps) => {
+  return prevProps.pathId === nextProps.pathId && prevProps.topic === nextProps.topic;
+});

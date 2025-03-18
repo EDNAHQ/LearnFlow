@@ -1,5 +1,5 @@
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import { BarLoader } from '@/components/ui/loader';
 import AudioControls from './AudioControls';
@@ -20,6 +20,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   topic 
 }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
+  
+  // Create a stable component ID
+  const stableId = useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
+  
   const {
     audioRef,
     isPlaying,
@@ -43,9 +47,6 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     handleRetry,
     handleAudioEnd
   } = useAudioPlayer(steps, topic);
-
-  // Stable component ID to prevent flickering
-  const stableId = React.useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
 
   if (isLoading) {
     return (
@@ -106,5 +107,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   );
 };
 
-// Using memo to prevent unnecessary re-renders
-export default memo(AudioSummaryPlayer);
+// Using memo with custom comparison to prevent unnecessary re-renders
+export default memo(AudioSummaryPlayer, (prevProps, nextProps) => {
+  return prevProps.pathId === nextProps.pathId && 
+         prevProps.stepId === nextProps.stepId && 
+         prevProps.topic === nextProps.topic;
+});

@@ -40,7 +40,10 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   const { mode } = useContentMode();
   const [currentStep, setCurrentStep] = useState<LearningStep | undefined>(undefined);
   
-  // Memoize the current step index to prevent unnecessary rerenders
+  // Create a stable key that uniquely identifies this display mode and content
+  const displayKey = useMemo(() => `${mode}-${pathId}-${stepId || index}-${Date.now()}`, [mode, pathId, stepId, index]);
+  
+  // Find the current step index only once when steps change
   const currentStepIndex = useMemo(() => {
     if (steps && steps.length > 0 && stepId) {
       const index = steps.findIndex(step => step.id === stepId);
@@ -56,13 +59,11 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   }, [steps, currentStepIndex]);
 
-  // Create a stable key for each display mode to prevent flickering
-  const displayKey = useMemo(() => `${mode}-${pathId}-${stepId || index}`, [mode, pathId, stepId, index]);
-
-  // Special case for podcast mode
+  // Special case for podcast mode - use a stable key to prevent remounting
   if (mode === "podcast") {
+    const podcastKey = useMemo(() => `podcast-${pathId}-${Date.now()}`, [pathId]);
     return (
-      <div className="w-full" key={`podcast-${pathId}`}>
+      <div className="w-full" key={podcastKey}>
         <PodcastModeDisplay
           pathId={pathId}
           topic={topic}
@@ -71,14 +72,15 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     );
   }
 
-  // Special case for audio mode
+  // Special case for audio mode - use a stable key to prevent remounting
   if (mode === "audio") {
     const displayStepId = stepId || currentStep?.id || '';
     const safePathId = pathId || '';
     const safeTopic = topic || '';
+    const audioKey = useMemo(() => `audio-${safePathId}-${displayStepId}-${Date.now()}`, [safePathId, displayStepId]);
     
     return (
-      <div className="w-full" key={`audio-${pathId}`}>
+      <div className="w-full" key={audioKey}>
         <AudioModeDisplay
           pathId={safePathId}
           stepId={displayStepId}
@@ -130,4 +132,11 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   );
 };
 
-export default React.memo(ContentDisplay);
+// Using React.memo to prevent unnecessary re-renders
+export default React.memo(ContentDisplay, (prevProps, nextProps) => {
+  // Only re-render if important props change
+  return prevProps.pathId === nextProps.pathId && 
+         prevProps.stepId === nextProps.stepId && 
+         prevProps.content === nextProps.content &&
+         prevProps.detailedContent === nextProps.detailedContent;
+});

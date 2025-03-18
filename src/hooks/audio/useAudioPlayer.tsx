@@ -4,6 +4,7 @@ import { useAudioState } from './useAudioState';
 import { useAudioEffects } from './useAudioEffects';
 import { useAudioActions } from './useAudioActions';
 import { UseAudioPlayerResult } from './types';
+import { useMemo } from 'react';
 
 export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResult => {
   const { 
@@ -45,7 +46,8 @@ export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResul
     topic
   });
 
-  return {
+  // Memoize the result to prevent unnecessary re-renders
+  const result = useMemo(() => ({
     audioRef,
     ...state,
     isGenerating,
@@ -54,5 +56,16 @@ export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResul
     scriptContent,
     error,
     ...actions
-  };
+  }), [
+    audioRef, 
+    state, 
+    isGenerating, 
+    isGeneratingScript, 
+    audioUrl, 
+    scriptContent, 
+    error, 
+    actions
+  ]);
+
+  return result;
 };
