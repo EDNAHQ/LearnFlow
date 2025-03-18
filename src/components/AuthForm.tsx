@@ -60,14 +60,13 @@ export function AuthForm() {
       setGoogleLoading(true);
       setError(null);
       
-      // Get the current URL's origin (protocol + hostname + port)
-      const redirectUrl = `${window.location.origin}/auth`;
-      console.log("Redirecting to:", redirectUrl); // For debugging
-      
+      // For Google auth with Supabase, we should NOT set a redirectTo
+      // Let Supabase handle the redirect with its default configuration
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl
+          // Important: Removed the redirectTo option to use Supabase's default callback
+          // which is exactly what Google expects: https://[PROJECT_ID].supabase.co/auth/v1/callback
         }
       });
       
