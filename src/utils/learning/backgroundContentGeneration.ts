@@ -15,6 +15,40 @@ export const startBackgroundContentGeneration = async (steps: Step[], topic: str
   // We'll use Promises to track all generation tasks
   const generationPromises = [];
   
+  // First, check if we already have scripts for this path
+  try {
+    const { data: pathData, error: pathError } = await supabase
+      .from('learning_paths')
+      .select('podcast_script, audio_script')
+      .eq('id', pathId)
+      .single();
+      
+    // If we don't have scripts yet, generate them immediately
+    if (!pathError && (!pathData.podcast_script || !pathData.audio_script)) {
+      console.log('Generating podcast and audio scripts for the project');
+      
+      // Generate scripts in the background
+      const generateScripts = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          // Generate with scripts flag to true
+          generateStepContent(steps[0], topic, true, true)
+            .then(() => {
+              console.log('Successfully generated podcast and audio scripts');
+              resolve();
+            })
+            .catch(err => {
+              console.error('Error generating scripts:', err);
+              resolve(); // Still resolve to continue with other steps
+            });
+        }, 500);
+      });
+      
+      generationPromises.push(generateScripts);
+    }
+  } catch (error) {
+    console.error('Error checking for existing scripts:', error);
+  }
+  
   // Process steps concurrently but with a small delay between requests to avoid rate limiting
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];

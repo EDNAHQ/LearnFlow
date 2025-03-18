@@ -12,12 +12,14 @@ interface AudioSummaryPlayerProps {
   pathId: string;
   stepId?: string;
   topic: string;
+  initialScript?: string | null;
 }
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ 
   pathId, 
   stepId,
-  topic 
+  topic,
+  initialScript = null
 }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
   
@@ -40,13 +42,22 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     setEditableScript,
     setShowScriptEditor,
     setShowControls,
+    setScriptContent,
     handleGenerateScript,
     handleGenerateAudio,
     handleTogglePlay,
     handleMuteToggle,
     handleRetry,
     handleAudioEnd
-  } = useAudioPlayer(steps, topic);
+  } = useAudioPlayer(steps, topic, initialScript);
+
+  // Set the initial script if provided and no script content yet
+  useEffect(() => {
+    if (initialScript && !scriptContent) {
+      setScriptContent(initialScript);
+      setEditableScript(initialScript);
+    }
+  }, [initialScript, scriptContent, setScriptContent, setEditableScript]);
 
   if (isLoading) {
     return (

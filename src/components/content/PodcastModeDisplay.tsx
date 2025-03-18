@@ -1,8 +1,9 @@
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import ProjectPodcastCreator from '../podcast/ProjectPodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PodcastModeDisplayProps {
   pathId?: string;
@@ -21,8 +22,43 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   
   // Use a callback for memoization
   const { steps, isLoading } = useLearningSteps(pathId || null, topic || null);
+  const [podcastScript, setPodcastScript] = useState<string | null>(null);
+  const [loadingScript, setLoadingScript] = useState<boolean>(false);
+  
+  // Fetch pre-generated script on component mount
+  useEffect(() => {
+    const fetchSavedScript = async () => {
+      if (!pathId) return;
+      
+      setLoadingScript(true);
+      try {
+        // Check if we already have a generated script for this path
+        const { data, error } = await supabase
+          .from('learning_paths')
+          .select('podcast_script')
+          .eq('id', pathId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching saved podcast script:', error);
+          return;
+        }
+        
+        if (data && data.podcast_script) {
+          console.log('Found pre-generated podcast script');
+          setPodcastScript(data.podcast_script);
+        }
+      } catch (err) {
+        console.error('Error in podcast script fetching:', err);
+      } finally {
+        setLoadingScript(false);
+      }
+    };
+    
+    fetchSavedScript();
+  }, [pathId]);
 
-  if (isLoading) {
+  if (isLoading || loadingScript) {
     return (
       <div className="flex flex-col items-center justify-center py-8 w-full max-w-[860px] mx-auto">
         <BarLoader className="mx-auto mb-4" />
@@ -46,6 +82,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
         pathId={pathId}
         topic={topic}
         steps={steps}
+        initialTranscript={podcastScript}
       />
     </div>
   );

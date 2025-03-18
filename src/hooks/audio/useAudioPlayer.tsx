@@ -4,9 +4,9 @@ import { useAudioState } from './useAudioState';
 import { useAudioEffects } from './useAudioEffects';
 import { useAudioActions } from './useAudioActions';
 import { UseAudioPlayerResult } from './types';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
-export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResult => {
+export const useAudioPlayer = (steps: any[], topic: string, initialScript: string | null = null): UseAudioPlayerResult => {
   const { 
     isGenerating, 
     isGeneratingScript,
@@ -15,10 +15,19 @@ export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResul
     error, 
     generateSpeech, 
     generateScript,
-    cleanup 
+    cleanup,
+    setScriptContent 
   } = useTextToSpeech();
   
-  const { state, audioRef, setState } = useAudioState(scriptContent);
+  const { state, audioRef, setState } = useAudioState(scriptContent || initialScript);
+  
+  // Set initial script if provided
+  useEffect(() => {
+    if (initialScript && !scriptContent) {
+      setScriptContent(initialScript);
+      setState.setEditableScript(initialScript);
+    }
+  }, [initialScript, scriptContent, setScriptContent, setState.setEditableScript]);
   
   useAudioEffects(
     audioRef, 
@@ -55,7 +64,8 @@ export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResul
     audioUrl,
     scriptContent,
     error,
-    ...actions
+    ...actions,
+    setScriptContent
   }), [
     audioRef, 
     state, 
@@ -64,7 +74,8 @@ export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResul
     audioUrl, 
     scriptContent, 
     error, 
-    actions
+    actions,
+    setScriptContent
   ]);
 
   return result;

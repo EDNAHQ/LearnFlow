@@ -25,7 +25,8 @@ serve(async (req) => {
       generatePlan, 
       generateQuestions: shouldGenerateQuestions, 
       content, 
-      silent 
+      silent,
+      generateScripts
     } = await req.json();
 
     // If generateQuestions is true, generate related questions for the content
@@ -46,7 +47,8 @@ serve(async (req) => {
         totalSteps, 
         supabaseUrl, 
         supabaseServiceKey, 
-        corsHeaders
+        corsHeaders,
+        generateScripts
       );
     }
   } catch (error) {

@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePodcastStatusCheck } from './usePodcastStatusCheck';
 import { createPodcast, downloadPodcastFile } from '@/utils/podcast/podcastApiUtils';
 
-export function useProjectPodcast(steps: any[], topic: string) {
-  const [transcript, setTranscript] = useState<string>('');
+export function useProjectPodcast(steps: any[], topic: string, initialTranscript: string | null = null) {
+  const [transcript, setTranscript] = useState<string>(initialTranscript || '');
   const [isGeneratingTranscript, setIsGeneratingTranscript] = useState<boolean>(false);
   const [charCount, setCharCount] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +22,13 @@ export function useProjectPodcast(steps: any[], topic: string) {
   useEffect(() => {
     setCharCount(transcript.length);
   }, [transcript]);
+
+  // If we have an initial transcript, use it
+  useEffect(() => {
+    if (initialTranscript && !transcript) {
+      setTranscript(initialTranscript);
+    }
+  }, [initialTranscript, transcript]);
 
   // Generate a transcript from all steps in the project
   const generateProjectTranscript = async () => {
@@ -56,6 +63,20 @@ export function useProjectPodcast(steps: any[], topic: string) {
       if (data?.transcript) {
         console.log("Project transcript generated successfully");
         setTranscript(data.transcript);
+        
+        // Save the generated transcript to the learning path
+        try {
+          if (steps[0] && steps[0].path_id) {
+            await supabase
+              .from('learning_paths')
+              .update({ podcast_script: data.transcript })
+              .eq('id', steps[0].path_id);
+              
+            console.log('Saved podcast script to learning path');
+          }
+        } catch (saveError) {
+          console.error('Error saving podcast script:', saveError);
+        }
       } else {
         throw new Error('No transcript returned from the API');
       }

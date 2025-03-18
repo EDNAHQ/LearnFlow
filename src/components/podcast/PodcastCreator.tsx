@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Headphones } from 'lucide-react';
@@ -42,6 +42,13 @@ const PodcastCreator = ({
     title,
     topic
   });
+
+  // Set initial transcript if provided
+  useEffect(() => {
+    if (initialTranscript && !transcript) {
+      setTranscript(initialTranscript);
+    }
+  }, [initialTranscript, transcript, setTranscript]);
 
   return (
     <Card className="bg-white shadow-lg">

@@ -1,8 +1,9 @@
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
 import { BarLoader } from '@/components/ui/loader';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AudioModeDisplayProps {
   pathId: string;
@@ -27,8 +28,43 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   
   // Use callbacks for memoization
   const { steps, isLoading } = useLearningSteps(pathId || null, topic || null);
+  const [scriptContent, setScriptContent] = useState<string | null>(null);
+  const [loadingScript, setLoadingScript] = useState<boolean>(false);
+  
+  // Fetch pre-generated script on component mount
+  useEffect(() => {
+    const fetchSavedScript = async () => {
+      if (!pathId) return;
+      
+      setLoadingScript(true);
+      try {
+        // Check if we already have a generated script for this path
+        const { data, error } = await supabase
+          .from('learning_paths')
+          .select('audio_script')
+          .eq('id', pathId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching saved script:', error);
+          return;
+        }
+        
+        if (data && data.audio_script) {
+          console.log('Found pre-generated audio script');
+          setScriptContent(data.audio_script);
+        }
+      } catch (err) {
+        console.error('Error in script fetching:', err);
+      } finally {
+        setLoadingScript(false);
+      }
+    };
+    
+    fetchSavedScript();
+  }, [pathId]);
 
-  if (isLoading) {
+  if (isLoading || loadingScript) {
     return (
       <div className="flex flex-col items-center justify-center py-8 w-full max-w-[860px] mx-auto">
         <BarLoader className="mx-auto mb-4" />
@@ -58,7 +94,8 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
         key={stableKey}
         pathId={pathId} 
         stepId={stepId} 
-        topic={topic} 
+        topic={topic}
+        initialScript={scriptContent}
       />
     </div>
   );

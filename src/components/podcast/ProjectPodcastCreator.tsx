@@ -1,5 +1,5 @@
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import PodcastCreator from './PodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
@@ -9,12 +9,14 @@ interface ProjectPodcastCreatorProps {
   pathId: string;
   topic: string;
   steps?: any[];
+  initialTranscript?: string | null;
 }
 
 const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   pathId,
   topic,
-  steps = []
+  steps = [],
+  initialTranscript = null
 }) => {
   const { isLoading: stepsLoading } = useLearningSteps(pathId, topic);
   const isMobile = useIsMobile();
@@ -61,7 +63,7 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
           key={stableKey}
           topic={topic}
           pathId={pathId}
-          initialTranscript=""
+          initialTranscript={initialTranscript || ""}
           content={combinedContent}
           title={`Complete ${topic} Learning Project`}
         />

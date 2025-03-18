@@ -1,8 +1,9 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/LearningStep";
 
 // Generate detailed content for a learning step using the edge function
-export const generateStepContent = async (step: Step, topic: string, silent = false): Promise<string> => {
+export const generateStepContent = async (step: Step, topic: string, silent = false, generateScriptsOnly = false): Promise<string> => {
   if (!step || !step.id || !topic) {
     console.error("Missing required parameters for content generation:", { step, topic });
     throw new Error("Missing required parameters for content generation");
@@ -21,14 +22,14 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
       throw new Error("Failed to fetch step data");
     }
     
-    // If detailed content already exists, return it
-    if (stepData.detailed_content) {
+    // If detailed content already exists and we're not just generating scripts, return it
+    if (stepData.detailed_content && !generateScriptsOnly) {
       return stepData.detailed_content;
     }
     
     // Otherwise, call the edge function to generate content
     try {
-      console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
+      console.log(`Generating ${generateScriptsOnly ? 'scripts' : 'detailed content'} for step: ${step.title} (ID: ${step.id})`);
       
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
@@ -37,7 +38,8 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           title: step.title,
           stepNumber: stepData.order_index + 1,
           totalSteps: 10,
-          silent // Pass the silent parameter to suppress notifications
+          silent, // Pass the silent parameter to suppress notifications
+          generateScripts: true // Always generate scripts regardless
         }
       });
       
