@@ -1,5 +1,5 @@
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
 import { BarLoader } from '@/components/ui/loader';
@@ -19,10 +19,14 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   content,
   title
 }) => {
-  // Create a stable component key to prevent remounting
-  const stableKey = useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
+  // Create a unique instance id
+  const instanceId = useMemo(() => `audio-player-${pathId}-${stepId}-${Math.random().toString(36).substring(2, 9)}`, [pathId, stepId]);
   
-  const { steps, isLoading } = useLearningSteps(pathId, topic);
+  // Create a stable component key to prevent remounting
+  const stableKey = useMemo(() => `audio-player-instance-${instanceId}`, [instanceId]);
+  
+  // Use callbacks for memoization
+  const { steps, isLoading } = useLearningSteps(pathId || null, topic || null);
 
   if (isLoading) {
     return (

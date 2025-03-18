@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -36,21 +36,41 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   title,
   stepId
 }) => {
-  const { steps, isLoading } = useLearningSteps(pathId, topic);
+  const routeParams = useParams();
+  const resolvedPathId = pathId || routeParams.pathId || '';
+  const resolvedStepId = stepId || routeParams.stepId || '';
+  
+  // Only fetch steps if we're not in podcast or audio mode to prevent double fetching
   const { mode } = useContentMode();
+  const skipFetching = mode === "podcast" || mode === "audio";
+  
+  const { steps, isLoading } = useLearningSteps(
+    skipFetching ? null : resolvedPathId,
+    skipFetching ? null : topic
+  );
+  
   const [currentStep, setCurrentStep] = useState<LearningStep | undefined>(undefined);
   
-  // Create a stable key that uniquely identifies this display mode and content
-  const displayKey = useMemo(() => `${mode}-${pathId}-${stepId || index}-${Date.now()}`, [mode, pathId, stepId, index]);
+  // Create a stable unique identifier that won't change on re-renders
+  const instanceId = useMemo(() => 
+    `content-display-${resolvedPathId}-${resolvedStepId}-${Math.random().toString(36).slice(2, 9)}`, 
+    [resolvedPathId, resolvedStepId]
+  );
+  
+  // Create a stable key that uniquely identifies this display instance
+  const displayKey = useMemo(() => 
+    `${instanceId}-${mode}`, 
+    [instanceId, mode]
+  );
   
   // Find the current step index only once when steps change
   const currentStepIndex = useMemo(() => {
-    if (steps && steps.length > 0 && stepId) {
-      const index = steps.findIndex(step => step.id === stepId);
+    if (steps && steps.length > 0 && resolvedStepId) {
+      const index = steps.findIndex(step => step.id === resolvedStepId);
       return index !== -1 ? index : 0;
     }
     return 0;
-  }, [steps, stepId]);
+  }, [steps, resolvedStepId]);
   
   // Set the current step based on the index
   useEffect(() => {
@@ -59,25 +79,24 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   }, [steps, currentStepIndex]);
 
-  // Special case for podcast mode - use a stable key to prevent remounting
-  if (mode === "podcast") {
-    const podcastKey = useMemo(() => `podcast-${pathId}-${Date.now()}`, [pathId]);
+  // Memoized render functions to prevent unnecessary re-renders
+  const renderPodcastMode = useCallback(() => {
+    const podcastKey = `podcast-${resolvedPathId}-${instanceId}`;
     return (
       <div className="w-full" key={podcastKey}>
         <PodcastModeDisplay
-          pathId={pathId}
+          pathId={resolvedPathId}
           topic={topic}
         />
       </div>
     );
-  }
+  }, [resolvedPathId, topic, instanceId]);
 
-  // Special case for audio mode - use a stable key to prevent remounting
-  if (mode === "audio") {
-    const displayStepId = stepId || currentStep?.id || '';
-    const safePathId = pathId || '';
+  const renderAudioMode = useCallback(() => {
+    const displayStepId = resolvedStepId || currentStep?.id || '';
+    const safePathId = resolvedPathId;
     const safeTopic = topic || '';
-    const audioKey = useMemo(() => `audio-${safePathId}-${displayStepId}-${Date.now()}`, [safePathId, displayStepId]);
+    const audioKey = `audio-${safePathId}-${displayStepId}-${instanceId}`;
     
     return (
       <div className="w-full" key={audioKey}>
@@ -90,43 +109,61 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
         />
       </div>
     );
+  }, [resolvedPathId, resolvedStepId, currentStep, topic, detailedContent, content, title, instanceId]);
+
+  const renderContent = useCallback(() => {
+    if (isLoading && mode !== "podcast" && mode !== "audio") {
+      return <div className="w-full">Loading content...</div>;
+    }
+
+    if (!currentStep && !content && mode !== "podcast" && mode !== "audio") {
+      return <div className="w-full">No content available.</div>;
+    }
+
+    const displayContent = content || currentStep?.content || '';
+    const displayTitle = title || currentStep?.title || '';
+
+    if (mode === "text") {
+      return (
+        <TextModeDisplay
+          content={detailedContent || displayContent}
+          title={displayTitle}
+          index={index}
+          detailedContent={detailedContent}
+          pathId={resolvedPathId}
+          topic={topic}
+        />
+      );
+    }
+    
+    if (mode === "slides") {
+      return (
+        <SlideModeDisplay
+          content={detailedContent || displayContent}
+          title={displayTitle}
+          detailedContent={detailedContent}
+          pathId={resolvedPathId}
+          topic={topic}
+        />
+      );
+    }
+
+    return null;
+  }, [mode, isLoading, currentStep, content, detailedContent, title, index, resolvedPathId, topic]);
+
+  // Main render based on mode
+  if (mode === "podcast") {
+    return renderPodcastMode();
   }
 
-  if (isLoading) {
-    return <div className="w-full">Loading content...</div>;
+  if (mode === "audio") {
+    return renderAudioMode();
   }
-
-  if (!currentStep && !content) {
-    return <div className="w-full">No content available.</div>;
-  }
-
-  const displayContent = content || currentStep?.content || '';
-  const displayTitle = title || currentStep?.title || '';
-  const displayStepId = stepId || currentStep?.id || '';
 
   return (
     <div className="w-full" key={displayKey}>
       <div className="pb-8">
-        {mode === "text" && (
-          <TextModeDisplay
-            content={detailedContent || displayContent}
-            title={displayTitle}
-            index={index}
-            detailedContent={detailedContent}
-            pathId={pathId}
-            topic={topic}
-          />
-        )}
-        
-        {mode === "slides" && (
-          <SlideModeDisplay
-            content={detailedContent || displayContent}
-            title={displayTitle}
-            detailedContent={detailedContent}
-            pathId={pathId}
-            topic={topic}
-          />
-        )}
+        {renderContent()}
       </div>
     </div>
   );
