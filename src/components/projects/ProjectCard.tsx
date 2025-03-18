@@ -6,21 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Trash2, BookOpen, Headphones, Music } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { LearningProject } from "@/hooks/useProjects";
+import { ProjectCardProps } from "./types";
 
-interface ProjectCardProps {
-  project: {
-    id: string;
-    title: string;
-    description: string;
-    created_at: string;
-    updated_at: string;
-    is_completed: boolean;
-    completion_date?: string;
-  };
-  onDeleteClick: (id: string) => void;
-}
-
-export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
+export function ProjectCard({ project, onDeleteProject, isDeleting }: ProjectCardProps) {
   const navigate = useNavigate();
   const linkBaseStyles = "flex items-center text-sm font-medium";
   
@@ -56,7 +45,7 @@ export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
     <Card className="w-full transition-all duration-300 hover:shadow-md">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
+          <CardTitle className="text-xl font-bold">{project.topic}</CardTitle>
           {project.is_completed && (
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               Completed
@@ -68,7 +57,12 @@ export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-2">
-        <p className="text-sm text-gray-700 line-clamp-2">{project.description}</p>
+        <p className="text-sm text-gray-700 line-clamp-2">
+          {project.progress !== undefined ? 
+            `Progress: ${project.progress}%` : 
+            "Start your learning journey"
+          }
+        </p>
       </CardContent>
       <CardFooter className="flex justify-between pt-2">
         <div className="flex space-x-4">
@@ -99,9 +93,10 @@ export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
           size="icon"
           onClick={(e) => {
             e.stopPropagation();
-            onDeleteClick(project.id);
+            onDeleteProject(project.id);
           }}
           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+          disabled={isDeleting}
         >
           <Trash2 className="h-4 w-4" />
           <span className="sr-only">Delete</span>
