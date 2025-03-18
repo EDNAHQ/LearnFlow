@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -49,8 +50,10 @@ const ContentPage = () => {
 
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
-    setMode("text");
-  }, [setMode]);
+    if (mode !== "podcast") {
+      setMode("text");
+    }
+  }, [setMode, mode]);
 
   // Memoize the navigation handler to prevent unnecessary rerenders
   const handleComplete = useCallback(
@@ -58,13 +61,11 @@ const ContentPage = () => {
     [isLastStep, completePath, handleMarkComplete]
   );
 
-  // Log generation progress for debugging
-  useEffect(() => {
-    console.log(`Content generation progress: ${generatedSteps}/${steps.length}, generating: ${generatingContent}`);
-  }, [generatedSteps, steps.length, generatingContent]);
-
   // Handle generation complete redirect - only once and with strict conditions
   useEffect(() => {
+    // Skip redirect if in podcast mode
+    if (mode === "podcast") return;
+    
     // Only redirect if we're not already on a step page and generation is complete
     if (!hasRedirected && 
         !isLoading && 
@@ -78,10 +79,11 @@ const ContentPage = () => {
       setHasRedirected(true);
       navigate(`/content/${pathId}/step/0`);
     }
-  }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
+  }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading, mode]);
 
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  if ((isLoading || generatingContent) && !stepId) {
+  // Don't show loading for podcast mode
+  if ((isLoading || generatingContent) && !stepId && mode !== "podcast") {
     return (
       <KnowledgeNuggetLoading 
         topic={topic} 
@@ -108,6 +110,11 @@ const ContentPage = () => {
   // Skip step navigation for podcast mode - it works with the entire project
   const showStepNavigation = mode !== "podcast";
   
+  // Use full width layout for podcast mode
+  const contentWidthClass = mode === "podcast" 
+    ? "max-w-full px-0" 
+    : "max-w-[860px] px-4";
+  
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
@@ -118,7 +125,7 @@ const ContentPage = () => {
         totalSteps={steps.length} 
       />
 
-      <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
+      <div className={`container ${contentWidthClass} mx-auto my-0 py-[30px]`}>
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 

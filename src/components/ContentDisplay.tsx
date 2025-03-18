@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -84,8 +85,20 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   };
 
-  if (isLoading) {
+  if (isLoading && mode !== "podcast") {
     return <div>Loading content...</div>;
+  }
+
+  // Special case for podcast mode - render it even if steps are loading
+  if (mode === "podcast") {
+    return (
+      <div className="w-full px-4">
+        <PodcastModeDisplay
+          pathId={pathId}
+          topic={topic}
+        />
+      </div>
+    );
   }
 
   if (!currentStep && !content) {
@@ -122,13 +135,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
           />
         )}
         
-        {mode === "podcast" && (
-          <PodcastModeDisplay
-            pathId={safePathId}
-            topic={safeTopic}
-          />
-        )}
-
         {mode === "audio" && (
           <AudioModeDisplay
             pathId={safePathId}
