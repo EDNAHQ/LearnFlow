@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { AudioState } from './types';
 
 export const useAudioState = (scriptContent: string | null): {
@@ -22,12 +22,23 @@ export const useAudioState = (scriptContent: string | null): {
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize script when content changes
+  // Initialize script when content changes - with a stable check to avoid loops
   useEffect(() => {
     if (scriptContent && !editableScript) {
+      console.log("Setting editable script from content");
       setEditableScript(scriptContent);
     }
-  }, [scriptContent, editableScript]);
+  }, [scriptContent]);  // Deliberately removed editableScript from deps to avoid loops
+
+  // Create stable setState object with memoized setters
+  const setters = useMemo(() => ({
+    setIsPlaying,
+    setIsMuted,
+    setShowControls,
+    setShowScriptEditor,
+    setEditableScript,
+    setIsAudioLoaded
+  }), []);
 
   return {
     state: {
@@ -39,13 +50,6 @@ export const useAudioState = (scriptContent: string | null): {
       isAudioLoaded
     },
     audioRef,
-    setState: {
-      setIsPlaying,
-      setIsMuted,
-      setShowControls,
-      setShowScriptEditor,
-      setEditableScript,
-      setIsAudioLoaded
-    }
+    setState: setters
   };
 };

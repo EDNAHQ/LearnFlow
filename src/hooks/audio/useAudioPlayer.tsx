@@ -4,7 +4,7 @@ import { useAudioState } from './useAudioState';
 import { useAudioEffects } from './useAudioEffects';
 import { useAudioActions } from './useAudioActions';
 import { UseAudioPlayerResult } from './types';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 
 export const useAudioPlayer = (steps: any[], topic: string, initialScript: string | null = null): UseAudioPlayerResult => {
   const { 
@@ -19,15 +19,22 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     setScriptContent 
   } = useTextToSpeech();
   
-  const { state, audioRef, setState } = useAudioState(scriptContent || initialScript);
+  const { state, audioRef, setState } = useAudioState(initialScript || scriptContent);
   
-  // Set initial script if provided
+  // Memoize setScriptContent to avoid creating a new function on each render
+  const handleSetScriptContent = useCallback((content: string) => {
+    if (content) {
+      setScriptContent(content);
+      setState.setEditableScript(content);
+    }
+  }, [setScriptContent, setState.setEditableScript]);
+  
+  // Set initial script if provided - in a controlled way
   useEffect(() => {
     if (initialScript && !scriptContent) {
-      setScriptContent(initialScript);
-      setState.setEditableScript(initialScript);
+      handleSetScriptContent(initialScript);
     }
-  }, [initialScript, scriptContent, setScriptContent, setState.setEditableScript]);
+  }, [initialScript, scriptContent, handleSetScriptContent]);
   
   useAudioEffects(
     audioRef, 
@@ -56,7 +63,7 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
   });
 
   // Memoize the result to prevent unnecessary re-renders
-  const result = useMemo(() => ({
+  return useMemo(() => ({
     audioRef,
     ...state,
     isGenerating,
@@ -65,7 +72,7 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     scriptContent,
     error,
     ...actions,
-    setScriptContent
+    setScriptContent: handleSetScriptContent
   }), [
     audioRef, 
     state, 
@@ -75,8 +82,6 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     scriptContent, 
     error, 
     actions,
-    setScriptContent
+    handleSetScriptContent
   ]);
-
-  return result;
 };

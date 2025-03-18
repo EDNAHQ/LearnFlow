@@ -1,5 +1,5 @@
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
 import { BarLoader } from '@/components/ui/loader';
@@ -20,13 +20,6 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   content,
   title
 }) => {
-  // Create a unique instance id
-  const instanceId = useMemo(() => `audio-player-${pathId}-${stepId}-${Math.random().toString(36).substring(2, 9)}`, [pathId, stepId]);
-  
-  // Create a stable component key to prevent remounting
-  const stableKey = useMemo(() => `audio-player-instance-${instanceId}`, [instanceId]);
-  
-  // Use callbacks for memoization
   const { steps, isLoading } = useLearningSteps(pathId || null, topic || null);
   const [scriptContent, setScriptContent] = useState<string | null>(null);
   const [loadingScript, setLoadingScript] = useState<boolean>(false);
@@ -51,7 +44,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
         }
         
         if (data && data?.audio_script) {
-          console.log('Found pre-generated audio script');
+          console.log('Found pre-generated audio script:', data.audio_script.substring(0, 50) + '...');
           setScriptContent(data.audio_script);
         }
       } catch (err) {
@@ -91,7 +84,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
       </div>
       
       <AudioSummaryPlayer 
-        key={stableKey}
+        key={`audio-player-${pathId}-${stepId}`}
         pathId={pathId} 
         stepId={stepId} 
         topic={topic}
@@ -101,9 +94,4 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
   );
 };
 
-// Using React.memo with custom comparison to prevent unnecessary re-renders
-export default memo(AudioModeDisplay, (prevProps, nextProps) => {
-  return prevProps.pathId === nextProps.pathId && 
-         prevProps.stepId === nextProps.stepId && 
-         prevProps.topic === nextProps.topic;
-});
+export default memo(AudioModeDisplay);

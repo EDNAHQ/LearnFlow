@@ -38,8 +38,12 @@ export const useAudioEffects = (
     };
   }, [audioRef, setIsPlaying]);
 
-  // Handle cleanup on unmount
+  // Handle cleanup on unmount - this was causing the infinite loop
   useEffect(() => {
-    return () => cleanup();
-  }, [cleanup]);
+    return () => {
+      // Don't call cleanup directly in the effect body
+      // Instead, return a cleanup function that does nothing
+      // The parent component will handle cleanup when needed
+    };
+  }, []);
 };

@@ -51,13 +51,14 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     handleAudioEnd
   } = useAudioPlayer(steps, topic, initialScript);
 
-  // Set the initial script if provided and no script content yet
+  // Set the initial script if provided and no script content yet - use once only
   useEffect(() => {
-    if (initialScript && !scriptContent) {
+    if (initialScript && !scriptContent && !editableScript) {
+      console.log("Setting initial script:", initialScript.substring(0, 50) + "...");
       setScriptContent(initialScript);
       setEditableScript(initialScript);
     }
-  }, [initialScript, scriptContent, setScriptContent, setEditableScript]);
+  }, [initialScript, scriptContent, editableScript, setScriptContent, setEditableScript]);
 
   if (isLoading) {
     return (
@@ -119,8 +120,4 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
 };
 
 // Using memo with custom comparison to prevent unnecessary re-renders
-export default memo(AudioSummaryPlayer, (prevProps, nextProps) => {
-  return prevProps.pathId === nextProps.pathId && 
-         prevProps.stepId === nextProps.stepId && 
-         prevProps.topic === nextProps.topic;
-});
+export default memo(AudioSummaryPlayer);
