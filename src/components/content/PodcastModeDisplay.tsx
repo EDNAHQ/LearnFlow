@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import ProjectPodcastCreator from '../podcast/ProjectPodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
@@ -35,6 +35,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   return (
     <div className="w-full min-h-[calc(100vh-12rem)]">
       <ProjectPodcastCreator
+        key={`podcast-creator-${pathId}`}
         pathId={pathId}
         topic={topic}
         steps={steps}
@@ -43,4 +44,5 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   );
 };
 
-export default PodcastModeDisplay;
+// Using React.memo to prevent unnecessary re-renders
+export default memo(PodcastModeDisplay);

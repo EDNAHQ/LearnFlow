@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { BookOpen, Presentation, Music, Headphones } from "lucide-react";
-import { useContentMode } from "@/hooks/useContentMode";
+import { useContentMode, ContentMode } from "@/hooks/useContentMode";
 import { cn } from "@/lib/utils";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -10,7 +10,7 @@ export const ModeToggle = () => {
   const { pathId } = useParams();
   const navigate = useNavigate();
 
-  const handleModeChange = (newMode: string) => {
+  const handleModeChange = (newMode: ContentMode) => {
     setMode(newMode);
     
     // If changing to podcast or audio, navigate to dedicated page

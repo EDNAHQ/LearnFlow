@@ -1,37 +1,20 @@
 
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 
-type ContentMode = "text" | "e-book" | "presentation" | "podcast" | "slides" | "audio";
+export type ContentMode = "text" | "slides" | "podcast" | "audio";
 
-interface ContentModeContextProps {
+interface ContentModeContextType {
   mode: ContentMode;
   setMode: (mode: ContentMode) => void;
-  toggleMode: () => void;
 }
 
-const ContentModeContext = createContext<ContentModeContextProps | undefined>(undefined);
+const ContentModeContext = createContext<ContentModeContextType | undefined>(undefined);
 
-export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
-  const [mode, setMode] = useState<ContentMode>(() => {
-    const savedMode = localStorage.getItem("content-mode");
-    return (savedMode as ContentMode) || "text";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("content-mode", mode);
-  }, [mode]);
-
-  const toggleMode = () => {
-    setMode(prev => {
-      if (prev === "text" || prev === "e-book") return "slides";
-      if (prev === "slides" || prev === "presentation") return "podcast";
-      if (prev === "podcast") return "audio";
-      return "text";
-    });
-  };
+export const ContentModeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [mode, setMode] = useState<ContentMode>("text");
 
   return (
-    <ContentModeContext.Provider value={{ mode, setMode, toggleMode }}>
+    <ContentModeContext.Provider value={{ mode, setMode }}>
       {children}
     </ContentModeContext.Provider>
   );
@@ -39,8 +22,10 @@ export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
 
 export const useContentMode = () => {
   const context = useContext(ContentModeContext);
+  
   if (context === undefined) {
     throw new Error("useContentMode must be used within a ContentModeProvider");
   }
+  
   return context;
 };

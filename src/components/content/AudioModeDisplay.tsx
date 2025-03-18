@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
 import { BarLoader } from '@/components/ui/loader';
@@ -47,9 +47,15 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
         </p>
       </div>
       
-      <AudioSummaryPlayer pathId={pathId} stepId={stepId} topic={topic} />
+      <AudioSummaryPlayer 
+        key={`audio-player-${pathId}-${stepId}`} 
+        pathId={pathId} 
+        stepId={stepId} 
+        topic={topic} 
+      />
     </div>
   );
 };
 
-export default AudioModeDisplay;
+// Using React.memo to prevent unnecessary re-renders
+export default memo(AudioModeDisplay);

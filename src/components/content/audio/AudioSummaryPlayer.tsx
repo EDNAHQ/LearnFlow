@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useEffect } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import { BarLoader } from '@/components/ui/loader';
 import AudioControls from './AudioControls';
@@ -44,6 +44,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     handleAudioEnd
   } = useAudioPlayer(steps, topic);
 
+  // Stable component ID to prevent flickering
+  const stableId = React.useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-8">
@@ -54,7 +57,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   }
 
   return (
-    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-24rem)]">
+    <div 
+      key={stableId}
+      className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-24rem)]"
+    >
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">Project Audio Summary</h3>
         <p className="text-sm text-gray-400">
@@ -100,4 +106,5 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   );
 };
 
-export default AudioSummaryPlayer;
+// Using memo to prevent unnecessary re-renders
+export default memo(AudioSummaryPlayer);

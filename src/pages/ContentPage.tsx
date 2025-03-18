@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -46,6 +46,8 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
+  // Prevent flickering by stabilizing the render
+  const contentKey = useRef(`${pathId}-${stepId}-${mode}`);
 
   // Use the custom hook directly
   const {
@@ -58,10 +60,14 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
   useEffect(() => {
     if (initialMode) {
       setMode(initialMode);
+      // Update the content key to include the new mode
+      contentKey.current = `${pathId}-${stepId}-${initialMode}`;
     } else if (mode !== "podcast" && mode !== "audio") {
       setMode("text");
+      // Update the content key for text mode
+      contentKey.current = `${pathId}-${stepId}-text`;
     }
-  }, [setMode, initialMode, mode]);
+  }, [setMode, initialMode, mode, pathId, stepId]);
 
   // Memoize the navigation handler to prevent unnecessary rerenders
   const handleComplete = useCallback(
@@ -130,9 +136,10 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
 
       <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
         <motion.div 
+          key={contentKey.current}
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
           className="w-full min-h-[calc(100vh-16rem)]"
         >
           {showStepNavigation && (
@@ -149,6 +156,7 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
 
           <div className="mb-4 w-full min-h-[calc(100vh-20rem)]">
             <ContentDisplay 
+              key={`content-${contentKey.current}`}
               content={safeContent} 
               index={currentStep} 
               detailedContent={currentStepData?.detailed_content} 

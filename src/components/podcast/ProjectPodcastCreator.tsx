@@ -1,7 +1,6 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
-import { useProjectPodcast } from '@/hooks/podcast/useProjectPodcast';
 import PodcastCreator from './PodcastCreator';
 import { BarLoader } from '@/components/ui/loader';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -19,6 +18,11 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
 }) => {
   const { isLoading: stepsLoading } = useLearningSteps(pathId, topic);
   const isMobile = useIsMobile();
+  
+  // Prepare content only once to avoid re-renders
+  const combinedContent = React.useMemo(() => {
+    return steps.map(step => step.title + ": " + (step.detailed_content || step.content || '')).join("\n\n");
+  }, [steps]);
   
   if (stepsLoading) {
     return (
@@ -51,10 +55,11 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
       
       <div className="bg-[#1A1A1A] text-white rounded-xl p-6 shadow-lg min-h-[calc(100vh-20rem)]">
         <PodcastCreator
+          key={`podcast-creator-content-${pathId}`}
           topic={topic}
           pathId={pathId}
           initialTranscript=""
-          content={steps.map(step => step.title + ": " + (step.detailed_content || step.content || '')).join("\n\n")}
+          content={combinedContent}
           title={`Complete ${topic} Learning Project`}
         />
       </div>
@@ -62,4 +67,5 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   );
 };
 
-export default ProjectPodcastCreator;
+// Using memo to prevent unnecessary re-renders
+export default memo(ProjectPodcastCreator);

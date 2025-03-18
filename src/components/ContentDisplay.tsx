@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -36,36 +36,33 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   title,
   stepId
 }) => {
-  const { steps, isLoading, markStepAsComplete } = useLearningSteps(pathId, topic);
+  const { steps, isLoading } = useLearningSteps(pathId, topic);
   const { mode } = useContentMode();
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<LearningStep | undefined>(undefined);
-
-  useEffect(() => {
-    if (steps && steps.length > 0) {
-      if (stepId) {
-        const index = steps.findIndex(step => step.id === stepId);
-        if (index !== -1) {
-          setCurrentStepIndex(index);
-        } else {
-          setCurrentStepIndex(0);
-        }
-      } else {
-        setCurrentStepIndex(0);
-      }
+  
+  // Memoize the current step index to prevent unnecessary rerenders
+  const currentStepIndex = useMemo(() => {
+    if (steps && steps.length > 0 && stepId) {
+      const index = steps.findIndex(step => step.id === stepId);
+      return index !== -1 ? index : 0;
     }
+    return 0;
   }, [steps, stepId]);
-
+  
+  // Set the current step based on the index
   useEffect(() => {
     if (steps && steps.length > 0 && currentStepIndex >= 0 && currentStepIndex < steps.length) {
       setCurrentStep(steps[currentStepIndex]);
     }
   }, [steps, currentStepIndex]);
 
+  // Create a stable key for each display mode to prevent flickering
+  const displayKey = useMemo(() => `${mode}-${pathId}-${stepId || index}`, [mode, pathId, stepId, index]);
+
   // Special case for podcast mode
   if (mode === "podcast") {
     return (
-      <div className="w-full">
+      <div className="w-full" key={`podcast-${pathId}`}>
         <PodcastModeDisplay
           pathId={pathId}
           topic={topic}
@@ -81,7 +78,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     const safeTopic = topic || '';
     
     return (
-      <div className="w-full">
+      <div className="w-full" key={`audio-${pathId}`}>
         <AudioModeDisplay
           pathId={safePathId}
           stepId={displayStepId}
@@ -106,7 +103,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   const displayStepId = stepId || currentStep?.id || '';
 
   return (
-    <div className="w-full">
+    <div className="w-full" key={displayKey}>
       <div className="pb-8">
         {mode === "text" && (
           <TextModeDisplay
@@ -133,4 +130,4 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   );
 };
 
-export default ContentDisplay;
+export default React.memo(ContentDisplay);
