@@ -47,7 +47,7 @@ const PresentationControls = ({
     if (onExit) {
       onExit();
     } else {
-      setMode("e-book");
+      setMode("text");
     }
   };
 
