@@ -2,11 +2,44 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 
-// Separate hook for handling audio playback
-const useAudioPlayback = (audioRef, audioUrl) => {
+export const useAudioPlayer = (steps: any[], topic: string) => {
+  const { 
+    isGenerating, 
+    isGeneratingScript,
+    audioUrl, 
+    scriptContent,
+    error, 
+    generateSpeech, 
+    generateScript,
+    cleanup 
+  } = useTextToSpeech();
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [editableScript, setEditableScript] = useState<string>('');
+  const [showScriptEditor, setShowScriptEditor] = useState(false);
+  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Initialize script when content changes
+  useEffect(() => {
+    if (scriptContent && !editableScript) {
+      setEditableScript(scriptContent);
+    }
+  }, [scriptContent, editableScript]);
+
+  // Update audio element when URL changes
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.load();
+      setIsAudioLoaded(true);
+      console.log("Audio URL loaded into player:", audioUrl);
+    }
+  }, [audioUrl]);
+
+  // Setup audio event listeners
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -24,108 +57,7 @@ const useAudioPlayback = (audioRef, audioUrl) => {
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [audioRef, audioUrl]);
-
-  const togglePlay = async (audioRef) => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        console.log("Pausing audio");
-        audioRef.current.pause();
-      } else {
-        console.log("Playing audio");
-        audioRef.current.play().catch(err => {
-          console.error("Error playing audio:", err);
-        });
-      }
-    }
-  };
-
-  const toggleMute = (audioRef) => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  return {
-    isPlaying,
-    isMuted,
-    togglePlay,
-    toggleMute,
-    setIsPlaying
-  };
-};
-
-// Separate hook for handling script management
-const useScriptManagement = (scriptContent) => {
-  const [editableScript, setEditableScript] = useState<string>('');
-  const [showScriptEditor, setShowScriptEditor] = useState(false);
-
-  useEffect(() => {
-    if (scriptContent && !editableScript) {
-      setEditableScript(scriptContent);
-    }
-  }, [scriptContent, editableScript]);
-
-  return {
-    editableScript,
-    showScriptEditor,
-    setEditableScript,
-    setShowScriptEditor
-  };
-};
-
-// Separate hook for handling audio initialization
-const useAudioInitialization = (audioUrl, audioRef) => {
-  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
-
-  useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.src = audioUrl;
-      audioRef.current.load();
-      setIsAudioLoaded(true);
-      console.log("Audio URL loaded into player:", audioUrl);
-    }
-  }, [audioUrl, audioRef]);
-
-  return {
-    isAudioLoaded
-  };
-};
-
-// Main hook that composes the other hooks
-export const useAudioPlayer = (steps: any[], topic: string) => {
-  const { 
-    isGenerating, 
-    isGeneratingScript,
-    audioUrl, 
-    scriptContent,
-    error, 
-    generateSpeech, 
-    generateScript,
-    cleanup 
-  } = useTextToSpeech();
-  
-  const [showControls, setShowControls] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Compose the smaller hooks
-  const {
-    isPlaying,
-    isMuted,
-    togglePlay,
-    toggleMute,
-    setIsPlaying
-  } = useAudioPlayback(audioRef, audioUrl);
-
-  const {
-    editableScript,
-    showScriptEditor,
-    setEditableScript,
-    setShowScriptEditor
-  } = useScriptManagement(scriptContent);
-
-  const { isAudioLoaded } = useAudioInitialization(audioUrl, audioRef);
+  }, []);
 
   // Handle cleanup on unmount
   useEffect(() => {
@@ -172,9 +104,25 @@ export const useAudioPlayer = (steps: any[], topic: string) => {
           await generateSpeech(script);
         }
       }
-    } else {
+    } else if (audioRef.current) {
       // If audio exists, toggle play/pause
-      await togglePlay(audioRef);
+      if (isPlaying) {
+        console.log("Pausing audio");
+        audioRef.current.pause();
+      } else {
+        console.log("Playing audio");
+        audioRef.current.play().catch(err => {
+          console.error("Error playing audio:", err);
+        });
+      }
+    }
+  };
+
+  // Mute toggle function
+  const handleMuteToggle = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
     }
   };
 
@@ -196,10 +144,6 @@ export const useAudioPlayer = (steps: any[], topic: string) => {
   // Handle audio end
   const handleAudioEnd = () => {
     setIsPlaying(false);
-  };
-
-  const handleMuteToggle = () => {
-    toggleMute(audioRef);
   };
 
   return {
