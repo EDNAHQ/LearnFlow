@@ -41,7 +41,7 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   }
 
   return (
-    <div className={`h-full min-h-[calc(100vh-12rem)] w-full ${isMobile ? 'px-2' : 'px-4'}`}>
+    <div className="h-full min-h-[calc(100vh-12rem)] w-full max-w-[860px] mx-auto">
       <div className="border-b border-gray-200 pb-5 mb-6">
         <h1 className="text-2xl font-bold text-brand-purple mb-2">Create Podcast</h1>
         <p className="text-gray-600">
@@ -53,8 +53,9 @@ const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
         <PodcastCreator
           topic={topic}
           pathId={pathId}
-          steps={steps}
-          displayHeader={false}
+          initialTranscript=""
+          content={steps.map(step => step.title + ": " + (step.detailed_content || step.content || '')).join("\n\n")}
+          title={`Complete ${topic} Learning Project`}
         />
       </div>
     </div>

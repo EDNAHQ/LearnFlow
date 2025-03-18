@@ -14,7 +14,11 @@ import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const ContentPage = () => {
+interface ContentPageProps {
+  initialMode?: "text" | "slides" | "podcast" | "audio";
+}
+
+const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
   const {
     pathId,
     stepId
@@ -50,12 +54,14 @@ const ContentPage = () => {
     projectCompleted
   } = useProjectCompletion(pathId, () => goToProjects());
 
-  // Set "text" (Read) mode by default when component mounts
+  // Set initial mode from props or default to "text"
   useEffect(() => {
-    if (mode !== "podcast" && mode !== "audio") {
+    if (initialMode) {
+      setMode(initialMode);
+    } else if (mode !== "podcast" && mode !== "audio") {
       setMode("text");
     }
-  }, [setMode, mode]);
+  }, [setMode, initialMode, mode]);
 
   // Memoize the navigation handler to prevent unnecessary rerenders
   const handleComplete = useCallback(
@@ -63,7 +69,7 @@ const ContentPage = () => {
     [isLastStep, completePath, handleMarkComplete]
   );
 
-  // Handle generation complete redirect - only once and with strict conditions
+  // Handle generation complete redirect - only for text/slides modes
   useEffect(() => {
     // Skip redirect if in podcast or audio mode
     if (mode === "podcast" || mode === "audio") return;
@@ -112,16 +118,6 @@ const ContentPage = () => {
   // Skip step navigation for podcast and audio modes
   const showStepNavigation = mode !== "podcast" && mode !== "audio";
   
-  // Use full width layout for podcast and audio modes
-  const contentWidthClass = (mode === "podcast" || mode === "audio")
-    ? "max-w-full px-0" 
-    : "max-w-[860px] px-4";
-  
-  // Adjust height based on mode
-  const contentHeightClass = (mode === "podcast" || mode === "audio")
-    ? "min-h-[calc(100vh-12rem)]" 
-    : "";
-  
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
@@ -132,12 +128,12 @@ const ContentPage = () => {
         totalSteps={steps.length} 
       />
 
-      <div className={`container ${contentWidthClass} mx-auto my-0 py-[30px] ${contentHeightClass}`}>
+      <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           transition={{ duration: 0.5 }}
-          className={`w-full ${contentHeightClass}`}
+          className="w-full min-h-[calc(100vh-16rem)]"
         >
           {showStepNavigation && (
             <div className="flex justify-between items-center mb-3 w-full">
@@ -151,7 +147,7 @@ const ContentPage = () => {
             </h1>
           )}
 
-          <div className={`mb-4 w-full ${contentHeightClass}`}>
+          <div className="mb-4 w-full min-h-[calc(100vh-20rem)]">
             <ContentDisplay 
               content={safeContent} 
               index={currentStep} 

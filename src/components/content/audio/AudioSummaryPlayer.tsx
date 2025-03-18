@@ -46,17 +46,17 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)]">
+      <div className="flex flex-col items-center justify-center py-8">
         <BarLoader className="mx-auto" />
-        <p className="mt-4 text-gray-200">Loading learning content...</p>
+        <p className="mt-4 text-gray-600">Loading learning content...</p>
       </div>
     );
   }
 
   return (
-    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-16rem)]">
+    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-24rem)]">
       <div className="mb-6">
-        <h3 className="text-2xl font-semibold mb-2">Project Audio Summary</h3>
+        <h3 className="text-xl font-semibold mb-2">Project Audio Summary</h3>
         <p className="text-sm text-gray-400">
           Generate and listen to an audio summary of the entire learning project.
         </p>
@@ -74,7 +74,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
         onGenerateScript={handleGenerateScript}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-4">
         <AudioControls
           isPlaying={isPlaying}
           isMuted={isMuted}

@@ -43,16 +43,15 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
 
   useEffect(() => {
     if (steps && steps.length > 0) {
-      // If stepId is provided, find the index of that step
       if (stepId) {
         const index = steps.findIndex(step => step.id === stepId);
         if (index !== -1) {
           setCurrentStepIndex(index);
         } else {
-          setCurrentStepIndex(0); // Reset to first step if stepId not found
+          setCurrentStepIndex(0);
         }
       } else {
-        setCurrentStepIndex(0); // Default to first step if no stepId
+        setCurrentStepIndex(0);
       }
     }
   }, [steps, stepId]);
@@ -63,32 +62,10 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   }, [steps, currentStepIndex]);
 
-  const handleNext = () => {
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
-    }
-  };
-
-  const handleComplete = async () => {
-    if (currentStep) {
-      const success = await markStepAsComplete(currentStep.id);
-      if (success) {
-        // Optimistically update the UI
-        setCurrentStep(prevStep => ({ ...prevStep!, completed: true }));
-      }
-    }
-  };
-
-  // Special case for podcast mode - render it even if steps are loading
+  // Special case for podcast mode
   if (mode === "podcast") {
     return (
-      <div className="w-full h-full min-h-[calc(100vh-12rem)]">
+      <div className="w-full">
         <PodcastModeDisplay
           pathId={pathId}
           topic={topic}
@@ -97,14 +74,14 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     );
   }
 
-  // Special case for audio mode - render it even if steps are loading
+  // Special case for audio mode
   if (mode === "audio") {
     const displayStepId = stepId || currentStep?.id || '';
     const safePathId = pathId || '';
     const safeTopic = topic || '';
     
     return (
-      <div className="w-full h-full min-h-[calc(100vh-12rem)]">
+      <div className="w-full">
         <AudioModeDisplay
           pathId={safePathId}
           stepId={displayStepId}
