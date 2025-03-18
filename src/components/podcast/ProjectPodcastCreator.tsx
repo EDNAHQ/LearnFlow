@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Headphones, BarLoader } from 'lucide-react';
+import { Music, Headphones } from 'lucide-react';
+import { BarLoader } from '@/components/ui/loader';
 import PodcastForm from './PodcastForm';
 import PodcastPreview from './PodcastPreview';
 import PodcastControls from './PodcastControls';
