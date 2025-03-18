@@ -134,7 +134,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="relative min-h-screen flex flex-col">
+      <div className="relative h-screen flex flex-col">
         <div className="flex-1 relative overflow-hidden">
           {slides.map((slide, index) => (
             <PresentationSlide 

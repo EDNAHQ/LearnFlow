@@ -33,7 +33,7 @@ const PodcastModeDisplay: React.FC<PodcastModeDisplayProps> = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-[calc(100vh-12rem)]">
       <ProjectPodcastCreator
         pathId={pathId}
         topic={topic}

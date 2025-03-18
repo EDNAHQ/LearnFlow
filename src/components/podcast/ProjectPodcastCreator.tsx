@@ -1,147 +1,62 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Headphones } from 'lucide-react';
-import { BarLoader } from '@/components/ui/loader';
-import PodcastForm from './PodcastForm';
-import PodcastPreview from './PodcastPreview';
-import PodcastControls from './PodcastControls';
+import React from 'react';
+import { useLearningSteps } from '@/hooks/useLearningSteps';
 import { useProjectPodcast } from '@/hooks/podcast/useProjectPodcast';
+import PodcastCreator from './PodcastCreator';
+import { BarLoader } from '@/components/ui/loader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProjectPodcastCreatorProps {
   pathId: string;
   topic: string;
-  steps: any[];
+  steps?: any[];
 }
 
-const ProjectPodcastCreator = ({ 
+const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
   pathId,
   topic,
-  steps
-}: ProjectPodcastCreatorProps) => {
-  const {
-    transcript,
-    setTranscript,
-    podcastUrl,
-    isGenerating,
-    isGeneratingTranscript,
-    error,
-    charCount,
-    handleSubmit,
-    downloadPodcast,
-    generateProjectTranscript
-  } = useProjectPodcast(steps, topic);
+  steps = []
+}) => {
+  const { isLoading: stepsLoading } = useLearningSteps(pathId, topic);
+  const isMobile = useIsMobile();
+  
+  if (stepsLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)] w-full">
+        <BarLoader className="mx-auto mb-4" />
+        <p className="text-gray-600">Loading project content...</p>
+      </div>
+    );
+  }
 
-  const [activeTab, setActiveTab] = useState<string>("create");
-
-  // Generate transcript only once when component mounts
-  useEffect(() => {
-    if (steps.length > 0 && !transcript && !isGeneratingTranscript) {
-      generateProjectTranscript();
-    }
-  }, [steps, transcript, isGeneratingTranscript, generateProjectTranscript]);
-
-  // Automatically switch to listen tab when podcast is ready
-  useEffect(() => {
-    if (podcastUrl && activeTab === "create") {
-      setActiveTab("listen");
-    }
-  }, [podcastUrl, activeTab]);
+  if (steps.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)] w-full">
+        <div className="max-w-md mx-auto text-center">
+          <p className="text-lg font-medium mb-2">No content available</p>
+          <p className="text-gray-600">This project doesn't have any content steps yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto pb-8">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-brand-purple flex items-center justify-center gap-2">
-          <Music className="h-6 w-6" />
-          Create Project Podcast
-        </h1>
-        <p className="text-gray-600 mt-2">
-          This podcast summarizes your entire learning project on {topic}.
+    <div className={`h-full min-h-[calc(100vh-12rem)] w-full ${isMobile ? 'px-2' : 'px-4'}`}>
+      <div className="border-b border-gray-200 pb-5 mb-6">
+        <h1 className="text-2xl font-bold text-brand-purple mb-2">Create Podcast</h1>
+        <p className="text-gray-600">
+          Generate a conversational podcast about "{topic}" to help reinforce your learning.
         </p>
       </div>
-
-      <Card className="bg-white shadow-lg border-0 w-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xl">
-            {topic}
-          </CardTitle>
-          <CardDescription>
-            {isGeneratingTranscript 
-              ? "We're generating a complete podcast script for you..." 
-              : "Edit the script if needed, then create your podcast."}
-          </CardDescription>
-        </CardHeader>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="create" disabled={isGenerating}>
-              <div className="flex items-center gap-2">
-                <Music className="h-4 w-4" />
-                Create
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="listen" disabled={!podcastUrl}>
-              <div className="flex items-center gap-2">
-                <Headphones className="h-4 w-4" />
-                Listen
-              </div>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="create" className="mt-0">
-            <CardContent>
-              {isGeneratingTranscript ? (
-                <div className="text-center py-12 mb-4">
-                  <div className="flex justify-center mb-6">
-                    <BarLoader className="mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-medium text-brand-purple mb-2">Generating complete podcast script</h3>
-                  <p className="text-gray-600">This may take a minute as we analyze all content from your learning project.</p>
-                </div>
-              ) : (
-                <PodcastForm
-                  transcript={transcript}
-                  isGenerating={isGenerating}
-                  charCount={charCount}
-                  onTranscriptChange={setTranscript}
-                />
-              )}
-              
-              {!isGeneratingTranscript && (
-                <div className="mt-6">
-                  <PodcastControls
-                    charCount={charCount}
-                    isGenerating={isGenerating}
-                    error={error}
-                    onSubmit={handleSubmit}
-                    transcript={transcript}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </TabsContent>
-          
-          <TabsContent value="listen" className="mt-0">
-            <CardContent>
-              {podcastUrl ? (
-                <PodcastPreview
-                  podcastUrl={podcastUrl}
-                  onDownload={downloadPodcast}
-                />
-              ) : (
-                <div className="text-center py-12">
-                  <div className="flex justify-center mb-6">
-                    <BarLoader className="mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-medium text-brand-purple mb-2">Loading your podcast</h3>
-                  <p className="text-gray-600">Just a moment while we prepare your audio...</p>
-                </div>
-              )}
-            </CardContent>
-          </TabsContent>
-        </Tabs>
-      </Card>
+      
+      <div className="bg-[#1A1A1A] text-white rounded-xl p-6 shadow-lg min-h-[calc(100vh-20rem)]">
+        <PodcastCreator
+          topic={topic}
+          pathId={pathId}
+          steps={steps}
+          displayHeader={false}
+        />
+      </div>
     </div>
   );
 };

@@ -88,7 +88,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   // Special case for podcast mode - render it even if steps are loading
   if (mode === "podcast") {
     return (
-      <div className="w-full">
+      <div className="w-full h-full min-h-[calc(100vh-12rem)]">
         <PodcastModeDisplay
           pathId={pathId}
           topic={topic}
@@ -104,7 +104,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     const safeTopic = topic || '';
     
     return (
-      <div className="w-full">
+      <div className="w-full h-full min-h-[calc(100vh-12rem)]">
         <AudioModeDisplay
           pathId={safePathId}
           stepId={displayStepId}

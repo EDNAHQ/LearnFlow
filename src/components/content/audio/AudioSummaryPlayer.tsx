@@ -45,13 +45,18 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   } = useAudioPlayer(steps, topic);
 
   if (isLoading) {
-    return <div className="text-center p-8"><BarLoader className="mx-auto" /><p>Loading learning content...</p></div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)]">
+        <BarLoader className="mx-auto" />
+        <p className="mt-4 text-gray-200">Loading learning content...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-4 my-4">
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold mb-2">Project Audio Summary</h3>
+    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-16rem)]">
+      <div className="mb-6">
+        <h3 className="text-2xl font-semibold mb-2">Project Audio Summary</h3>
         <p className="text-sm text-gray-400">
           Generate and listen to an audio summary of the entire learning project.
         </p>

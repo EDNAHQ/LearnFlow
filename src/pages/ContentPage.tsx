@@ -12,6 +12,7 @@ import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading"
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ContentPage = () => {
   const {
@@ -37,6 +38,7 @@ const ContentPage = () => {
     generatingContent,
     generatedSteps
   } = useContentNavigation();
+  const isMobile = useIsMobile();
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
@@ -115,6 +117,11 @@ const ContentPage = () => {
     ? "max-w-full px-0" 
     : "max-w-[860px] px-4";
   
+  // Adjust height based on mode
+  const contentHeightClass = (mode === "podcast" || mode === "audio")
+    ? "min-h-[calc(100vh-12rem)]" 
+    : "";
+  
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
@@ -125,12 +132,12 @@ const ContentPage = () => {
         totalSteps={steps.length} 
       />
 
-      <div className={`container ${contentWidthClass} mx-auto my-0 py-[30px]`}>
+      <div className={`container ${contentWidthClass} mx-auto my-0 py-[30px] ${contentHeightClass}`}>
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
           transition={{ duration: 0.5 }}
-          className="w-full"
+          className={`w-full ${contentHeightClass}`}
         >
           {showStepNavigation && (
             <div className="flex justify-between items-center mb-3 w-full">
@@ -144,7 +151,7 @@ const ContentPage = () => {
             </h1>
           )}
 
-          <div className="mb-4 w-full">
+          <div className={`mb-4 w-full ${contentHeightClass}`}>
             <ContentDisplay 
               content={safeContent} 
               index={currentStep} 
