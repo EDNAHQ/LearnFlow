@@ -42,22 +42,22 @@ export function ProjectCard({ project, onDeleteProject, isDeleting }: ProjectCar
   };
 
   return (
-    <Card className="w-full transition-all duration-300 hover:shadow-md">
+    <Card className="brand-card transform transition-all duration-300 hover:scale-[1.02]">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-xl font-bold">{project.topic}</CardTitle>
+          <CardTitle className="text-xl font-bold text-white">{project.topic}</CardTitle>
           {project.is_completed && (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-brand-gold/10 text-brand-gold border-brand-gold/20">
               Completed
             </Badge>
           )}
         </div>
-        <CardDescription className="text-sm text-gray-500">
+        <CardDescription className="text-gray-400">
           Created {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-2">
-        <p className="text-sm text-gray-700 line-clamp-2">
+        <p className="text-gray-300">
           {project.progress !== undefined ? 
             `Progress: ${project.progress}%` : 
             "Start your learning journey"
@@ -68,21 +68,21 @@ export function ProjectCard({ project, onDeleteProject, isDeleting }: ProjectCar
         <div className="flex space-x-4">
           <button
             onClick={handleViewContent}
-            className={cn(linkBaseStyles, "text-blue-600 hover:text-blue-800")}
+            className={cn(linkBaseStyles, "text-brand-purple hover:text-brand-purple/80")}
           >
             <BookOpen className="mr-1 h-4 w-4" />
             <span>Learn</span>
           </button>
           <button
             onClick={handlePodcast}
-            className={cn(linkBaseStyles, "text-purple-600 hover:text-purple-800")}
+            className={cn(linkBaseStyles, "text-brand-pink hover:text-brand-pink/80")}
           >
             <Music className="mr-1 h-4 w-4" />
             <span>Podcast</span>
           </button>
           <button
             onClick={handleAudio}
-            className={cn(linkBaseStyles, "text-amber-600 hover:text-amber-800")}
+            className={cn(linkBaseStyles, "text-brand-gold hover:text-brand-gold/80")}
           >
             <Headphones className="mr-1 h-4 w-4" />
             <span>Audio</span>
@@ -95,7 +95,7 @@ export function ProjectCard({ project, onDeleteProject, isDeleting }: ProjectCar
             e.stopPropagation();
             onDeleteProject(project.id);
           }}
-          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50/10"
           disabled={isDeleting}
         >
           <Trash2 className="h-4 w-4" />
