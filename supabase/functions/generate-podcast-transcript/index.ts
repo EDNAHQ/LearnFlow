@@ -44,16 +44,16 @@ serve(async (req) => {
         
         console.log(`Parsed ${parsedSteps.length} steps for project summary`);
         
-        systemPrompt = `You are an AI assistant that creates comprehensive audio summaries of educational content.
-Format the output as a conversational monologue that covers the key points from the entire learning project.
+        systemPrompt = `You are an AI assistant that creates comprehensive podcast scripts about educational content.
+Format the output EXACTLY as a dialog between two podcast hosts with "Host 1:" and "Host 2:" prefixes.
 
 Important:
-- Keep it conversational and educational
-- Focus on the most important concepts from the entire project
-- Organize the information logically
-- Aim for about 5-10 minutes of spoken content
+- The podcast should cover all key concepts and topics from the entire learning project
+- Make it conversational and engaging between the two hosts
+- Organize the information logically, covering all main points from the project
+- Aim for about 5-10 minutes of spoken content (approximately 1000-1500 words)
 - Don't use any special formatting or markdown
-- Make it flow naturally for audio listening`;
+- Make it flow naturally for listening`;
 
       } catch (parseError) {
         console.error('Error parsing project steps:', parseError);
@@ -98,7 +98,7 @@ Important:
         },
         { 
           role: 'user', 
-          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into ${isFullProjectSummary ? 'a comprehensive audio summary' : 'a podcast script'}:\n\n${processedContent}`
+          content: `Please convert the following educational content about "${topic || 'this topic'}" titled "${title || 'this lesson'}" into ${isFullProjectSummary ? 'a comprehensive podcast script' : 'a podcast script'}:\n\n${processedContent}`
         }
       ],
       temperature: 0.7,

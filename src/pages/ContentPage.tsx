@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -20,7 +19,8 @@ const ContentPage = () => {
   } = useParams();
   const navigate = useNavigate();
   const {
-    setMode
+    setMode,
+    mode
   } = useContentMode();
   const {
     topic,
@@ -105,6 +105,9 @@ const ContentPage = () => {
       ? JSON.stringify(currentStepData.content) 
       : "No content available";
   
+  // Skip step navigation for podcast mode - it works with the entire project
+  const showStepNavigation = mode !== "podcast";
+  
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
@@ -122,13 +125,17 @@ const ContentPage = () => {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <div className="flex justify-between items-center mb-3 w-full">
-            <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
-          </div>
+          {mode !== "podcast" && (
+            <div className="flex justify-between items-center mb-3 w-full">
+              <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
+            </div>
+          )}
           
-          <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
-            {currentStepData?.title || "Loading..."}
-          </h1>
+          {mode !== "podcast" && (
+            <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
+              {currentStepData?.title || "Loading..."}
+            </h1>
+          )}
 
           <div className="mb-4 w-full">
             <ContentDisplay 
@@ -142,17 +149,19 @@ const ContentPage = () => {
             />
           </div>
 
-          <div>
-            <ContentNavigation 
-              currentStep={currentStep} 
-              totalSteps={steps.length} 
-              onPrevious={handleBack} 
-              onComplete={handleComplete} 
-              isLastStep={isLastStep} 
-              isSubmitting={isSubmitting} 
-              projectCompleted={projectCompleted} 
-            />
-          </div>
+          {showStepNavigation && (
+            <div>
+              <ContentNavigation 
+                currentStep={currentStep} 
+                totalSteps={steps.length} 
+                onPrevious={handleBack} 
+                onComplete={handleComplete} 
+                isLastStep={isLastStep} 
+                isSubmitting={isSubmitting} 
+                projectCompleted={projectCompleted} 
+              />
+            </div>
+          )}
         </motion.div>
       </div>
     </ContentPageLayout>

@@ -8,15 +8,24 @@ interface ProgressIndicatorProps {
   generatingContent: boolean;
   generatedSteps: number;
   totalSteps: number;
+  isPodcast?: boolean;
 }
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   progress,
   generatingContent,
   generatedSteps,
-  totalSteps
+  totalSteps,
+  isPodcast = false
 }) => {
   const getProgressMessage = () => {
+    if (isPodcast) {
+      if (!generatingContent && progress >= 100) {
+        return "Podcast script ready!";
+      }
+      return `Generating podcast script... ${Math.round(progress)}%`;
+    }
+    
     if (!generatingContent && progress >= 100) {
       return "Content ready! You'll be redirected automatically.";
     }
@@ -38,7 +47,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
       
       {generatingContent && (
         <p className="text-gray-500 text-xs mt-2">
-          Generated {generatedSteps} of {totalSteps} content pieces
+          {isPodcast ? "Analyzing project content..." : `Generated ${generatedSteps} of ${totalSteps} content pieces`}
         </p>
       )}
     </div>
