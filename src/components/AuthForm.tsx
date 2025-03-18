@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,10 +60,14 @@ export function AuthForm() {
       setGoogleLoading(true);
       setError(null);
       
+      // Get the current URL's origin (protocol + hostname + port)
+      const redirectUrl = `${window.location.origin}/auth`;
+      console.log("Redirecting to:", redirectUrl); // For debugging
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/auth'
+          redirectTo: redirectUrl
         }
       });
       
