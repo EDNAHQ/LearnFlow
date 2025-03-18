@@ -92,7 +92,10 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
       <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
         <ContentHeader 
           onBack={handleBack} 
-          onHome={goToProjects} 
+          onHome={goToProjects}
+          generatingContent={generatingContent}
+          generatedSteps={generatedSteps}
+          totalSteps={steps.length}
         />
         <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
           <ContentDisplay 
@@ -111,7 +114,10 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
       <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
         <ContentHeader 
           onBack={handleBack} 
-          onHome={goToProjects} 
+          onHome={goToProjects}
+          generatingContent={generatingContent}
+          generatedSteps={generatedSteps}
+          totalSteps={steps.length}
         />
         <div className="container max-w-[860px] mx-auto py-[30px] flex justify-center">
           <ContentLoader message="Loading content..." />
@@ -136,6 +142,9 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
       <ContentHeader 
         onBack={handleBack} 
         onHome={goToProjects}
+        generatingContent={generatingContent}
+        generatedSteps={generatedSteps}
+        totalSteps={steps.length}
       />
 
       <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
