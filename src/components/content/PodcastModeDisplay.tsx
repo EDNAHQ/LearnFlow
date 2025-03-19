@@ -3,7 +3,7 @@ import React from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Music } from "lucide-react";
 
-const PodcastModeDisplay = () => {
+const PodcastModeDisplay: React.FC = () => {
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 w-full max-w-[860px] mx-auto">
       <div className="text-center py-8">

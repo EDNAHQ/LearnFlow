@@ -87,7 +87,7 @@ const ContentPage = () => {
         <motion.div 
           initial={{opacity: 0}} 
           animate={{opacity: 1}} 
-          transition={{duration: 0.3}} 
+          transition={{duration: 0.2, ease: "easeOut"}} 
           className="w-full"
         >
           <div className="flex justify-between items-center mb-3 w-full">

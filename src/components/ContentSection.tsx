@@ -11,7 +11,6 @@ import ContentRelatedQuestions from "./ContentRelatedQuestions";
 import ContentDetailLoader from "./content/ContentDetailLoader";
 import ContentQuestionsGenerator from "./content/ContentQuestionsGenerator";
 import ContentMarginNotesRenderer from "./content/ContentMarginNotesRenderer";
-import TextToSpeechPlayer from "./TextToSpeechPlayer";
 import "@/styles/content.css";
 
 interface ContentSectionProps {
@@ -50,10 +49,10 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
     setRelatedQuestions([]);
     setLoadingQuestions(true);
     
-    // Animation effect for fading in the content
+    // Animation effect for fading in the content - reduced delay to minimize flickering
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, index * 200);
+    }, 100); // Reduced from index * 200 to a flat 100ms
 
     return () => clearTimeout(timer);
   }, [content, detailedContent, index, topic]);
@@ -102,7 +101,7 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   return (
     <div 
       className={cn(
-        "transition-all duration-500 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full max-w-5xl mx-auto overflow-hidden",
+        "transition-all duration-300 ease-in-out bg-white rounded-xl shadow-md border border-gray-200 p-6 md:p-8 mb-8 w-full max-w-5xl mx-auto overflow-hidden",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
@@ -124,12 +123,6 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           onMouseUp={handleTextSelection}
           onTouchEnd={handleTextSelection}
         >
-          {/* Text-to-Speech Player */}
-          <TextToSpeechPlayer 
-            text={loadedDetailedContent}
-            title={title}
-          />
-        
           <div 
             className="content-section relative"
             ref={contentRef}

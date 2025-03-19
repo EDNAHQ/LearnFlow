@@ -121,12 +121,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
         )}
         
         {mode === "podcast" && (
-          <PodcastModeDisplay
-            content={detailedContent || displayContent}
-            title={displayTitle}
-            pathId={pathId}
-            topic={topic}
-          />
+          <PodcastModeDisplay />
         )}
       </div>
     </div>
