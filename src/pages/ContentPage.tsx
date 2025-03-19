@@ -75,16 +75,21 @@ const ContentPage = () => {
   // Ensure content is a string
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
   return <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
-      <ContentHeader onBack={handleBack} onHome={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} />
+      <ContentHeader 
+        onBack={handleBack} 
+        onHome={goToProjects} 
+        generatingContent={generatingContent} 
+        generatedSteps={generatedSteps} 
+        totalSteps={steps.length} 
+      />
 
       <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
-        <motion.div initial={{
-        opacity: 0
-      }} animate={{
-        opacity: 1
-      }} transition={{
-        duration: 0.5
-      }} className="w-full">
+        <motion.div 
+          initial={{opacity: 0}} 
+          animate={{opacity: 1}} 
+          transition={{duration: 0.3}} 
+          className="w-full"
+        >
           <div className="flex justify-between items-center mb-3 w-full">
             <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
           </div>
@@ -102,6 +107,7 @@ const ContentPage = () => {
               pathId={pathId} 
               topic={topic}
               title={currentStepData?.title || ""} 
+              stepId={currentStep.toString()}
             />
           </div>
 

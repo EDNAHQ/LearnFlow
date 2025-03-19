@@ -6,7 +6,6 @@ import { useContentMode } from "@/hooks/useContentMode";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
 import PodcastModeDisplay from "./content/PodcastModeDisplay";
-import AudioModeDisplay from '@/components/content/AudioModeDisplay';
 
 interface ContentDisplayProps {
   content?: string;
@@ -124,16 +123,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             content={detailedContent || displayContent}
             title={displayTitle}
             pathId={pathId}
-            topic={topic}
-          />
-        )}
-
-        {mode === "audio" && (
-          <AudioModeDisplay
-            content={detailedContent || displayContent}
-            title={displayTitle}
-            pathId={pathId}
-            stepId={displayStepId}
             topic={topic}
           />
         )}
