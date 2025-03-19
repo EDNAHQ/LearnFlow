@@ -1,5 +1,4 @@
-
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -8,17 +7,12 @@ import ContentDisplay from "@/components/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
 import ContentProgress from "@/components/content/ContentProgress";
 import ContentNavigation from "@/components/content/ContentNavigation";
-import ContentLoader from "@/components/content/ContentLoader";
+import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading";
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-interface ContentPageProps {
-  initialMode?: "text" | "slides" | "podcast" | "audio";
-}
-
-const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
+const ContentPage = () => {
   const {
     pathId,
     stepId
@@ -42,36 +36,9 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
     generatingContent,
     generatedSteps
   } = useContentNavigation();
-  const isMobile = useIsMobile();
 
-  // Set initial mode from props or default to "text"
-  useEffect(() => {
-    if (initialMode) {
-      setMode(initialMode);
-    } else if (mode !== "podcast" && mode !== "audio") {
-      setMode("text");
-    }
-  }, [setMode, initialMode, mode]);
-
-  // Create a stable key for the content
-  const contentKey = useMemo(() => 
-    `${pathId}-${stepId}-${mode}-${currentStep}`, 
-    [pathId, stepId, mode, currentStep]
-  );
-
-  // Redirect to generation page if needed
-  useEffect(() => {
-    // Only redirect if content is loading and we're in text/slides mode (not podcast/audio)
-    if (isLoading && 
-        !stepId && 
-        pathId && 
-        mode !== "podcast" && 
-        mode !== "audio" && 
-        (!steps.length || !steps.some(s => s.detailed_content))) {
-      console.log("Content needs generation, redirecting to generation page");
-      navigate(`/generate/${pathId}`);
-    }
-  }, [isLoading, steps, pathId, stepId, navigate, mode]);
+  // Track if we've already redirected to avoid loops
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   // Use the custom hook directly
   const {
@@ -80,53 +47,54 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
     projectCompleted
   } = useProjectCompletion(pathId, () => goToProjects());
 
+  // Set "text" (Read) mode by default when component mounts
+  useEffect(() => {
+    setMode("text");
+  }, [setMode]);
+
   // Memoize the navigation handler to prevent unnecessary rerenders
   const handleComplete = useCallback(
     () => isLastStep ? completePath() : handleMarkComplete(),
     [isLastStep, completePath, handleMarkComplete]
   );
 
-  // Don't render podcast and audio modes in the same way as regular content
-  if ((mode === "podcast" || mode === "audio") && !isLoading) {
-    return (
-      <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
-        <ContentHeader 
-          onBack={handleBack} 
-          onHome={goToProjects}
-          generatingContent={generatingContent}
-          generatedSteps={generatedSteps}
-          totalSteps={steps.length}
-        />
-        <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
-          <ContentDisplay 
-            key={contentKey}
-            pathId={pathId}
-            topic={topic || ""}
-            stepId={stepId}
-          />
-        </div>
-      </ContentPageLayout>
-    );
-  }
+  // Log generation progress for debugging
+  useEffect(() => {
+    console.log(`Content generation progress: ${generatedSteps}/${steps.length}, generating: ${generatingContent}`);
+  }, [generatedSteps, steps.length, generatingContent]);
 
-  if (isLoading) {
+  // Handle generation complete redirect - only once and with strict conditions
+  useEffect(() => {
+    // Only redirect if we're not already on a step page and generation is complete
+    if (!hasRedirected && 
+        !isLoading && 
+        !generatingContent && 
+        pathId && 
+        steps.length > 0 && 
+        generatedSteps >= steps.length && 
+        !stepId) {
+      
+      console.log("Content generation complete. Navigating to first content page...");
+      setHasRedirected(true);
+      navigate(`/content/${pathId}/step/0`);
+    }
+  }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
+
+  // Show loading screen ONLY when no stepId is present OR we're in initial loading state
+  if ((isLoading || generatingContent) && !stepId) {
     return (
-      <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
-        <ContentHeader 
-          onBack={handleBack} 
-          onHome={goToProjects}
-          generatingContent={generatingContent}
-          generatedSteps={generatedSteps}
-          totalSteps={steps.length}
-        />
-        <div className="container max-w-[860px] mx-auto py-[30px] flex justify-center">
-          <ContentLoader message="Loading content..." />
-        </div>
-      </ContentPageLayout>
+      <KnowledgeNuggetLoading 
+        topic={topic} 
+        goToProjects={goToProjects} 
+        generatingContent={generatingContent} 
+        generatedSteps={generatedSteps} 
+        totalSteps={steps.length} 
+        pathId={pathId} 
+      />
     );
   }
   
-  if (!topic || !pathId || !currentStepData) {
+  if (!topic || !pathId) {
     return <ContentError goToProjects={goToProjects} />;
   }
   
@@ -137,56 +105,63 @@ const ContentPage = ({ initialMode }: ContentPageProps = {}) => {
       ? JSON.stringify(currentStepData.content) 
       : "No content available";
   
+  // Skip step navigation for podcast mode - it works with the entire project
+  const showStepNavigation = mode !== "podcast";
+  
   return (
     <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
         onBack={handleBack} 
-        onHome={goToProjects}
-        generatingContent={generatingContent}
-        generatedSteps={generatedSteps}
-        totalSteps={steps.length}
+        onHome={goToProjects} 
+        generatingContent={generatingContent} 
+        generatedSteps={generatedSteps} 
+        totalSteps={steps.length} 
       />
 
       <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
         <motion.div 
-          key={contentKey}
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
-          transition={{ duration: 0.3 }}
-          className="w-full min-h-[calc(100vh-16rem)]"
+          transition={{ duration: 0.5 }}
+          className="w-full"
         >
-          <div className="flex justify-between items-center mb-3 w-full">
-            <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
-          </div>
+          {mode !== "podcast" && (
+            <div className="flex justify-between items-center mb-3 w-full">
+              <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
+            </div>
+          )}
           
-          <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
-            {currentStepData?.title || "Loading..."}
-          </h1>
+          {mode !== "podcast" && (
+            <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
+              {currentStepData?.title || "Loading..."}
+            </h1>
+          )}
 
-          <div className="mb-4 w-full min-h-[calc(100vh-20rem)]">
+          <div className="mb-4 w-full">
             <ContentDisplay 
-              key={contentKey}
               content={safeContent} 
               index={currentStep} 
               detailedContent={currentStepData?.detailed_content} 
               pathId={pathId} 
               topic={topic}
               title={currentStepData?.title || ""}
-              stepId={currentStepData?.id}
+              stepId={stepId}
             />
           </div>
 
-          <div>
-            <ContentNavigation 
-              currentStep={currentStep} 
-              totalSteps={steps.length} 
-              onPrevious={handleBack} 
-              onComplete={handleComplete} 
-              isLastStep={isLastStep} 
-              isSubmitting={isSubmitting} 
-              projectCompleted={projectCompleted} 
-            />
-          </div>
+          {showStepNavigation && (
+            <div>
+              <ContentNavigation 
+                currentStep={currentStep} 
+                totalSteps={steps.length} 
+                onPrevious={handleBack} 
+                onComplete={handleComplete} 
+                isLastStep={isLastStep} 
+                isSubmitting={isSubmitting} 
+                projectCompleted={projectCompleted} 
+              />
+            </div>
+          )}
         </motion.div>
       </div>
     </ContentPageLayout>

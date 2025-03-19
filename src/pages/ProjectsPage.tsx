@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { MainNav } from "@/components/MainNav";
-import { ProjectCard } from "@/components/projects/ProjectCard";
+import ProjectCard from "@/components/projects/ProjectCard";
 import EmptyProjectsState from "@/components/projects/EmptyProjectsState";
 import ProjectsLoading from "@/components/projects/ProjectsLoading";
 import ProjectsHeader from "@/components/projects/ProjectsHeader";

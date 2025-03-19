@@ -130,7 +130,6 @@ export function useTextToSpeech() {
     error,
     generateSpeech,
     generateScript,
-    cleanup,
-    setScriptContent
+    cleanup
   };
 }

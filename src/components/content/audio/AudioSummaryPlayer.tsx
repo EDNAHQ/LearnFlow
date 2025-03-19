@@ -1,5 +1,5 @@
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import { BarLoader } from '@/components/ui/loader';
 import AudioControls from './AudioControls';
@@ -12,20 +12,14 @@ interface AudioSummaryPlayerProps {
   pathId: string;
   stepId?: string;
   topic: string;
-  initialScript?: string | null;
 }
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ 
   pathId, 
   stepId,
-  topic,
-  initialScript = null
+  topic 
 }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
-  
-  // Create a stable component ID
-  const stableId = useMemo(() => `audio-player-${pathId}-${stepId}`, [pathId, stepId]);
-  
   const {
     audioRef,
     isPlaying,
@@ -39,7 +33,6 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     editableScript,
     showScriptEditor,
     error,
-    setScriptContent,
     setEditableScript,
     setShowScriptEditor,
     setShowControls,
@@ -49,32 +42,15 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
     handleMuteToggle,
     handleRetry,
     handleAudioEnd
-  } = useAudioPlayer(steps, topic, initialScript);
-
-  // Set the initial script if provided and no script content yet - use once only
-  useEffect(() => {
-    if (initialScript && !scriptContent && !editableScript) {
-      console.log("Setting initial script:", initialScript.substring(0, 50) + "...");
-      setScriptContent(initialScript);
-      setEditableScript(initialScript);
-    }
-  }, [initialScript, scriptContent, editableScript, setScriptContent, setEditableScript]);
+  } = useAudioPlayer(steps, topic);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8">
-        <BarLoader className="mx-auto" />
-        <p className="mt-4 text-gray-600">Loading learning content...</p>
-      </div>
-    );
+    return <div className="text-center p-8"><BarLoader className="mx-auto" /><p>Loading learning content...</p></div>;
   }
 
   return (
-    <div 
-      key={stableId}
-      className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-6 my-4 min-h-[calc(100vh-24rem)]"
-    >
-      <div className="mb-6">
+    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-4 my-4">
+      <div className="mb-4">
         <h3 className="text-xl font-semibold mb-2">Project Audio Summary</h3>
         <p className="text-sm text-gray-400">
           Generate and listen to an audio summary of the entire learning project.
@@ -93,7 +69,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
         onGenerateScript={handleGenerateScript}
       />
 
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex items-center justify-between">
         <AudioControls
           isPlaying={isPlaying}
           isMuted={isMuted}
@@ -119,5 +95,4 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
   );
 };
 
-// Using memo with custom comparison to prevent unnecessary re-renders
-export default memo(AudioSummaryPlayer);
+export default AudioSummaryPlayer;

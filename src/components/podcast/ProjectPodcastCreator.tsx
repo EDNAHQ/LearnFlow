@@ -1,89 +1,125 @@
 
-import React, { memo, useEffect, useMemo } from 'react';
-import { useLearningSteps } from '@/hooks/useLearningSteps';
-import PodcastCreator from './PodcastCreator';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Music, Headphones } from 'lucide-react';
 import { BarLoader } from '@/components/ui/loader';
-import { useIsMobile } from '@/hooks/use-mobile';
+import PodcastForm from './PodcastForm';
+import PodcastPreview from './PodcastPreview';
+import PodcastControls from './PodcastControls';
+import { useProjectPodcast } from '@/hooks/podcast/useProjectPodcast';
 
 interface ProjectPodcastCreatorProps {
   pathId: string;
   topic: string;
-  steps?: any[];
-  initialTranscript?: string | null;
+  steps: any[];
 }
 
-const ProjectPodcastCreator: React.FC<ProjectPodcastCreatorProps> = ({
+const ProjectPodcastCreator = ({ 
   pathId,
   topic,
-  steps = [],
-  initialTranscript = null
-}) => {
-  const { isLoading: stepsLoading } = useLearningSteps(pathId, topic);
-  const isMobile = useIsMobile();
-  
-  // Create stable key for the component
-  const stableKey = useMemo(() => `podcast-creator-content-${pathId}`, [pathId]);
-  
-  // Prepare content only once to avoid re-renders
-  const combinedContent = useMemo(() => {
-    return steps.map(step => step.title + ": " + (step.detailed_content || step.content || '')).join("\n\n");
-  }, [steps]);
-  
-  if (stepsLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)] w-full">
-        <BarLoader className="mx-auto mb-4" />
-        <p className="text-gray-600">Loading project content...</p>
-      </div>
-    );
-  }
+  steps
+}: ProjectPodcastCreatorProps) => {
+  const {
+    transcript,
+    setTranscript,
+    podcastUrl,
+    isGenerating,
+    isGeneratingTranscript,
+    error,
+    charCount,
+    handleSubmit,
+    downloadPodcast,
+    generateProjectTranscript
+  } = useProjectPodcast(steps, topic);
 
-  if (steps.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-16rem)] w-full">
-        <div className="max-w-md mx-auto text-center">
-          <p className="text-lg font-medium mb-2">No content available</p>
-          <p className="text-gray-600">This project doesn't have any content steps yet.</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (steps.length > 0 && !transcript && !isGeneratingTranscript) {
+      generateProjectTranscript();
+    }
+  }, [steps, transcript, isGeneratingTranscript, generateProjectTranscript]);
 
   return (
-    <div className="h-full min-h-[calc(100vh-12rem)] w-full max-w-[860px] mx-auto">
-      <div className="border-b border-gray-200 pb-5 mb-6">
-        <h1 className="text-2xl font-bold text-brand-purple mb-2">Create Podcast</h1>
-        <p className="text-gray-600">
-          Generate a conversational podcast about "{topic}" to help reinforce your learning.
-        </p>
-      </div>
-      
-      <div className="bg-[#1A1A1A] text-white rounded-xl p-6 shadow-lg min-h-[calc(100vh-20rem)]">
-        <PodcastCreator
-          key={stableKey}
-          topic={topic}
-          pathId={pathId}
-          initialTranscript={initialTranscript || ""}
-          content={combinedContent}
-          title={`Complete ${topic} Learning Project`}
-        />
-      </div>
-    </div>
+    <Card className="bg-white shadow-lg">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Music className="h-5 w-5 text-brand-purple" />
+          Create Project Podcast: {topic}
+        </CardTitle>
+        <CardDescription>
+          This podcast summarizes the entire learning project on {topic}.
+          {isGeneratingTranscript 
+            ? " We're generating a complete podcast script for you..." 
+            : " Edit the script if needed, then create your podcast."}
+        </CardDescription>
+      </CardHeader>
+      <Tabs defaultValue="create" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="create" disabled={isGenerating}>
+            <div className="flex items-center gap-2">
+              <Music className="h-4 w-4" />
+              Create
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="listen" disabled={!podcastUrl}>
+            <div className="flex items-center gap-2">
+              <Headphones className="h-4 w-4" />
+              Listen
+            </div>
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="create" className="mt-4">
+          <CardContent>
+            {isGeneratingTranscript ? (
+              <div className="text-center py-8">
+                <div className="flex justify-center mb-4">
+                  <BarLoader className="mx-auto" />
+                </div>
+                <p>Generating complete podcast script for {topic}...</p>
+                <p className="text-sm text-gray-500 mt-2">This may take a minute as we analyze all content from your learning project.</p>
+              </div>
+            ) : (
+              <PodcastForm
+                transcript={transcript}
+                isGenerating={isGenerating}
+                charCount={charCount}
+                onTranscriptChange={setTranscript}
+              />
+            )}
+          </CardContent>
+          
+          <CardFooter className="flex flex-col items-start">
+            <PodcastControls
+              charCount={charCount}
+              isGenerating={isGenerating}
+              error={error}
+              onSubmit={handleSubmit}
+              transcript={transcript}
+            />
+          </CardFooter>
+        </TabsContent>
+        
+        <TabsContent value="listen" className="mt-4">
+          <CardContent>
+            {podcastUrl ? (
+              <PodcastPreview
+                podcastUrl={podcastUrl}
+                onDownload={downloadPodcast}
+              />
+            ) : (
+              <div className="text-center py-8">
+                <div className="flex justify-center mb-4">
+                  <BarLoader className="mx-auto" />
+                </div>
+                <p>Loading your podcast...</p>
+              </div>
+            )}
+          </CardContent>
+        </TabsContent>
+      </Tabs>
+    </Card>
   );
 };
 
-// Using React.memo with custom comparison to prevent unnecessary re-renders
-export default memo(ProjectPodcastCreator, (prevProps, nextProps) => {
-  if (prevProps.pathId !== nextProps.pathId || prevProps.topic !== nextProps.topic) {
-    return false;
-  }
-  
-  // Deep comparison of steps if pathId and topic are the same
-  if (prevProps.steps?.length !== nextProps.steps?.length) {
-    return false;
-  }
-  
-  // For optimization, we'll just check if the steps array is the same reference
-  // A more thorough check would compare each step's id
-  return prevProps.steps === nextProps.steps;
-});
+export default ProjectPodcastCreator;

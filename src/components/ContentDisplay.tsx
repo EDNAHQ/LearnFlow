@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
@@ -36,144 +35,112 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   title,
   stepId
 }) => {
-  const routeParams = useParams();
-  const resolvedPathId = pathId || routeParams.pathId || '';
-  const resolvedStepId = stepId || routeParams.stepId || '';
-  
-  // Only fetch steps if we're not in podcast or audio mode to prevent double fetching
+  const { steps, isLoading, markStepAsComplete } = useLearningSteps(pathId, topic);
   const { mode } = useContentMode();
-  const skipFetching = mode === "podcast" || mode === "audio";
-  
-  const { steps, isLoading } = useLearningSteps(
-    skipFetching ? null : resolvedPathId,
-    skipFetching ? null : topic
-  );
-  
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [currentStep, setCurrentStep] = useState<LearningStep | undefined>(undefined);
-  
-  // Create a stable unique identifier that won't change on re-renders
-  const instanceId = useMemo(() => 
-    `content-display-${resolvedPathId}-${resolvedStepId}-${Math.random().toString(36).slice(2, 9)}`, 
-    [resolvedPathId, resolvedStepId]
-  );
-  
-  // Create a stable key that uniquely identifies this display instance
-  const displayKey = useMemo(() => 
-    `${instanceId}-${mode}`, 
-    [instanceId, mode]
-  );
-  
-  // Find the current step index only once when steps change
-  const currentStepIndex = useMemo(() => {
-    if (steps && steps.length > 0 && resolvedStepId) {
-      const index = steps.findIndex(step => step.id === resolvedStepId);
-      return index !== -1 ? index : 0;
+
+  useEffect(() => {
+    if (steps && steps.length > 0) {
+      // If stepId is provided, find the index of that step
+      if (stepId) {
+        const index = steps.findIndex(step => step.id === stepId);
+        if (index !== -1) {
+          setCurrentStepIndex(index);
+        } else {
+          setCurrentStepIndex(0); // Reset to first step if stepId not found
+        }
+      } else {
+        setCurrentStepIndex(0); // Default to first step if no stepId
+      }
     }
-    return 0;
-  }, [steps, resolvedStepId]);
-  
-  // Set the current step based on the index
+  }, [steps, stepId]);
+
   useEffect(() => {
     if (steps && steps.length > 0 && currentStepIndex >= 0 && currentStepIndex < steps.length) {
       setCurrentStep(steps[currentStepIndex]);
     }
   }, [steps, currentStepIndex]);
 
-  // Memoized render functions to prevent unnecessary re-renders
-  const renderPodcastMode = useCallback(() => {
-    const podcastKey = `podcast-${resolvedPathId}-${instanceId}`;
-    return (
-      <div className="w-full" key={podcastKey}>
-        <PodcastModeDisplay
-          pathId={resolvedPathId}
-          topic={topic}
-        />
-      </div>
-    );
-  }, [resolvedPathId, topic, instanceId]);
-
-  const renderAudioMode = useCallback(() => {
-    const displayStepId = resolvedStepId || currentStep?.id || '';
-    const safePathId = resolvedPathId;
-    const safeTopic = topic || '';
-    const audioKey = `audio-${safePathId}-${displayStepId}-${instanceId}`;
-    
-    return (
-      <div className="w-full" key={audioKey}>
-        <AudioModeDisplay
-          pathId={safePathId}
-          stepId={displayStepId}
-          topic={safeTopic}
-          content={detailedContent || content || ''}
-          title={title || currentStep?.title || ''}
-        />
-      </div>
-    );
-  }, [resolvedPathId, resolvedStepId, currentStep, topic, detailedContent, content, title, instanceId]);
-
-  const renderContent = useCallback(() => {
-    if (isLoading && mode !== "podcast" && mode !== "audio") {
-      return <div className="w-full">Loading content...</div>;
+  const handleNext = () => {
+    if (currentStepIndex < steps.length - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
     }
+  };
 
-    if (!currentStep && !content && mode !== "podcast" && mode !== "audio") {
-      return <div className="w-full">No content available.</div>;
+  const handlePrev = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
     }
+  };
 
-    const displayContent = content || currentStep?.content || '';
-    const displayTitle = title || currentStep?.title || '';
-
-    if (mode === "text") {
-      return (
-        <TextModeDisplay
-          content={detailedContent || displayContent}
-          title={displayTitle}
-          index={index}
-          detailedContent={detailedContent}
-          pathId={resolvedPathId}
-          topic={topic}
-        />
-      );
+  const handleComplete = async () => {
+    if (currentStep) {
+      const success = await markStepAsComplete(currentStep.id);
+      if (success) {
+        // Optimistically update the UI
+        setCurrentStep(prevStep => ({ ...prevStep!, completed: true }));
+      }
     }
-    
-    if (mode === "slides") {
-      return (
-        <SlideModeDisplay
-          content={detailedContent || displayContent}
-          title={displayTitle}
-          detailedContent={detailedContent}
-          pathId={resolvedPathId}
-          topic={topic}
-        />
-      );
-    }
+  };
 
-    return null;
-  }, [mode, isLoading, currentStep, content, detailedContent, title, index, resolvedPathId, topic]);
-
-  // Main render based on mode
-  if (mode === "podcast") {
-    return renderPodcastMode();
+  if (isLoading) {
+    return <div>Loading content...</div>;
   }
 
-  if (mode === "audio") {
-    return renderAudioMode();
+  if (!currentStep && !content) {
+    return <div>No content available.</div>;
   }
+
+  const displayContent = content || currentStep?.content || '';
+  const displayTitle = title || currentStep?.title || '';
+  const displayStepId = stepId || currentStep?.id || '';
+  const safePathId = pathId || '';
+  const safeTopic = topic || '';
 
   return (
-    <div className="w-full" key={displayKey}>
+    <div className="w-full">
       <div className="pb-8">
-        {renderContent()}
+        {mode === "text" && (
+          <TextModeDisplay
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            index={index}
+            detailedContent={detailedContent}
+            pathId={pathId}
+            topic={topic}
+          />
+        )}
+        
+        {mode === "slides" && (
+          <SlideModeDisplay
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            detailedContent={detailedContent}
+            pathId={pathId}
+            topic={topic}
+          />
+        )}
+        
+        {mode === "podcast" && (
+          <PodcastModeDisplay
+            pathId={safePathId}
+            topic={safeTopic}
+          />
+        )}
+
+        {mode === "audio" && (
+          <AudioModeDisplay
+            pathId={safePathId}
+            stepId={displayStepId}
+            topic={safeTopic}
+            content={detailedContent || displayContent}
+            title={displayTitle}
+          />
+        )}
       </div>
     </div>
   );
 };
 
-// Using React.memo to prevent unnecessary re-renders
-export default React.memo(ContentDisplay, (prevProps, nextProps) => {
-  // Only re-render if important props change
-  return prevProps.pathId === nextProps.pathId && 
-         prevProps.stepId === nextProps.stepId && 
-         prevProps.content === nextProps.content &&
-         prevProps.detailedContent === nextProps.detailedContent;
-});
+export default ContentDisplay;

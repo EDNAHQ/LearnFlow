@@ -1,26 +1,37 @@
 
-import { createContext, useContext, useState, useMemo } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 
-export type ContentMode = "text" | "slides" | "podcast" | "audio";
+type ContentMode = "text" | "e-book" | "presentation" | "podcast" | "slides" | "audio";
 
-interface ContentModeContextType {
+interface ContentModeContextProps {
   mode: ContentMode;
   setMode: (mode: ContentMode) => void;
+  toggleMode: () => void;
 }
 
-const ContentModeContext = createContext<ContentModeContextType | undefined>(undefined);
+const ContentModeContext = createContext<ContentModeContextProps | undefined>(undefined);
 
-export const ContentModeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [mode, setMode] = useState<ContentMode>("text");
-  
-  // Use useMemo to prevent unnecessary context value recreations
-  const contextValue = useMemo(() => ({
-    mode,
-    setMode
-  }), [mode]);
+export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
+  const [mode, setMode] = useState<ContentMode>(() => {
+    const savedMode = localStorage.getItem("content-mode");
+    return (savedMode as ContentMode) || "text";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("content-mode", mode);
+  }, [mode]);
+
+  const toggleMode = () => {
+    setMode(prev => {
+      if (prev === "text" || prev === "e-book") return "slides";
+      if (prev === "slides" || prev === "presentation") return "podcast";
+      if (prev === "podcast") return "audio";
+      return "text";
+    });
+  };
 
   return (
-    <ContentModeContext.Provider value={contextValue}>
+    <ContentModeContext.Provider value={{ mode, setMode, toggleMode }}>
       {children}
     </ContentModeContext.Provider>
   );
@@ -28,10 +39,8 @@ export const ContentModeProvider = ({ children }: { children: React.ReactNode })
 
 export const useContentMode = () => {
   const context = useContext(ContentModeContext);
-  
   if (context === undefined) {
     throw new Error("useContentMode must be used within a ContentModeProvider");
   }
-  
   return context;
 };

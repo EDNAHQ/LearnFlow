@@ -1,9 +1,9 @@
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { AudioState } from './types';
+import { useState, useRef, useEffect } from 'react';
+import { AudioPlayerState } from './types';
 
 export const useAudioState = (scriptContent: string | null): {
-  state: AudioState;
+  state: AudioPlayerState;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   setState: {
     setIsPlaying: (isPlaying: boolean) => void;
@@ -22,23 +22,12 @@ export const useAudioState = (scriptContent: string | null): {
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize script when content changes - with a stable check to avoid loops
+  // Initialize script when content changes
   useEffect(() => {
     if (scriptContent && !editableScript) {
-      console.log("Setting editable script from content");
       setEditableScript(scriptContent);
     }
-  }, [scriptContent]);  // Deliberately removed editableScript from deps to avoid loops
-
-  // Create stable setState object with memoized setters
-  const setters = useMemo(() => ({
-    setIsPlaying,
-    setIsMuted,
-    setShowControls,
-    setShowScriptEditor,
-    setEditableScript,
-    setIsAudioLoaded
-  }), []);
+  }, [scriptContent, editableScript]);
 
   return {
     state: {
@@ -50,6 +39,13 @@ export const useAudioState = (scriptContent: string | null): {
       isAudioLoaded
     },
     audioRef,
-    setState: setters
+    setState: {
+      setIsPlaying,
+      setIsMuted,
+      setShowControls,
+      setShowScriptEditor,
+      setEditableScript,
+      setIsAudioLoaded
+    }
   };
 };

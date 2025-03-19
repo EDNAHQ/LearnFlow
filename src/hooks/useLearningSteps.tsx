@@ -21,11 +21,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   
   // Track last update time to prevent too frequent updates
   const lastUpdateTime = useRef<number>(0);
-  const updateBufferTime = 2000; // Increased to 2 seconds buffer between updates
-  const pollingIntervalTime = 30000; // Increased to 30 seconds for polling interval
-  
-  // Use ref to track if we should continue polling
-  const shouldPoll = useRef<boolean>(true);
+  const updateBufferTime = 1000; // 1 second buffer between updates
   
   // Function to count how many steps have detailed content
   const countGeneratedSteps = (stepsArray: LearningStepData[]) => {
@@ -42,11 +38,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
     
     if (!pathId) return;
     
-    // Don't set loading state for polling updates
-    if (steps.length === 0) {
-      setIsLoading(true);
-    }
-    
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('learning_steps')
@@ -60,6 +52,8 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
       }
 
       if (data && data.length > 0) {
+        console.log(`Retrieved ${data.length} learning steps for path:`, pathId);
+        
         // Process data to ensure all values are properly formatted as strings
         const processedData = data.map(step => ({
           ...step,
@@ -71,23 +65,16 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
             : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
         }));
         
-        // Only update state if data has changed
-        const currentStepsIds = steps.map(step => step.id).sort().join(',');
-        const newStepsIds = processedData.map(step => step.id).sort().join(',');
+        setSteps(processedData);
         
-        if (currentStepsIds !== newStepsIds || steps.length !== processedData.length) {
-          setSteps(processedData);
-          
-          // Count steps with detailed content
-          const stepsWithDetailedContent = countGeneratedSteps(processedData);
-          setGeneratedSteps(stepsWithDetailedContent);
-          setGeneratingContent(stepsWithDetailedContent < processedData.length);
-          
-          // If all steps are generated, stop polling
-          if (stepsWithDetailedContent >= processedData.length) {
-            shouldPoll.current = false;
-          }
-        }
+        // Count steps with detailed content
+        const stepsWithDetailedContent = countGeneratedSteps(processedData);
+        setGeneratedSteps(stepsWithDetailedContent);
+        setGeneratingContent(stepsWithDetailedContent < processedData.length);
+        
+        console.log(`Content generation status: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
+      } else {
+        console.log("No learning steps found for path:", pathId);
       }
     } catch (error) {
       console.error("Error fetching learning steps:", error);
@@ -103,9 +90,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
     // Initial fetch
     fetchLearningSteps.current();
     
-    // Reset polling state when pathId changes
-    shouldPoll.current = true;
-    
     // Set up subscription to track generation progress
     const channel = supabase.channel(`steps-${pathId}`);
     
@@ -118,35 +102,31 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
           filter: `path_id=eq.${pathId}`
         }, 
         (payload) => {
-          // Force a fetch of learning steps but only if we haven't updated recently
-          const now = Date.now();
-          if (now - lastUpdateTime.current >= updateBufferTime) {
-            fetchLearningSteps.current();
-          }
+          console.log('Received realtime update for step:', payload.new.id);
+          
+          // Force a complete refresh of learning steps
+          fetchLearningSteps.current();
         }
       )
       .subscribe((status) => {
+        console.log(`Realtime subscription status: ${status}`);
+        
         // If subscription failed, fall back to polling
         if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
           console.log('Subscription failed, falling back to polling');
-          
-          // Set up polling as fallback, but with reasonable interval
+          // Set up polling as fallback
           const pollInterval = setInterval(() => {
-            // Only poll if we should
-            if (shouldPoll.current) {
-              fetchLearningSteps.current();
-            } else {
-              clearInterval(pollInterval);
-            }
-          }, pollingIntervalTime); // Poll every 30 seconds
+            fetchLearningSteps.current();
+          }, 5000); // Poll every 5 seconds
           
           return () => clearInterval(pollInterval);
         }
       });
       
+    console.log("Subscription to learning steps updates established");
+      
     return () => {
       console.log("Cleaning up subscription");
-      shouldPoll.current = false;
       channel.unsubscribe();
     };
   }, [pathId]);

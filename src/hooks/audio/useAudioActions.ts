@@ -1,5 +1,5 @@
 
-import { AudioActions } from './types';
+import { AudioPlayerActions } from './types';
 
 interface UseAudioActionsParams {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -35,7 +35,7 @@ export const useAudioActions = ({
   cleanup,
   steps,
   topic
-}: UseAudioActionsParams): AudioActions => {
+}: UseAudioActionsParams): AudioPlayerActions => {
   
   // Script generation function
   const handleGenerateScript = async () => {

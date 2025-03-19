@@ -4,9 +4,8 @@ import { useAudioState } from './useAudioState';
 import { useAudioEffects } from './useAudioEffects';
 import { useAudioActions } from './useAudioActions';
 import { UseAudioPlayerResult } from './types';
-import { useMemo, useEffect, useCallback } from 'react';
 
-export const useAudioPlayer = (steps: any[], topic: string, initialScript: string | null = null): UseAudioPlayerResult => {
+export const useAudioPlayer = (steps: any[], topic: string): UseAudioPlayerResult => {
   const { 
     isGenerating, 
     isGeneratingScript,
@@ -15,26 +14,10 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     error, 
     generateSpeech, 
     generateScript,
-    cleanup,
-    setScriptContent 
+    cleanup 
   } = useTextToSpeech();
   
-  const { state, audioRef, setState } = useAudioState(initialScript || scriptContent);
-  
-  // Memoize setScriptContent to avoid creating a new function on each render
-  const handleSetScriptContent = useCallback((content: string) => {
-    if (content) {
-      setScriptContent(content);
-      setState.setEditableScript(content);
-    }
-  }, [setScriptContent, setState.setEditableScript]);
-  
-  // Set initial script if provided - in a controlled way
-  useEffect(() => {
-    if (initialScript && !scriptContent) {
-      handleSetScriptContent(initialScript);
-    }
-  }, [initialScript, scriptContent, handleSetScriptContent]);
+  const { state, audioRef, setState } = useAudioState(scriptContent);
   
   useAudioEffects(
     audioRef, 
@@ -62,8 +45,7 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     topic
   });
 
-  // Memoize the result to prevent unnecessary re-renders
-  return useMemo(() => ({
+  return {
     audioRef,
     ...state,
     isGenerating,
@@ -71,17 +53,6 @@ export const useAudioPlayer = (steps: any[], topic: string, initialScript: strin
     audioUrl,
     scriptContent,
     error,
-    ...actions,
-    setScriptContent: handleSetScriptContent
-  }), [
-    audioRef, 
-    state, 
-    isGenerating, 
-    isGeneratingScript, 
-    audioUrl, 
-    scriptContent, 
-    error, 
-    actions,
-    handleSetScriptContent
-  ]);
+    ...actions
+  };
 };

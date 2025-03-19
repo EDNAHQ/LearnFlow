@@ -15,7 +15,6 @@ import NotFound from "./pages/NotFound";
 import ProjectsPage from "./pages/ProjectsPage";
 import WhyFreePage from "./pages/WhyFreePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import ContentGenerationPage from "./pages/ContentGenerationPage";
 
 const queryClient = new QueryClient();
 
@@ -34,18 +33,9 @@ const App = () => (
                   <Route path="/" element={<HomePage />} />
                   <Route path="/home" element={<HomePage />} />
                   <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
-                  
-                  {/* Content Generation Page - separate from content display */}
-                  <Route path="/generate/:pathId" element={<ProtectedRoute><ContentGenerationPage /></ProtectedRoute>} />
-                  
-                  {/* Content routes */}
+                  {/* Updated content routes with parameters */}
                   <Route path="/content/:pathId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
                   <Route path="/content/:pathId/step/:stepId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
-                  
-                  {/* Dedicated routes for podcast and audio */}
-                  <Route path="/podcast/:pathId" element={<ProtectedRoute><ContentPage initialMode="podcast" /></ProtectedRoute>} />
-                  <Route path="/audio/:pathId" element={<ProtectedRoute><ContentPage initialMode="audio" /></ProtectedRoute>} />
-                  
                   <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
                   <Route path="/why-free" element={<WhyFreePage />} />
                   <Route path="*" element={<NotFound />} />
