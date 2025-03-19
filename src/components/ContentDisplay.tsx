@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
@@ -95,8 +96,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   const displayContent = content || currentStep?.content || '';
   const displayTitle = title || currentStep?.title || '';
   const displayStepId = stepId || currentStep?.id || '';
-  const safePathId = pathId || '';
-  const safeTopic = topic || '';
 
   return (
     <div className="w-full">
@@ -117,25 +116,25 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             content={detailedContent || displayContent}
             title={displayTitle}
             detailedContent={detailedContent}
-            pathId={pathId}
-            topic={topic}
           />
         )}
         
         {mode === "podcast" && (
           <PodcastModeDisplay
-            pathId={safePathId}
-            topic={safeTopic}
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            pathId={pathId}
+            topic={topic}
           />
         )}
 
         {mode === "audio" && (
           <AudioModeDisplay
-            pathId={safePathId}
-            stepId={displayStepId}
-            topic={safeTopic}
             content={detailedContent || displayContent}
             title={displayTitle}
+            pathId={pathId}
+            stepId={displayStepId}
+            topic={topic}
           />
         )}
       </div>

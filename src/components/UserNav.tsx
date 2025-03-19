@@ -9,33 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
-import { User, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { User, LogOut, Settings } from "lucide-react";
 
 export function UserNav() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
-    try {
-      // Direct supabase call instead of relying on the context method
-      // which may be using a stale session
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Error signing out:", error);
-        toast.error("Failed to sign out. Please try again.");
-        return;
-      }
-      
-      // If successful, navigate to auth page
-      toast.success("Successfully signed out");
-      navigate("/auth");
-    } catch (err) {
-      console.error("Exception during sign out:", err);
-      toast.error("An unexpected error occurred. Please try again.");
-    }
+    await signOut();
+    navigate("/auth");
   };
 
   if (!user) return null;
@@ -79,6 +61,10 @@ export function UserNav() {
         <DropdownMenuItem onClick={() => navigate("/projects")}>
           <User className="mr-2 h-4 w-4" />
           <span>My Projects</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings")}>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-700">

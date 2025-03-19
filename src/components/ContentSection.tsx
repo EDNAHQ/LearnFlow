@@ -11,6 +11,7 @@ import ContentRelatedQuestions from "./ContentRelatedQuestions";
 import ContentDetailLoader from "./content/ContentDetailLoader";
 import ContentQuestionsGenerator from "./content/ContentQuestionsGenerator";
 import ContentMarginNotesRenderer from "./content/ContentMarginNotesRenderer";
+import TextToSpeechPlayer from "./TextToSpeechPlayer";
 import "@/styles/content.css";
 
 interface ContentSectionProps {
@@ -123,6 +124,12 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           onMouseUp={handleTextSelection}
           onTouchEnd={handleTextSelection}
         >
+          {/* Text-to-Speech Player */}
+          <TextToSpeechPlayer 
+            text={loadedDetailedContent}
+            title={title}
+          />
+        
           <div 
             className="content-section relative"
             ref={contentRef}

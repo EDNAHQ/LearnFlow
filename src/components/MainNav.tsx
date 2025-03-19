@@ -22,16 +22,14 @@ import {
   Brain,
 } from "lucide-react";
 import { UserNav } from "@/components/UserNav";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface MainNavProps extends React.HTMLAttributes<HTMLElement> {}
 
 export function MainNav({ className }: MainNavProps) {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const isActive = (path: string) => location.pathname === path;
-  const isHomePage = location.pathname === "/" || location.pathname === "/home";
+  const isHomePage = location.pathname === "/home";
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -44,28 +42,11 @@ export function MainNav({ className }: MainNavProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-        toast.error("Failed to sign out. Please try again.");
-        return;
-      }
-      toast.success("Successfully signed out");
-      closeMobileMenu();
-      navigate("/auth");
-    } catch (err) {
-      console.error("Exception during sign out:", err);
-      toast.error("An unexpected error occurred. Please try again.");
-    }
-  };
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link to="/" className="mr-6 flex items-center space-x-2">
+          <Link to="/home" className="mr-6 flex items-center space-x-2">
             <div className="p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
               <Brain className="h-5 w-5 text-white" />
             </div>
@@ -145,9 +126,11 @@ export function MainNav({ className }: MainNavProps) {
                   <Button
                     variant="outline"
                     className="w-full mt-3"
-                    onClick={handleSignOut}
+                    onClick={() => {
+                      signOut();
+                      closeMobileMenu();
+                    }}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </Button>
                 )}

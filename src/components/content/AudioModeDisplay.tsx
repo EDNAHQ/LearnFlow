@@ -1,18 +1,19 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import AudioSummaryPlayer from '@/components/content/audio/AudioSummaryPlayer';
+import AudioSummaryPlayer from './AudioSummaryPlayer';
 
 interface AudioModeDisplayProps {
+  content: string;
+  title: string;
   pathId: string;
   stepId: string;
   topic: string;
-  // These props are unused but kept for consistent interface with other mode displays
-  content?: string;
-  title?: string;
 }
 
 const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
+  content,
+  title,
   pathId,
   stepId,
   topic
@@ -25,7 +26,7 @@ const AudioModeDisplay: React.FC<AudioModeDisplayProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <AudioSummaryPlayer pathId={pathId} stepId={stepId} topic={topic} />
+        <AudioSummaryPlayer pathId={pathId} topic={topic} />
       </CardContent>
     </Card>
   );

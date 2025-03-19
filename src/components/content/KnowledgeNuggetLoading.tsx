@@ -29,7 +29,6 @@ const KnowledgeNuggetLoading = ({
     if (totalSteps > 0) {
       const calculatedProgress = (generatedSteps / totalSteps) * 100;
       setProgress(calculatedProgress);
-      console.log(`Updated progress: ${calculatedProgress}% (${generatedSteps}/${totalSteps})`);
     }
   }, [generatedSteps, totalSteps]);
 

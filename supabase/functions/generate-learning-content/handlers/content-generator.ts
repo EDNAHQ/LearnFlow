@@ -34,7 +34,7 @@ export async function generateStepContent(
 
     console.log(`Generating content for step: ${title}`);
     
-    // Enhanced prompt with modified structure for shorter paragraphs
+    // Enhanced prompt that avoids specific words and removes part references
     const prompt = `
     You are an expert educator creating in-depth, engaging educational content about "${topic}".
     
@@ -49,8 +49,7 @@ export async function generateStepContent(
     
     Content structure:
     - Begin directly with the core content - no introductions identifying this as "part X" or "section Y"
-    - Develop 4-6 distinct points or concepts related to the topic
-    - IMPORTANT: Break content into SHORT paragraphs of 2-3 sentences each for better readability
+    - Develop 4-6 distinct points or concepts related to the topic, each in its own paragraph(s)
     - For each major concept:
       * Explain the core idea clearly
       * Provide relevant examples or analogies 
@@ -60,8 +59,8 @@ export async function generateStepContent(
     - End with a concise summary of key takeaways
     
     Formatting requirements:
-    - Write in SHORTER paragraphs with 2-3 sentences each
-    - Use proper spacing between paragraphs
+    - Write in clear paragraphs with logical transitions between ideas
+    - Use proper formatting and spacing between paragraphs
     - Aim for ~800-1000 words of substantial, valuable content
     - Write in a way that's accessible but intellectually stimulating
     
@@ -74,7 +73,7 @@ export async function generateStepContent(
     Remember to stay precisely focused on "${title}" as it relates to ${topic}.
     `;
 
-    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Use short paragraphs of 2-3 sentences maximum for better readability. Never use the words "realm" or "delve" in your content.`;
+    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Never use the words "realm" or "delve" in your content.`;
     const data = await callOpenAI(prompt, systemMessage, undefined, 1500);
     
     const generatedContent = data.choices[0].message.content;
