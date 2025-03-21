@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -18,7 +18,9 @@ export const useContentNavigation = () => {
   const topRef = useRef<HTMLDivElement>(null);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const contentGenerationStarted = useRef<boolean>(false);
+  const navigationInitiated = useRef<boolean>(false);
 
+  // User authentication and path validation
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -31,13 +33,10 @@ export const useContentNavigation = () => {
       return;
     }
 
-    // We still need to get the topic from sessionStorage initially
-    // In a more complete solution, we would fetch this from the database based on pathId
+    // Get the topic from sessionStorage initially
     const storedTopic = sessionStorage.getItem("learn-topic");
     
     if (!storedTopic) {
-      // Fetch topic based on pathId from database
-      // For now, we'll keep using sessionStorage as a fallback
       navigate("/projects");
       toast.error("Learning topic not found. Please start a new learning path.");
       return;
@@ -46,19 +45,21 @@ export const useContentNavigation = () => {
     setTopic(storedTopic);
   }, [navigate, user, pathId]);
 
-  // Set step from URL parameter if available
+  // Set step from URL parameter if available - only run once to prevent loops
   useEffect(() => {
-    if (stepId) {
+    if (stepId && !navigationInitiated.current) {
       const stepIndex = parseInt(stepId, 10);
       if (!isNaN(stepIndex) && stepIndex >= 0) {
         setCurrentStep(stepIndex);
+        navigationInitiated.current = true;
       }
     }
   }, [stepId]);
 
+  // Get learning steps data
   const {
     steps,
-    isLoading,
+    isLoading: stepsLoading,
     markStepAsComplete,
     generatingContent: bgGenerating,
     generatedSteps: bgGenerated,
@@ -86,23 +87,20 @@ export const useContentNavigation = () => {
     }
   }, [steps, pathId, topic]);
 
-  // Update generation status from useLearningSteps
+  // Update generation status from useLearningSteps - use minimal state updates
   useEffect(() => {
     if (steps.length > 0) {
       setGeneratingContent(bgGenerating);
       setGeneratedSteps(bgGenerated);
       
-      console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
-      
       // Only set initialLoading to false when content generation is complete or after a timeout
       if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
-        console.log("All content generated, ending loading state");
         setInitialLoading(false);
       }
     }
   }, [bgGenerating, bgGenerated, steps.length]);
 
-  // Add a timeout to eventually disable initial loading after 30 seconds
+  // Add a timeout to eventually disable initial loading after 15 seconds
   // This is a safety measure in case content generation takes too long
   useEffect(() => {
     if (initialLoading) {
@@ -111,13 +109,14 @@ export const useContentNavigation = () => {
           console.log("Loading timeout reached, ending loading state despite incomplete generation");
           setInitialLoading(false);
         }
-      }, 30000); // 30 seconds timeout
+      }, 15000); // 15 second timeout - reduced from 30s to prevent long waits
       
       return () => clearTimeout(timer);
     }
   }, [initialLoading, steps.length, bgGenerated]);
 
-  const handleMarkComplete = async () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleMarkComplete = useCallback(async () => {
     if (!steps[currentStep]) return;
     
     const success = await markStepAsComplete(steps[currentStep].id);
@@ -127,42 +126,46 @@ export const useContentNavigation = () => {
       setCurrentStep(nextStep);
       
       // Update URL with the new step
-      navigate(`/content/${pathId}/step/${nextStep}`);
+      navigate(`/content/${pathId}/step/${nextStep}`, { replace: true });
       
-      setTimeout(() => {
-        topRef.current?.scrollIntoView({ behavior: 'smooth' });
-        window.scrollTo(0, 0);
-      }, 100);
+      // Scroll to top
+      window.scrollTo(0, 0);
+      topRef.current?.scrollIntoView({ behavior: 'auto' });
     }
-  };
+  }, [currentStep, steps, markStepAsComplete, navigate, pathId]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep > 0) {
       const prevStep = currentStep - 1;
       setCurrentStep(prevStep);
-      // Update URL with the previous step
-      navigate(`/content/${pathId}/step/${prevStep}`);
+      // Update URL with the previous step, using replace to avoid building history stack
+      navigate(`/content/${pathId}/step/${prevStep}`, { replace: true });
+      
+      // Scroll to top immediately without animation
+      window.scrollTo(0, 0);
+      topRef.current?.scrollIntoView({ behavior: 'auto' });
     } else {
       navigate("/projects");
     }
-  };
+  }, [currentStep, navigate, pathId]);
 
-  // New function to navigate to a specific step
-  const navigateToStep = (stepIndex: number) => {
+  // Navigate to a specific step
+  const navigateToStep = useCallback((stepIndex: number) => {
     if (stepIndex >= 0 && stepIndex < steps.length) {
       setCurrentStep(stepIndex);
-      navigate(`/content/${pathId}/step/${stepIndex}`);
       
-      setTimeout(() => {
-        topRef.current?.scrollIntoView({ behavior: 'smooth' });
-        window.scrollTo(0, 0);
-      }, 100);
+      // Use replace: true to prevent history stack buildup
+      navigate(`/content/${pathId}/step/${stepIndex}`, { replace: true });
+      
+      // Scroll to top immediately without animation
+      window.scrollTo(0, 0);
+      topRef.current?.scrollIntoView({ behavior: 'auto' });
     }
-  };
+  }, [navigate, pathId, steps.length]);
 
-  const goToProjects = () => {
+  const goToProjects = useCallback(() => {
     navigate("/projects");
-  };
+  }, [navigate]);
 
   const isLastStep = steps.length > 0 ? currentStep === steps.length - 1 : false;
   const currentStepData = steps[currentStep];
@@ -172,7 +175,7 @@ export const useContentNavigation = () => {
     currentStep,
     pathId: pathId || null,
     steps,
-    isLoading: isLoading || initialLoading,
+    isLoading: stepsLoading || initialLoading,
     generatingContent,
     generatedSteps,
     handleMarkComplete,

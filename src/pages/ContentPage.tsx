@@ -76,7 +76,9 @@ const ContentPage = () => {
 
   // Ensure content is a string
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
-  return <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
+  
+  return (
+    <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
       <ContentHeader 
         onBack={handleBack} 
         onHome={goToProjects} 
@@ -93,16 +95,24 @@ const ContentPage = () => {
           className="w-full"
         >
           <div className="flex justify-between items-center mb-3 w-full">
-            <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
+            <ContentProgress 
+              topic={topic} 
+              currentStep={currentStep} 
+              totalSteps={steps.length} 
+              steps={steps.map(step => ({ id: step.id, title: step.title }))}
+              onNavigateToStep={navigateToStep}
+            />
           </div>
           
-          {/* Add StepPagination component here */}
-          <StepPagination 
-            currentStep={currentStep}
-            totalSteps={steps.length}
-            onNavigate={(step) => navigateToStep(step)}
-            steps={steps.map(step => ({ id: step.id, title: step.title }))}
-          />
+          {/* Pagination below progress bar */}
+          <div className="mb-6">
+            <StepPagination 
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              onNavigate={(step) => navigateToStep(step)}
+              steps={steps.map(step => ({ id: step.id, title: step.title }))}
+            />
+          </div>
           
           {/* Add the title of the current step here */}
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
@@ -126,6 +136,8 @@ const ContentPage = () => {
           </div>
         </motion.div>
       </div>
-    </ContentPageLayout>;
+    </ContentPageLayout>
+  );
 };
+
 export default ContentPage;
