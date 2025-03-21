@@ -12,6 +12,7 @@ import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading"
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+import StepPagination from "@/components/content/StepPagination";
 
 const ContentPage = () => {
   const {
@@ -34,7 +35,8 @@ const ContentPage = () => {
     currentStepData,
     topRef,
     generatingContent,
-    generatedSteps
+    generatedSteps,
+    navigateToStep
   } = useContentNavigation();
 
   // Track if we've already redirected to avoid loops
@@ -93,6 +95,14 @@ const ContentPage = () => {
           <div className="flex justify-between items-center mb-3 w-full">
             <ContentProgress topic={topic} currentStep={currentStep} totalSteps={steps.length} />
           </div>
+          
+          {/* Add StepPagination component here */}
+          <StepPagination 
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            onNavigate={(step) => navigateToStep(step)}
+            steps={steps.map(step => ({ id: step.id, title: step.title }))}
+          />
           
           {/* Add the title of the current step here */}
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">

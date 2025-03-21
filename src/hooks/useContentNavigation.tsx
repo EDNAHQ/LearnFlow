@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -146,6 +147,19 @@ export const useContentNavigation = () => {
     }
   };
 
+  // New function to navigate to a specific step
+  const navigateToStep = (stepIndex: number) => {
+    if (stepIndex >= 0 && stepIndex < steps.length) {
+      setCurrentStep(stepIndex);
+      navigate(`/content/${pathId}/step/${stepIndex}`);
+      
+      setTimeout(() => {
+        topRef.current?.scrollIntoView({ behavior: 'smooth' });
+        window.scrollTo(0, 0);
+      }, 100);
+    }
+  };
+
   const goToProjects = () => {
     navigate("/projects");
   };
@@ -166,6 +180,7 @@ export const useContentNavigation = () => {
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef
+    topRef,
+    navigateToStep
   };
 };

@@ -98,6 +98,14 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
     setMode("text");
   }, [setMode]);
 
+  // Go to a specific slide directly
+  const goToSlide = useCallback((index: number) => {
+    if (index >= 0 && index < slides.length) {
+      setCurrentSlide(index);
+      setShowOverview(false);
+    }
+  }, [slides.length]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showOverview) return;
@@ -110,12 +118,17 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
         setShowOverview(false);
       } else if (e.key === "o") {
         setShowOverview(prev => !prev);
+      } else if (e.key >= "1" && e.key <= "9") {
+        const slideNumber = parseInt(e.key, 10) - 1;
+        if (slideNumber < slides.length) {
+          goToSlide(slideNumber);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNextSlide, goToPreviousSlide, showOverview]);
+  }, [goToNextSlide, goToPreviousSlide, showOverview, slides.length, goToSlide]);
 
   if (!safeContent || slides.length === 0) {
     return (
@@ -160,10 +173,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
           <PresentationOverview
             slides={slides}
             currentSlide={currentSlide}
-            onSelectSlide={(index) => {
-              setCurrentSlide(index);
-              setShowOverview(false);
-            }}
+            onSelectSlide={goToSlide}
             onClose={() => setShowOverview(false)}
           />
         )}
