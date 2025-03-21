@@ -11,8 +11,8 @@ import AnimatedBackgroundPaths from "@/components/home/FloatingPaths";
 const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col w-full bg-white text-gray-800 relative overflow-hidden">
-      {/* Animated background paths for the entire page */}
-      <div className="absolute inset-0 z-0 opacity-70">
+      {/* Animated background paths for the entire page - increased z-index and opacity */}
+      <div className="absolute inset-0 z-0 opacity-90">
         <AnimatedBackgroundPaths />
       </div>
       

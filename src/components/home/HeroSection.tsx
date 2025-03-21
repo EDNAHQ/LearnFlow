@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
-import { BackgroundPaths } from "@/components/ui/background-paths";
 import HeroDecorations from "@/components/home/HeroDecorations";
 
 const HeroSection = () => {
@@ -25,34 +24,34 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-10">
-      {/* Background elements with enhanced visibility */}
+      {/* Background elements - removed solid backgrounds to allow floating paths to show through */}
       <div className="absolute inset-0 -z-10">
-        {/* Main gradient background - adjusted to be more transparent */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/60 to-white/50"></div>
-        
-        {/* We won't add BackgroundPaths here since they're already in the HomePage component */}
+        {/* Removed the solid gradient background that was blocking animations */}
         
         {/* Additional decorative elements */}
         <HeroDecorations />
         
-        {/* Decorative color blurs - repositioned slightly */}
-        <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/10 blur-3xl"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 rounded-full bg-brand-purple/10 blur-3xl"></div>
-        <div className="absolute top-1/3 left-1/4 w-40 h-40 rounded-full bg-brand-pink/10 blur-2xl"></div>
+        {/* Repositioned color blurs with lower opacity to not block the paths */}
+        <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/5 blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-72 h-72 rounded-full bg-brand-purple/5 blur-3xl"></div>
+        <div className="absolute top-1/3 left-1/4 w-40 h-40 rounded-full bg-brand-pink/5 blur-2xl"></div>
       </div>
 
       <div className="container max-w-5xl mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center text-center">
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
-              Learn anything with AI
-            </span>
-          </h1>
-          
-          {/* Topic input container */}
-          <div className="w-full max-w-3xl mx-auto mt-8 mb-6">
-            <TopicInput onSubmit={handleSubmit} loading={loading} />
+          {/* Added a subtle backdrop to make text readable but still show animations */}
+          <div className="backdrop-blur-[2px] rounded-2xl p-6">
+            {/* Headline */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
+                Learn anything with AI
+              </span>
+            </h1>
+            
+            {/* Topic input container - with transparent background */}
+            <div className="w-full max-w-3xl mx-auto mt-8 mb-6 bg-transparent">
+              <TopicInput onSubmit={handleSubmit} loading={loading} />
+            </div>
           </div>
         </div>
       </div>
