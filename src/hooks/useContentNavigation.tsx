@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -19,6 +19,10 @@ export const useContentNavigation = () => {
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const contentGenerationStarted = useRef<boolean>(false);
   const navigationInitiated = useRef<boolean>(false);
+  
+  // Track last update time to throttle updates
+  const lastUpdateTime = useRef<number>(Date.now());
+  const updateThreshold = 2000; // Only update every 2 seconds
 
   // User authentication and path validation
   useEffect(() => {
@@ -87,20 +91,26 @@ export const useContentNavigation = () => {
     }
   }, [steps, pathId, topic]);
 
-  // Update generation status from useLearningSteps - use minimal state updates
+  // Update generation status from useLearningSteps - throttle updates to prevent flickering
   useEffect(() => {
     if (steps.length > 0) {
-      setGeneratingContent(bgGenerating);
-      setGeneratedSteps(bgGenerated);
-      
-      // Only set initialLoading to false when content generation is complete or after a timeout
-      if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
-        setInitialLoading(false);
+      const now = Date.now();
+      if (now - lastUpdateTime.current > updateThreshold) {
+        lastUpdateTime.current = now;
+        
+        // Only update if values changed to prevent unnecessary re-renders
+        setGeneratingContent(prev => bgGenerating !== prev ? bgGenerating : prev);
+        setGeneratedSteps(prev => bgGenerated !== prev ? bgGenerated : prev);
+        
+        // Only set initialLoading to false when content generation is complete or after a timeout
+        if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
+          setInitialLoading(false);
+        }
       }
     }
   }, [bgGenerating, bgGenerated, steps.length]);
 
-  // Add a timeout to eventually disable initial loading after 15 seconds
+  // Add a timeout to eventually disable initial loading after 10 seconds
   // This is a safety measure in case content generation takes too long
   useEffect(() => {
     if (initialLoading) {
@@ -109,7 +119,7 @@ export const useContentNavigation = () => {
           console.log("Loading timeout reached, ending loading state despite incomplete generation");
           setInitialLoading(false);
         }
-      }, 15000); // 15 second timeout - reduced from 30s to prevent long waits
+      }, 10000); // 10 second timeout
       
       return () => clearTimeout(timer);
     }
@@ -128,7 +138,7 @@ export const useContentNavigation = () => {
       // Update URL with the new step
       navigate(`/content/${pathId}/step/${nextStep}`, { replace: true });
       
-      // Scroll to top
+      // Scroll to top immediately without animation
       window.scrollTo(0, 0);
       topRef.current?.scrollIntoView({ behavior: 'auto' });
     }
@@ -168,7 +178,9 @@ export const useContentNavigation = () => {
   }, [navigate]);
 
   const isLastStep = steps.length > 0 ? currentStep === steps.length - 1 : false;
-  const currentStepData = steps[currentStep];
+  
+  // Memoize current step data to prevent re-renders
+  const currentStepData = useMemo(() => steps[currentStep], [steps, currentStep]);
 
   return {
     topic,

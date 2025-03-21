@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { TableProperties } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 
 interface Step {
   id: string;
@@ -18,26 +18,29 @@ interface ContentProgressProps {
   onNavigateToStep: (step: number) => void;
 }
 
-const ContentProgress = ({
+// Memoize the component to prevent unnecessary re-renders
+const ContentProgress = memo(({
   topic,
   currentStep,
   totalSteps,
-  steps,
+  steps = [], // Provide default empty array to prevent mapping errors
   onNavigateToStep
 }: ContentProgressProps) => {
   const [showAllSteps, setShowAllSteps] = useState(false);
   
+  // Memoize the dialog close handler
+  const handleStepSelect = useCallback((index: number) => {
+    onNavigateToStep(index);
+    setShowAllSteps(false);
+  }, [onNavigateToStep]);
+  
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3 gap-2">
-        <h1 className="text-3xl font-bold text-gray-800">
-          {topic}
-        </h1>
-        
-        <div className="flex items-center gap-2">
-          <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] py-1.5 rounded-full font-semibold px-[20px]">
-            Step {currentStep + 1} of {totalSteps}
-          </div>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-800">
+            {topic}
+          </h1>
           
           <Dialog open={showAllSteps} onOpenChange={setShowAllSteps}>
             <DialogTrigger asChild>
@@ -45,7 +48,7 @@ const ContentProgress = ({
                 variant="ghost" 
                 size="icon" 
                 className="text-[#6D42EF] hover:bg-[#6D42EF]/10"
-                aria-label="View all steps"
+                aria-label="Table of contents"
               >
                 <TableProperties className="h-5 w-5" />
               </Button>
@@ -54,16 +57,13 @@ const ContentProgress = ({
               <div className="pt-4">
                 <h3 className="text-lg font-semibold mb-4">All Steps</h3>
                 <div className="space-y-2">
-                  {steps.map((step, index) => (
+                  {steps && steps.length > 0 ? steps.map((step, index) => (
                     <div 
                       key={step.id} 
                       className={`p-3 rounded-md cursor-pointer ${currentStep === index 
                         ? 'bg-brand-purple text-white' 
                         : 'hover:bg-gray-100'}`}
-                      onClick={() => {
-                        onNavigateToStep(index);
-                        setShowAllSteps(false);
-                      }}
+                      onClick={() => handleStepSelect(index)}
                     >
                       <div className="flex items-center">
                         <div className="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-brand-purple font-medium">
@@ -72,11 +72,17 @@ const ContentProgress = ({
                         <span className="text-sm font-medium">{step.title}</span>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="p-3">No steps available</div>
+                  )}
                 </div>
               </div>
             </DialogContent>
           </Dialog>
+        </div>
+        
+        <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] py-1.5 rounded-full font-semibold px-[20px]">
+          Step {currentStep + 1} of {totalSteps}
         </div>
       </div>
       
@@ -90,6 +96,9 @@ const ContentProgress = ({
       </div>
     </div>
   );
-};
+});
+
+// Add displayName for better debugging
+ContentProgress.displayName = "ContentProgress";
 
 export default ContentProgress;

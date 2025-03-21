@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, memo } from "react";
 import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
 import ContentHelperTip from "./ContentHelperTip";
@@ -22,13 +22,19 @@ interface ContentSectionProps {
   topic?: string;
 }
 
-const ContentSection = ({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
+// Use memo to prevent unnecessary re-renders
+const ContentSection = memo(({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [showInsightsDialog, setShowInsightsDialog] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [contentLoaded, setContentLoaded] = useState(false);
+  
+  // Track if margin notes have been generated to prevent regeneration
+  const marginNotesGenerated = useRef(false);
+  const questionsGenerated = useRef(false);
   
   const { 
     selectedText, 
@@ -45,58 +51,66 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
   // Reset state when content changes
   useEffect(() => {
     setIsVisible(false);
-    setLoadedDetailedContent(null);
-    setRelatedQuestions([]);
-    setLoadingQuestions(true);
     
-    // Animation effect for fading in the content - reduced delay to minimize flickering
+    // Only reset content if it has changed significantly
+    if (!loadedDetailedContent || content.substring(0, 20) !== loadedDetailedContent.substring(0, 20)) {
+      setLoadedDetailedContent(null);
+      setContentLoaded(false);
+      marginNotesGenerated.current = false;
+      questionsGenerated.current = false;
+    }
+    
+    // Animation effect for fading in the content - use a fixed short timeout
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 100); // Reduced from index * 200 to a flat 100ms
+    }, 100);
 
     return () => clearTimeout(timer);
-  }, [content, detailedContent, index, topic]);
+  }, [content, detailedContent, index, topic, loadedDetailedContent]);
 
+  // Initialize with detailed content if available - only do this once per content change
   useEffect(() => {
-    // Initialize with detailed content if available
-    if (detailedContent && typeof detailedContent === 'string') {
+    if (detailedContent && typeof detailedContent === 'string' && !contentLoaded) {
       setLoadedDetailedContent(detailedContent);
+      setContentLoaded(true);
+      console.log("Using provided detailed content");
     }
-  }, [detailedContent]);
+  }, [detailedContent, contentLoaded]);
 
-  // Handle content detail loading
+  // Handle content detail loading - memoize callback
   const handleContentLoaded = useCallback((loadedContent: string) => {
-    if (typeof loadedContent === 'string') {
+    if (typeof loadedContent === 'string' && !contentLoaded) {
       console.log("Content loaded successfully", loadedContent.substring(0, 100) + "...");
       setLoadedDetailedContent(loadedContent);
-    } else {
-      console.error("Content loaded is not a string:", typeof loadedContent);
-      setLoadedDetailedContent("Error: Content could not be loaded properly");
+      setContentLoaded(true);
+    }
+  }, [contentLoaded]);
+
+  // Handle related questions - memoize callback
+  const handleQuestionsGenerated = useCallback((questions: string[]) => {
+    if (!questionsGenerated.current) {
+      setRelatedQuestions(questions);
+      setLoadingQuestions(false);
+      questionsGenerated.current = true;
     }
   }, []);
 
-  // Handle related questions
-  const handleQuestionsGenerated = useCallback((questions: string[]) => {
-    setRelatedQuestions(questions);
-    setLoadingQuestions(false);
-  }, []);
-
-  // Dialog event handlers
-  const handleDialogOpenChange = (open: boolean) => {
+  // Dialog event handlers - memoize callbacks
+  const handleDialogOpenChange = useCallback((open: boolean) => {
     setShowInsightsDialog(open);
     if (!open) {
       setCurrentQuestion("");
     }
-  };
+  }, []);
 
-  const handleShowInsights = () => {
+  const handleShowInsights = useCallback(() => {
     setShowInsightsDialog(true);
-  };
+  }, []);
 
-  const handleQuestionClick = (question: string) => {
+  const handleQuestionClick = useCallback((question: string) => {
     setCurrentQuestion(question);
     setShowInsightsDialog(true);
-  };
+  }, []);
 
   return (
     <div 
@@ -105,15 +119,17 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
-      {/* Content Detail Loader - Hidden component that handles loading content */}
-      <ContentDetailLoader
-        stepId={stepId}
-        title={title}
-        content={content}
-        topic={topic}
-        detailedContent={detailedContent}
-        onContentLoaded={handleContentLoaded}
-      />
+      {/* Only show ContentDetailLoader if content is not already loaded */}
+      {!contentLoaded && (
+        <ContentDetailLoader
+          stepId={stepId}
+          title={title}
+          content={content}
+          topic={topic}
+          detailedContent={detailedContent}
+          onContentLoaded={handleContentLoaded}
+        />
+      )}
       
       {!loadedDetailedContent ? (
         <ContentLoader />
@@ -131,20 +147,25 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
           </div>
           
           {/* Questions Generator - Generates questions based on content */}
-          <ContentQuestionsGenerator 
-            content={loadedDetailedContent}
-            topic={topic}
-            title={title}
-            stepId={stepId}
-            onQuestionsGenerated={handleQuestionsGenerated}
-          />
+          {!questionsGenerated.current && (
+            <ContentQuestionsGenerator 
+              content={loadedDetailedContent}
+              topic={topic}
+              title={title}
+              stepId={stepId}
+              onQuestionsGenerated={handleQuestionsGenerated}
+            />
+          )}
           
           {/* Margin Notes Renderer - Adds margin notes to content */}
-          <ContentMarginNotesRenderer
-            content={loadedDetailedContent}
-            topic={topic || ""}
-            contentRef={contentRef}
-          />
+          {!marginNotesGenerated.current && topic && (
+            <ContentMarginNotesRenderer
+              content={loadedDetailedContent}
+              topic={topic}
+              contentRef={contentRef}
+              onNotesGenerated={() => {marginNotesGenerated.current = true}}
+            />
+          )}
           
           {/* Display related questions */}
           <ContentRelatedQuestions 
@@ -176,6 +197,9 @@ const ContentSection = ({ title, content, index, detailedContent, topic }: Conte
       )}
     </div>
   );
-};
+});
+
+// Add display name for better debugging
+ContentSection.displayName = "ContentSection";
 
 export default ContentSection;

@@ -12,7 +12,6 @@ import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading"
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
-import StepPagination from "@/components/content/StepPagination";
 
 const ContentPage = () => {
   const {
@@ -104,15 +103,7 @@ const ContentPage = () => {
             />
           </div>
           
-          {/* Pagination below progress bar */}
-          <div className="mb-6">
-            <StepPagination 
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              onNavigate={(step) => navigateToStep(step)}
-              steps={steps.map(step => ({ id: step.id, title: step.title }))}
-            />
-          </div>
+          {/* Remove the StepPagination component that was here */}
           
           {/* Add the title of the current step here */}
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
