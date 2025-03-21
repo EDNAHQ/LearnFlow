@@ -11,14 +11,14 @@ function FloatingPaths({ position }: { position: number }) {
         } ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${
             684 - i * 5 * position
         } ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`,
-        color: `rgba(15,23,42,${0.1 + i * 0.03})`,
+        color: `rgba(109, 66, 239, ${0.1 + i * 0.03})`, // Brand purple with opacity
         width: 0.5 + i * 0.03,
     }));
 
     return (
         <div className="absolute inset-0 pointer-events-none">
             <svg
-                className="w-full h-full text-brand-purple dark:text-white opacity-40"
+                className="w-full h-full"
                 viewBox="0 0 696 316"
                 fill="none"
             >
@@ -51,8 +51,12 @@ function FloatingPaths({ position }: { position: number }) {
 export function AnimatedBackgroundPaths() {
     return (
         <div className="absolute inset-0 overflow-hidden">
-            <FloatingPaths position={1} />
-            <FloatingPaths position={-1} />
+            <div className="text-brand-purple">
+                <FloatingPaths position={1} />
+            </div>
+            <div className="text-brand-pink">
+                <FloatingPaths position={-1} />
+            </div>
         </div>
     );
 }
