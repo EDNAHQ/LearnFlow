@@ -2,8 +2,8 @@
 import { motion } from "framer-motion";
 
 function FloatingPaths({ position }: { position: number }) {
-    // Generate more paths for a denser effect with higher visibility
-    const paths = Array.from({ length: 45 }, (_, i) => ({
+    // Generate paths with subtle, thinner lines as originally designed
+    const paths = Array.from({ length: 35 }, (_, i) => ({
         id: i,
         d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${
             380 - i * 5 * position
@@ -12,8 +12,8 @@ function FloatingPaths({ position }: { position: number }) {
         } ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${
             684 - i * 5 * position
         } ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`,
-        color: i % 2 === 0 ? `rgba(109, 66, 239, ${0.3 + i * 0.02})` : `rgba(232, 67, 147, ${0.3 + i * 0.02})`, // Brighter brand colors
-        width: 1.2 + i * 0.05, // Thicker lines for better visibility
+        color: i % 2 === 0 ? `rgba(109, 66, 239, ${0.4})` : `rgba(232, 67, 147, ${0.4})`, // Using brand colors with consistent opacity
+        width: 0.8 + i * 0.02, // Thinner lines as originally preferred
     }));
 
     return (
@@ -22,27 +22,27 @@ function FloatingPaths({ position }: { position: number }) {
                 className="w-full h-full"
                 viewBox="0 0 696 316"
                 fill="none"
-                preserveAspectRatio="xMidYMid slice" // This helps maintain the aspect ratio while filling the viewport
+                preserveAspectRatio="xMidYMid slice"
             >
                 <title>Background Paths</title>
                 {paths.map((path) => (
                     <motion.path
                         key={path.id}
                         d={path.d}
-                        stroke="currentColor"
+                        stroke={path.color}
                         strokeWidth={path.width}
-                        strokeOpacity={0.3 + path.id * 0.02} // Increased base opacity
-                        initial={{ pathLength: 0.3, opacity: 0.8 }} // Higher initial opacity
+                        strokeOpacity={0.6} // Consistent opacity for better visibility
+                        initial={{ pathLength: 0.3, opacity: 0.6 }}
                         animate={{
                             pathLength: 1,
-                            opacity: [0.5, 0.9, 0.5], // More pronounced opacity animation
+                            opacity: [0.4, 0.7, 0.4], // Subtle opacity animation
                             pathOffset: [0, 1, 0],
                         }}
                         transition={{
-                            duration: 15 + Math.random() * 10, // Slightly faster animation
+                            duration: 20 + Math.random() * 10,
                             repeat: Number.POSITIVE_INFINITY,
                             ease: "linear",
-                            delay: path.id * 0.1, // Staggered animation start
+                            delay: path.id * 0.1,
                         }}
                     />
                 ))}
