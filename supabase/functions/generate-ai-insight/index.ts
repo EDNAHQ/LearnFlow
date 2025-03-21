@@ -53,6 +53,7 @@ serve(async (req) => {
       """` : 'Answer this question in the context of the broader topic.'}
       
       Please provide a clear, educational response to their question (150-250 words maximum).
+      Use short paragraphs of 2-4 sentences maximum, with frequent paragraph breaks.
       Focus specifically on answering their question while providing context from the broader topic of ${topic}.
       Include a concrete example or application if relevant.
       
@@ -70,6 +71,8 @@ serve(async (req) => {
       """
       
       Please provide a concise but insightful explanation (100-150 words maximum) about this text.
+      Use short paragraphs of 2-4 sentences maximum.
+      
       Your explanation should:
       1. Clarify any complex concepts mentioned
       2. Provide additional context if needed
@@ -88,7 +91,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `You are an expert educator creating concise and insightful explanations about topics related to ${topic}.`
+            content: `You are an expert educator creating concise and insightful explanations about topics related to ${topic}. You write using short paragraphs of 2-4 sentences maximum to improve readability.`
           },
           { role: 'user', content: prompt }
         ],

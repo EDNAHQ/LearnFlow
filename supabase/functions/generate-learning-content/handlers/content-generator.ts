@@ -34,7 +34,7 @@ export async function generateStepContent(
 
     console.log(`Generating content for step: ${title}`);
     
-    // Enhanced prompt that avoids specific words and removes part references
+    // Enhanced prompt that avoids specific words and requests shorter paragraphs
     const prompt = `
     You are an expert educator creating in-depth, engaging educational content about "${topic}".
     
@@ -44,12 +44,12 @@ export async function generateStepContent(
     
     1. COMPREHENSIVE: Cover the subject thoroughly with clear explanations
     2. ENGAGING: Use a conversational tone that draws the reader in
-    3. WELL-STRUCTURED: Organize with clear sections, paragraphs, and transitions
+    3. WELL-STRUCTURED: Organize with clear sections and frequent paragraph breaks
     4. PRACTICAL: Include real-world examples and applications where relevant
     
     Content structure:
     - Begin directly with the core content - no introductions identifying this as "part X" or "section Y"
-    - Develop 4-6 distinct points or concepts related to the topic, each in its own paragraph(s)
+    - Develop 4-6 distinct points or concepts related to the topic
     - For each major concept:
       * Explain the core idea clearly
       * Provide relevant examples or analogies 
@@ -59,8 +59,9 @@ export async function generateStepContent(
     - End with a concise summary of key takeaways
     
     Formatting requirements:
-    - Write in clear paragraphs with logical transitions between ideas
-    - Use proper formatting and spacing between paragraphs
+    - Use SHORT PARAGRAPHS of 2-4 sentences maximum - this is critically important
+    - Create frequent paragraph breaks to improve readability
+    - Maintain clear transitions between paragraphs and ideas
     - Aim for ~800-1000 words of substantial, valuable content
     - Write in a way that's accessible but intellectually stimulating
     
@@ -73,7 +74,7 @@ export async function generateStepContent(
     Remember to stay precisely focused on "${title}" as it relates to ${topic}.
     `;
 
-    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured paragraphs and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Never use the words "realm" or "delve" in your content.`;
+    const systemMessage = `You are an expert educator creating engaging, comprehensive learning content with well-structured short paragraphs (2-4 sentences max) and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Never use the words "realm" or "delve" in your content.`;
     const data = await callOpenAI(prompt, systemMessage, undefined, 1500);
     
     const generatedContent = data.choices[0].message.content;
