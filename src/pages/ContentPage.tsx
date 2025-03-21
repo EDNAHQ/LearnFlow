@@ -53,7 +53,7 @@ const ContentPage = () => {
     setMode("text");
   }, [setMode]);
 
-  // Handle generation complete redirect - only once
+  // Handle generation complete redirect - only redirect if we're not on a step page
   useEffect(() => {
     // Only redirect if we're not already on a step page and generation is complete
     if (!hasRedirected && !isLoading && !generatingContent && pathId && steps.length > 0 && generatedSteps >= steps.length && !stepId) {
@@ -64,13 +64,14 @@ const ContentPage = () => {
   }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
 
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  // This prevents the redirect loop when already on a step page
   if ((isLoading || generatingContent) && !stepId) {
     return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} pathId={pathId} />;
   }
+  
   if (!topic || !pathId) {
     return <ContentError goToProjects={goToProjects} />;
   }
+  
   const handleComplete = isLastStep ? completePath : handleMarkComplete;
 
   // Ensure content is a string
@@ -103,9 +104,6 @@ const ContentPage = () => {
             />
           </div>
           
-          {/* Remove the StepPagination component that was here */}
-          
-          {/* Add the title of the current step here */}
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
             {currentStepData?.title || "Loading..."}
           </h1>
@@ -118,7 +116,7 @@ const ContentPage = () => {
               pathId={pathId} 
               topic={topic}
               title={currentStepData?.title || ""} 
-              stepId={currentStep.toString()}
+              stepId={currentStepData?.id}
             />
           </div>
 
