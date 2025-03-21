@@ -56,7 +56,7 @@ const ContentPage = () => {
   // Handle generation complete redirect - only redirect if we're not on a step page
   useEffect(() => {
     // Only redirect if we're not already on a step page and generation is complete
-    if (!hasRedirected && !isLoading && !generatingContent && pathId && steps.length > 0 && generatedSteps >= steps.length && !stepId) {
+    if (!hasRedirected && !isLoading && !generatingContent && pathId && steps.length > 0 && !stepId) {
       console.log("Content generation complete. Navigating to first content page...");
       setHasRedirected(true);
       navigate(`/content/${pathId}/step/0`);

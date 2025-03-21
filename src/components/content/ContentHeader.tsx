@@ -52,7 +52,8 @@ const ContentHeader = ({
           <div className="flex items-center gap-3">
             <ModeToggle />
             
-            {generatingContent && (
+            {/* Only show generation indicator when actively generating and not on an existing step page */}
+            {generatingContent && generatedSteps < totalSteps && (
               <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-[#E84393] px-3 py-1 rounded-full">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 <span>Generating ({generatedSteps}/{totalSteps})</span>

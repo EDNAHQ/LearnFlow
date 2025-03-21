@@ -69,9 +69,9 @@ export const useContentNavigation = () => {
     generatedSteps: bgGenerated,
   } = useLearningSteps(pathId || null, topic);
 
-  // Start background content generation when steps are loaded
+  // Don't start background generation if we're viewing an existing step
   useEffect(() => {
-    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current) {
+    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current && !stepId) {
       console.log(`Starting background content generation for ${steps.length} steps`);
       setGeneratingContent(true);
       contentGenerationStarted.current = true;
@@ -89,7 +89,7 @@ export const useContentNavigation = () => {
           console.error("Error starting background generation:", err);
         });
     }
-  }, [steps, pathId, topic]);
+  }, [steps, pathId, topic, stepId]);
 
   // Update generation status from useLearningSteps - throttle updates to prevent flickering
   useEffect(() => {
@@ -99,16 +99,18 @@ export const useContentNavigation = () => {
         lastUpdateTime.current = now;
         
         // Only update if values changed to prevent unnecessary re-renders
-        setGeneratingContent(prev => bgGenerating !== prev ? bgGenerating : prev);
+        // If we're on a step page, don't show generating status
+        const shouldShowGenerating = bgGenerating && !stepId;
+        setGeneratingContent(prev => shouldShowGenerating !== prev ? shouldShowGenerating : prev);
         setGeneratedSteps(prev => bgGenerated !== prev ? bgGenerated : prev);
         
         // Only set initialLoading to false when content generation is complete or after a timeout
-        if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
+        if ((!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) || stepId) {
           setInitialLoading(false);
         }
       }
     }
-  }, [bgGenerating, bgGenerated, steps.length]);
+  }, [bgGenerating, bgGenerated, steps.length, stepId]);
 
   // Add a timeout to eventually disable initial loading after 10 seconds
   // This is a safety measure in case content generation takes too long
