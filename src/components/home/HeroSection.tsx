@@ -27,18 +27,15 @@ const HeroSection = () => {
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-10">
       {/* Background elements with enhanced visibility */}
       <div className="absolute inset-0 -z-10">
-        {/* Main gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-brand-purple/5 to-brand-pink/5"></div>
+        {/* Main gradient background - adjusted to be more transparent */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/60 to-white/50"></div>
         
-        {/* Animated floating paths with custom styling */}
-        <div className="absolute inset-0 opacity-60">
-          <BackgroundPaths className="text-brand-purple dark:text-white" />
-        </div>
+        {/* We won't add BackgroundPaths here since they're already in the HomePage component */}
         
         {/* Additional decorative elements */}
         <HeroDecorations />
         
-        {/* Decorative color blurs */}
+        {/* Decorative color blurs - repositioned slightly */}
         <div className="absolute top-20 right-20 w-64 h-64 rounded-full bg-brand-gold/10 blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-72 h-72 rounded-full bg-brand-purple/10 blur-3xl"></div>
         <div className="absolute top-1/3 left-1/4 w-40 h-40 rounded-full bg-brand-pink/10 blur-2xl"></div>

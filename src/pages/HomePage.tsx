@@ -12,7 +12,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col w-full bg-white text-gray-800 relative overflow-hidden">
       {/* Animated background paths for the entire page */}
-      <div className="absolute inset-0 z-0 opacity-50">
+      <div className="absolute inset-0 z-0 opacity-70">
         <AnimatedBackgroundPaths />
       </div>
       
