@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -226,4 +225,4 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
     markStepAsComplete,
     setSteps
   };
-}, []);
+};
