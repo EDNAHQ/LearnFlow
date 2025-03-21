@@ -11,15 +11,15 @@ import AnimatedBackgroundPaths from "@/components/home/FloatingPaths";
 const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col w-full bg-transparent text-gray-800 relative overflow-hidden">
-      {/* Animated background paths for the entire page - positioned underneath all content */}
-      <div className="absolute inset-0 z-0">
+      {/* Animated background paths for the entire page - made sure z-index is properly set */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <AnimatedBackgroundPaths />
       </div>
       
       <MainNav />
       
       {/* Main Content */}
-      <main className="flex-1 relative w-full">
+      <main className="flex-1 relative w-full z-[1]">
         <HeroSection />
         <FeaturesSection />
         <BenefitsSection />

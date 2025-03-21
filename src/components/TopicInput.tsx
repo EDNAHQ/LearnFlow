@@ -46,7 +46,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
             onChange={(e) => setTopic(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className={`pl-5 pr-14 py-7 text-lg rounded-xl shadow-lg border-2 ${isFocused ? 'border-brand-purple' : 'border-transparent'} bg-white transition-all duration-300`}
+            className={`pl-5 pr-14 py-7 text-lg rounded-xl shadow-lg border-2 ${isFocused ? 'border-brand-purple' : 'border-transparent'} bg-white/90 transition-all duration-300`}
             disabled={loading}
           />
           
@@ -72,14 +72,14 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
         )}
         
         <motion.div 
-          className="mt-4 flex items-center justify-center text-sm text-gray-500"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Sparkles className="h-4 w-4 mr-2 text-brand-gold" />
-          Powered by AI • Personalized for you
-        </motion.div>
+            className="mt-4 flex items-center justify-center text-sm text-gray-500 bg-white/70 py-2 px-4 rounded-full w-auto mx-auto inline-flex"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Sparkles className="h-4 w-4 mr-2 text-brand-gold" />
+            Powered by AI • Personalized for you
+          </motion.div>
       </form>
     </motion.div>
   );
