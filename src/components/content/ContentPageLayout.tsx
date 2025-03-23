@@ -36,7 +36,7 @@ const ContentPageLayout = ({
         {Array.isArray(children) ? children.slice(1) : children}
       </div>
 
-      {/* Related Topics Sidebar */}
+      {/* Related Topics Sidebar - now using Sheet component */}
       <RelatedTopicsSidebar 
         topic={topic}
         open={sidebarOpen}

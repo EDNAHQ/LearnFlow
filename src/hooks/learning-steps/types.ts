@@ -7,5 +7,3 @@ export interface LearningStepData {
   detailed_content?: string | null;
   order_index?: number;
 }
-
-export type { LearningStepData };
