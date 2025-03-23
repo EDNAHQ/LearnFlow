@@ -63,6 +63,19 @@ const ContentPage = () => {
     }
   }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
 
+  // Handle question clicks for insights
+  const handleQuestionClick = (question: string) => {
+    console.log("Question clicked in ContentPage:", question);
+    
+    // Create a custom event to communicate with ContentInsightsManager
+    const event = new CustomEvent("ai:insight-request", {
+      detail: { question, topic }
+    });
+    
+    // Dispatch the event so ContentInsightsManager can catch it
+    window.dispatchEvent(event);
+  };
+
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
   if ((isLoading || generatingContent) && !stepId) {
     return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} pathId={pathId} />;

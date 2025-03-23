@@ -19,7 +19,7 @@ interface ContentSectionProps {
 }
 
 // Use memo to prevent unnecessary re-renders
-const ContentSection = memo(({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
+const ContentSection = memo(({ title, content, index, detailedContent, topic, pathId }: ContentSectionProps) => {
   const { handleTextSelection } = useTextSelection();
   
   // Use the extracted hook for state management
@@ -33,11 +33,18 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
     handleConceptClick
   } = useContentSection({ content, detailedContent, topic });
   
-  // Handle question clicking
+  // Handle question clicking - pass it to ContentInsightsManager via ContentPage
   const handleQuestionClick = (question: string) => {
-    // This gets passed down to child components
-    // The actual implementation is in ContentInsightsManager
-    console.log("Question clicked:", question);
+    // This implementation will properly propagate the question up
+    console.log("Question clicked in ContentSection:", question);
+    
+    // Create a custom event to communicate with ContentInsightsManager
+    const event = new CustomEvent("ai:insight-request", {
+      detail: { question, topic }
+    });
+    
+    // Dispatch the event so ContentInsightsManager can catch it
+    window.dispatchEvent(event);
   };
 
   return (

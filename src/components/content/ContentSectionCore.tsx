@@ -96,12 +96,12 @@ const ContentSectionCore = ({
     }
   }, []);
   
-  // Test concept highlighting when concepts are loaded
-  useEffect(() => {
-    if (concepts.length > 0) {
-      console.log(`${concepts.length} concepts available for highlighting in content`);
-    }
-  }, [concepts]);
+  // Handler for related question click specifically in the ContentSectionCore
+  const handleQuestionClick = useCallback((question: string) => {
+    console.log("Question clicked in ContentSectionCore:", question);
+    // Pass the question to the parent handler
+    onQuestionClick(question);
+  }, [onQuestionClick]);
   
   return (
     <div 
@@ -116,7 +116,7 @@ const ContentSectionCore = ({
         {formatContent(
           loadedDetailedContent, 
           topic, 
-          onQuestionClick,
+          handleQuestionClick, // Use the local handler that calls the parent handler
           concepts,
           handleConceptClick
         )}
@@ -152,7 +152,7 @@ const ContentSectionCore = ({
         topic={topic}
         title={title}
         stepId={stepId}
-        onQuestionClick={onQuestionClick}
+        onQuestionClick={handleQuestionClick} // Use the local handler
       />
       
       <ContentHelperTip />

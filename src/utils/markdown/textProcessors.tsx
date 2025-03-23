@@ -26,7 +26,7 @@ export const processTextWithQuestions = (
             <QuestionPrompt 
               key={i} 
               questionText={part} 
-              topic={topic}
+              topic={topic || ''}
               onInsightRequest={onInsightRequest} 
             />
           );
