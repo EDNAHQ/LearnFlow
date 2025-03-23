@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 // Separate the logic into a custom hook that can be used anywhere
 export const useProjectCompletion = (pathId: string | null, onComplete?: () => void) => {
@@ -24,11 +24,11 @@ export const useProjectCompletion = (pathId: string | null, onComplete?: () => v
       
       if (updateError) {
         console.error("Error updating path:", updateError);
-        toast.error("Failed to complete project");
+        console.log("Failed to complete project");
         return false;
       }
       
-      toast.success("Congratulations! Learning project completed! 🎉");
+      console.log("Congratulations! Learning project completed! 🎉");
       setProjectCompleted(true);
       
       // Call onComplete if provided
@@ -39,7 +39,7 @@ export const useProjectCompletion = (pathId: string | null, onComplete?: () => v
       return true;
     } catch (error) {
       console.error("Error marking project as complete:", error);
-      toast.error("Failed to mark project as complete");
+      console.log("Failed to mark project as complete");
       return false;
     } finally {
       setIsSubmitting(false);

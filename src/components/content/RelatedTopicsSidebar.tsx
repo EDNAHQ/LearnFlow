@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Book, ArrowRight, Search, Tag, X } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
@@ -67,7 +66,7 @@ const RelatedTopicsSidebar: React.FC<RelatedTopicsSidebarProps> = ({
         throw new Error("Topic details not found");
       }
       
-      toast.info(`Generating deep dive content for "${topicTitle}"...`);
+      console.log(`Generating deep dive content for "${topicTitle}"...`);
       
       const { data, error } = await supabase.functions.invoke('generate-deep-dive-content', {
         body: {
@@ -86,7 +85,6 @@ const RelatedTopicsSidebar: React.FC<RelatedTopicsSidebarProps> = ({
       }
     } catch (err) {
       console.error('Error generating deep dive content:', err);
-      toast.error('Failed to generate deep dive content');
       setDeepDiveContent(`# Error Generating Content\n\nWe couldn't generate deep dive content for "${topicTitle}" at this time. Please try again later.`);
     } finally {
       setIsGenerating(false);

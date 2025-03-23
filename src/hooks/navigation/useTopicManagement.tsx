@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 export function useTopicManagement(pathId: string | null, user: any) {
   const [topic, setTopic] = useState<string | null>(null);
@@ -16,7 +15,7 @@ export function useTopicManagement(pathId: string | null, user: any) {
 
     if (!pathId) {
       navigate("/projects");
-      toast.error("Learning path not found. Please select a project.");
+      console.log("Learning path not found. Please select a project.");
       return;
     }
 
@@ -25,7 +24,7 @@ export function useTopicManagement(pathId: string | null, user: any) {
     
     if (!storedTopic) {
       navigate("/projects");
-      toast.error("Learning topic not found. Please start a new learning path.");
+      console.log("Learning topic not found. Please start a new learning path.");
       return;
     }
 

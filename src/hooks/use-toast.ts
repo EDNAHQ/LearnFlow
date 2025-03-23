@@ -139,32 +139,13 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+// Create a no-op toast function
 function toast({ ...props }: Toast) {
-  const id = genId()
-
-  const update = (props: ToasterToast) =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...props, id },
-    })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
-    },
-  })
-
+  // No-op version that doesn't actually show toasts
   return {
-    id: id,
-    dismiss,
-    update,
+    id: genId(),
+    dismiss: () => {},
+    update: () => {},
   }
 }
 
