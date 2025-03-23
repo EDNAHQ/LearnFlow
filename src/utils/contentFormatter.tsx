@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { HelpCircle } from "lucide-react";
+import ConceptLink from "@/components/content/ConceptLink";
 
 // Helper component for question prompts
 const QuestionPrompt = ({ 
@@ -57,10 +58,73 @@ const processTextWithQuestions = (text: string, topic: string, onInsightRequest:
   );
 };
 
+// Process text with concept links
+const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: (concept: string) => void) => {
+  if (!concepts || concepts.length === 0) {
+    return text;
+  }
+  
+  // Sort concepts by length (longest first) to avoid nested replacements
+  const sortedConcepts = [...concepts].sort((a, b) => b.term.length - a.term.length);
+  
+  let processedText = text;
+  let placeholders: {[key: string]: React.ReactNode} = {};
+  let placeholderCounter = 0;
+  
+  for (const concept of sortedConcepts) {
+    // Use a case-insensitive regex to find the concept term
+    const regex = new RegExp(`\\b(${concept.term})\\b`, 'i');
+    
+    // Only replace the first occurrence to avoid too many popups
+    if (regex.test(processedText)) {
+      const match = processedText.match(regex);
+      if (match && match[0]) {
+        const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
+        
+        placeholders[placeholder] = (
+          <ConceptLink
+            key={concept.id}
+            term={concept.term}
+            definition={concept.definition}
+            relatedConcepts={concept.relatedConcepts}
+            onRelatedConceptClick={onConceptClick}
+          >
+            {match[0]}
+          </ConceptLink>
+        );
+        
+        // Replace only the first occurrence
+        processedText = processedText.replace(regex, placeholder);
+      }
+    }
+  }
+  
+  // If no replacements were made, return the original text
+  if (Object.keys(placeholders).length === 0) {
+    return text;
+  }
+  
+  // Replace all placeholders with their corresponding components
+  const parts = processedText.split(/(\_\_CONCEPT\_PLACEHOLDER\_\d+\_\_)/);
+  
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (placeholders[part]) {
+          return placeholders[part];
+        }
+        return part;
+      })}
+    </>
+  );
+};
+
 export const formatContent = (
   text: string, 
   topic?: string, 
-  onInsightRequest?: (question: string) => void
+  onInsightRequest?: (question: string) => void,
+  concepts?: any[],
+  onConceptClick?: (concept: string) => void
 ): React.ReactNode => {
   // Ensure text is actually a string
   if (typeof text !== 'string') {
@@ -84,11 +148,21 @@ export const formatContent = (
           <h4 className="text-lg font-semibold mt-5 mb-2 text-brand-purple/80" {...props} />
         ),
         p: ({ node, children, ...props }) => {
-          // Process paragraph content for questions if needed
+          // Process paragraph content for questions and concepts if needed
           if (topic && onInsightRequest && typeof children === 'string') {
-            const processedText = processTextWithQuestions(children, topic, onInsightRequest);
+            // First process questions
+            const withQuestions = processTextWithQuestions(children, topic, onInsightRequest);
+            
+            // Then add concept links if applicable
+            if (concepts && concepts.length > 0 && onConceptClick && typeof withQuestions === 'string') {
+              const withConcepts = processTextWithConcepts(withQuestions, concepts, onConceptClick);
+              return (
+                <p className="my-4 text-lg leading-relaxed text-pretty relative group">{withConcepts}</p>
+              );
+            }
+            
             return (
-              <p className="my-4 text-lg leading-relaxed text-pretty relative group">{processedText}</p>
+              <p className="my-4 text-lg leading-relaxed text-pretty relative group">{withQuestions}</p>
             );
           }
           return <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props}>{children}</p>;

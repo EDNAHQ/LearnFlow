@@ -4,7 +4,9 @@ import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
 import ContentDetailLoader from "./content/ContentDetailLoader";
 import ContentSectionCore from "./content/ContentSectionCore";
+import ConceptNetworkViewer from "./content/ConceptNetworkViewer";
 import { useTextSelection } from "@/hooks/useTextSelection";
+import { useConceptLinking } from "@/hooks/useConceptLinking";
 import "@/styles/content.css";
 
 interface ContentSectionProps {
@@ -21,11 +23,18 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [contentLoaded, setContentLoaded] = useState(false);
+  const [focusedConcept, setFocusedConcept] = useState<string | null>(null);
   
   const { handleTextSelection } = useTextSelection();
   
   // Extract step ID from content if it's in expected format
   const stepId = content.includes(':') ? content.split(":")[0] : '';
+  
+  // Get concepts from the loaded content once it's available
+  const { concepts, isLoading: conceptsLoading } = useConceptLinking(
+    loadedDetailedContent || '',
+    topic
+  );
   
   // Reset state when content changes
   useEffect(() => {
@@ -69,6 +78,14 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
     // The actual implementation is in ContentInsightsManager
     console.log("Question clicked:", question);
   }, []);
+  
+  // Handle concept clicking
+  const handleConceptClick = useCallback((conceptTerm: string) => {
+    setFocusedConcept(conceptTerm);
+    
+    // Find the element with the concept text and scroll to it
+    // Implementation in ContentSectionCore
+  }, []);
 
   return (
     <div 
@@ -92,14 +109,25 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
       {!loadedDetailedContent ? (
         <ContentLoader />
       ) : (
-        <ContentSectionCore
-          loadedDetailedContent={loadedDetailedContent}
-          topic={topic}
-          title={title}
-          stepId={stepId}
-          onTextSelection={handleTextSelection}
-          onQuestionClick={handleQuestionClick}
-        />
+        <>
+          <ContentSectionCore
+            loadedDetailedContent={loadedDetailedContent}
+            topic={topic}
+            title={title}
+            stepId={stepId}
+            onTextSelection={handleTextSelection}
+            onQuestionClick={handleQuestionClick}
+          />
+          
+          {/* Only show the concept network if we have concepts */}
+          {concepts && concepts.length > 0 && topic && (
+            <ConceptNetworkViewer 
+              concepts={concepts}
+              onConceptClick={handleConceptClick}
+              currentTopic={topic}
+            />
+          )}
+        </>
       )}
     </div>
   );
