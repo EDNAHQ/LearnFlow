@@ -1,3 +1,4 @@
+
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -27,7 +28,7 @@ const QuestionPrompt = ({
 };
 
 // Function to process text and identify potential question prompts
-const processTextWithQuestions = (text: string, topic: string, onInsightRequest: (question: string) => void) => {
+const processTextWithQuestions = (text: string, topic: string, onInsightRequest: (question: string) => void): React.ReactNode => {
   // This regex looks for text patterns that are likely to be questions
   // It matches text ending with "?" that is between 15-100 characters
   const questionRegex = /(\b[^.!?]{15,100}\?)/g;
@@ -58,7 +59,7 @@ const processTextWithQuestions = (text: string, topic: string, onInsightRequest:
 };
 
 // Process text with concept links
-const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: (concept: string) => void) => {
+const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: (concept: string) => void): React.ReactNode => {
   if (!concepts || concepts.length === 0) {
     return text;
   }
@@ -190,7 +191,7 @@ export const formatContent = (
         p: ({ node, children, ...props }) => {
           // Process paragraph content for questions and concepts if needed
           if (topic && onInsightRequest && concepts && concepts.length > 0 && onConceptClick) {
-            let processedContent = children;
+            let processedContent: React.ReactNode = children;
             
             // Check if we have a string to process
             if (typeof children === 'string') {
