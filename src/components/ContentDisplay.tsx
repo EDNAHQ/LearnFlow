@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { useLearningSteps, LearningStepData } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
