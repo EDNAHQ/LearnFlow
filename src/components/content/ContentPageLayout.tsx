@@ -1,19 +1,25 @@
-import { ReactNode } from "react";
+
+import { ReactNode, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import RelatedTopicsSidebar from "./RelatedTopicsSidebar";
 
 interface ContentPageLayoutProps {
   children: ReactNode;
   onGoToProjects: () => void;
   topRef: React.RefObject<HTMLDivElement>;
+  topic: string | null;
 }
 
 const ContentPageLayout = ({ 
   children, 
   onGoToProjects,
-  topRef 
+  topRef,
+  topic
 }: ContentPageLayoutProps) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#1A1A1A] text-white w-full">
       <div ref={topRef}></div>
@@ -29,6 +35,13 @@ const ContentPageLayout = ({
         {/* The remaining children (content) */}
         {Array.isArray(children) ? children.slice(1) : children}
       </div>
+
+      {/* Related Topics Sidebar */}
+      <RelatedTopicsSidebar 
+        topic={topic}
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      />
 
       <div className="fixed bottom-6 right-6">
         <Button 

@@ -78,7 +78,11 @@ const ContentPage = () => {
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
   
   return (
-    <ContentPageLayout onGoToProjects={goToProjects} topRef={topRef}>
+    <ContentPageLayout 
+      onGoToProjects={goToProjects} 
+      topRef={topRef}
+      topic={topic}
+    >
       <ContentHeader 
         onBack={handleBack} 
         onHome={goToProjects} 
