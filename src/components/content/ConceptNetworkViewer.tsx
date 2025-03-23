@@ -36,9 +36,9 @@ const ConceptNetworkViewer = ({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       
-      // Set canvas dimensions
+      // Set canvas dimensions - INCREASED HEIGHT for better text fitting
       canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      canvas.height = Math.max(400, canvas.offsetHeight); // Increased minimum height
       
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,28 +104,28 @@ const ConceptNetworkViewer = ({
         }
       });
       
-      // Draw nodes
+      // Draw nodes - INCREASED SIZES for better text fitting
       nodes.forEach(node => {
-        // Draw circle
+        // Draw circle - INCREASED NODE SIZES
         ctx.beginPath();
         ctx.fillStyle = node.isTopic 
           ? 'rgba(109, 66, 239, 0.8)' 
           : 'rgba(232, 67, 147, 0.6)';
-        ctx.arc(node.x, node.y, node.isTopic ? 40 : 30, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, node.isTopic ? 50 : 35, 0, 2 * Math.PI); // Increased node sizes
         ctx.fill();
         
-        // Draw text
-        ctx.font = node.isTopic ? 'bold 14px Arial' : '12px Arial';
+        // Draw text - INCREASED FONT SIZES
+        ctx.font = node.isTopic ? 'bold 16px Arial' : '14px Arial'; // Increased font sizes
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Wrap text if needed
-        const maxWidth = node.isTopic ? 70 : 50;
+        // Wrap text if needed - INCREASED MAX WIDTHS
+        const maxWidth = node.isTopic ? 85 : 60; // Increased max widths
         const words = node.term.split(' ');
         let line = '';
-        let lineHeight = node.isTopic ? 16 : 14;
-        let y = node.y - (words.length > 1 ? lineHeight / 2 : 0);
+        let lineHeight = node.isTopic ? 18 : 16; // Increased line heights
+        let y = node.y - (words.length > 1 ? lineHeight / 2 * (words.length - 1) : 0);
         
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
@@ -152,7 +152,7 @@ const ConceptNetworkViewer = ({
   }, [concepts, currentTopic]);
   
   return (
-    <div className="mt-8 border-t border-gray-200 pt-6">
+    <div className="mt-4">
       <h3 className="text-lg font-semibold text-brand-purple mb-4 flex items-center gap-2">
         <BookOpen className="h-5 w-5 text-[#E84393]" />
         Concept Map
@@ -161,7 +161,7 @@ const ConceptNetworkViewer = ({
       <div className="bg-gray-50 rounded-lg p-4 mb-4">
         <canvas 
           ref={canvasRef} 
-          className="w-full h-[300px]"
+          className="w-full h-[400px]" // Increased height from 300px to 400px
         />
       </div>
       
