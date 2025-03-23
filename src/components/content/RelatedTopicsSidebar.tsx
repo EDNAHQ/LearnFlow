@@ -186,7 +186,7 @@ const RelatedTopicsSidebar: React.FC<RelatedTopicsSidebarProps> = ({
         </SheetContent>
       </Sheet>
 
-      {/* Deep Dive Content Dialog - UPDATED FOR WIDER DISPLAY */}
+      {/* Deep Dive Content Dialog - UPDATED WITH WIDER WIDTH */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader className="relative">
