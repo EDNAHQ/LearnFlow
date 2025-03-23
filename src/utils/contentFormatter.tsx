@@ -61,10 +61,12 @@ const processTextWithQuestions = (text: string, topic: string, onInsightRequest:
 // Process text with concept links
 const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: (concept: string) => void): React.ReactNode => {
   if (!concepts || concepts.length === 0) {
+    console.log("No concepts provided for highlighting");
     return text;
   }
   
   console.log("Processing text with concepts:", concepts.map(c => c.term));
+  console.log("Text length:", text.length);
   
   // Sort concepts by length (longest first) to avoid nested replacements
   const sortedConcepts = [...concepts].sort((a, b) => b.term.length - a.term.length);
@@ -72,26 +74,26 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
   let processedText = text;
   let placeholders: {[key: string]: React.ReactNode} = {};
   let placeholderCounter = 0;
+  let replacementsCount = 0;
   
   for (const concept of sortedConcepts) {
     const conceptTerm = concept.term;
     
     // Skip empty or very short terms
-    if (!conceptTerm || conceptTerm.length < 3) continue;
+    if (!conceptTerm || conceptTerm.length < 3) {
+      console.log(`Skipping concept "${conceptTerm}" - too short`);
+      continue;
+    }
     
-    // Log attempt to find this concept
-    console.log(`Looking for concept: "${conceptTerm}" in text`);
-    
-    // Test exact match first
+    // Check for exact matches first (case-sensitive)
     if (processedText.includes(conceptTerm)) {
       console.log(`Found exact match for concept: "${conceptTerm}"`);
       
-      // We'll use a simple string replacement for exact matches
       const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
       
       placeholders[placeholder] = (
         <ConceptLink
-          key={concept.id}
+          key={concept.id || `concept-${placeholderCounter}`}
           term={concept.term}
           definition={concept.definition}
           relatedConcepts={concept.relatedConcepts}
@@ -103,11 +105,12 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
       
       // Replace only the first occurrence
       processedText = processedText.replace(conceptTerm, placeholder);
+      replacementsCount++;
       continue;
     }
     
-    // If exact match fails, try case-insensitive match
-    const caseInsensitiveRegex = new RegExp(escapeRegExp(conceptTerm), 'i');
+    // Try case-insensitive match as fallback
+    const caseInsensitiveRegex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
     const match = processedText.match(caseInsensitiveRegex);
     
     if (match && match[0]) {
@@ -117,7 +120,7 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
       
       placeholders[placeholder] = (
         <ConceptLink
-          key={concept.id}
+          key={concept.id || `concept-${placeholderCounter}`}
           term={concept.term}
           definition={concept.definition}
           relatedConcepts={concept.relatedConcepts}
@@ -129,16 +132,19 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
       
       // Replace only the first occurrence
       processedText = processedText.replace(match[0], placeholder);
+      replacementsCount++;
     } else {
       console.log(`No match found for concept: "${conceptTerm}"`);
     }
   }
   
   // If no replacements were made, return the original text
-  if (Object.keys(placeholders).length === 0) {
+  if (replacementsCount === 0) {
     console.log("No concept replacements were made in the text");
     return text;
   }
+  
+  console.log(`Made ${replacementsCount} concept replacements`);
   
   // Replace all placeholders with their corresponding components
   const parts = processedText.split(/(\_\_CONCEPT\_PLACEHOLDER\_\d+\_\_)/);
@@ -173,6 +179,11 @@ export const formatContent = (
     text = String(text || "Content could not be displayed properly");
   }
 
+  // Debug logging for concepts
+  if (concepts && concepts.length > 0) {
+    console.log(`formatContent received ${concepts.length} concepts for highlighting`);
+  }
+
   return (
     <ReactMarkdown
       components={{
@@ -195,6 +206,8 @@ export const formatContent = (
             
             // Check if we have a string to process
             if (typeof children === 'string') {
+              console.log(`Processing paragraph text (${children.length} chars) with ${concepts.length} concepts`);
+              
               // First try to add concept links
               processedContent = processTextWithConcepts(children, concepts, onConceptClick);
               

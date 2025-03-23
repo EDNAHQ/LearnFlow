@@ -31,11 +31,11 @@ const ConceptLink = ({
     <Popover>
       <PopoverTrigger asChild>
         <span 
-          className="relative inline border-b-2 border-dotted border-purple-500 text-purple-900 font-medium group cursor-pointer bg-purple-50/60 px-0.5 rounded" 
+          className="relative inline border-b-2 border-dotted border-[#6D42EF] text-[#6D42EF] font-medium group cursor-pointer bg-purple-50/80 px-1 py-0.5 rounded-sm hover:bg-purple-100/80 transition-colors" 
         >
           {children}
           <span className="inline-block ml-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
-            <InfoIcon className="h-3.5 w-3.5 inline-block text-purple-500" />
+            <InfoIcon className="h-3.5 w-3.5 inline-block text-[#6D42EF]" />
           </span>
         </span>
       </PopoverTrigger>

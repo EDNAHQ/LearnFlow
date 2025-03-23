@@ -37,7 +37,8 @@ const ContentSectionCore = ({
   // Debug output to help troubleshoot
   useEffect(() => {
     if (concepts.length > 0) {
-      console.log("Concepts ready to display:", concepts.length, concepts.map(c => c.term));
+      console.log("ContentSectionCore: Concepts ready to display:", concepts.length);
+      console.log("Concept terms:", concepts.map(c => c.term).join(", "));
       
       // Debug check: Try to find these terms in the content
       setTimeout(() => {
@@ -64,38 +65,29 @@ const ContentSectionCore = ({
       const conceptIndex = textContent.toLowerCase().indexOf(conceptTerm.toLowerCase());
       
       if (conceptIndex !== -1) {
-        // Create a range to highlight the concept
-        const selection = window.getSelection();
-        const range = document.createRange();
-        
-        // This is an approximation; finding the exact text node would require recursion
+        // Try to find the closest element containing this text
         try {
-          const textNodes = Array.from(contentRef.current.querySelectorAll('*'))
-            .filter(el => el.textContent?.toLowerCase().includes(conceptTerm.toLowerCase()))
-            .flatMap(el => Array.from(el.childNodes).filter(node => 
-              node.nodeType === Node.TEXT_NODE && 
-              node.textContent?.toLowerCase().includes(conceptTerm.toLowerCase())
-            ));
-            
-          if (textNodes.length > 0) {
-            const targetNode = textNodes[0];
-            const targetText = targetNode.textContent || '';
-            const nodeConceptIndex = targetText.toLowerCase().indexOf(conceptTerm.toLowerCase());
-            
-            // Scroll the parent element into view
-            let parentElement = targetNode.parentElement;
-            if (parentElement) {
-              parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              
-              // Highlight effect
-              const originalBg = parentElement.style.backgroundColor;
-              parentElement.style.backgroundColor = 'rgba(109, 66, 239, 0.2)';
-              parentElement.style.transition = 'background-color 0.5s ease';
-              
-              setTimeout(() => {
-                parentElement!.style.backgroundColor = originalBg;
-              }, 2000);
+          const allElements = contentRef.current.querySelectorAll('*');
+          let targetElement = null;
+          
+          for (const el of Array.from(allElements)) {
+            if (el.textContent?.includes(conceptTerm)) {
+              targetElement = el;
+              break;
             }
+          }
+          
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight effect
+            const originalBg = targetElement.style.backgroundColor;
+            targetElement.style.backgroundColor = 'rgba(109, 66, 239, 0.2)';
+            targetElement.style.transition = 'background-color 0.5s ease';
+            
+            setTimeout(() => {
+              targetElement.style.backgroundColor = originalBg;
+            }, 2000);
           }
         } catch (error) {
           console.error("Error highlighting concept:", error);
@@ -104,15 +96,10 @@ const ContentSectionCore = ({
     }
   }, []);
   
-  // Reset focused concept when content changes
-  useEffect(() => {
-    setFocusedConcept(null);
-  }, [loadedDetailedContent]);
-  
   // Test concept highlighting when concepts are loaded
   useEffect(() => {
-    if (concepts.length > 0 && contentRef.current) {
-      console.log("Testing concept highlighting after concepts loaded");
+    if (concepts.length > 0) {
+      console.log(`${concepts.length} concepts available for highlighting in content`);
     }
   }, [concepts]);
   
@@ -142,10 +129,10 @@ const ContentSectionCore = ({
         </div>
       )}
       
-      {/* Concept result indicator for debugging */}
+      {/* Concept result indicator */}
       {!conceptsLoading && concepts.length > 0 && (
-        <div className="text-xs text-gray-500 italic mt-4">
-          {concepts.length} concepts found and highlighted.
+        <div className="text-xs text-[#6D42EF] mt-4">
+          {concepts.length} key concepts are highlighted throughout the text.
         </div>
       )}
       

@@ -37,8 +37,8 @@ serve(async (req) => {
     console.log(`Extracting concepts for topic: ${topic}`);
     
     // Extract a sample of the content if it's very long
-    const contentSample = content.length > 4000 
-      ? content.substring(0, 4000) + "..." 
+    const contentSample = content.length > 8000 
+      ? content.substring(0, 8000) + "..." 
       : content;
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -52,20 +52,28 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert educator who identifies key concepts from learning content and explains them clearly. Extract important terms or concepts that appear EXACTLY as written in the text.'
+            content: 'You are an expert educator who identifies key concepts from learning content and explains them clearly. Extract important terms or concepts that appear EXACTLY as written in the text. Focus on finding exact phrases that can be highlighted for the reader.'
           },
           { 
             role: 'user', 
-            content: `This content is about "${topic}". Please analyze it and identify 3-5 key concepts or terms that appear EXACTLY as written in the text and are crucial to understanding this topic. For each concept, provide a short definition and list 1-3 related concepts that are mentioned in the content or are relevant to understanding the main concept.
+            content: `Analyze this educational content about "${topic}" and identify 4-7 important terms or concepts that appear EXACTLY in the text. 
+
+For each concept:
+1. The "term" MUST be an EXACT string that appears in the text (with exact capitalization and spacing)
+2. Provide a concise definition (2-3 sentences maximum)
+3. List 1-3 related concepts also mentioned in the text
+
+IMPORTANT RULES:
+- ONLY include concepts where the exact term appears in the text
+- Focus on significant, multi-word terms (avoid single common words)
+- For each concept, verify it appears EXACTLY in the text before including it
+- Choose terms that appear in full sentences, not in headings or lists
+- Choose terms that are at least 3-4 characters long
 
 Content to analyze:
 ${contentSample}
 
-Return the results as a JSON object with a "concepts" array, with each item having "term", "definition", and "relatedConcepts" fields. Make sure the "term" is EXACTLY as it appears in the text (same capitalization, spacing, etc.), so it can be highlighted.
-
-For example, if the text contains "Artificial Intelligence" (with that exact capitalization), use "Artificial Intelligence" as the term, not "artificial intelligence" or "AI" or any variation.
-
-IMPORTANT: Each term must appear verbatim in the content. Verify this before including it.`
+Return the results as a JSON object with a "concepts" array, with each item having "term", "definition", and "relatedConcepts" fields.`
           }
         ],
         temperature: 0.3,
@@ -98,8 +106,22 @@ IMPORTANT: Each term must appear verbatim in the content. Verify this before inc
       
       // Log each extracted concept for debugging
       conceptsData.forEach(concept => {
-        console.log(`Extracted concept: "${concept.term}" with definition: "${concept.definition.substring(0, 50)}..."`);
+        console.log(`Extracted concept: "${concept.term}" (${concept.term.length} chars) with definition: "${concept.definition.substring(0, 50)}..."`);
       });
+      
+      // Additional verification - check that each concept actually appears in the content
+      const validatedConcepts = conceptsData.filter(concept => {
+        const appears = contentSample.includes(concept.term);
+        if (!appears) {
+          console.log(`WARNING: Concept "${concept.term}" does not appear exactly in the content`);
+        }
+        return appears;
+      });
+      
+      if (validatedConcepts.length < conceptsData.length) {
+        console.log(`Filtered out ${conceptsData.length - validatedConcepts.length} concepts that don't appear in the content`);
+        conceptsData = validatedConcepts;
+      }
     } catch (error) {
       console.error('Error parsing OpenAI response:', error);
       throw new Error('Invalid format in concept extraction response');
