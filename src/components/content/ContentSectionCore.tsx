@@ -5,6 +5,7 @@ import ContentMarginNotesRenderer from "./ContentMarginNotesRenderer";
 import ContentHelperTip from "../ContentHelperTip";
 import ContentQuestionsSection from "./ContentQuestionsSection";
 import { useConceptLinking } from "@/hooks/useConceptLinking";
+import { toast } from "sonner";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -28,14 +29,23 @@ const ContentSectionCore = ({
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Get concepts from the loaded content
-  const { concepts, isLoading: conceptsLoading } = useConceptLinking(loadedDetailedContent, topic);
+  const { concepts, isLoading: conceptsLoading, hasResults } = useConceptLinking(loadedDetailedContent, topic);
   
   // State to track the currently focused concept
   const [focusedConcept, setFocusedConcept] = useState<string | null>(null);
   
+  // Debug output to help troubleshoot
+  useEffect(() => {
+    if (concepts.length > 0) {
+      console.log("Concepts ready to display:", concepts.length, concepts.map(c => c.term));
+    }
+  }, [concepts]);
+  
   // Handler for clicking on related concepts
   const handleConceptClick = useCallback((conceptTerm: string) => {
+    console.log("Concept clicked:", conceptTerm);
     setFocusedConcept(conceptTerm);
+    toast.info(`Highlighting concept: ${conceptTerm}`);
     
     // Find the concept in the content and scroll to it
     if (contentRef.current) {

@@ -27,6 +27,7 @@ serve(async (req) => {
 
     // Only process content that has enough substance
     if (content.length < 200) {
+      console.log("Content too short for concept extraction");
       return new Response(
         JSON.stringify({ concepts: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -51,16 +52,16 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert educator who identifies key concepts from learning content and explains them clearly. Extract 3-5 important terms or concepts from the provided content.'
+            content: 'You are an expert educator who identifies key concepts from learning content and explains them clearly. Extract exactly 3-5 important terms or concepts from the provided content that appear verbatim in the text.'
           },
           { 
             role: 'user', 
-            content: `This content is about "${topic}". Please analyze it and identify 3-5 key concepts or terms that are crucial to understanding this topic. For each concept, provide a short definition and list 1-3 related concepts that are mentioned in the content or are relevant to understanding the main concept.
+            content: `This content is about "${topic}". Please analyze it and identify 3-5 key concepts or terms that appear verbatim in the text and are crucial to understanding this topic. For each concept, provide a short definition and list 1-3 related concepts that are mentioned in the content or are relevant to understanding the main concept.
 
 Content to analyze:
 ${contentSample}
 
-Return the results as a JSON array, with each item having "term", "definition", and "relatedConcepts" fields.`
+Return the results as a JSON object with a "concepts" array, with each item having "term", "definition", and "relatedConcepts" fields. Make sure the "term" is EXACTLY as it appears in the text, so it can be highlighted.`
           }
         ],
         temperature: 0.3,

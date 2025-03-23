@@ -64,6 +64,8 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
     return text;
   }
   
+  console.log("Processing text with concepts:", concepts.map(c => c.term));
+  
   // Sort concepts by length (longest first) to avoid nested replacements
   const sortedConcepts = [...concepts].sort((a, b) => b.term.length - a.term.length);
   
@@ -72,12 +74,28 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
   let placeholderCounter = 0;
   
   for (const concept of sortedConcepts) {
-    // Use a case-insensitive regex to find the concept term
-    const regex = new RegExp(`\\b(${concept.term})\\b`, 'i');
+    const conceptTerm = concept.term;
     
-    // Only replace the first occurrence to avoid too many popups
-    if (regex.test(processedText)) {
-      const match = processedText.match(regex);
+    // Skip empty or very short terms
+    if (!conceptTerm || conceptTerm.length < 3) continue;
+    
+    // Use a regex that respects word boundaries when possible
+    // This avoids matching substrings of larger words
+    const regex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
+    
+    // If the strict boundary match doesn't work, try a more relaxed match
+    const containsMatch = processedText.toLowerCase().includes(conceptTerm.toLowerCase());
+    
+    if (regex.test(processedText) || containsMatch) {
+      // Try the strict boundary match first
+      let match = processedText.match(regex);
+      
+      // If no strict match, try to find the term more loosely
+      if (!match && containsMatch) {
+        const looseRegex = new RegExp(escapeRegExp(conceptTerm), 'i');
+        match = processedText.match(looseRegex);
+      }
+      
       if (match && match[0]) {
         const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
         
@@ -94,7 +112,7 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
         );
         
         // Replace only the first occurrence
-        processedText = processedText.replace(regex, placeholder);
+        processedText = processedText.replace(match[0], placeholder);
       }
     }
   }
@@ -117,6 +135,11 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
       })}
     </>
   );
+};
+
+// Helper function to escape special regex characters
+const escapeRegExp = (string: string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
 export const formatContent = (
@@ -173,9 +196,16 @@ export const formatContent = (
         ol: ({ node, ...props }) => (
           <ol className="my-5 pl-6 space-y-3 list-decimal" {...props} />
         ),
-        li: ({ node, ...props }) => (
-          <li className="pl-2 text-lg leading-relaxed" {...props} />
-        ),
+        li: ({ node, children, ...props }) => {
+          // Also process list items for concepts
+          if (topic && concepts && concepts.length > 0 && onConceptClick && typeof children === 'string') {
+            const withConcepts = processTextWithConcepts(children, concepts, onConceptClick);
+            return (
+              <li className="pl-2 text-lg leading-relaxed" {...props}>{withConcepts}</li>
+            );
+          }
+          return <li className="pl-2 text-lg leading-relaxed" {...props}>{children}</li>;
+        },
         blockquote: ({ node, ...props }) => (
           <blockquote className="border-l-4 border-brand-purple pl-5 py-2 my-5 bg-brand-purple/5 italic rounded-r-lg" {...props} />
         ),
