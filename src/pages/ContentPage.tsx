@@ -82,6 +82,8 @@ const ContentPage = () => {
       onGoToProjects={goToProjects} 
       topRef={topRef}
       topic={topic}
+      currentContent={currentStepData?.detailed_content || safeContent}
+      currentTitle={currentStepData?.title}
     >
       <ContentHeader 
         onBack={handleBack} 

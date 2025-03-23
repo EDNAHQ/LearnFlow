@@ -10,13 +10,17 @@ interface ContentPageLayoutProps {
   onGoToProjects: () => void;
   topRef: React.RefObject<HTMLDivElement>;
   topic: string | null;
+  currentContent?: string | null;
+  currentTitle?: string | null;
 }
 
 const ContentPageLayout = ({ 
   children, 
   onGoToProjects,
   topRef,
-  topic
+  topic,
+  currentContent,
+  currentTitle
 }: ContentPageLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -39,6 +43,8 @@ const ContentPageLayout = ({
       {/* Related Topics Sidebar - now using Sheet component */}
       <RelatedTopicsSidebar 
         topic={topic}
+        content={currentContent}
+        title={currentTitle}
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
       />
