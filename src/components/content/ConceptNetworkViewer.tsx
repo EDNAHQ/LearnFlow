@@ -1,7 +1,8 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import ConceptDetailPopup from "./ConceptDetailPopup";
 
 interface ConceptNode {
   id: string;
@@ -22,6 +23,9 @@ const ConceptNetworkViewer = ({
   currentTopic
 }: ConceptNetworkViewerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [selectedConcept, setSelectedConcept] = useState<ConceptNode | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   
   // Skip rendering if no concepts
   if (!concepts || concepts.length === 0) {
@@ -29,16 +33,16 @@ const ConceptNetworkViewer = ({
   }
   
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
     const renderNetwork = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      // Set canvas dimensions - INCREASED HEIGHT for better text fitting
+      // Set canvas dimensions
       canvas.width = canvas.offsetWidth;
-      canvas.height = Math.max(400, canvas.offsetHeight); // Increased minimum height
+      canvas.height = Math.max(400, canvas.offsetHeight);
       
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -54,6 +58,7 @@ const ConceptNetworkViewer = ({
         y: number;
         term: string;
         isTopic?: boolean;
+        id?: string;
       }[] = [
         { x: centerX, y: centerY, term: currentTopic, isTopic: true }
       ];
@@ -68,7 +73,8 @@ const ConceptNetworkViewer = ({
         nodes.push({
           x,
           y,
-          term: concept.term
+          term: concept.term,
+          id: concept.id
         });
       });
       
@@ -104,27 +110,34 @@ const ConceptNetworkViewer = ({
         }
       });
       
-      // Draw nodes - INCREASED SIZES for better text fitting
+      // Draw nodes
       nodes.forEach(node => {
-        // Draw circle - INCREASED NODE SIZES
+        // Determine if this node is hovered
+        const isHovered = node.term === hoveredNode;
+        
+        // Draw circle with hover effect
         ctx.beginPath();
         ctx.fillStyle = node.isTopic 
           ? 'rgba(109, 66, 239, 0.8)' 
-          : 'rgba(232, 67, 147, 0.6)';
-        ctx.arc(node.x, node.y, node.isTopic ? 50 : 35, 0, 2 * Math.PI); // Increased node sizes
+          : isHovered 
+            ? 'rgba(232, 67, 147, 0.8)' 
+            : 'rgba(232, 67, 147, 0.6)';
+        
+        const nodeSize = node.isTopic ? 50 : isHovered ? 40 : 35;
+        ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
         ctx.fill();
         
-        // Draw text - INCREASED FONT SIZES
-        ctx.font = node.isTopic ? 'bold 16px Arial' : '14px Arial'; // Increased font sizes
+        // Draw text
+        ctx.font = node.isTopic ? 'bold 16px Arial' : '14px Arial';
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Wrap text if needed - INCREASED MAX WIDTHS
-        const maxWidth = node.isTopic ? 85 : 60; // Increased max widths
+        // Wrap text if needed
+        const maxWidth = node.isTopic ? 85 : 60;
         const words = node.term.split(' ');
         let line = '';
-        let lineHeight = node.isTopic ? 18 : 16; // Increased line heights
+        let lineHeight = node.isTopic ? 18 : 16;
         let y = node.y - (words.length > 1 ? lineHeight / 2 * (words.length - 1) : 0);
         
         for (let n = 0; n < words.length; n++) {
@@ -146,10 +159,77 @@ const ConceptNetworkViewer = ({
     
     renderNetwork();
     
+    // Handle mouse move to detect hovering over nodes
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) * 0.7;
+      
+      // Check if mouse is over any node
+      let hoveredTerm: string | null = null;
+      
+      // Check the center node (topic)
+      const distToCenter = Math.sqrt(
+        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+      );
+      
+      if (distToCenter <= 50) { // Topic node radius
+        hoveredTerm = currentTopic;
+      } else {
+        // Check other nodes
+        const angleStep = (2 * Math.PI) / concepts.length;
+        concepts.forEach((concept, index) => {
+          const angle = index * angleStep;
+          const x = centerX + radius * Math.cos(angle);
+          const y = centerY + radius * Math.sin(angle);
+          
+          const distToConcept = Math.sqrt(
+            Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2)
+          );
+          
+          if (distToConcept <= 35) { // Concept node radius
+            hoveredTerm = concept.term;
+          }
+        });
+      }
+      
+      // Update hovered node if changed
+      if (hoveredTerm !== hoveredNode) {
+        setHoveredNode(hoveredTerm);
+        renderNetwork();
+        
+        // Change cursor to pointer if hovering over a node
+        canvas.style.cursor = hoveredTerm ? 'pointer' : 'default';
+      }
+    };
+    
+    // Handle click to select a concept
+    const handleClick = (e: MouseEvent) => {
+      if (hoveredNode && hoveredNode !== currentTopic) {
+        const clickedConcept = concepts.find(c => c.term === hoveredNode);
+        if (clickedConcept) {
+          setSelectedConcept(clickedConcept);
+          setIsPopupOpen(true);
+        }
+      }
+    };
+    
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('click', handleClick);
+    
     // Re-render on window resize
     window.addEventListener('resize', renderNetwork);
-    return () => window.removeEventListener('resize', renderNetwork);
-  }, [concepts, currentTopic]);
+    
+    return () => {
+      window.removeEventListener('resize', renderNetwork);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('click', handleClick);
+    };
+  }, [concepts, currentTopic, hoveredNode]);
   
   return (
     <div className="mt-4">
@@ -159,9 +239,12 @@ const ConceptNetworkViewer = ({
       </h3>
       
       <div className="bg-gray-50 rounded-lg p-4 mb-4">
+        <div className="text-xs text-gray-500 mb-2">
+          Click on any concept to learn more about it
+        </div>
         <canvas 
           ref={canvasRef} 
-          className="w-full h-[400px]" // Increased height from 300px to 400px
+          className="w-full h-[400px]"
         />
       </div>
       
@@ -172,12 +255,23 @@ const ConceptNetworkViewer = ({
             variant="outline"
             size="sm"
             className="bg-white hover:bg-purple-50 border-purple-200"
-            onClick={() => onConceptClick(concept.term)}
+            onClick={() => {
+              setSelectedConcept(concept);
+              setIsPopupOpen(true);
+            }}
           >
             {concept.term}
           </Button>
         ))}
       </div>
+      
+      {/* Concept Detail Popup */}
+      <ConceptDetailPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        concept={selectedConcept}
+        topic={currentTopic}
+      />
     </div>
   );
 };
