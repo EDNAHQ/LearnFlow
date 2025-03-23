@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,12 +15,14 @@ export function useConceptLinking(content: string, topic: string | undefined) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasRun, setHasRun] = useState<boolean>(false);
+  const runAttempted = useRef<boolean>(false);
 
   useEffect(() => {
     const extractConcepts = async () => {
       // Only run if we have meaningful content and topic, and haven't already run
-      if (!content || !topic || content.length < 100 || hasRun) return;
+      if (!content || !topic || content.length < 100 || hasRun || runAttempted.current) return;
       
+      runAttempted.current = true;
       setIsLoading(true);
       setError(null);
       console.log("Starting concept extraction for:", topic);
@@ -39,6 +41,17 @@ export function useConceptLinking(content: string, topic: string | undefined) {
         if (data && data.concepts && data.concepts.length > 0) {
           console.log("Concepts extracted successfully:", data.concepts);
           setConcepts(data.concepts);
+          
+          // Debug log each term that should be highlighted
+          data.concepts.forEach((concept: Concept) => {
+            console.log(`Looking for term in content: "${concept.term}"`);
+            if (content.toLowerCase().includes(concept.term.toLowerCase())) {
+              console.log(`✓ Found match for "${concept.term}" in content`);
+            } else {
+              console.log(`✗ No match found for "${concept.term}" in content`);
+            }
+          });
+          
         } else {
           console.log("No concepts found in the content");
           setConcepts([]);

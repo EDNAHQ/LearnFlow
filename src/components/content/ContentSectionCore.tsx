@@ -38,6 +38,17 @@ const ContentSectionCore = ({
   useEffect(() => {
     if (concepts.length > 0) {
       console.log("Concepts ready to display:", concepts.length, concepts.map(c => c.term));
+      
+      // Debug check: Try to find these terms in the content
+      setTimeout(() => {
+        if (contentRef.current) {
+          const textContent = contentRef.current.textContent || '';
+          concepts.forEach(c => {
+            const found = textContent.includes(c.term);
+            console.log(`Concept "${c.term}" ${found ? 'found' : 'NOT FOUND'} in content`);
+          });
+        }
+      }, 500);
     }
   }, [concepts]);
   
@@ -78,7 +89,7 @@ const ContentSectionCore = ({
               
               // Highlight effect
               const originalBg = parentElement.style.backgroundColor;
-              parentElement.style.backgroundColor = 'rgba(109, 66, 239, 0.1)';
+              parentElement.style.backgroundColor = 'rgba(109, 66, 239, 0.2)';
               parentElement.style.transition = 'background-color 0.5s ease';
               
               setTimeout(() => {
@@ -97,6 +108,13 @@ const ContentSectionCore = ({
   useEffect(() => {
     setFocusedConcept(null);
   }, [loadedDetailedContent]);
+  
+  // Test concept highlighting when concepts are loaded
+  useEffect(() => {
+    if (concepts.length > 0 && contentRef.current) {
+      console.log("Testing concept highlighting after concepts loaded");
+    }
+  }, [concepts]);
   
   return (
     <div 
@@ -121,6 +139,13 @@ const ContentSectionCore = ({
       {conceptsLoading && (
         <div className="text-xs text-gray-500 italic mt-4">
           Analyzing content for key concepts...
+        </div>
+      )}
+      
+      {/* Concept result indicator for debugging */}
+      {!conceptsLoading && concepts.length > 0 && (
+        <div className="text-xs text-gray-500 italic mt-4">
+          {concepts.length} concepts found and highlighted.
         </div>
       )}
       

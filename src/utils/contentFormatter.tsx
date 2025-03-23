@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -79,46 +78,64 @@ const processTextWithConcepts = (text: string, concepts: any[], onConceptClick: 
     // Skip empty or very short terms
     if (!conceptTerm || conceptTerm.length < 3) continue;
     
-    // Use a regex that respects word boundaries when possible
-    // This avoids matching substrings of larger words
-    const regex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
+    // Log attempt to find this concept
+    console.log(`Looking for concept: "${conceptTerm}" in text`);
     
-    // If the strict boundary match doesn't work, try a more relaxed match
-    const containsMatch = processedText.toLowerCase().includes(conceptTerm.toLowerCase());
+    // Test exact match first
+    if (processedText.includes(conceptTerm)) {
+      console.log(`Found exact match for concept: "${conceptTerm}"`);
+      
+      // We'll use a simple string replacement for exact matches
+      const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
+      
+      placeholders[placeholder] = (
+        <ConceptLink
+          key={concept.id}
+          term={concept.term}
+          definition={concept.definition}
+          relatedConcepts={concept.relatedConcepts}
+          onRelatedConceptClick={onConceptClick}
+        >
+          {conceptTerm}
+        </ConceptLink>
+      );
+      
+      // Replace only the first occurrence
+      processedText = processedText.replace(conceptTerm, placeholder);
+      continue;
+    }
     
-    if (regex.test(processedText) || containsMatch) {
-      // Try the strict boundary match first
-      let match = processedText.match(regex);
+    // If exact match fails, try case-insensitive match
+    const caseInsensitiveRegex = new RegExp(escapeRegExp(conceptTerm), 'i');
+    const match = processedText.match(caseInsensitiveRegex);
+    
+    if (match && match[0]) {
+      console.log(`Found case-insensitive match for "${conceptTerm}": "${match[0]}"`);
       
-      // If no strict match, try to find the term more loosely
-      if (!match && containsMatch) {
-        const looseRegex = new RegExp(escapeRegExp(conceptTerm), 'i');
-        match = processedText.match(looseRegex);
-      }
+      const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
       
-      if (match && match[0]) {
-        const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
-        
-        placeholders[placeholder] = (
-          <ConceptLink
-            key={concept.id}
-            term={concept.term}
-            definition={concept.definition}
-            relatedConcepts={concept.relatedConcepts}
-            onRelatedConceptClick={onConceptClick}
-          >
-            {match[0]}
-          </ConceptLink>
-        );
-        
-        // Replace only the first occurrence
-        processedText = processedText.replace(match[0], placeholder);
-      }
+      placeholders[placeholder] = (
+        <ConceptLink
+          key={concept.id}
+          term={concept.term}
+          definition={concept.definition}
+          relatedConcepts={concept.relatedConcepts}
+          onRelatedConceptClick={onConceptClick}
+        >
+          {match[0]}
+        </ConceptLink>
+      );
+      
+      // Replace only the first occurrence
+      processedText = processedText.replace(match[0], placeholder);
+    } else {
+      console.log(`No match found for concept: "${conceptTerm}"`);
     }
   }
   
   // If no replacements were made, return the original text
   if (Object.keys(placeholders).length === 0) {
+    console.log("No concept replacements were made in the text");
     return text;
   }
   
@@ -172,20 +189,24 @@ export const formatContent = (
         ),
         p: ({ node, children, ...props }) => {
           // Process paragraph content for questions and concepts if needed
-          if (topic && onInsightRequest && typeof children === 'string') {
-            // First process questions
-            const withQuestions = processTextWithQuestions(children, topic, onInsightRequest);
+          if (topic && onInsightRequest && concepts && concepts.length > 0 && onConceptClick) {
+            let processedContent = children;
             
-            // Then add concept links if applicable
-            if (concepts && concepts.length > 0 && onConceptClick && typeof withQuestions === 'string') {
-              const withConcepts = processTextWithConcepts(withQuestions, concepts, onConceptClick);
-              return (
-                <p className="my-4 text-lg leading-relaxed text-pretty relative group">{withConcepts}</p>
-              );
+            // Check if we have a string to process
+            if (typeof children === 'string') {
+              // First try to add concept links
+              processedContent = processTextWithConcepts(children, concepts, onConceptClick);
+              
+              // If it's still a string (no concept matches were found), process for questions
+              if (typeof processedContent === 'string') {
+                processedContent = processTextWithQuestions(processedContent, topic, onInsightRequest);
+              }
             }
             
             return (
-              <p className="my-4 text-lg leading-relaxed text-pretty relative group">{withQuestions}</p>
+              <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props}>
+                {processedContent}
+              </p>
             );
           }
           return <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props}>{children}</p>;

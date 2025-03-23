@@ -31,7 +31,7 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
   const stepId = content.includes(':') ? content.split(":")[0] : '';
   
   // Get concepts from the loaded content once it's available
-  const { concepts, isLoading: conceptsLoading } = useConceptLinking(
+  const { concepts, isLoading: conceptsLoading, hasResults } = useConceptLinking(
     loadedDetailedContent || '',
     topic
   );
@@ -57,16 +57,16 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
   // Initialize with detailed content if available - only do this once per content change
   useEffect(() => {
     if (detailedContent && typeof detailedContent === 'string' && !contentLoaded) {
+      console.log("Using provided detailed content, length:", detailedContent.length);
       setLoadedDetailedContent(detailedContent);
       setContentLoaded(true);
-      console.log("Using provided detailed content");
     }
   }, [detailedContent, contentLoaded]);
 
   // Handle content detail loading - memoize callback
   const handleContentLoaded = useCallback((loadedContent: string) => {
     if (typeof loadedContent === 'string' && !contentLoaded) {
-      console.log("Content loaded successfully", loadedContent.substring(0, 100) + "...");
+      console.log("Content loaded successfully, length:", loadedContent.length);
       setLoadedDetailedContent(loadedContent);
       setContentLoaded(true);
     }
@@ -81,11 +81,16 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
   
   // Handle concept clicking
   const handleConceptClick = useCallback((conceptTerm: string) => {
+    console.log("Concept clicked in ContentSection:", conceptTerm);
     setFocusedConcept(conceptTerm);
-    
-    // Find the element with the concept text and scroll to it
-    // Implementation in ContentSectionCore
   }, []);
+
+  // Log when concepts are ready for debugging
+  useEffect(() => {
+    if (concepts && concepts.length > 0) {
+      console.log(`ContentSection has ${concepts.length} concepts ready for ${topic}`);
+    }
+  }, [concepts, topic]);
 
   return (
     <div 
@@ -121,11 +126,14 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
           
           {/* Only show the concept network if we have concepts */}
           {concepts && concepts.length > 0 && topic && (
-            <ConceptNetworkViewer 
-              concepts={concepts}
-              onConceptClick={handleConceptClick}
-              currentTopic={topic}
-            />
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-brand-purple mb-4">Concept Map</h3>
+              <ConceptNetworkViewer 
+                concepts={concepts}
+                onConceptClick={handleConceptClick}
+                currentTopic={topic}
+              />
+            </div>
           )}
         </>
       )}
