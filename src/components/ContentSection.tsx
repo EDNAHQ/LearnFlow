@@ -1,16 +1,10 @@
 
-import { useEffect, useState, useCallback, useRef, memo } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { cn } from "@/lib/utils";
 import ContentLoader from "./content/ContentLoader";
-import ContentHelperTip from "./ContentHelperTip";
-import { formatContent } from "@/utils/contentFormatter";
-import { useTextSelection } from "@/hooks/useTextSelection";
-import AIInsightsDialog from "./AIInsightsDialog";
-import TextSelectionButton from "./TextSelectionButton";
-import ContentRelatedQuestions from "./ContentRelatedQuestions";
 import ContentDetailLoader from "./content/ContentDetailLoader";
-import ContentQuestionsGenerator from "./content/ContentQuestionsGenerator";
-import ContentMarginNotesRenderer from "./content/ContentMarginNotesRenderer";
+import ContentSectionCore from "./content/ContentSectionCore";
+import { useTextSelection } from "@/hooks/useTextSelection";
 import "@/styles/content.css";
 
 interface ContentSectionProps {
@@ -26,24 +20,9 @@ interface ContentSectionProps {
 const ContentSection = memo(({ title, content, index, detailedContent, topic }: ContentSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
-  const [showInsightsDialog, setShowInsightsDialog] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState<string>("");
-  const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
-  const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [contentLoaded, setContentLoaded] = useState(false);
   
-  // Track if margin notes have been generated to prevent regeneration
-  const marginNotesGenerated = useRef(false);
-  const questionsGenerated = useRef(false);
-  
-  const { 
-    selectedText, 
-    showSelectionButton,
-    selectionPosition,
-    handleTextSelection
-  } = useTextSelection();
-  
-  const contentRef = useRef<HTMLDivElement>(null);
+  const { handleTextSelection } = useTextSelection();
   
   // Extract step ID from content if it's in expected format
   const stepId = content.includes(':') ? content.split(":")[0] : '';
@@ -56,8 +35,6 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
     if (!loadedDetailedContent || content.substring(0, 20) !== loadedDetailedContent.substring(0, 20)) {
       setLoadedDetailedContent(null);
       setContentLoaded(false);
-      marginNotesGenerated.current = false;
-      questionsGenerated.current = false;
     }
     
     // Animation effect for fading in the content - use a fixed short timeout
@@ -86,30 +63,11 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
     }
   }, [contentLoaded]);
 
-  // Handle related questions - memoize callback
-  const handleQuestionsGenerated = useCallback((questions: string[]) => {
-    if (!questionsGenerated.current) {
-      setRelatedQuestions(questions);
-      setLoadingQuestions(false);
-      questionsGenerated.current = true;
-    }
-  }, []);
-
-  // Dialog event handlers - memoize callbacks
-  const handleDialogOpenChange = useCallback((open: boolean) => {
-    setShowInsightsDialog(open);
-    if (!open) {
-      setCurrentQuestion("");
-    }
-  }, []);
-
-  const handleShowInsights = useCallback(() => {
-    setShowInsightsDialog(true);
-  }, []);
-
+  // Handle question clicking
   const handleQuestionClick = useCallback((question: string) => {
-    setCurrentQuestion(question);
-    setShowInsightsDialog(true);
+    // This gets passed down to child components
+    // The actual implementation is in ContentInsightsManager
+    console.log("Question clicked:", question);
   }, []);
 
   return (
@@ -134,65 +92,13 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic }: 
       {!loadedDetailedContent ? (
         <ContentLoader />
       ) : (
-        <div 
-          className="prose prose-gray max-w-none w-full"
-          onMouseUp={handleTextSelection}
-          onTouchEnd={handleTextSelection}
-        >
-          <div 
-            className="content-section relative"
-            ref={contentRef}
-          >
-            {formatContent(loadedDetailedContent, topic, handleQuestionClick)}
-          </div>
-          
-          {/* Questions Generator - Generates questions based on content */}
-          {!questionsGenerated.current && (
-            <ContentQuestionsGenerator 
-              content={loadedDetailedContent}
-              topic={topic}
-              title={title}
-              stepId={stepId}
-              onQuestionsGenerated={handleQuestionsGenerated}
-            />
-          )}
-          
-          {/* Margin Notes Renderer - Adds margin notes to content */}
-          {!marginNotesGenerated.current && topic && (
-            <ContentMarginNotesRenderer
-              content={loadedDetailedContent}
-              topic={topic}
-              contentRef={contentRef}
-              onNotesGenerated={() => {marginNotesGenerated.current = true}}
-            />
-          )}
-          
-          {/* Display related questions */}
-          <ContentRelatedQuestions 
-            questions={relatedQuestions}
-            isLoading={loadingQuestions}
-            onQuestionClick={handleQuestionClick}
-          />
-          
-          <ContentHelperTip />
-        </div>
-      )}
-      
-      {/* Floating Selection Button */}
-      <TextSelectionButton 
-        position={selectionPosition}
-        onInsightRequest={handleShowInsights}
-        visible={showSelectionButton}
-      />
-      
-      {/* AI Insights Dialog */}
-      {topic && (
-        <AIInsightsDialog
-          selectedText={selectedText}
-          open={showInsightsDialog}
-          onOpenChange={handleDialogOpenChange}
+        <ContentSectionCore
+          loadedDetailedContent={loadedDetailedContent}
           topic={topic}
-          question={currentQuestion}
+          title={title}
+          stepId={stepId}
+          onTextSelection={handleTextSelection}
+          onQuestionClick={handleQuestionClick}
         />
       )}
     </div>

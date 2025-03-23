@@ -1,12 +1,12 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { LearningStepData } from "./learning-steps/types";
+import { type LearningStepData } from "./learning-steps/types";
 import { useFetchLearningSteps } from "./learning-steps/useFetchLearningSteps";
 import { useStepCompletion } from "./learning-steps/useStepCompletion";
 import { useRealtimeUpdates } from "./learning-steps/useRealtimeUpdates";
 
-export { LearningStepData } from "./learning-steps/types";
+export type { LearningStepData } from "./learning-steps/types";
 
 export const useLearningSteps = (pathId: string | null, topic: string | null) => {
   const navigate = useNavigate();
