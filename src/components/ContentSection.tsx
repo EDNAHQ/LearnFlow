@@ -4,7 +4,6 @@ import ContentLoader from "./content/ContentLoader";
 import ContentDetailLoader from "./content/ContentDetailLoader";
 import ContentSectionCore from "./content/ContentSectionCore";
 import ContentSectionContainer from "./content/ContentSectionContainer";
-import ContentSectionConcepts from "./content/ContentSectionConcepts";
 import { useContentSection } from "@/hooks/useContentSection";
 import { useTextSelection } from "@/hooks/useTextSelection";
 import "@/styles/content.css";
@@ -30,7 +29,8 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
     stepId,
     concepts,
     handleContentLoaded,
-    handleConceptClick
+    handleConceptClick,
+    focusedConcept
   } = useContentSection({ content, detailedContent, topic });
   
   // Handle question clicking - pass it to ContentInsightsManager via ContentPage
@@ -62,27 +62,16 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
       )}
       
       {!loadedDetailedContent ? (
-        <ContentLoader />
+        <ContentLoader message="Loading content..." />
       ) : (
-        <>
-          <ContentSectionCore
-            loadedDetailedContent={loadedDetailedContent}
-            topic={topic}
-            title={title}
-            stepId={stepId}
-            onTextSelection={handleTextSelection}
-            onQuestionClick={handleQuestionClick}
-          />
-          
-          {/* Only show the concept network if we have concepts */}
-          {concepts && concepts.length > 0 && topic && (
-            <ContentSectionConcepts 
-              concepts={concepts}
-              onConceptClick={handleConceptClick}
-              currentTopic={topic}
-            />
-          )}
-        </>
+        <ContentSectionCore
+          loadedDetailedContent={loadedDetailedContent}
+          topic={topic}
+          title={title}
+          stepId={stepId}
+          onTextSelection={handleTextSelection}
+          onQuestionClick={handleQuestionClick}
+        />
       )}
     </ContentSectionContainer>
   );

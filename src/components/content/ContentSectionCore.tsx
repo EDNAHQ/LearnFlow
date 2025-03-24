@@ -6,6 +6,7 @@ import ContentHelperTip from "../ContentHelperTip";
 import ContentQuestionsSection from "./ContentQuestionsSection";
 import { useConceptLinking } from "@/hooks/useConceptLinking";
 import { toast } from "sonner";
+import ContentSectionConcepts from "./ContentSectionConcepts";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -117,41 +118,43 @@ const ContentSectionCore = ({
   }, [onQuestionClick]);
   
   return (
-    <div 
-      className="prose prose-gray max-w-none w-full"
-      onMouseUp={onTextSelection}
-      onTouchEnd={onTextSelection}
-    >
+    <div className="space-y-6 w-full">
       <div 
-        className="content-section relative"
-        ref={contentRef}
+        className="prose prose-gray max-w-none w-full"
+        onMouseUp={onTextSelection}
+        onTouchEnd={onTextSelection}
       >
-        {formatContent(
-          loadedDetailedContent, 
-          topic, 
-          handleQuestionClick, // Use the local handler that calls the parent handler
-          concepts,
-          handleConceptClick
+        <div 
+          className="content-section relative"
+          ref={contentRef}
+        >
+          {formatContent(
+            loadedDetailedContent, 
+            topic, 
+            handleQuestionClick, 
+            concepts,
+            handleConceptClick
+          )}
+        </div>
+        
+        {/* Concept loading indicator */}
+        {conceptsLoading && (
+          <div className="text-xs text-gray-500 italic mt-4 flex items-center">
+            <div className="animate-spin mr-1 h-3 w-3 border border-[#6D42EF] border-t-transparent rounded-full"></div>
+            Analyzing content for key concepts...
+          </div>
+        )}
+        
+        {/* Concept result indicator */}
+        {!conceptsLoading && concepts.length > 0 && (
+          <div className="text-xs text-[#6D42EF] font-medium mt-4 flex items-center">
+            <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#6D42EF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {concepts.length} key concepts are highlighted throughout the text
+          </div>
         )}
       </div>
-      
-      {/* Concept loading indicator */}
-      {conceptsLoading && (
-        <div className="text-xs text-gray-500 italic mt-4 flex items-center">
-          <div className="animate-spin mr-1 h-3 w-3 border border-[#6D42EF] border-t-transparent rounded-full"></div>
-          Analyzing content for key concepts...
-        </div>
-      )}
-      
-      {/* Concept result indicator */}
-      {!conceptsLoading && concepts.length > 0 && (
-        <div className="text-xs text-[#6D42EF] font-medium mt-4 flex items-center">
-          <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#6D42EF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {concepts.length} key concepts are highlighted throughout the text
-        </div>
-      )}
       
       {/* Margin Notes Renderer - Adds margin notes to content */}
       {!marginNotesGenerated.current && topic && (
@@ -163,13 +166,22 @@ const ContentSectionCore = ({
         />
       )}
       
+      {/* Concept Network Viewer moved here directly in the component */}
+      {concepts && concepts.length > 0 && topic && (
+        <ContentSectionConcepts 
+          concepts={concepts}
+          onConceptClick={handleConceptClick}
+          currentTopic={topic}
+        />
+      )}
+      
       {/* Questions Section */}
       <ContentQuestionsSection
         loadedDetailedContent={loadedDetailedContent}
         topic={topic}
         title={title}
         stepId={stepId}
-        onQuestionClick={handleQuestionClick} // Use the local handler
+        onQuestionClick={handleQuestionClick}
       />
       
       <ContentHelperTip />

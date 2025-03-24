@@ -20,14 +20,14 @@ const ContentLoader = ({ message = "Content is being generated..." }: ContentLoa
   }, []);
   
   return (
-    <div className="flex flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center py-12 my-8 border border-gray-100 rounded-lg bg-gray-50">
       <div className="relative">
-        <Loader2 className="w-12 h-12 animate-spin mb-3 text-[#6D42EF]" />
-        <Book className="w-5 h-5 text-[#E84393] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+        <Loader2 className="w-16 h-16 animate-spin mb-3 text-[#6D42EF]" />
+        <Book className="w-6 h-6 text-[#E84393] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
       </div>
-      <p className="text-gray-500 mt-4">{message}{dots}</p>
+      <p className="text-gray-500 mt-4 text-lg font-medium">{message}{dots}</p>
       <p className="text-xs text-gray-400 mt-1">This may take a few moments</p>
-      <div className="w-48 mt-4">
+      <div className="w-64 mt-6">
         <BarLoader className="w-full" />
       </div>
     </div>

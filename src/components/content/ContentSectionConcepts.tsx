@@ -2,7 +2,7 @@
 import { memo, useState } from "react";
 import ConceptNetworkViewer from "./ConceptNetworkViewer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Network } from "lucide-react";
 
 interface ContentSectionConceptsProps {
   concepts: any[];
@@ -22,16 +22,21 @@ const ContentSectionConcepts = memo(({
     return null;
   }
 
+  console.log("ContentSectionConcepts rendering with", concepts.length, "concepts");
+
   const handleConceptClick = (conceptTerm: string) => {
     console.log("Concept clicked in ContentSectionConcepts:", conceptTerm);
     onConceptClick(conceptTerm);
   };
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
+    <div className="mt-8 pt-6 border-t border-gray-200 bg-white rounded-lg shadow-sm p-4">
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-[#6D42EF]">Concept Network</h3>
+          <h3 className="text-lg font-semibold text-[#6D42EF] flex items-center gap-2">
+            <Network size={20} className="text-brand-pink" />
+            Interactive Concept Network
+          </h3>
           <CollapsibleTrigger asChild>
             <button className="p-1 rounded-md hover:bg-gray-100 text-gray-500">
               {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -40,7 +45,7 @@ const ContentSectionConcepts = memo(({
         </div>
         
         <CollapsibleContent>
-          <div className="p-1 bg-gray-50 rounded-lg border border-gray-100">
+          <div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
             <ConceptNetworkViewer 
               concepts={concepts}
               onConceptClick={handleConceptClick}
