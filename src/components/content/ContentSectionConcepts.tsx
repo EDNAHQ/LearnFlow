@@ -1,5 +1,5 @@
 
-import { memo, useState } from "react";
+import { memo } from "react";
 import ConceptNetworkViewer from "./ConceptNetworkViewer";
 
 interface ContentSectionConceptsProps {
@@ -18,12 +18,16 @@ const ContentSectionConcepts = memo(({
     return null;
   }
 
+  const handleConceptClick = (conceptTerm: string) => {
+    console.log("Concept clicked in ContentSectionConcepts:", conceptTerm);
+    onConceptClick(conceptTerm);
+  };
+
   return (
     <div className="mt-8 pt-6 border-t border-gray-200">
-      <h3 className="text-lg font-semibold text-brand-purple mb-4">Concept Map</h3>
       <ConceptNetworkViewer 
         concepts={concepts}
-        onConceptClick={onConceptClick}
+        onConceptClick={handleConceptClick}
         currentTopic={currentTopic}
       />
     </div>

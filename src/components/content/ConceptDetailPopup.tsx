@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ConceptDetailPopupProps {
   isOpen: boolean;
@@ -31,36 +32,55 @@ const ConceptDetailPopup: React.FC<ConceptDetailPopupProps> = ({
   const [detailedExplanation, setDetailedExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Get a detailed explanation of the concept
   const fetchDetailedExplanation = async () => {
     if (!concept || !topic) return;
     
     // Don't fetch again if we already have the explanation
-    if (detailedExplanation) return;
+    if (detailedExplanation && retryCount === 0) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-concept-explanation', {
+      console.log(`Fetching explanation for "${concept.term}" in topic "${topic}"`);
+      
+      const { data, error: invokeError } = await supabase.functions.invoke('generate-concept-explanation', {
         body: {
           concept: concept.term,
-          definition: concept.definition,
+          definition: concept.definition || "",
           topic
         }
       });
       
-      if (error) throw new Error(error.message);
+      if (invokeError) {
+        console.error("Edge function error:", invokeError);
+        throw new Error(invokeError.message);
+      }
       
-      if (data && data.explanation) {
+      if (!data) {
+        throw new Error("No data received from the edge function");
+      }
+      
+      if (data.error) {
+        console.error("API error:", data.error);
+        throw new Error(data.error);
+      }
+      
+      if (data.explanation) {
+        console.log("Explanation received, length:", data.explanation.length);
         setDetailedExplanation(data.explanation);
+        setRetryCount(0); // Reset retry count on success
       } else {
+        console.error("No explanation in response:", data);
         throw new Error("No explanation received");
       }
     } catch (err) {
       console.error("Failed to fetch concept explanation:", err);
-      setError("Couldn't load a detailed explanation at this time. Please try again later.");
+      setError(`Couldn't load a detailed explanation at this time. ${err.message}`);
+      toast.error("Failed to load concept explanation");
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +91,11 @@ const ConceptDetailPopup: React.FC<ConceptDetailPopupProps> = ({
     if (isOpen && concept) {
       fetchDetailedExplanation();
     }
-  }, [isOpen, concept?.term]);
+  }, [isOpen, concept?.term, retryCount]);
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -99,7 +123,7 @@ const ConceptDetailPopup: React.FC<ConceptDetailPopupProps> = ({
           {/* Basic definition */}
           <div className="mb-6 p-4 bg-purple-50 rounded-lg">
             <h3 className="text-sm uppercase text-gray-500 font-medium mb-1">Definition</h3>
-            <p className="text-gray-800">{concept?.definition}</p>
+            <p className="text-gray-800">{concept?.definition || "No definition available"}</p>
           </div>
 
           {/* Loading state */}
@@ -111,14 +135,14 @@ const ConceptDetailPopup: React.FC<ConceptDetailPopupProps> = ({
           )}
 
           {/* Error state */}
-          {error && (
+          {error && !isLoading && (
             <div className="text-center py-4 text-red-500">
               <p>{error}</p>
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="mt-2" 
-                onClick={fetchDetailedExplanation}
+                onClick={handleRetry}
               >
                 Try Again
               </Button>

@@ -16,6 +16,7 @@ serve(async (req) => {
     const { concept, definition, topic } = await req.json();
 
     if (!concept || !topic) {
+      console.error("Missing concept or topic");
       return new Response(
         JSON.stringify({ error: "Concept and topic are required" }),
         {
@@ -26,6 +27,7 @@ serve(async (req) => {
     }
 
     if (!OPENAI_API_KEY) {
+      console.error("OpenAI API key not configured");
       return new Response(
         JSON.stringify({ error: "OpenAI API key not configured" }),
         {
@@ -35,6 +37,8 @@ serve(async (req) => {
       );
     }
 
+    console.log(`Generating explanation for concept: "${concept}" in topic: "${topic}"`);
+    
     // Prepare the prompt for OpenAI
     const prompt = {
       model: "o3-mini",
@@ -45,7 +49,7 @@ serve(async (req) => {
         },
         {
           role: "user",
-          content: `Provide a detailed explanation of the concept "${concept}" in the context of ${topic}. Here's a basic definition to start with: "${definition}".
+          content: `Provide a detailed explanation of the concept "${concept}" in the context of ${topic}. Here's a basic definition to start with: "${definition || 'No definition provided'}".
           
           Include the following in your explanation:
           1. A clear and comprehensive explanation of what this concept means
@@ -61,6 +65,7 @@ serve(async (req) => {
     };
 
     // Call OpenAI API
+    console.log("Calling OpenAI API...");
     const response = await fetch(OPENAI_API_URL, {
       method: "POST",
       headers: {
@@ -71,10 +76,13 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("OpenAI API error:", error);
+      const errorText = await response.text();
+      console.error("OpenAI API error:", errorText);
       return new Response(
-        JSON.stringify({ error: "Failed to generate explanation" }),
+        JSON.stringify({ 
+          error: "Failed to generate explanation", 
+          details: errorText 
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -83,7 +91,19 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+    console.log("OpenAI response received");
     const explanation = data.choices[0]?.message?.content;
+
+    if (!explanation) {
+      console.error("No explanation in OpenAI response:", data);
+      return new Response(
+        JSON.stringify({ error: "Empty explanation from OpenAI" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     return new Response(
       JSON.stringify({ explanation }),
@@ -95,7 +115,10 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ 
+        error: "Internal server error", 
+        message: error.message 
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
