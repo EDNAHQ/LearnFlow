@@ -14,7 +14,7 @@ export const useRealtimeUpdates = (
 ) => {
   // Track last update time to throttle updates
   const lastUpdateRef = useRef<number>(Date.now());
-  const updateThrottleMs = 2000; // Only update every 2 seconds
+  const updateThrottleMs = 1000; // Reduced throttle time to 1 second for more frequent updates
   
   // Track subscription status
   const subscriptionActive = useRef<boolean>(false);
@@ -89,7 +89,7 @@ export const useRealtimeUpdates = (
             // Set up polling as fallback - use a ref to track the interval
             const pollInterval = setInterval(() => {
               fetchLearningSteps();
-            }, 5000); // Poll every 5 seconds
+            }, 3000); // Poll every 3 seconds for more frequent updates
             
             return () => clearInterval(pollInterval);
           }

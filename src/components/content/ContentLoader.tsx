@@ -1,5 +1,6 @@
 
 import { Loader2, Book } from "lucide-react";
+import { BarLoader } from "@/components/ui/loader";
 
 interface ContentLoaderProps {
   message?: string;
@@ -14,6 +15,9 @@ const ContentLoader = ({ message = "Content is being generated..." }: ContentLoa
       </div>
       <p className="text-gray-500 mt-4">{message}</p>
       <p className="text-xs text-gray-400 mt-1">This may take a few moments</p>
+      <div className="w-48 mt-4">
+        <BarLoader className="w-full" />
+      </div>
     </div>
   );
 };

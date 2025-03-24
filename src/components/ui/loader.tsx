@@ -14,7 +14,7 @@ export const BarLoader = React.forwardRef<HTMLDivElement, LoaderProps>(
       {...props}
     >
       <div className="h-2 w-full bg-gray-200 rounded-full dark:bg-gray-700">
-        <div className="h-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full w-3/4"></div>
+        <div className="h-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full w-3/4 animate-[progress_1.5s_ease-in-out_infinite]"></div>
       </div>
     </div>
   )
