@@ -1,3 +1,4 @@
+
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
@@ -53,6 +54,8 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         "brand-purple": "#6D42EF",
+        "brand-pink": "#E84393",  // Adding brand-pink color
+        "brand-gold": "#F5B623",  // This was already defined in your CSS variables but not in Tailwind config
       },
       borderRadius: {
         lg: "var(--radius)",
