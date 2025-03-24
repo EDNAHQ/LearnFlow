@@ -48,7 +48,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'o3-mini',
         messages: [
           { 
             role: 'system', 
@@ -56,7 +56,7 @@ serve(async (req) => {
           },
           { 
             role: 'user', 
-            content: `Analyze this educational content about "${topic}" and identify 4-7 important terms or concepts that appear EXACTLY in the text. 
+            content: `Analyze this educational content about "${topic}" and identify 5-8 important terms or concepts that appear EXACTLY in the text. 
 
 For each concept:
 1. The "term" MUST be an EXACT string that appears in the text (with exact capitalization and spacing)
@@ -65,10 +65,10 @@ For each concept:
 
 IMPORTANT RULES:
 - ONLY include concepts where the exact term appears in the text
-- Focus on significant, multi-word terms (avoid single common words)
+- Focus on significant, multi-word terms when possible (avoid single common words)
 - For each concept, verify it appears EXACTLY in the text before including it
 - Choose terms that appear in full sentences, not in headings or lists
-- Choose terms that are at least 3-4 characters long
+- Choose terms that are at least 4 characters long
 
 Content to analyze:
 ${contentSample}
@@ -76,7 +76,7 @@ ${contentSample}
 Return the results as a JSON object with a "concepts" array, with each item having "term", "definition", and "relatedConcepts" fields.`
           }
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         response_format: { type: "json_object" }
       }),
     });
@@ -106,7 +106,7 @@ Return the results as a JSON object with a "concepts" array, with each item havi
       
       // Log each extracted concept for debugging
       conceptsData.forEach(concept => {
-        console.log(`Extracted concept: "${concept.term}" (${concept.term.length} chars) with definition: "${concept.definition.substring(0, 50)}..."`);
+        console.log(`Extracted concept: "${concept.term}" (${concept.term.length} chars)`);
       });
       
       // Additional verification - check that each concept actually appears in the content

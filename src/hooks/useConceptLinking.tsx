@@ -15,12 +15,27 @@ export function useConceptLinking(content: string, topic: string | undefined) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasRun, setHasRun] = useState<boolean>(false);
+  const contentRef = useRef<string>('');
   const runAttempted = useRef<boolean>(false);
+
+  useEffect(() => {
+    // Reset state when content significantly changes
+    if (content && contentRef.current && content !== contentRef.current) {
+      if (content.substring(0, 50) !== contentRef.current.substring(0, 50)) {
+        console.log("Content changed significantly, resetting concept extraction state");
+        setHasRun(false);
+        runAttempted.current = false;
+        setConcepts([]);
+        setError(null);
+      }
+    }
+    contentRef.current = content;
+  }, [content]);
 
   useEffect(() => {
     const extractConcepts = async () => {
       // Only run if we have meaningful content and topic, and haven't already run
-      if (!content || !topic || content.length < 100 || hasRun || runAttempted.current) return;
+      if (!content || !topic || content.length < 200 || hasRun || runAttempted.current) return;
       
       runAttempted.current = true;
       setIsLoading(true);
@@ -39,7 +54,7 @@ export function useConceptLinking(content: string, topic: string | undefined) {
         if (error) throw new Error(error.message);
         
         if (data && data.concepts && data.concepts.length > 0) {
-          console.log("Concepts extracted successfully:", data.concepts);
+          console.log("Concepts extracted successfully:", data.concepts.length);
           setConcepts(data.concepts);
           
           // Debug log each term that should be highlighted
@@ -85,6 +100,10 @@ export function useConceptLinking(content: string, topic: string | undefined) {
     isLoading,
     error,
     findConcept,
-    hasResults: concepts.length > 0
+    hasResults: concepts.length > 0,
+    resetExtraction: () => {
+      setHasRun(false);
+      runAttempted.current = false;
+    }
   };
 }

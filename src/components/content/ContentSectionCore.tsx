@@ -29,7 +29,17 @@ const ContentSectionCore = ({
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Get concepts from the loaded content
-  const { concepts, isLoading: conceptsLoading, hasResults } = useConceptLinking(loadedDetailedContent, topic);
+  const { concepts, isLoading: conceptsLoading, hasResults, resetExtraction } = useConceptLinking(
+    loadedDetailedContent, 
+    topic
+  );
+  
+  useEffect(() => {
+    // Re-analyze concepts if content changes significantly
+    if (loadedDetailedContent && loadedDetailedContent.length > 0) {
+      resetExtraction();
+    }
+  }, [loadedDetailedContent, resetExtraction]);
   
   // State to track the currently focused concept
   const [focusedConcept, setFocusedConcept] = useState<string | null>(null);
@@ -38,18 +48,21 @@ const ContentSectionCore = ({
   useEffect(() => {
     if (concepts.length > 0) {
       console.log("ContentSectionCore: Concepts ready to display:", concepts.length);
-      console.log("Concept terms:", concepts.map(c => c.term).join(", "));
       
       // Debug check: Try to find these terms in the content
-      setTimeout(() => {
-        if (contentRef.current) {
-          const textContent = contentRef.current.textContent || '';
-          concepts.forEach(c => {
-            const found = textContent.includes(c.term);
-            console.log(`Concept "${c.term}" ${found ? 'found' : 'NOT FOUND'} in content`);
-          });
-        }
-      }, 500);
+      if (contentRef.current) {
+        const textContent = contentRef.current.textContent || '';
+        concepts.forEach(c => {
+          const found = textContent.includes(c.term);
+          console.log(`Concept "${c.term}" ${found ? 'found' : 'NOT FOUND'} in content`);
+        });
+      }
+      
+      // Notify user concepts were found
+      toast.success(`${concepts.length} key concepts identified`, {
+        description: "Important terms are highlighted throughout the text",
+        duration: 3000
+      });
     }
   }, [concepts]);
   
@@ -71,7 +84,7 @@ const ContentSectionCore = ({
           let targetElement = null;
           
           for (const el of Array.from(allElements)) {
-            if (el.textContent?.includes(conceptTerm)) {
+            if (el.textContent?.toLowerCase().includes(conceptTerm.toLowerCase())) {
               targetElement = el;
               break;
             }
@@ -124,15 +137,19 @@ const ContentSectionCore = ({
       
       {/* Concept loading indicator */}
       {conceptsLoading && (
-        <div className="text-xs text-gray-500 italic mt-4">
+        <div className="text-xs text-gray-500 italic mt-4 flex items-center">
+          <div className="animate-spin mr-1 h-3 w-3 border border-[#6D42EF] border-t-transparent rounded-full"></div>
           Analyzing content for key concepts...
         </div>
       )}
       
       {/* Concept result indicator */}
       {!conceptsLoading && concepts.length > 0 && (
-        <div className="text-xs text-[#6D42EF] mt-4">
-          {concepts.length} key concepts are highlighted throughout the text.
+        <div className="text-xs text-[#6D42EF] font-medium mt-4 flex items-center">
+          <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#6D42EF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {concepts.length} key concepts are highlighted throughout the text
         </div>
       )}
       

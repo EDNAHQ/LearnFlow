@@ -14,62 +14,43 @@ export const processTextWithConcepts = (
     return text;
   }
   
-  console.log("Processing text with concepts:", concepts.map(c => c.term));
-  console.log("Text length:", text.length);
+  console.log(`Processing text with ${concepts.length} concepts`);
   
   // Sort concepts by length (longest first) to avoid nested replacements
   const sortedConcepts = [...concepts].sort((a, b) => b.term.length - a.term.length);
   
-  let processedText = text;
-  let placeholders: {[key: string]: React.ReactNode} = {};
-  let placeholderCounter = 0;
+  // Track which concepts we've already processed to avoid duplicates
+  const processedTerms = new Set();
   let replacementsCount = 0;
   
+  // Create a map for the replacements
+  const parts: React.ReactNode[] = [];
+  let currentText = text;
+  let lastIndex = 0;
+  
+  // Process each concept
   for (const concept of sortedConcepts) {
     const conceptTerm = concept.term;
     
-    // Skip empty or very short terms
-    if (!conceptTerm || conceptTerm.length < 3) {
-      console.log(`Skipping concept "${conceptTerm}" - too short`);
+    // Skip empty, very short terms, or already processed terms
+    if (!conceptTerm || conceptTerm.length < 3 || processedTerms.has(conceptTerm.toLowerCase())) {
       continue;
     }
     
-    // Check for exact matches first (case-sensitive)
-    if (processedText.includes(conceptTerm)) {
-      console.log(`Found exact match for concept: "${conceptTerm}"`);
-      
-      const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
-      
-      placeholders[placeholder] = (
-        <ConceptLink
-          key={concept.id || `concept-${placeholderCounter}`}
-          term={concept.term}
-          definition={concept.definition}
-          relatedConcepts={concept.relatedConcepts}
-          onRelatedConceptClick={onConceptClick}
-        >
-          {conceptTerm}
-        </ConceptLink>
-      );
-      
-      // Replace only the first occurrence
-      processedText = processedText.replace(conceptTerm, placeholder);
-      replacementsCount++;
-      continue;
-    }
+    // Create a regex that matches the concept term with word boundaries
+    const regex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
+    const match = currentText.match(regex);
     
-    // Try case-insensitive match as fallback
-    const caseInsensitiveRegex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
-    const match = processedText.match(caseInsensitiveRegex);
-    
-    if (match && match[0]) {
-      console.log(`Found case-insensitive match for "${conceptTerm}": "${match[0]}"`);
+    if (match && match.index !== undefined) {
+      // Add the text before the match
+      if (match.index > lastIndex) {
+        parts.push(currentText.substring(lastIndex, match.index));
+      }
       
-      const placeholder = `__CONCEPT_PLACEHOLDER_${placeholderCounter++}__`;
-      
-      placeholders[placeholder] = (
+      // Add the concept component
+      parts.push(
         <ConceptLink
-          key={concept.id || `concept-${placeholderCounter}`}
+          key={`concept-${replacementsCount}`}
           term={concept.term}
           definition={concept.definition}
           relatedConcepts={concept.relatedConcepts}
@@ -79,12 +60,18 @@ export const processTextWithConcepts = (
         </ConceptLink>
       );
       
-      // Replace only the first occurrence
-      processedText = processedText.replace(match[0], placeholder);
+      // Update lastIndex to after the match
+      lastIndex = match.index + match[0].length;
       replacementsCount++;
-    } else {
-      console.log(`No match found for concept: "${conceptTerm}"`);
+      
+      // Mark this term as processed
+      processedTerms.add(conceptTerm.toLowerCase());
     }
+  }
+  
+  // Add any remaining text
+  if (lastIndex < currentText.length) {
+    parts.push(currentText.substring(lastIndex));
   }
   
   // If no replacements were made, return the original text
@@ -95,17 +82,5 @@ export const processTextWithConcepts = (
   
   console.log(`Made ${replacementsCount} concept replacements`);
   
-  // Replace all placeholders with their corresponding components
-  const parts = processedText.split(/(\_\_CONCEPT\_PLACEHOLDER\_\d+\_\_)/);
-  
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (placeholders[part]) {
-          return placeholders[part];
-        }
-        return part;
-      })}
-    </>
-  );
+  return <>{parts}</>;
 };
