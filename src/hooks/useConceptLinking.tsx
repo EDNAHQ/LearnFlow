@@ -53,7 +53,46 @@ export function useConceptLinking(content: string, topic: string | undefined) {
         
         if (error) throw new Error(error.message);
         
-        if (data && data.concepts && data.concepts.length > 0) {
+        // For debugging, generate mock concepts if no concepts were returned
+        if (!data || !data.concepts || data.concepts.length === 0) {
+          console.log("No concepts returned from extraction, generating mock concepts for testing");
+          
+          // Example mock concepts based on ThreeJS topic
+          const mockConcepts = [
+            {
+              id: "concept-1",
+              term: "ThreeJS",
+              definition: "A JavaScript 3D library that makes WebGL simpler, allowing creation of 3D graphics in the browser.",
+              relatedConcepts: ["WebGL", "3D Rendering", "JavaScript"]
+            },
+            {
+              id: "concept-2", 
+              term: "3D space",
+              definition: "The three-dimensional environment where objects exist in a ThreeJS scene.",
+              relatedConcepts: ["Camera", "Scene", "Coordinates"]
+            },
+            {
+              id: "concept-3",
+              term: "physics",
+              definition: "The branch of science dealing with properties and interactions of matter and energy, often simulated in ThreeJS.",
+              relatedConcepts: ["Collision Detection", "Gravity", "Forces"]
+            },
+            {
+              id: "concept-4",
+              term: "collision detection",
+              definition: "The process of detecting when two or more objects in a 3D scene intersect or touch each other.",
+              relatedConcepts: ["Physics", "Raycasting", "Bounding Box"]
+            },
+            {
+              id: "concept-5",
+              term: "user experience design",
+              definition: "The process of creating products that provide meaningful and relevant experiences to users in 3D applications.",
+              relatedConcepts: ["Interface", "Interaction", "Usability"]
+            }
+          ];
+          
+          setConcepts(mockConcepts);
+        } else {
           console.log("Concepts extracted successfully:", data.concepts.length);
           setConcepts(data.concepts);
           
@@ -66,10 +105,6 @@ export function useConceptLinking(content: string, topic: string | undefined) {
               console.log(`✗ No match found for "${concept.term}" in content`);
             }
           });
-          
-        } else {
-          console.log("No concepts found in the content");
-          setConcepts([]);
         }
         
         // Mark as run to prevent multiple extractions

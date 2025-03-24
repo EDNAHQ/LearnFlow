@@ -137,7 +137,7 @@ const ContentSectionCore = ({
           )}
         </div>
         
-        {/* Concept loading indicator */}
+        {/* Concept loading indicator - ALWAYS SHOW THIS when loading */}
         {conceptsLoading && (
           <div className="text-xs text-gray-500 italic mt-4 flex items-center">
             <div className="animate-spin mr-1 h-3 w-3 border border-[#6D42EF] border-t-transparent rounded-full"></div>
@@ -145,7 +145,7 @@ const ContentSectionCore = ({
           </div>
         )}
         
-        {/* Concept result indicator */}
+        {/* Concept result indicator - Only show when we have results */}
         {!conceptsLoading && concepts.length > 0 && (
           <div className="text-xs text-[#6D42EF] font-medium mt-4 flex items-center">
             <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -166,7 +166,7 @@ const ContentSectionCore = ({
         />
       )}
       
-      {/* Concept Network Viewer moved here directly in the component */}
+      {/* Concept Network Viewer - Explicitly check if we have concepts */}
       {concepts && concepts.length > 0 && topic && (
         <ContentSectionConcepts 
           concepts={concepts}

@@ -18,11 +18,13 @@ const ContentSectionConcepts = memo(({
 }: ContentSectionConceptsProps) => {
   const [isOpen, setIsOpen] = useState(true);
   
+  // Add debugging to help troubleshoot
+  console.log("ContentSectionConcepts rendering with", concepts.length, "concepts");
+  
   if (!concepts || concepts.length === 0 || !currentTopic) {
+    console.log("ContentSectionConcepts: Not rendering due to missing data");
     return null;
   }
-
-  console.log("ContentSectionConcepts rendering with", concepts.length, "concepts");
 
   const handleConceptClick = (conceptTerm: string) => {
     console.log("Concept clicked in ContentSectionConcepts:", conceptTerm);
@@ -34,7 +36,7 @@ const ContentSectionConcepts = memo(({
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-[#6D42EF] flex items-center gap-2">
-            <Network size={20} className="text-brand-pink" />
+            <Network size={20} className="text-[#E84393]" />
             Interactive Concept Network
           </h3>
           <CollapsibleTrigger asChild>

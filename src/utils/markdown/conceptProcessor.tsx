@@ -23,12 +23,14 @@ export const processTextWithConcepts = (
   const processedTerms = new Set();
   let replacementsCount = 0;
   
-  // Create a map for the replacements
+  // Process the text
+  let processedText = text;
   const parts: React.ReactNode[] = [];
-  let currentText = text;
   let lastIndex = 0;
   
-  // Process each concept
+  // Find all positions where concepts appear in the text
+  const positions: {start: number, end: number, concept: any}[] = [];
+  
   for (const concept of sortedConcepts) {
     const conceptTerm = concept.term;
     
@@ -37,41 +39,59 @@ export const processTextWithConcepts = (
       continue;
     }
     
-    // Create a regex that matches the concept term with word boundaries
-    const regex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'i');
-    const match = currentText.match(regex);
+    // Look for the concept term in the text (case insensitive)
+    const regex = new RegExp(`\\b${escapeRegExp(conceptTerm)}\\b`, 'gi');
+    let match;
     
-    if (match && match.index !== undefined) {
-      // Add the text before the match
-      if (match.index > lastIndex) {
-        parts.push(currentText.substring(lastIndex, match.index));
-      }
+    while ((match = regex.exec(text)) !== null) {
+      positions.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        concept
+      });
       
-      // Add the concept component
-      parts.push(
-        <ConceptLink
-          key={`concept-${replacementsCount}`}
-          term={concept.term}
-          definition={concept.definition}
-          relatedConcepts={concept.relatedConcepts}
-          onRelatedConceptClick={onConceptClick}
-        >
-          {match[0]}
-        </ConceptLink>
-      );
-      
-      // Update lastIndex to after the match
-      lastIndex = match.index + match[0].length;
-      replacementsCount++;
-      
-      // Mark this term as processed
+      // Mark as processed to avoid duplicates
       processedTerms.add(conceptTerm.toLowerCase());
     }
   }
   
+  // Sort positions by start index
+  positions.sort((a, b) => a.start - b.start);
+  
+  // Build the final text with concept links
+  for (let i = 0; i < positions.length; i++) {
+    const { start, end, concept } = positions[i];
+    
+    // Skip if this position overlaps with a previous one
+    if (i > 0 && start < positions[i-1].end) {
+      continue;
+    }
+    
+    // Add text before this concept
+    if (start > lastIndex) {
+      parts.push(text.substring(lastIndex, start));
+    }
+    
+    // Add the concept link
+    parts.push(
+      <ConceptLink
+        key={`concept-${replacementsCount}`}
+        term={concept.term}
+        definition={concept.definition}
+        relatedConcepts={concept.relatedConcepts}
+        onRelatedConceptClick={onConceptClick}
+      >
+        {text.substring(start, end)}
+      </ConceptLink>
+    );
+    
+    lastIndex = end;
+    replacementsCount++;
+  }
+  
   // Add any remaining text
-  if (lastIndex < currentText.length) {
-    parts.push(currentText.substring(lastIndex));
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
   }
   
   // If no replacements were made, return the original text

@@ -33,12 +33,12 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
       <Progress 
         value={progress} 
         className="h-2 w-full mb-6"
-        indicatorClassName="bg-gradient-to-r from-brand-purple to-brand-pink animate-pulse"
+        indicatorClassName="bg-gradient-to-r from-[#6D42EF] to-[#E84393] animate-pulse"
       />
       
       <div className="flex items-center justify-center gap-2 mb-2">
         {generatingContent && (
-          <Loader2 className="h-4 w-4 animate-spin text-brand-pink" />
+          <Loader2 className="h-4 w-4 animate-spin text-[#E84393]" />
         )}
         <p className="text-gray-600 text-sm font-medium">
           {getProgressMessage()}

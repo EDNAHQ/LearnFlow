@@ -18,7 +18,7 @@ export function useContentSection({ content, detailedContent, topic }: UseConten
   const stepId = content.includes(':') ? content.split(":")[0] : '';
   
   // Get concepts from the loaded content once it's available
-  const { concepts, isLoading: conceptsLoading, hasResults } = useConceptLinking(
+  const { concepts, isLoading: conceptsLoading, hasResults, resetExtraction } = useConceptLinking(
     loadedDetailedContent || '',
     topic
   );
@@ -56,8 +56,11 @@ export function useContentSection({ content, detailedContent, topic }: UseConten
       console.log("Content loaded successfully, length:", loadedContent.length);
       setLoadedDetailedContent(loadedContent);
       setContentLoaded(true);
+      
+      // Reset concept extraction when new content is loaded
+      resetExtraction();
     }
-  }, [contentLoaded]);
+  }, [contentLoaded, resetExtraction]);
 
   // Handle concept clicking
   const handleConceptClick = useCallback((conceptTerm: string) => {

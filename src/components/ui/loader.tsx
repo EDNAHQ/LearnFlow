@@ -14,7 +14,7 @@ export const BarLoader = React.forwardRef<HTMLDivElement, LoaderProps>(
       {...props}
     >
       <div className="h-2 w-full bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
-        <div className="h-2 bg-gradient-to-r from-brand-purple to-brand-pink rounded-full animate-[progress_2s_ease-in-out_infinite] relative">
+        <div className="h-2 bg-gradient-to-r from-[#6D42EF] to-[#E84393] rounded-full animate-[progress_2s_ease-in-out_infinite] relative">
           {/* Add a shine effect for more visual feedback */}
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shine"></div>
         </div>
