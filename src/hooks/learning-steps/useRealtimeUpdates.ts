@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LearningStepData } from "./types";
@@ -14,7 +13,7 @@ export const useRealtimeUpdates = (
 ) => {
   // Track last update time to throttle updates
   const lastUpdateRef = useRef<number>(Date.now());
-  const updateThrottleMs = 1000; // Reduced throttle time to 1 second for more frequent updates
+  const updateThrottleMs = 500; // Further reduced throttle time for more frequent updates
   
   // Track subscription status
   const subscriptionActive = useRef<boolean>(false);
@@ -22,9 +21,11 @@ export const useRealtimeUpdates = (
   useEffect(() => {
     if (!pathId) return;
     
-    // Only set up subscription if not already active
-    if (!subscriptionActive.current) {
-      // Set up subscription to track generation progress
+    // Always fetch steps immediately when hook mounts or pathId changes
+    fetchLearningSteps();
+    
+    // Set up subscription to track generation progress
+    try {
       const channel = supabase.channel(`steps-${pathId}`);
       
       const subscription = channel
@@ -36,50 +37,22 @@ export const useRealtimeUpdates = (
             filter: `path_id=eq.${pathId}`
           }, 
           (payload) => {
-            // Throttle updates to prevent excessive re-renders
+            console.log('Step updated (realtime):', payload.new.id);
+            
+            // Throttle updates to prevent excessive re-renders but keep it fast enough to show progress
             const now = Date.now();
             if (now - lastUpdateRef.current < updateThrottleMs) {
               return; // Skip this update if too soon after the last one
             }
             lastUpdateRef.current = now;
             
-            console.log('Step updated:', payload.new.id);
-            
-            // Only process updates with detailed content
-            if (payload.new && payload.new.detailed_content) {
-              // Update the steps state with the new data, minimizing re-renders
-              setSteps(prevSteps => {
-                // Check if we need to update
-                const stepIndex = prevSteps.findIndex(step => step.id === payload.new.id);
-                if (stepIndex === -1 || prevSteps[stepIndex].detailed_content === payload.new.detailed_content) {
-                  return prevSteps; // No changes needed
-                }
-                
-                // Create updated steps array with the new data
-                const updatedSteps = [...prevSteps];
-                updatedSteps[stepIndex] = {
-                  ...updatedSteps[stepIndex],
-                  detailed_content: payload.new.detailed_content
-                };
-                
-                // Calculate new counts based on the updated steps
-                const newGeneratedCount = countGeneratedSteps(updatedSteps);
-                
-                // Update generated steps count if changed
-                if (newGeneratedCount !== generatedSteps) {
-                  setGeneratedSteps(newGeneratedCount);
-                  setGeneratingContent(newGeneratedCount < updatedSteps.length);
-                  console.log(`Generation progress updated: ${newGeneratedCount}/${updatedSteps.length} steps`);
-                }
-                
-                return updatedSteps;
-              });
-            }
+            // Force a refresh of all steps to ensure we have the latest data
+            fetchLearningSteps();
           }
         )
         .subscribe((status) => {
-          console.log(`Subscription status: ${status}`);
-          subscriptionActive.current = true;
+          console.log(`Realtime subscription status: ${status}`);
+          subscriptionActive.current = status === 'SUBSCRIBED';
           
           // If subscription failed, fall back to polling
           if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
@@ -89,7 +62,7 @@ export const useRealtimeUpdates = (
             // Set up polling as fallback - use a ref to track the interval
             const pollInterval = setInterval(() => {
               fetchLearningSteps();
-            }, 3000); // Poll every 3 seconds for more frequent updates
+            }, 2000); // Poll every 2 seconds
             
             return () => clearInterval(pollInterval);
           }
@@ -97,10 +70,25 @@ export const useRealtimeUpdates = (
         
       console.log("Subscription to learning steps updates established");
         
+      // Set up polling even with active subscription as a backup
+      const backupPollInterval = setInterval(() => {
+        fetchLearningSteps();
+      }, 5000); // Backup poll every 5 seconds
+        
       return () => {
         channel.unsubscribe();
         subscriptionActive.current = false;
+        clearInterval(backupPollInterval);
       };
+    } catch (error) {
+      console.error("Error setting up realtime subscription:", error);
+      
+      // If subscription setup fails, fall back to aggressive polling
+      const pollInterval = setInterval(() => {
+        fetchLearningSteps();
+      }, 2000);
+      
+      return () => clearInterval(pollInterval);
     }
-  }, [pathId, countGeneratedSteps, generatedSteps, updateThrottleMs, setSteps, setGeneratedSteps, setGeneratingContent, fetchLearningSteps]);
+  }, [pathId, fetchLearningSteps, updateThrottleMs]);
 };

@@ -15,6 +15,8 @@ export const useFetchLearningSteps = () => {
     if (!pathId) return;
     
     try {
+      console.log("Fetching learning steps for path:", pathId);
+      
       const { data, error } = await supabase
         .from('learning_steps')
         .select('*')
@@ -40,14 +42,8 @@ export const useFetchLearningSteps = () => {
             : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
         }));
         
-        // Only update state if there are actual changes to avoid re-renders
-        setSteps(prevSteps => {
-          // Only update if different
-          if (JSON.stringify(prevSteps) !== JSON.stringify(processedData)) {
-            return processedData;
-          }
-          return prevSteps;
-        });
+        // Always update steps to ensure freshness
+        setSteps(processedData);
         
         // Count steps with detailed content
         const stepsWithDetailedContent = countGeneratedSteps(processedData);

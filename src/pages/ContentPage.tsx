@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -40,6 +39,7 @@ const ContentPage = () => {
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [showLoadingPage, setShowLoadingPage] = useState(true);
 
   // Use the custom hook directly
   const {
@@ -53,15 +53,53 @@ const ContentPage = () => {
     setMode("text");
   }, [setMode]);
 
+  // Add a timeout to hide loading page after certain period even if generation is still in progress
+  useEffect(() => {
+    if (showLoadingPage && (!isLoading && steps.length > 0)) {
+      // If we have steps but generation is still happening, give it a bit of time then show content
+      const timer = setTimeout(() => {
+        if (generatedSteps > 0) {
+          console.log("Showing content page after timeout with partial generation");
+          setShowLoadingPage(false);
+        }
+      }, 10000); // Give it 10 seconds to start showing some progress
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showLoadingPage, isLoading, steps.length, generatedSteps]);
+
   // Handle generation complete redirect - only redirect if we're not on a step page
   useEffect(() => {
+    // Check if loading is completely done OR if we have enough steps generated
+    const generationComplete = (!isLoading && !generatingContent) || 
+                              (generatedSteps > 0 && generatedSteps === steps.length);
+    
     // Only redirect if we're not already on a step page and generation is complete
-    if (!hasRedirected && !isLoading && !generatingContent && pathId && steps.length > 0 && !stepId) {
+    if (!hasRedirected && generationComplete && pathId && steps.length > 0 && !stepId) {
       console.log("Content generation complete. Navigating to first content page...");
       setHasRedirected(true);
       navigate(`/content/${pathId}/step/0`);
     }
-  }, [generatingContent, generatedSteps, steps.length, pathId, navigate, hasRedirected, stepId, isLoading]);
+    
+    // If we have at least one step generated, we can start showing content
+    if (showLoadingPage && generatedSteps > 0 && steps.length > 0) {
+      const initialGenerationTimeout = setTimeout(() => {
+        setShowLoadingPage(false);
+      }, 3000); // Give it 3 seconds after the first step is generated
+      
+      return () => clearTimeout(initialGenerationTimeout);
+    }
+  }, [
+    generatingContent, 
+    generatedSteps, 
+    steps.length, 
+    pathId, 
+    navigate, 
+    hasRedirected, 
+    stepId, 
+    isLoading,
+    showLoadingPage
+  ]);
 
   // Handle question clicks for insights
   const handleQuestionClick = (question: string) => {
@@ -77,8 +115,15 @@ const ContentPage = () => {
   };
 
   // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  if ((isLoading || generatingContent) && !stepId) {
-    return <KnowledgeNuggetLoading topic={topic} goToProjects={goToProjects} generatingContent={generatingContent} generatedSteps={generatedSteps} totalSteps={steps.length} pathId={pathId} />;
+  if ((isLoading || (generatingContent && showLoadingPage)) && !stepId) {
+    return <KnowledgeNuggetLoading 
+             topic={topic} 
+             goToProjects={goToProjects} 
+             generatingContent={generatingContent} 
+             generatedSteps={generatedSteps} 
+             totalSteps={steps.length} 
+             pathId={pathId} 
+           />;
   }
   
   if (!topic || !pathId) {
