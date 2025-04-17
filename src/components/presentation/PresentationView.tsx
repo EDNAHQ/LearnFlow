@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PresentationSlide from "./PresentationSlide";
 import PresentationControls from "./PresentationControls";
@@ -15,9 +15,15 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showOverview, setShowOverview] = useState(false);
   const { setMode } = useContentMode();
+  const slidesProcessed = useRef(false);
 
   // Process content once using useMemo to avoid unnecessary re-renders
   const slides = useMemo(() => {
+    // Don't reprocess if we've already done it
+    if (slidesProcessed.current) {
+      return [];
+    }
+    
     // Ensure content is always a properly formatted string
     const safeContent = (() => {
       if (typeof content === 'string') {
@@ -74,7 +80,13 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
       });
     }
     
+    slidesProcessed.current = true;
     return processedSlides;
+  }, [content]);
+
+  // Reset slides processing flag when content changes completely
+  useEffect(() => {
+    slidesProcessed.current = false;
   }, [content]);
 
   const goToNextSlide = useCallback(() => {

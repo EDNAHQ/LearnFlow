@@ -24,15 +24,34 @@ const KnowledgeNuggetLoading = ({
 }: KnowledgeNuggetLoadingProps) => {
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [forceRedirect, setForceRedirect] = useState(false);
 
   // Set progress based on content generation
   useEffect(() => {
     if (totalSteps > 0) {
-      const calculatedProgress = Math.min(Math.max((generatedSteps / totalSteps) * 100, 0), 100);
+      // Calculate normal progress
+      let calculatedProgress = Math.min(Math.max((generatedSteps / totalSteps) * 100, 0), 100);
+      
+      // Fix for 9/10 issue - when we're at 9/10 or more, gradually increase to 100%
+      if (generatedSteps >= totalSteps - 1 && calculatedProgress >= 90) {
+        calculatedProgress += Math.min((elapsedTime * 0.5), 10); // Gradually increase based on time
+        
+        // Force to 100% after a reasonable timeout (5 seconds)
+        if (elapsedTime > 5 && calculatedProgress >= 95) {
+          calculatedProgress = 100;
+          if (!forceRedirect) {
+            setForceRedirect(true);
+          }
+        }
+      }
+      
+      // Cap at 100
+      calculatedProgress = Math.min(calculatedProgress, 100);
+      
       setProgress(calculatedProgress);
       console.log(`Loading progress updated: ${calculatedProgress.toFixed(1)}% (${generatedSteps}/${totalSteps})`);
     }
-  }, [generatedSteps, totalSteps]);
+  }, [generatedSteps, totalSteps, elapsedTime, forceRedirect]);
 
   // Fallback progress animation when steps aren't available
   useEffect(() => {
@@ -80,6 +99,11 @@ const KnowledgeNuggetLoading = ({
             {elapsedTime > 20 && (
               <span className="block mt-2 text-sm text-amber-600">
                 This may take a minute or two. Thanks for your patience!
+              </span>
+            )}
+            {forceRedirect && elapsedTime > 8 && (
+              <span className="block mt-2 text-sm text-green-600">
+                Content is ready! Redirecting you shortly...
               </span>
             )}
           </p>
