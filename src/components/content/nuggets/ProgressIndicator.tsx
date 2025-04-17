@@ -22,7 +22,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     }
     
     if (generatingContent && generatedSteps === 0) {
-      return "Starting content generation...";
+      return "Creating concise learning content...";
     }
     
     return `Generating content... ${Math.round(progress)}%`;
