@@ -18,6 +18,7 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
   const [showControls, setShowControls] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [loadAttempts, setLoadAttempts] = useState(0);
 
   // Combined error state
   const combinedError = error || localError;
@@ -34,21 +35,54 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
       
       // Reset error state when setting new URL
       setLocalError(null);
+      setIsAudioLoaded(false);
+      
+      // Add query param to bust cache if we've had a previous load attempt
+      const urlWithCacheBust = loadAttempts > 0 
+        ? `${audioUrl}${audioUrl.includes('?') ? '&' : '?'}cb=${Date.now()}` 
+        : audioUrl;
       
       // Set the audio source and attempt to load it
-      audioRef.current.src = audioUrl;
+      audioRef.current.src = urlWithCacheBust;
       audioRef.current.load();
       
       const handleCanPlay = () => {
         console.log("Audio can now play");
         setIsAudioLoaded(true);
+        setLocalError(null);
       };
       
       const handleError = (e: Event) => {
-        const audioError = e.currentTarget as HTMLAudioElement;
-        console.error("Audio element error:", e);
-        setLocalError(`Audio playback error: ${audioError.error?.message || 'Unknown error'}`);
+        const audioElement = e.currentTarget as HTMLAudioElement;
+        console.error("Audio element error:", e, audioElement.error);
+        
+        // Increment load attempts for future retries
+        setLoadAttempts(prev => prev + 1);
+        
+        // Provide more specific error message based on error code
+        let errorMessage = "Unknown playback error";
+        if (audioElement.error) {
+          switch (audioElement.error.code) {
+            case MediaError.MEDIA_ERR_ABORTED:
+              errorMessage = "Playback aborted by the user";
+              break;
+            case MediaError.MEDIA_ERR_NETWORK:
+              errorMessage = "Network error while loading audio";
+              break;
+            case MediaError.MEDIA_ERR_DECODE:
+              errorMessage = "Audio decoding error";
+              break;
+            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage = "Audio format not supported by your browser";
+              break;
+            default:
+              errorMessage = `Error code: ${audioElement.error.code}`;
+          }
+        }
+        
+        setLocalError(`Audio playback error: ${errorMessage}`);
         setIsAudioLoaded(false);
+        toast.error(`Audio error: ${errorMessage}. Try refreshing or generating again.`);
       };
       
       audioRef.current.addEventListener('canplay', handleCanPlay);
@@ -61,7 +95,7 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
         }
       };
     }
-  }, [audioUrl]);
+  }, [audioUrl, loadAttempts]);
 
   const handleTogglePlay = async (script?: string, currentPathId?: string) => {
     setLocalError(null);
@@ -86,6 +120,12 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
       } else {
         console.log("Playing audio");
         try {
+          // Force reload if we've had errors before
+          if (localError) {
+            audioRef.current.load();
+            setLocalError(null);
+          }
+          
           const playPromise = audioRef.current.play();
           
           // Handle the play promise to catch any autoplay restrictions
@@ -119,6 +159,9 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
   const handleRetry = async (script: string, currentPathId?: string) => {
     if (!isGenerating && currentPathId) {
       setLocalError(null);
+      setIsAudioLoaded(false);
+      setLoadAttempts(0);
+      
       try {
         cleanup();
         console.log("Regenerating speech...");

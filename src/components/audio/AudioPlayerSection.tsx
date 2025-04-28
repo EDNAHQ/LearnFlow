@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Loader2 } from 'lucide-react';
 import { BarLoader } from '@/components/ui/loader';
-import { AudioControls } from './AudioControls';
+import { AudioControls } from '@/components/audio/AudioControls';
 
 interface AudioPlayerSectionProps {
   isGenerating: boolean;
@@ -67,9 +67,10 @@ export const AudioPlayerSection: React.FC<AudioPlayerSectionProps> = ({
             ref={audioRef} 
             controls={showControls}
             className="w-full mt-2"
+            onError={(e) => console.error("Audio element error:", e)}
           />
           
-          {(isGenerating) && <BarLoader className="w-full mt-2" />}
+          {isGenerating && <BarLoader className="w-full mt-2" />}
           
           {!isGenerating && audioUrl && (
             <div className="text-xs text-gray-400 mt-1">

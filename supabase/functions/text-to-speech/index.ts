@@ -62,7 +62,8 @@ serve(async (req) => {
     if (!audioBucketExists) {
       console.log("Creating audio_files bucket");
       const { error: createBucketError } = await supabase.storage.createBucket('audio_files', {
-        public: true
+        public: true,
+        fileSizeLimit: 50000000 // 50MB
       });
       
       if (createBucketError) {
@@ -82,18 +83,30 @@ serve(async (req) => {
       console.error("Error fetching path data:", pathError);
     } else if (pathData?.audio_url) {
       console.log('Using existing audio URL:', pathData.audio_url);
-      return new Response(
-        JSON.stringify({ 
-          audioUrl: pathData.audio_url,
-          message: 'Using existing audio URL' 
-        }), 
-        {
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
+      
+      // Check if the file actually exists in storage
+      const fileUrl = pathData.audio_url.split('/').pop();
+      const { data: fileExists } = await supabase
+        .storage
+        .from('audio_files')
+        .download(fileUrl);
+        
+      if (fileExists) {
+        return new Response(
+          JSON.stringify({ 
+            audioUrl: pathData.audio_url,
+            message: 'Using existing audio URL' 
+          }), 
+          {
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json' 
+            }
           }
-        }
-      );
+        );
+      }
+      
+      console.log("Existing audio file not found, regenerating...");
     }
 
     // Trim text if it's too long (ElevenLabs has limitations)
