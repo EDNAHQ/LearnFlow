@@ -11,14 +11,30 @@ interface AudioErrorProps {
 
 export const AudioError: React.FC<AudioErrorProps> = ({ error, noContent, attempted }) => {
   if (error) {
+    // Check for specific API key related errors
+    const isApiKeyError = error.includes("API key") || 
+                          error.includes("ELEVEN_LABS_API_KEY") || 
+                          error.includes("not configured") ||
+                          error.includes("authentication failed");
+    
     return (
       <Alert variant="destructive" className="mt-4">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Error Generating Audio</AlertTitle>
         <AlertDescription>
-          {error}.{' '}
-          {error.includes("API") && "This might be due to an issue with the AI service connection. "}
-          Please try again or check if the API keys are properly configured.
+          {error}
+          {isApiKeyError && (
+            <span className="block mt-2">
+              This is an API key configuration issue with ElevenLabs. Please make sure the ELEVEN_LABS_API_KEY 
+              is properly configured in your Supabase project settings.
+            </span>
+          )}
+          {!isApiKeyError && error.includes("API") && (
+            <span className="block mt-2">
+              This might be due to an issue with the ElevenLabs API service connection.
+              Please try again or check if the API keys are properly configured.
+            </span>
+          )}
         </AlertDescription>
       </Alert>
     );

@@ -64,17 +64,26 @@ serve(async (req) => {
           'Content-Type': 'audio/mpeg',
         },
       });
-    } catch (elevenlabsError: any) {
+    } catch (elevenlabsError) {
       console.error('Eleven Labs API error:', elevenlabsError);
       
       // Provide more detailed error information
-      const errorResponse = elevenlabsError.response 
-        ? `Status code: ${elevenlabsError.response.status}\nBody: ${await elevenlabsError.response.text()}` 
-        : elevenlabsError.message;
+      let errorMessage = 'Eleven Labs API error';
+      if (elevenlabsError.response) {
+        try {
+          const errorBody = await elevenlabsError.response.text();
+          errorMessage = `Eleven Labs API error (${elevenlabsError.response.status}): ${errorBody}`;
+          console.error(errorMessage);
+        } catch (e) {
+          errorMessage = `Eleven Labs API error: Status code ${elevenlabsError.response.status}`;
+        }
+      } else {
+        errorMessage = `Eleven Labs API error: ${elevenlabsError.message || 'Unknown error'}`;
+      }
         
-      throw new Error(`Eleven Labs API error: ${errorResponse}`);
+      throw new Error(errorMessage);
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in text-to-speech function:', error.message);
     
     return new Response(
