@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -31,27 +31,9 @@ export function useTextToSpeech() {
     setError(null);
     
     try {
-      // First check if we already have an audio URL for this path
-      const { data: pathData, error: pathError } = await supabase
-        .from('learning_paths')
-        .select('audio_url')
-        .eq('id', pathId)
-        .single();
-
-      if (pathError) {
-        console.error("Error fetching path data:", pathError);
-      }
-
-      if (pathData?.audio_url) {
-        console.log('Using existing audio URL:', pathData.audio_url);
-        setAudioUrl(pathData.audio_url);
-        toast.success('Using existing audio');
-        return pathData.audio_url;
-      }
-
       console.log(`Generating speech for path ${pathId} with text length ${text.length}`);
       
-      // If no existing audio, generate new one
+      // Call the Supabase Edge Function
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text,
@@ -69,7 +51,7 @@ export function useTextToSpeech() {
         throw new Error('No audio URL received');
       }
       
-      console.log('Generated new audio URL:', response.data.audioUrl);
+      console.log('Generated audio URL:', response.data.audioUrl);
       setAudioUrl(response.data.audioUrl);
       toast.success('Audio generated successfully');
       return response.data.audioUrl;
@@ -84,7 +66,7 @@ export function useTextToSpeech() {
     }
   };
 
-  // Add a script generation function for the AudioSummaryPlayer
+  // Script generation function for the AudioSummaryPlayer
   const generateScript = async (steps: any[], topic: string) => {
     setIsGeneratingScript(true);
     setError(null);
@@ -102,7 +84,7 @@ export function useTextToSpeech() {
       const stepsContent = steps.map((step, index) => {
         const content = step.detailed_content || step.content || '';
         // Extract first paragraph or a portion of the content
-        const firstParagraph = content.split('\n')[0] || content.substring(0, 200);
+        const firstParagraph = content.split('\n')[0] || content.substring(0, 150);
         return `Step ${index + 1}: ${step.title}\n${firstParagraph}\n`;
       }).join('\n\n');
       
@@ -122,13 +104,13 @@ export function useTextToSpeech() {
     }
   };
 
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (audioUrl) {
       setAudioUrl(null);
     }
     setError(null);
     setScriptContent(null);
-  };
+  }, [audioUrl]);
 
   return {
     isGenerating,
@@ -136,7 +118,6 @@ export function useTextToSpeech() {
     error,
     generateSpeech,
     cleanup,
-    // Add the new properties and methods
     scriptContent,
     isGeneratingScript,
     generateScript

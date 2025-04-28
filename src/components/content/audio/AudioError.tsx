@@ -17,10 +17,19 @@ export const AudioError: React.FC<AudioErrorProps> = ({ error, noContent, attemp
                           error.includes("not configured") ||
                           error.includes("authentication failed");
     
+    // Check for playback errors
+    const isPlaybackError = error.includes("play") || 
+                            error.includes("playback") || 
+                            error.includes("audio element");
+    
     return (
       <Alert variant="destructive" className="mt-4">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error Generating Audio</AlertTitle>
+        <AlertTitle>
+          {isApiKeyError ? "API Key Configuration Error" :
+           isPlaybackError ? "Audio Playback Error" : 
+           "Error Generating Audio"}
+        </AlertTitle>
         <AlertDescription>
           {error}
           {isApiKeyError && (
@@ -29,7 +38,13 @@ export const AudioError: React.FC<AudioErrorProps> = ({ error, noContent, attemp
               is properly configured in your Supabase project settings.
             </span>
           )}
-          {!isApiKeyError && error.includes("API") && (
+          {isPlaybackError && (
+            <span className="block mt-2">
+              There was an issue playing the audio. Try refreshing the page or using a different browser.
+              If the issue persists, try regenerating the audio.
+            </span>
+          )}
+          {!isApiKeyError && !isPlaybackError && error.includes("API") && (
             <span className="block mt-2">
               This might be due to an issue with the ElevenLabs API service connection.
               Please try again or check if the API keys are properly configured.
@@ -58,7 +73,8 @@ export const AudioError: React.FC<AudioErrorProps> = ({ error, noContent, attemp
         <Info className="h-4 w-4" />
         <AlertTitle>Audio Generation</AlertTitle>
         <AlertDescription>
-          If you don't see audio controls or hear audio after generation, there might be an issue with the audio service. Try refreshing the page or generating the audio again.
+          If you don't see audio controls or hear audio after generation, there might be an issue with the audio service. 
+          Try refreshing the page or generating the audio again.
         </AlertDescription>
       </Alert>
     );

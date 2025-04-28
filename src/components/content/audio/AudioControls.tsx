@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import { RefreshCw, Volume2, VolumeX, Settings } from 'lucide-react';
 
 interface AudioControlsProps {
   isPlaying: boolean;
@@ -58,10 +58,11 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
       <Button
         onClick={onToggleControls}
         variant="ghost"
-        size="sm"
-        className="text-xs text-gray-400 hover:bg-gray-800"
+        size="icon"
+        className="h-8 w-8 text-white hover:bg-gray-800"
+        title={showControls ? "Hide Controls" : "Show Controls"}
       >
-        {showControls ? "Hide Controls" : "Show Controls"}
+        <Settings className="h-4 w-4" />
       </Button>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { toast } from 'sonner';
@@ -29,6 +30,12 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
 
   useEffect(() => {
     if (audioUrl && audioRef.current) {
+      console.log("Setting audio source:", audioUrl);
+      
+      // Reset error state when setting new URL
+      setLocalError(null);
+      
+      // Set the audio source and attempt to load it
       audioRef.current.src = audioUrl;
       audioRef.current.load();
       
@@ -37,19 +44,20 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
         setIsAudioLoaded(true);
       };
       
-      const handleError = (e: ErrorEvent) => {
+      const handleError = (e: Event) => {
+        const audioError = e.currentTarget as HTMLAudioElement;
         console.error("Audio element error:", e);
-        setLocalError(`Audio playback error: ${e.message || 'Unknown error'}`);
+        setLocalError(`Audio playback error: ${audioError.error?.message || 'Unknown error'}`);
         setIsAudioLoaded(false);
       };
       
       audioRef.current.addEventListener('canplay', handleCanPlay);
-      audioRef.current.addEventListener('error', handleError as EventListener);
+      audioRef.current.addEventListener('error', handleError);
       
       return () => {
         if (audioRef.current) {
           audioRef.current.removeEventListener('canplay', handleCanPlay);
-          audioRef.current.removeEventListener('error', handleError as EventListener);
+          audioRef.current.removeEventListener('error', handleError);
         }
       };
     }
@@ -64,6 +72,7 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
         const url = await generateSpeech(script, currentPathId);
         if (url) {
           toast.success("Audio generated successfully");
+          // We'll let the useEffect handle setting up the audio
         }
       } catch (err: any) {
         console.error("Failed to generate speech:", err);
@@ -77,7 +86,20 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
       } else {
         console.log("Playing audio");
         try {
-          await audioRef.current.play();
+          const playPromise = audioRef.current.play();
+          
+          // Handle the play promise to catch any autoplay restrictions
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              // Playback started successfully
+              console.log("Audio playback started successfully");
+            }).catch((error) => {
+              // Auto-play was prevented
+              console.error("Playback prevented:", error);
+              setLocalError(`Playback error: ${error.message}. Try clicking play again.`);
+              toast.error("Playback prevented. Try clicking play again.");
+            });
+          }
         } catch (err: any) {
           console.error("Error playing audio:", err);
           setLocalError(`Playback error: ${err.message || 'Unknown error'}`);
@@ -114,24 +136,21 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
     const handleLoadedData = () => setIsAudioLoaded(true);
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleAudioEnd);
+    audio.addEventListener('ended', handleEnded);
     audio.addEventListener('loadeddata', handleLoadedData);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleAudioEnd);
+      audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('loadeddata', handleLoadedData);
     };
-  }, [audioUrl]);
-
-  const handleAudioEnd = () => {
-    setIsPlaying(false);
-  };
+  }, []);
 
   return {
     audioRef,

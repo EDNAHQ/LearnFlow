@@ -42,12 +42,59 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Supabase configuration missing", { supabaseUrl: !!supabaseUrl, supabaseServiceKey: !!supabaseServiceKey });
+      console.error("Supabase configuration missing");
       throw new Error('Supabase configuration missing')
     }
     console.log("Supabase configuration retrieved successfully");
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Check if 'audio_files' bucket exists, create if not
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      console.error("Error listing buckets:", bucketsError);
+      throw new Error(`Failed to list buckets: ${bucketsError.message}`);
+    }
+    
+    const audioBucketExists = buckets?.some(bucket => bucket.name === 'audio_files');
+    
+    if (!audioBucketExists) {
+      console.log("Creating audio_files bucket");
+      const { error: createBucketError } = await supabase.storage.createBucket('audio_files', {
+        public: true
+      });
+      
+      if (createBucketError) {
+        console.error("Error creating audio_files bucket:", createBucketError);
+        throw new Error(`Failed to create audio_files bucket: ${createBucketError.message}`);
+      }
+    }
+
+    // First check if we already have an audio URL for this path
+    const { data: pathData, error: pathError } = await supabase
+      .from('learning_paths')
+      .select('audio_url')
+      .eq('id', pathId)
+      .single();
+
+    if (pathError) {
+      console.error("Error fetching path data:", pathError);
+    } else if (pathData?.audio_url) {
+      console.log('Using existing audio URL:', pathData.audio_url);
+      return new Response(
+        JSON.stringify({ 
+          audioUrl: pathData.audio_url,
+          message: 'Using existing audio URL' 
+        }), 
+        {
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          }
+        }
+      );
+    }
 
     // Trim text if it's too long (ElevenLabs has limitations)
     const maxTextLength = 5000;
@@ -82,27 +129,6 @@ serve(async (req) => {
       }
       
       console.log(`Successfully generated audio: ${audioData.length} bytes`);
-
-      // Check if 'audio_files' bucket exists, create if not
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error("Error listing buckets:", bucketsError);
-      }
-      
-      const audioBucketExists = buckets?.some(bucket => bucket.name === 'audio_files');
-      
-      if (!audioBucketExists) {
-        console.log("Creating audio_files bucket");
-        const { error: createBucketError } = await supabase.storage.createBucket('audio_files', {
-          public: true
-        });
-        
-        if (createBucketError) {
-          console.error("Error creating audio_files bucket:", createBucketError);
-          throw new Error(`Failed to create audio_files bucket: ${createBucketError.message}`);
-        }
-      }
 
       // Create a unique filename
       const timestamp = new Date().getTime()
