@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -22,7 +21,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
   const [editableScript, setEditableScript] = useState<string>('');
   const [showScriptEditor, setShowScriptEditor] = useState(false);
   const [generationAttempted, setGenerationAttempted] = useState(false);
-  
+
   const {
     audioRef,
     isPlaying,
@@ -36,7 +35,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     handleTogglePlay,
     handleMuteToggle,
     handleRetry
-  } = useAudioPlayer(editableScript);
+  } = useAudioPlayer(editableScript, pathId);  // Updated to pass pathId
 
   // Combine errors from both script and audio generation
   const error = scriptError || audioError;
@@ -64,10 +63,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
   };
 
   const handleGenerateAudio = async () => {
-    if (!isGenerating && editableScript) {
+    if (!isGenerating && editableScript && pathId) {  // Added pathId check
       console.log("Generating audio from script with length:", editableScript.length);
       setGenerationAttempted(true);
-      await handleTogglePlay(editableScript);
+      await handleTogglePlay(editableScript, pathId);  // Updated to pass pathId
     }
   };
 
@@ -130,7 +129,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow">
           <Button
-            onClick={() => handleTogglePlay(editableScript)}
+            onClick={() => handleTogglePlay(editableScript, pathId)}
             disabled={isGenerating && !audioUrl}
             variant="ghost"
             size="icon"
@@ -174,9 +173,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
           showControls={showControls}
           isGenerating={isGenerating}
           audioUrl={audioUrl}
-          onPlayPause={() => handleTogglePlay(editableScript)}
+          onPlayPause={() => handleTogglePlay(editableScript, pathId)}
           onMuteToggle={handleMuteToggle}
-          onRetry={() => handleRetry(editableScript)}
+          onRetry={() => handleRetry(editableScript, pathId)}
           onToggleControls={() => setShowControls(!showControls)}
         />
       </div>

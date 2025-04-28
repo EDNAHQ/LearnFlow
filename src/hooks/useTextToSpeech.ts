@@ -5,65 +5,10 @@ import { toast } from 'sonner';
 
 export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [scriptContent, setScriptContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const generateScript = async (steps: any[], topic: string) => {
-    if (!steps || steps.length === 0) {
-      const errorMsg = 'No learning steps provided for script generation';
-      setError(errorMsg);
-      return null;
-    }
-    
-    setIsGeneratingScript(true);
-    setError(null);
-    
-    try {
-      console.log(`Generating script for topic: ${topic} with ${steps.length} learning steps`);
-      
-      // Extract relevant content from steps
-      const stepsContent = steps.map(step => ({
-        title: step.title,
-        content: step.detailed_content || step.content || ''
-      }));
-      
-      // Call the edge function to generate a script
-      const response = await supabase.functions.invoke('generate-podcast-transcript', {
-        body: { 
-          content: JSON.stringify(stepsContent),
-          title: `Complete overview of ${topic}`,
-          topic: topic,
-          isFullProjectSummary: true
-        }
-      });
-      
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate script');
-      }
-      
-      if (!response.data || !response.data.transcript) {
-        throw new Error('No script content received');
-      }
-      
-      const generatedScript = response.data.transcript;
-      console.log('Script generated successfully:', generatedScript.substring(0, 100) + '...');
-      
-      setScriptContent(generatedScript);
-      return generatedScript;
-    } catch (err: any) {
-      console.error('Error generating script:', err);
-      const errorMsg = err.message || 'Unknown error occurred during script generation';
-      setError(errorMsg);
-      toast.error(`Script generation failed: ${errorMsg}`);
-      return null;
-    } finally {
-      setIsGeneratingScript(false);
-    }
-  };
-
-  const generateSpeech = async (text: string, voiceId?: string) => {
+  const generateSpeech = async (text: string, pathId: string) => {
     if (!text) {
       const errorMsg = 'No text provided for speech generation';
       setError(errorMsg);
@@ -74,25 +19,24 @@ export function useTextToSpeech() {
     setError(null);
     
     try {
-      // Clear previous audio if exists
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-        setAudioUrl(null);
+      // First check if we already have an audio URL for this path
+      const { data: pathData } = await supabase
+        .from('learning_paths')
+        .select('audio_url')
+        .eq('id', pathId)
+        .single();
+
+      if (pathData?.audio_url) {
+        console.log('Using existing audio URL:', pathData.audio_url);
+        setAudioUrl(pathData.audio_url);
+        return pathData.audio_url;
       }
-      
-      // If text is too long, truncate it
-      const maxLength = 4000;
-      const truncatedText = text.length > maxLength 
-        ? text.substring(0, maxLength) + "... (content truncated for text to speech)"
-        : text;
-      
-      console.log(`Generating speech for text: ${truncatedText.substring(0, 50)}...`);
-      console.log(`Text length: ${truncatedText.length} characters`);
-      
+
+      // If no existing audio, generate new one
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
-          text: truncatedText, 
-          voiceId: voiceId || "pFZP5JQG7iQjIQuC4Bku" // Default to Lily voice
+          text,
+          pathId
         }
       });
       
@@ -100,17 +44,14 @@ export function useTextToSpeech() {
         throw new Error(response.error.message || 'Failed to generate speech');
       }
       
-      if (!response.data) {
-        throw new Error('No audio data received');
+      if (!response.data?.audioUrl) {
+        throw new Error('No audio URL received');
       }
       
-      // Create audio blob from the binary data response
-      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
-      const url = URL.createObjectURL(audioBlob);
-      
-      console.log('Speech generated successfully, audio URL created:', url);
-      setAudioUrl(url);
-      return url;
+      console.log('Generated new audio URL:', response.data.audioUrl);
+      setAudioUrl(response.data.audioUrl);
+      toast.success('Audio generated successfully');
+      return response.data.audioUrl;
     } catch (err: any) {
       console.error('Error generating speech:', err);
       const errorMsg = err.message || 'Unknown error occurred';
@@ -124,21 +65,16 @@ export function useTextToSpeech() {
 
   const cleanup = () => {
     if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
     setError(null);
-    setScriptContent(null);
   };
 
   return {
     isGenerating,
-    isGeneratingScript,
     audioUrl,
-    scriptContent,
     error,
     generateSpeech,
-    generateScript,
     cleanup
   };
 }

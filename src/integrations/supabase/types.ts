@@ -12,6 +12,7 @@ export type Database = {
       learning_paths: {
         Row: {
           audio_script: string | null
+          audio_url: string | null
           created_at: string
           id: string
           is_approved: boolean | null
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           audio_script?: string | null
+          audio_url?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null
@@ -36,6 +38,7 @@ export type Database = {
         }
         Update: {
           audio_script?: string | null
+          audio_url?: string | null
           created_at?: string
           id?: string
           is_approved?: boolean | null

@@ -1,9 +1,8 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { toast } from 'sonner';
 
-export const useAudioPlayer = (initialScript: string = '') => {
+export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
   const { 
     isGenerating, 
     audioUrl, 
@@ -33,7 +32,6 @@ export const useAudioPlayer = (initialScript: string = '') => {
       audioRef.current.src = audioUrl;
       audioRef.current.load();
       
-      // Add event listeners to track audio loading
       const handleCanPlay = () => {
         console.log("Audio can now play");
         setIsAudioLoaded(true);
@@ -57,13 +55,13 @@ export const useAudioPlayer = (initialScript: string = '') => {
     }
   }, [audioUrl]);
 
-  const handleTogglePlay = async (script?: string) => {
+  const handleTogglePlay = async (script?: string, currentPathId?: string) => {
     setLocalError(null);
     
-    if (!audioUrl && !isGenerating && script) {
+    if (!audioUrl && !isGenerating && script && currentPathId) {
       console.log("Generating speech from script with length:", script.length);
       try {
-        const url = await generateSpeech(script);
+        const url = await generateSpeech(script, currentPathId);
         if (url) {
           toast.success("Audio generated successfully");
         }
@@ -96,22 +94,18 @@ export const useAudioPlayer = (initialScript: string = '') => {
     }
   };
 
-  const handleRetry = async (script: string) => {
-    if (!isGenerating) {
+  const handleRetry = async (script: string, currentPathId?: string) => {
+    if (!isGenerating && currentPathId) {
       setLocalError(null);
       try {
         cleanup();
         console.log("Regenerating speech...");
-        await generateSpeech(script);
+        await generateSpeech(script, currentPathId);
       } catch (err: any) {
         console.error("Failed to regenerate speech:", err);
         setLocalError(err.message || "Failed to regenerate speech");
       }
     }
-  };
-
-  const handleAudioEnd = () => {
-    setIsPlaying(false);
   };
 
   useEffect(() => {
@@ -135,6 +129,10 @@ export const useAudioPlayer = (initialScript: string = '') => {
     };
   }, [audioUrl]);
 
+  const handleAudioEnd = () => {
+    setIsPlaying(false);
+  };
+
   return {
     audioRef,
     isPlaying,
@@ -148,6 +146,6 @@ export const useAudioPlayer = (initialScript: string = '') => {
     handleTogglePlay,
     handleMuteToggle,
     handleRetry,
-    handleAudioEnd
+    handleAudioEnd: () => setIsPlaying(false)
   };
 };
