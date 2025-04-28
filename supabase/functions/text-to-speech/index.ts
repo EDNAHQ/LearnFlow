@@ -17,7 +17,7 @@ serve(async (req) => {
     console.log("Text-to-speech function called");
     
     // Parse the request body to get the text and pathId
-    const { text, voiceId = "pFZP5JQG7iQjIQuC4Bku", pathId } = await req.json()
+    const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb", pathId } = await req.json()
 
     if (!text) {
       console.error("No text provided for speech generation");
