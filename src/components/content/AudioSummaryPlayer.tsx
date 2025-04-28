@@ -1,13 +1,14 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { Play, Pause, Volume2, Loader2, VolumeX, RefreshCw, FileText } from 'lucide-react';
+import { Play, Pause, Loader2, FileText } from 'lucide-react';
 import { BarLoader } from '@/components/ui/loader';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import { useAudioPlayer } from '@/hooks/useAudioPlayer';
+import { AudioControls } from './audio/AudioControls';
+import { ScriptEditor } from './audio/ScriptEditor';
+import { AudioError } from './audio/AudioError';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
@@ -16,48 +17,31 @@ interface AudioSummaryPlayerProps {
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
-  const { 
-    isGenerating, 
-    isGeneratingScript,
-    audioUrl, 
-    scriptContent,
-    error, 
-    generateSpeech, 
-    generateScript,
-    cleanup 
-  } = useTextToSpeech();
+  const { isGeneratingScript, scriptContent, generateScript } = useTextToSpeech();
   
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
-  const [showControls, setShowControls] = useState(true);
   const [editableScript, setEditableScript] = useState<string>('');
   const [showScriptEditor, setShowScriptEditor] = useState(false);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Handle cleanup on unmount
-  useEffect(() => {
-    return () => {
-      cleanup();
-    };
-  }, [cleanup]);
+  const {
+    audioRef,
+    isPlaying,
+    isMuted,
+    isAudioLoaded,
+    showControls,
+    isGenerating,
+    audioUrl,
+    error,
+    setShowControls,
+    handleTogglePlay,
+    handleMuteToggle,
+    handleRetry
+  } = useAudioPlayer(editableScript);
 
   useEffect(() => {
     if (scriptContent && !editableScript) {
       setEditableScript(scriptContent);
     }
   }, [scriptContent, editableScript]);
-
-  // Create audio element when URL is available
-  useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.src = audioUrl;
-      audioRef.current.load();
-      setIsAudioLoaded(true);
-      console.log("Audio URL loaded into player:", audioUrl);
-    }
-  }, [audioUrl]);
 
   const handleGenerateScript = async () => {
     if (!isGeneratingScript && steps.length > 0) {
@@ -75,84 +59,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
 
   const handleGenerateAudio = async () => {
     if (!isGenerating && editableScript) {
-      console.log("Generating audio from script...");
-      try {
-        await generateSpeech(editableScript);
-      } catch (err) {
-        console.error("Failed to generate audio:", err);
-      }
+      await handleTogglePlay(editableScript);
     }
   };
-
-  const handleTogglePlay = async () => {
-    if (!audioUrl && !isGenerating) {
-      // If no audio yet, check if we have a script
-      if (editableScript) {
-        await handleGenerateAudio();
-      } else {
-        // If no script, generate one first
-        const script = await generateScript(steps, topic || 'this topic');
-        if (script) {
-          await generateSpeech(script);
-        }
-      }
-    } else if (audioRef.current) {
-      // If audio exists, toggle play/pause
-      if (isPlaying) {
-        console.log("Pausing audio");
-        audioRef.current.pause();
-      } else {
-        console.log("Playing audio");
-        audioRef.current.play().catch(err => {
-          console.error("Error playing audio:", err);
-        });
-      }
-    }
-  };
-
-  const handleMuteToggle = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleRetry = async () => {
-    if (!isGenerating) {
-      try {
-        // Clean up existing audio
-        cleanup();
-        // Reset the script editor state
-        setEditableScript('');
-        setShowScriptEditor(false);
-      } catch (err) {
-        console.error("Failed to reset:", err);
-      }
-    }
-  };
-
-  const handleAudioEnd = () => {
-    setIsPlaying(false);
-  };
-
-  // Update play state when audio plays or pauses
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleAudioEnd);
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleAudioEnd);
-    };
-  }, [audioUrl]);
 
   if (isLoading) {
     return <div className="text-center p-8"><BarLoader className="mx-auto" /><p>Loading learning content...</p></div>;
@@ -190,42 +99,13 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
       )}
 
       {scriptContent && showScriptEditor && (
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="font-semibold">Edit Summary Script</h4>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowScriptEditor(false)}
-              className="text-xs"
-            >
-              Hide Editor
-            </Button>
-          </div>
-          <Textarea
-            value={editableScript}
-            onChange={(e) => setEditableScript(e.target.value)}
-            className="h-40 bg-gray-800 text-white border-gray-700"
-            placeholder="Edit the generated script here..."
-          />
-          <div className="flex justify-end mt-2">
-            <Button
-              onClick={handleGenerateAudio}
-              disabled={isGenerating || !editableScript}
-              size="sm"
-              className="bg-purple-700 hover:bg-purple-600 text-white"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>Generate Audio</>
-              )}
-            </Button>
-          </div>
-        </div>
+        <ScriptEditor
+          script={editableScript}
+          isGenerating={isGenerating}
+          onScriptChange={setEditableScript}
+          onGenerateAudio={handleGenerateAudio}
+          onToggleEditor={() => setShowScriptEditor(false)}
+        />
       )}
 
       {scriptContent && !showScriptEditor && (
@@ -242,7 +122,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow">
           <Button
-            onClick={handleTogglePlay}
+            onClick={() => handleTogglePlay(editableScript)}
             disabled={isGenerating && !audioUrl}
             variant="ghost"
             size="icon"
@@ -263,17 +143,14 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
               {isGenerating ? 'Generating audio...' : (isGeneratingScript ? 'Generating script...' : 'Project Audio Summary')}
             </div>
             
-            {/* Audio element - always visible */}
             <audio 
               ref={audioRef} 
-              onEnded={handleAudioEnd}
               controls={showControls}
               className="w-full mt-2"
             />
             
             {(isGenerating || isGeneratingScript) && <BarLoader className="w-full mt-2" />}
             
-            {/* Show audio status message */}
             {!isGenerating && audioUrl && (
               <div className="text-xs text-gray-400 mt-1">
                 {isPlaying ? 'Playing audio...' : (isAudioLoaded ? 'Audio ready to play' : 'Loading audio...')}
@@ -282,61 +159,23 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleRetry}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-white hover:bg-gray-800"
-            title="Reset and start over"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            onClick={handleMuteToggle}
-            variant="ghost" 
-            size="icon"
-            disabled={!audioUrl}
-            className="h-8 w-8 text-white hover:bg-gray-800"
-            title={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-          
-          <Button
-            onClick={() => setShowControls(!showControls)}
-            variant="ghost"
-            size="sm"
-            className="text-xs text-gray-400 hover:bg-gray-800"
-          >
-            {showControls ? "Hide Controls" : "Show Controls"}
-          </Button>
-        </div>
+        <AudioControls
+          isPlaying={isPlaying}
+          isMuted={isMuted}
+          showControls={showControls}
+          isGenerating={isGenerating}
+          audioUrl={audioUrl}
+          onPlayPause={() => handleTogglePlay(editableScript)}
+          onMuteToggle={handleMuteToggle}
+          onRetry={() => handleRetry(editableScript)}
+          onToggleControls={() => setShowControls(!showControls)}
+        />
       </div>
       
-      {/* Error message display */}
-      {error && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}. Please try again.</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Info message when no steps */}
-      {steps.length === 0 && (
-        <Alert className="mt-4 bg-blue-900/20 border-blue-800">
-          <Info className="h-4 w-4" />
-          <AlertTitle>No Content Available</AlertTitle>
-          <AlertDescription>
-            There's no learning content available for this path yet. Please navigate to a learning path with content.
-          </AlertDescription>
-        </Alert>
-      )}
+      <AudioError 
+        error={error} 
+        noContent={steps.length === 0}
+      />
     </div>
   );
 };
