@@ -14,3 +14,4 @@ export const AudioErrorDisplay: React.FC<AudioErrorDisplayProps> = ({ error }) =
     </div>
   );
 };
+

@@ -63,3 +63,4 @@ export const useAudioPlayerState = (audioUrl: string | null) => {
     handleMuteToggle
   };
 };
+
