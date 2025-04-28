@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -11,7 +12,8 @@ export function useTextToSpeech() {
 
   const generateScript = async (steps: any[], topic: string) => {
     if (!steps || steps.length === 0) {
-      setError('No learning steps provided for script generation');
+      const errorMsg = 'No learning steps provided for script generation';
+      setError(errorMsg);
       return null;
     }
     
@@ -52,7 +54,9 @@ export function useTextToSpeech() {
       return generatedScript;
     } catch (err: any) {
       console.error('Error generating script:', err);
-      setError(err.message || 'Unknown error occurred during script generation');
+      const errorMsg = err.message || 'Unknown error occurred during script generation';
+      setError(errorMsg);
+      toast.error(`Script generation failed: ${errorMsg}`);
       return null;
     } finally {
       setIsGeneratingScript(false);
@@ -61,7 +65,8 @@ export function useTextToSpeech() {
 
   const generateSpeech = async (text: string, voiceId?: string) => {
     if (!text) {
-      setError('No text provided for speech generation');
+      const errorMsg = 'No text provided for speech generation';
+      setError(errorMsg);
       return null;
     }
     
@@ -76,11 +81,13 @@ export function useTextToSpeech() {
       }
       
       // If text is too long, truncate it
-      const truncatedText = text.length > 4000 
-        ? text.substring(0, 4000) + "... (content truncated for text to speech)"
+      const maxLength = 4000;
+      const truncatedText = text.length > maxLength 
+        ? text.substring(0, maxLength) + "... (content truncated for text to speech)"
         : text;
       
       console.log(`Generating speech for text: ${truncatedText.substring(0, 50)}...`);
+      console.log(`Text length: ${truncatedText.length} characters`);
       
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
@@ -106,7 +113,9 @@ export function useTextToSpeech() {
       return url;
     } catch (err: any) {
       console.error('Error generating speech:', err);
-      setError(err.message || 'Unknown error occurred');
+      const errorMsg = err.message || 'Unknown error occurred';
+      setError(errorMsg);
+      toast.error(`Speech generation failed: ${errorMsg}`);
       return null;
     } finally {
       setIsGenerating(false);

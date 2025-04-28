@@ -14,20 +14,24 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Text-to-speech function called");
+    
     // Parse the request body to get the text and voiceId
     const { text, voiceId = "pFZP5JQG7iQjIQuC4Bku" } = await req.json()
 
     if (!text) {
+      console.error("No text provided for speech generation");
       throw new Error('Text is required')
     }
 
     // Get API key from environment variables
     const apiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
     if (!apiKey) {
+      console.error("ELEVEN_LABS_API_KEY is not configured");
       throw new Error('ELEVEN_LABS_API_KEY is not configured')
     }
 
-    console.log(`Text-to-speech request: ${text.length} characters, voice: ${voiceId}`)
+    console.log(`Text-to-speech request: ${text.length} characters, voice: ${voiceId}`);
     
     // Initialize ElevenLabs client
     const client = new ElevenLabsClient({
@@ -47,6 +51,7 @@ serve(async (req) => {
       });
       
       if (!audioData || audioData.length === 0) {
+        console.error("No audio data received from Eleven Labs API");
         throw new Error('No audio data received from Eleven Labs API');
       }
       
@@ -73,7 +78,11 @@ serve(async (req) => {
     console.error('Error in text-to-speech function:', error.message);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        service: 'text-to-speech',
+        timestamp: new Date().toISOString()
+      }),
       {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

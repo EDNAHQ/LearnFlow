@@ -17,10 +17,11 @@ interface AudioSummaryPlayerProps {
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
-  const { isGeneratingScript, scriptContent, generateScript } = useTextToSpeech();
+  const { isGeneratingScript, scriptContent, generateScript, error: scriptError } = useTextToSpeech();
   
   const [editableScript, setEditableScript] = useState<string>('');
   const [showScriptEditor, setShowScriptEditor] = useState(false);
+  const [generationAttempted, setGenerationAttempted] = useState(false);
   
   const {
     audioRef,
@@ -30,12 +31,15 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     showControls,
     isGenerating,
     audioUrl,
-    error,
+    error: audioError,
     setShowControls,
     handleTogglePlay,
     handleMuteToggle,
     handleRetry
   } = useAudioPlayer(editableScript);
+
+  // Combine errors from both script and audio generation
+  const error = scriptError || audioError;
 
   useEffect(() => {
     if (scriptContent && !editableScript) {
@@ -46,10 +50,12 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
   const handleGenerateScript = async () => {
     if (!isGeneratingScript && steps.length > 0) {
       console.log("Generating script for entire project...");
+      setGenerationAttempted(true);
       try {
         const script = await generateScript(steps, topic || 'this topic');
         if (script) {
           setShowScriptEditor(true);
+          console.log("Script generation successful, length:", script.length);
         }
       } catch (err) {
         console.error("Failed to generate script:", err);
@@ -59,6 +65,8 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
 
   const handleGenerateAudio = async () => {
     if (!isGenerating && editableScript) {
+      console.log("Generating audio from script with length:", editableScript.length);
+      setGenerationAttempted(true);
       await handleTogglePlay(editableScript);
     }
   };
@@ -147,6 +155,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
               ref={audioRef} 
               controls={showControls}
               className="w-full mt-2"
+              onError={(e) => console.error("Audio element error:", e)}
             />
             
             {(isGenerating || isGeneratingScript) && <BarLoader className="w-full mt-2" />}
@@ -175,6 +184,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
       <AudioError 
         error={error} 
         noContent={steps.length === 0}
+        attempted={generationAttempted}
       />
     </div>
   );
