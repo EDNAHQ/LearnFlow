@@ -60,6 +60,7 @@ Important:
         processedContent = content.toString();
       }
     } else {
+      // Format as podcast script for Play.ai
       // Remove markdown formatting for regular podcast transcript
       processedContent = content
         .replace(/```[^`]*```/g, '') // Remove code blocks

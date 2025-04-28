@@ -5,7 +5,7 @@ import { useLearningSteps, LearningStepData } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
-import PodcastModeDisplay from "./content/PodcastModeDisplay";
+import AudioModeDisplay from "./content/AudioModeDisplay";
 
 interface ContentDisplayProps {
   content?: string;
@@ -121,7 +121,13 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
         )}
         
         {mode === "podcast" && (
-          <PodcastModeDisplay />
+          <AudioModeDisplay 
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            pathId={pathId || ''}
+            stepId={displayStepId}
+            topic={topic || ''}
+          />
         )}
       </div>
     </div>
