@@ -35,18 +35,27 @@ serve(async (req) => {
       console.error("ELEVEN_LABS_API_KEY is not configured");
       throw new Error('ELEVEN_LABS_API_KEY is not configured')
     }
+    console.log("API key retrieved successfully");
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Supabase configuration missing", { supabaseUrl: !!supabaseUrl, supabaseServiceKey: !!supabaseServiceKey });
       throw new Error('Supabase configuration missing')
     }
+    console.log("Supabase configuration retrieved successfully");
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log(`Text-to-speech request: ${text.length} characters, voice: ${voiceId}`);
+    // Trim text if it's too long (ElevenLabs has limitations)
+    const maxTextLength = 5000;
+    const trimmedText = text.length > maxTextLength ? 
+      text.substring(0, maxTextLength) + "... (text was trimmed due to length constraints)" : 
+      text;
+
+    console.log(`Text-to-speech request: ${trimmedText.length} characters, voice: ${voiceId}`);
     
     // Initialize ElevenLabs client
     const client = new ElevenLabsClient({
@@ -55,15 +64,17 @@ serve(async (req) => {
 
     try {
       // Generate audio from text
+      console.log("Calling ElevenLabs API...");
       const audioData = await client.textToSpeech.convert(voiceId, {
         output_format: "mp3_44100_128",
-        text: text,
+        text: trimmedText,
         model_id: "eleven_multilingual_v2",
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,
         }
       });
+      console.log("ElevenLabs API call completed");
       
       if (!audioData || audioData.length === 0) {
         console.error("No audio data received from Eleven Labs API");
@@ -72,11 +83,33 @@ serve(async (req) => {
       
       console.log(`Successfully generated audio: ${audioData.length} bytes`);
 
+      // Check if 'audio_files' bucket exists, create if not
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error("Error listing buckets:", bucketsError);
+      }
+      
+      const audioBucketExists = buckets?.some(bucket => bucket.name === 'audio_files');
+      
+      if (!audioBucketExists) {
+        console.log("Creating audio_files bucket");
+        const { error: createBucketError } = await supabase.storage.createBucket('audio_files', {
+          public: true
+        });
+        
+        if (createBucketError) {
+          console.error("Error creating audio_files bucket:", createBucketError);
+          throw new Error(`Failed to create audio_files bucket: ${createBucketError.message}`);
+        }
+      }
+
       // Create a unique filename
       const timestamp = new Date().getTime()
       const filename = `audio_${pathId}_${timestamp}.mp3`
       
       // Upload to Supabase Storage
+      console.log(`Uploading audio file: ${filename}`);
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('audio_files')
@@ -89,6 +122,7 @@ serve(async (req) => {
         console.error('Error uploading audio:', uploadError);
         throw new Error(`Failed to upload audio: ${uploadError.message}`);
       }
+      console.log("Audio file uploaded successfully");
 
       // Get the public URL for the uploaded file
       const { data: { publicUrl } } = supabase
@@ -96,7 +130,10 @@ serve(async (req) => {
         .from('audio_files')
         .getPublicUrl(filename)
 
+      console.log(`Audio public URL: ${publicUrl}`);
+
       // Update the learning path with the audio URL
+      console.log(`Updating learning path ${pathId} with audio URL`);
       const { error: updateError } = await supabase
         .from('learning_paths')
         .update({ audio_url: publicUrl })
@@ -106,6 +143,7 @@ serve(async (req) => {
         console.error('Error updating learning path:', updateError);
         throw new Error(`Failed to update learning path: ${updateError.message}`);
       }
+      console.log("Learning path updated successfully");
 
       // Return success response with the audio URL
       return new Response(

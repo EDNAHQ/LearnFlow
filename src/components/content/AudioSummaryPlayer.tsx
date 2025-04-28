@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -8,6 +9,7 @@ import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { AudioControls } from './audio/AudioControls';
 import { ScriptEditor } from './audio/ScriptEditor';
 import { AudioError } from './audio/AudioError';
+import { toast } from 'sonner';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
@@ -29,6 +31,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
   const [editableScript, setEditableScript] = useState<string>('');
   const [showScriptEditor, setShowScriptEditor] = useState(false);
   const [generationAttempted, setGenerationAttempted] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   const {
     audioRef,
@@ -53,19 +56,46 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     }
   }, [scriptContent, editableScript]);
 
+  // Prepare a script from all the learning steps
+  const prepareDefaultScript = () => {
+    if (!steps || steps.length === 0) return '';
+    
+    const introduction = `Here's a summary of what you'll learn about ${topic}:\n\n`;
+    
+    // Get content or detailed_content from each step
+    const stepsContent = steps.map((step, index) => {
+      const content = step.detailed_content || step.content || '';
+      // Extract first paragraph or a portion of the content
+      const firstParagraph = content.split('\n')[0] || content.substring(0, 200);
+      return `Step ${index + 1}: ${step.title}\n${firstParagraph}\n`;
+    }).join('\n');
+    
+    return introduction + stepsContent;
+  };
+
   const handleGenerateScript = async () => {
     if (!isGeneratingScript && steps.length > 0) {
       console.log("Generating script for entire project...");
       setGenerationAttempted(true);
+      
       try {
+        // First try to use the generateScript function from useTextToSpeech
         const script = await generateScript(steps, topic || 'this topic');
+        
         if (script) {
           setShowScriptEditor(true);
           console.log("Script generation successful, length:", script.length);
+          return;
         }
       } catch (err) {
-        console.error("Failed to generate script:", err);
+        console.error("Error in script generation:", err);
+        // If the function fails, use our default script preparation
       }
+      
+      // Fallback to local script generation
+      const defaultScript = prepareDefaultScript();
+      setEditableScript(defaultScript);
+      setShowScriptEditor(true);
     }
   };
 
@@ -73,7 +103,27 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     if (!isGenerating && editableScript && pathId) {
       console.log("Generating audio from script with length:", editableScript.length);
       setGenerationAttempted(true);
-      await handleTogglePlay(editableScript, pathId);
+      
+      try {
+        await handleTogglePlay(editableScript, pathId);
+      } catch (err) {
+        console.error("Error calling handleTogglePlay:", err);
+        setDebugInfo(`Error: ${err.message}`);
+        
+        // As a fallback, try direct generation
+        try {
+          const url = await generateSpeech(editableScript, pathId);
+          if (url) {
+            toast.success("Audio generated successfully");
+            console.log("Audio URL:", url);
+          } else {
+            toast.error("Failed to generate audio");
+          }
+        } catch (genErr) {
+          console.error("Direct generation failed too:", genErr);
+          toast.error(`Audio generation failed: ${genErr.message}`);
+        }
+      }
     }
   };
 
@@ -90,7 +140,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
         </p>
       </div>
 
-      {!scriptContent && !showScriptEditor && (
+      {!scriptContent && !editableScript && !showScriptEditor && (
         <div className="flex justify-center mb-4">
           <Button
             onClick={handleGenerateScript}
@@ -112,9 +162,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
         </div>
       )}
 
-      {scriptContent && showScriptEditor && (
+      {(scriptContent || editableScript) && showScriptEditor && (
         <ScriptEditor
-          script={editableScript}
+          script={editableScript || scriptContent || ''}
           isGenerating={isGenerating}
           onScriptChange={setEditableScript}
           onGenerateAudio={handleGenerateAudio}
@@ -122,7 +172,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
         />
       )}
 
-      {scriptContent && !showScriptEditor && (
+      {(scriptContent || editableScript) && !showScriptEditor && (
         <Button 
           variant="outline" 
           size="sm" 
@@ -136,7 +186,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-grow">
           <Button
-            onClick={() => handleTogglePlay(editableScript, pathId)}
+            onClick={() => handleTogglePlay(editableScript || scriptContent || '', pathId)}
             disabled={isGenerating && !audioUrl}
             variant="ghost"
             size="icon"
@@ -161,7 +211,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
               ref={audioRef} 
               controls={showControls}
               className="w-full mt-2"
-              onError={(e) => console.error("Audio element error:", e)}
+              onError={(e) => {
+                console.error("Audio element error:", e);
+                setDebugInfo(`Audio element error: ${e.type}`);
+              }}
             />
             
             {(isGenerating || isGeneratingScript) && <BarLoader className="w-full mt-2" />}
@@ -180,9 +233,9 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
           showControls={showControls}
           isGenerating={isGenerating}
           audioUrl={audioUrl}
-          onPlayPause={() => handleTogglePlay(editableScript, pathId)}
+          onPlayPause={() => handleTogglePlay(editableScript || scriptContent || '', pathId)}
           onMuteToggle={handleMuteToggle}
-          onRetry={() => handleRetry(editableScript, pathId)}
+          onRetry={() => handleRetry(editableScript || scriptContent || '', pathId)}
           onToggleControls={() => setShowControls(!showControls)}
         />
       </div>
@@ -192,6 +245,12 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
         noContent={steps.length === 0}
         attempted={generationAttempted}
       />
+      
+      {debugInfo && (
+        <div className="mt-2 p-2 bg-gray-800 text-xs text-yellow-400 rounded">
+          Debug: {debugInfo}
+        </div>
+      )}
     </div>
   );
 };

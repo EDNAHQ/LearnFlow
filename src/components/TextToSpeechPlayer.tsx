@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -44,6 +45,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({
       // If no audio yet, generate it first
       console.log("Generating speech...");
       try {
+        // Make sure to pass the pathId parameter
         await generateSpeech(text, pathId);
       } catch (err) {
         console.error("Failed to generate speech:", err);
@@ -74,7 +76,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({
       try {
         // Clean up existing audio
         cleanup();
-        // Generate new audio
+        // Generate new audio - make sure to pass the pathId parameter
         console.log("Regenerating speech...");
         await generateSpeech(text, pathId);
       } catch (err) {

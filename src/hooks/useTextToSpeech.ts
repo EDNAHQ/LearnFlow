@@ -16,6 +16,14 @@ export function useTextToSpeech() {
     if (!text) {
       const errorMsg = 'No text provided for speech generation';
       setError(errorMsg);
+      toast.error(errorMsg);
+      return null;
+    }
+    
+    if (!pathId) {
+      const errorMsg = 'No pathId provided for speech generation';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return null;
     }
     
@@ -24,18 +32,25 @@ export function useTextToSpeech() {
     
     try {
       // First check if we already have an audio URL for this path
-      const { data: pathData } = await supabase
+      const { data: pathData, error: pathError } = await supabase
         .from('learning_paths')
         .select('audio_url')
         .eq('id', pathId)
         .single();
 
+      if (pathError) {
+        console.error("Error fetching path data:", pathError);
+      }
+
       if (pathData?.audio_url) {
         console.log('Using existing audio URL:', pathData.audio_url);
         setAudioUrl(pathData.audio_url);
+        toast.success('Using existing audio');
         return pathData.audio_url;
       }
 
+      console.log(`Generating speech for path ${pathId} with text length ${text.length}`);
+      
       // If no existing audio, generate new one
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
@@ -43,6 +58,8 @@ export function useTextToSpeech() {
           pathId
         }
       });
+      
+      console.log("Text-to-speech response:", response);
       
       if (response.error) {
         throw new Error(response.error.message || 'Failed to generate speech');
@@ -74,8 +91,23 @@ export function useTextToSpeech() {
     
     try {
       // Generate a summary script from the learning steps
-      const content = steps.map(step => step.content || step.detailed_content || '').join('\n\n');
-      const summary = `Here's a summary of what you'll learn about ${topic}: ${content.substring(0, 1000)}...`;
+      if (!steps || steps.length === 0) {
+        throw new Error('No steps available to generate a script');
+      }
+      
+      // Create a more structured script with better formatting
+      const introduction = `Here's a summary of what you'll learn about ${topic}:\n\n`;
+      
+      // Get content from each step, focusing on the title and first part
+      const stepsContent = steps.map((step, index) => {
+        const content = step.detailed_content || step.content || '';
+        // Extract first paragraph or a portion of the content
+        const firstParagraph = content.split('\n')[0] || content.substring(0, 200);
+        return `Step ${index + 1}: ${step.title}\n${firstParagraph}\n`;
+      }).join('\n\n');
+      
+      const summary = introduction + stepsContent;
+      
       setScriptContent(summary);
       toast.success('Script generated successfully');
       return summary;

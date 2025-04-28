@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Volume2, Loader2, VolumeX, RefreshCw } from 'lucide-react';
+import { RefreshCw, Volume2, VolumeX } from 'lucide-react';
 
 interface AudioControlsProps {
   isPlaying: boolean;

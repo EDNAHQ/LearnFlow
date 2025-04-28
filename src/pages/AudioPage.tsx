@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { MainNav } from "@/components/MainNav";
 import { motion } from "framer-motion";
@@ -35,6 +36,8 @@ const AudioPage = () => {
       
       // Generate a unique dummy pathId for this audio since it's not tied to a specific learning path
       const dummyPathId = `audio_page_${Date.now()}`;
+      
+      // Make sure to pass both text and pathId parameters
       const url = await generateSpeech(summaryText, dummyPathId);
       
       if (url) {
@@ -68,15 +71,21 @@ const AudioPage = () => {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      console.error("Audio element error:", e);
+      setError("Error playing audio. Please try again.");
+    };
 
     audioElement.addEventListener('play', handlePlay);
     audioElement.addEventListener('pause', handlePause);
     audioElement.addEventListener('ended', handleEnded);
+    audioElement.addEventListener('error', handleError);
 
     return () => {
       audioElement.removeEventListener('play', handlePlay);
       audioElement.removeEventListener('pause', handlePause);
       audioElement.removeEventListener('ended', handleEnded);
+      audioElement.removeEventListener('error', handleError);
     };
   }, [audioUrl]);
 
@@ -159,6 +168,7 @@ const AudioPage = () => {
                       src={audioUrl} 
                       controls 
                       className="w-full"
+                      onError={() => setError("Error loading audio")}
                     />
                   </div>
                 )}
