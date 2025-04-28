@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -8,9 +7,14 @@ import { BarLoader } from '@/components/ui/loader';
 interface TextToSpeechPlayerProps {
   text: string;
   title: string;
+  pathId?: string; // Add pathId prop
 }
 
-const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) => {
+const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ 
+  text, 
+  title,
+  pathId = 'default' // Provide a default value for pathId
+}) => {
   const { isGenerating, audioUrl, error, generateSpeech, cleanup } = useTextToSpeech();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -40,7 +44,7 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
       // If no audio yet, generate it first
       console.log("Generating speech...");
       try {
-        await generateSpeech(text);
+        await generateSpeech(text, pathId);
       } catch (err) {
         console.error("Failed to generate speech:", err);
       }
@@ -72,9 +76,9 @@ const TextToSpeechPlayer: React.FC<TextToSpeechPlayerProps> = ({ text, title }) 
         cleanup();
         // Generate new audio
         console.log("Regenerating speech...");
-        await generateSpeech(text);
+        await generateSpeech(text, pathId);
       } catch (err) {
-        console.error("Failed to regenerate speech:", err);
+        console.error("Failed to generate speech:", err);
       }
     }
   };

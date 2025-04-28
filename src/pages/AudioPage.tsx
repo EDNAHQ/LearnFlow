@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MainNav } from "@/components/MainNav";
 import { motion } from "framer-motion";
@@ -34,7 +33,10 @@ const AudioPage = () => {
         "LearnFlow adapts to your learning style and pace. " +
         "Start your learning journey today with LearnFlow.";
       
-      const url = await generateSpeech(summaryText);
+      // Generate a unique dummy pathId for this audio since it's not tied to a specific learning path
+      const dummyPathId = `audio_page_${Date.now()}`;
+      const url = await generateSpeech(summaryText, dummyPathId);
+      
       if (url) {
         setAudioUrl(url);
       }

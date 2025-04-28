@@ -7,6 +7,10 @@ export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Add these properties for script generation
+  const [scriptContent, setScriptContent] = useState<string | null>(null);
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
 
   const generateSpeech = async (text: string, pathId: string) => {
     if (!text) {
@@ -63,11 +67,35 @@ export function useTextToSpeech() {
     }
   };
 
+  // Add a script generation function for the AudioSummaryPlayer
+  const generateScript = async (steps: any[], topic: string) => {
+    setIsGeneratingScript(true);
+    setError(null);
+    
+    try {
+      // Generate a summary script from the learning steps
+      const content = steps.map(step => step.content || step.detailed_content || '').join('\n\n');
+      const summary = `Here's a summary of what you'll learn about ${topic}: ${content.substring(0, 1000)}...`;
+      setScriptContent(summary);
+      toast.success('Script generated successfully');
+      return summary;
+    } catch (err: any) {
+      console.error('Error generating script:', err);
+      const errorMsg = err.message || 'Failed to generate script';
+      setError(errorMsg);
+      toast.error(`Script generation failed: ${errorMsg}`);
+      return null;
+    } finally {
+      setIsGeneratingScript(false);
+    }
+  };
+
   const cleanup = () => {
     if (audioUrl) {
       setAudioUrl(null);
     }
     setError(null);
+    setScriptContent(null);
   };
 
   return {
@@ -75,6 +103,10 @@ export function useTextToSpeech() {
     audioUrl,
     error,
     generateSpeech,
-    cleanup
+    cleanup,
+    // Add the new properties and methods
+    scriptContent,
+    isGeneratingScript,
+    generateScript
   };
 }

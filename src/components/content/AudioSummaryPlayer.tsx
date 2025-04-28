@@ -16,7 +16,15 @@ interface AudioSummaryPlayerProps {
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
-  const { isGeneratingScript, scriptContent, generateScript, error: scriptError } = useTextToSpeech();
+  const { 
+    isGenerating: isGeneratingAudio, 
+    audioUrl, 
+    error: audioError,
+    scriptContent,
+    isGeneratingScript,
+    generateScript,
+    generateSpeech
+  } = useTextToSpeech();
   
   const [editableScript, setEditableScript] = useState<string>('');
   const [showScriptEditor, setShowScriptEditor] = useState(false);
@@ -29,16 +37,15 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     isAudioLoaded,
     showControls,
     isGenerating,
-    audioUrl,
-    error: audioError,
+    error: playerError,
     setShowControls,
     handleTogglePlay,
     handleMuteToggle,
     handleRetry
-  } = useAudioPlayer(editableScript, pathId);  // Updated to pass pathId
+  } = useAudioPlayer(editableScript, pathId);
 
   // Combine errors from both script and audio generation
-  const error = scriptError || audioError;
+  const error = audioError || playerError;
 
   useEffect(() => {
     if (scriptContent && !editableScript) {
@@ -63,10 +70,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
   };
 
   const handleGenerateAudio = async () => {
-    if (!isGenerating && editableScript && pathId) {  // Added pathId check
+    if (!isGenerating && editableScript && pathId) {
       console.log("Generating audio from script with length:", editableScript.length);
       setGenerationAttempted(true);
-      await handleTogglePlay(editableScript, pathId);  // Updated to pass pathId
+      await handleTogglePlay(editableScript, pathId);
     }
   };
 
