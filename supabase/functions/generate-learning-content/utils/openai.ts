@@ -1,10 +1,11 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 // Shared OpenAI API call function
-export async function callOpenAI(prompt: string, systemMessage: string, responseFormat?: "json_object", maxTokens = 1000) {
+export async function callOpenAI(prompt: string, systemMessage: string, responseFormat?: "json_object", maxTokens = 1500) {
   if (!openAIApiKey) {
     throw new Error('OpenAI API key is not set');
   }
@@ -35,8 +36,9 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
         ],
       };
 
-      // Use max_completion_tokens for o3-mini model
+      // Use max_completion_tokens for o3-mini model - INCREASED LIMIT FOR BOTH MODELS
       if (currentModel === "o3-mini") {
+        // Increased from previous limit to ensure complete responses
         params.max_completion_tokens = maxTokens;
       } else {
         // Use max_tokens for other models like gpt-4o-mini
@@ -58,11 +60,39 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       console.log("OpenAI request params:", JSON.stringify({
         model: params.model,
         response_format: params.response_format,
-        max_tokens: params.max_tokens || params.max_completion_tokens
+        max_tokens: params.max_tokens || params.max_completion_tokens,
+        estimated_prompt_tokens: prompt.length / 4, // Rough estimate of prompt token count
       }));
 
       const completion = await openai.chat.completions.create(params);
       console.log("OpenAI response received");
+      
+      // Check for truncated response by looking for common patterns
+      const content = completion.choices[0].message.content || "";
+      const contentLength = content.length;
+      
+      console.log(`Response length: ${contentLength} characters`);
+      
+      // Check if response might be truncated
+      const mightBeTruncated = 
+        content.endsWith("...") || 
+        content.endsWith("…") ||
+        content.endsWith("to be continued") ||
+        content.endsWith("continued") ||
+        !content.includes(".") || // Very unlikely for educational content
+        (contentLength < 200 && !responseFormat); // Too short for educational content
+      
+      if (mightBeTruncated) {
+        console.warn("Response appears to be truncated. Content ends with:", content.slice(-40));
+        
+        // If this is our first attempt, retry with increased token count or fallback model
+        if (!fallbackAttempted) {
+          console.log("Detected potential truncation, trying fallback model with higher token limit");
+          currentModel = "gpt-4o-mini";
+          fallbackAttempted = true;
+          continue;
+        }
+      }
       
       if (responseFormat === "json_object") {
         // Validate and sanitize JSON response
@@ -155,8 +185,8 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       
       // If we haven't tried the fallback model yet and this is a JSON parsing error, try the fallback
       if (!fallbackAttempted && 
-          (error.message.includes("JSON") || error.message.includes("SyntaxError"))) {
-        console.log("Falling back to gpt-4o-mini model due to JSON parsing error");
+          (error.message.includes("JSON") || error.message.includes("SyntaxError") || error.message.includes("truncated"))) {
+        console.log("Falling back to gpt-4o-mini model due to error");
         currentModel = "gpt-4o-mini";
         fallbackAttempted = true;
         continue; // Retry with the fallback model
@@ -197,6 +227,18 @@ export async function saveContentToSupabase(
   supabaseUrl: string,
   supabaseServiceKey: string
 ) {
+  // Validate content before saving
+  if (!content || content.length < 200) {
+    console.error("Content appears to be truncated or too short:", content);
+    throw new Error("Generated content is too short or incomplete");
+  }
+  
+  // Check for common truncation patterns
+  if (content.endsWith("...") || content.endsWith("…")) {
+    console.error("Content appears to be truncated at the end:", content.slice(-50));
+    throw new Error("Generated content appears to be truncated");
+  }
+  
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   
   const { error } = await supabase
@@ -209,5 +251,5 @@ export async function saveContentToSupabase(
     throw new Error(`Failed to save generated content: ${error.message}`);
   }
   
-  console.log(`Successfully saved content for step ${stepId}`);
+  console.log(`Successfully saved content for step ${stepId} (${content.length} characters)`);
 }

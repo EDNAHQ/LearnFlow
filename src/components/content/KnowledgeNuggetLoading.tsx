@@ -26,22 +26,35 @@ const KnowledgeNuggetLoading = ({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [forceRedirect, setForceRedirect] = useState(false);
 
-  // Set progress based on content generation
+  // Set progress based on content generation with better handling of edge cases
   useEffect(() => {
     if (totalSteps > 0) {
       // Calculate normal progress
       let calculatedProgress = Math.min(Math.max((generatedSteps / totalSteps) * 100, 0), 100);
       
-      // Fix for 9/10 issue - when we're at 9/10 or more, gradually increase to 100%
-      if (generatedSteps >= totalSteps - 1 && calculatedProgress >= 90) {
-        calculatedProgress += Math.min((elapsedTime * 0.5), 10); // Gradually increase based on time
+      // Enhanced logic for 9/10 issue
+      // If we're close to completion, accelerate progress more aggressively
+      if (generatedSteps >= totalSteps - 1) {
+        // Add time-based acceleration that increases with elapsed time
+        const timeBoost = Math.min((elapsedTime * 0.8), 20); // More aggressive boost based on time
+        calculatedProgress += timeBoost;
         
-        // Force to 100% after a reasonable timeout (5 seconds)
-        if (elapsedTime > 5 && calculatedProgress >= 95) {
+        // Force to 100% after a reasonable timeout (3 seconds instead of 5)
+        if (elapsedTime > 3 && calculatedProgress >= 90) {
           calculatedProgress = 100;
           if (!forceRedirect) {
             setForceRedirect(true);
+            console.log("Force redirecting due to timeout with nearly complete generation");
           }
+        }
+      }
+      
+      // If all steps are generated, show 100% regardless of calculated progress
+      if (generatedSteps >= totalSteps) {
+        calculatedProgress = 100;
+        if (!forceRedirect) {
+          setForceRedirect(true);
+          console.log("Force redirecting as all steps are generated");
         }
       }
       
@@ -78,6 +91,16 @@ const KnowledgeNuggetLoading = ({
     return () => clearInterval(timer);
   }, []);
 
+  // Force redirect after a maximum wait time regardless of progress
+  useEffect(() => {
+    if (elapsedTime > 15 && generatedSteps > 0 && pathId) {
+      console.log("Maximum wait time reached, forcing redirect");
+      if (!forceRedirect) {
+        setForceRedirect(true);
+      }
+    }
+  }, [elapsedTime, generatedSteps, pathId, forceRedirect]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-6">
       <div className="max-w-3xl w-full">
@@ -96,12 +119,12 @@ const KnowledgeNuggetLoading = ({
           
           <p className="text-gray-600 text-center mb-6">
             We're creating personalized content for you.
-            {elapsedTime > 20 && (
+            {elapsedTime > 15 && (
               <span className="block mt-2 text-sm text-amber-600">
                 This may take a minute or two. Thanks for your patience!
               </span>
             )}
-            {forceRedirect && elapsedTime > 8 && (
+            {forceRedirect && elapsedTime > 5 && (
               <span className="block mt-2 text-sm text-green-600">
                 Content is ready! Redirecting you shortly...
               </span>
@@ -137,7 +160,7 @@ const KnowledgeNuggetLoading = ({
               transition={{ delay: 3 }}
               className="mt-4 text-sm text-gray-500 max-w-md text-center"
             >
-              Our AI is generating detailed, personalized content for each step of your learning path. 
+              Our AI is generating concise, personalized content for each step of your learning path. 
               This process can take a few moments as we craft high-quality material just for you.
             </motion.p>
           )}

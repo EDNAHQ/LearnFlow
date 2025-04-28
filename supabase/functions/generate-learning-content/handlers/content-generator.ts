@@ -34,50 +34,49 @@ export async function generateStepContent(
 
     console.log(`Generating content for step: ${title}`);
     
-    // Modified prompt that requests shorter content (400-500 words instead of 800-1000)
+    // Streamlined, cleaner prompt to prevent truncation
     const prompt = `
-    You are an expert educator creating concise, engaging educational content about "${topic}".
+    Create focused educational content about "${title}" related to ${topic}.
+
+    Write 400-500 words covering these key areas:
+    - Core concepts and principles
+    - 1-2 practical examples or applications
+    - Connections to the broader topic
+    - Brief takeaway points
+
+    Style requirements:
+    - SHORT PARAGRAPHS (2-3 sentences maximum)
+    - Clear, engaging educational tone
+    - Frequent paragraph breaks for readability
+    - No meta-references (don't call this "Part X" or refer to other sections)
+    - Direct approach that starts with substantive content
+    - Avoid redundant language patterns
     
-    Focus on creating clear, focused content for this topic: "${title}"
-    
-    Create informative educational content that efficiently explains this topic. Your content should be:
-    
-    1. CONCISE: Brief but thorough explanations covering the essential points
-    2. ENGAGING: Use a conversational tone that draws the reader in
-    3. WELL-STRUCTURED: Organize with clear sections and frequent paragraph breaks
-    4. PRACTICAL: Include key examples where relevant
-    
-    Content structure:
-    - Begin directly with the core content - no introductions identifying this as "part X" or "section Y"
-    - Develop 3-4 distinct points or concepts related to the topic (not too many)
-    - For each major concept:
-      * Explain the core idea clearly and briefly
-      * Provide a relevant example or application 
-      * Connect it to the broader topic of ${topic}
-    - Include practical applications or real-world relevance
-    - End with a brief summary of key takeaways
-    
-    Formatting requirements:
-    - Use SHORT PARAGRAPHS of 2-3 sentences maximum - this is critically important
-    - Create frequent paragraph breaks to improve readability
-    - Maintain clear transitions between paragraphs and ideas
-    - Aim for ~400-500 words of focused, valuable content (HALF the typical length)
-    - Write in a way that's accessible but intellectually stimulating
-    
-    Important language restrictions:
-    - AVOID using the words "realm" and "delve" entirely
-    - Do not refer to this content as "part 1", "part 2", etc.
-    - Do not include introductory lines like "In this section..."
-    - Focus purely on explaining the topic without meta-references
-    
-    Remember to stay precisely focused on "${title}" as it relates to ${topic}.
+    Keep the content concise but complete, making every word count.
     `;
 
-    const systemMessage = `You are an expert educator creating concise, engaging learning content with well-structured short paragraphs (2-3 sentences max) and examples. Your writing is informative yet conversational, with clear organization and practical applications. IMPORTANT: Never use the words "realm" or "delve" in your content. Keep content to about 400-500 words maximum.`;
-    const data = await callOpenAI(prompt, systemMessage, undefined, 800);
+    const systemMessage = `You are a concise educational content writer specializing in clear, focused explanations. Your writing features short paragraphs, practical examples, and readable formatting. Avoid filler words, redundancy, and overly complex terminology. Always complete your thoughts fully without getting cut off.`;
+    
+    // Increased token limit to ensure complete responses
+    const data = await callOpenAI(prompt, systemMessage, undefined, 1500);
     
     const generatedContent = data.choices[0].message.content;
-    console.log(`Content successfully generated (${generatedContent.length} characters)`);
+    const contentLength = generatedContent.length;
+    console.log(`Content successfully generated (${contentLength} characters)`);
+    
+    // Additional validation to ensure content is complete
+    if (contentLength < 200) {
+      console.error("Generated content is suspiciously short:", generatedContent);
+      throw new Error("Generated content is too short and may be incomplete");
+    }
+    
+    // Check for truncation patterns
+    if (generatedContent.endsWith("...") || 
+        generatedContent.endsWith("…") ||
+        generatedContent.endsWith("to be continued")) {
+      console.error("Content appears truncated:", generatedContent.slice(-50));
+      throw new Error("Generated content appears to be truncated");
+    }
 
     // Save generated content to the database
     await saveContentToSupabase(stepId, generatedContent, supabaseUrl, supabaseServiceKey);
