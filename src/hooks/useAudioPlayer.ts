@@ -1,27 +1,39 @@
 
-import { useState, useRef, useEffect } from 'react';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { useAudioGeneration } from './audio/useAudioGeneration';
+import { useAudioPlayback } from './audio/useAudioPlayback';
+import { useAudioControls } from './audio/useAudioControls';
 
 export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
-  const { 
-    isGenerating, 
-    audioUrl, 
-    error, 
-    generateSpeech, 
-    cleanup 
-  } = useTextToSpeech();
+  const {
+    isGenerating,
+    audioUrl,
+    error: generationError,
+    localError: generationLocalError,
+    setLocalError,
+    generateAudio,
+    retryGeneration,
+    cleanup
+  } = useAudioGeneration();
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [loadAttempts, setLoadAttempts] = useState(0);
+  const {
+    audioRef,
+    isPlaying,
+    isMuted,
+    isAudioLoaded,
+    localError: playbackError,
+    playAudio,
+    pauseAudio,
+    toggleMute
+  } = useAudioPlayback(audioUrl);
 
-  // Combined error state
-  const combinedError = error || localError;
+  const {
+    showControls,
+    setShowControls
+  } = useAudioControls();
+
+  // Combined error from all sources
+  const error = generationError || playbackError || generationLocalError;
 
   useEffect(() => {
     return () => {
@@ -29,171 +41,30 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
     };
   }, [cleanup]);
 
-  useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      console.log("Setting audio source:", audioUrl);
-      
-      // Reset error state when setting new URL
-      setLocalError(null);
-      setIsAudioLoaded(false);
-      
-      // Add query param to bust cache if we've had a previous load attempt
-      const urlWithCacheBust = loadAttempts > 0 
-        ? `${audioUrl}${audioUrl.includes('?') ? '&' : '?'}cb=${Date.now()}` 
-        : audioUrl;
-      
-      // Set the audio source and attempt to load it
-      audioRef.current.src = urlWithCacheBust;
-      audioRef.current.load();
-      
-      const handleCanPlay = () => {
-        console.log("Audio can now play");
-        setIsAudioLoaded(true);
-        setLocalError(null);
-      };
-      
-      const handleError = (e: Event) => {
-        const audioElement = e.currentTarget as HTMLAudioElement;
-        console.error("Audio element error:", e, audioElement.error);
-        
-        // Increment load attempts for future retries
-        setLoadAttempts(prev => prev + 1);
-        
-        // Provide more specific error message based on error code
-        let errorMessage = "Unknown playback error";
-        if (audioElement.error) {
-          switch (audioElement.error.code) {
-            case MediaError.MEDIA_ERR_ABORTED:
-              errorMessage = "Playback aborted by the user";
-              break;
-            case MediaError.MEDIA_ERR_NETWORK:
-              errorMessage = "Network error while loading audio";
-              break;
-            case MediaError.MEDIA_ERR_DECODE:
-              errorMessage = "Audio decoding error";
-              break;
-            case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-              errorMessage = "Audio format not supported by your browser";
-              break;
-            default:
-              errorMessage = `Error code: ${audioElement.error.code}`;
-          }
-        }
-        
-        setLocalError(`Audio playback error: ${errorMessage}`);
-        setIsAudioLoaded(false);
-        toast.error(`Audio error: ${errorMessage}. Try refreshing or generating again.`);
-      };
-      
-      audioRef.current.addEventListener('canplay', handleCanPlay);
-      audioRef.current.addEventListener('error', handleError);
-      
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.removeEventListener('canplay', handleCanPlay);
-          audioRef.current.removeEventListener('error', handleError);
-        }
-      };
-    }
-  }, [audioUrl, loadAttempts]);
-
   const handleTogglePlay = async (script?: string, currentPathId?: string) => {
     setLocalError(null);
     
     if (!audioUrl && !isGenerating && script && currentPathId) {
-      console.log("Generating speech from script with length:", script.length);
-      try {
-        const url = await generateSpeech(script, currentPathId);
-        if (url) {
-          toast.success("Audio generated successfully");
-          // We'll let the useEffect handle setting up the audio
-        }
-      } catch (err: any) {
-        console.error("Failed to generate speech:", err);
-        setLocalError(err.message || "Failed to generate speech");
-        toast.error(`Failed to generate audio: ${err.message || 'Unknown error'}`);
-      }
+      await generateAudio(script, currentPathId);
     } else if (audioRef.current) {
       if (isPlaying) {
-        console.log("Pausing audio");
-        audioRef.current.pause();
+        pauseAudio();
       } else {
-        console.log("Playing audio");
-        try {
-          // Force reload if we've had errors before
-          if (localError) {
-            audioRef.current.load();
-            setLocalError(null);
-          }
-          
-          const playPromise = audioRef.current.play();
-          
-          // Handle the play promise to catch any autoplay restrictions
-          if (playPromise !== undefined) {
-            playPromise.then(() => {
-              // Playback started successfully
-              console.log("Audio playback started successfully");
-            }).catch((error) => {
-              // Auto-play was prevented
-              console.error("Playback prevented:", error);
-              setLocalError(`Playback error: ${error.message}. Try clicking play again.`);
-              toast.error("Playback prevented. Try clicking play again.");
-            });
-          }
-        } catch (err: any) {
-          console.error("Error playing audio:", err);
-          setLocalError(`Playback error: ${err.message || 'Unknown error'}`);
-          toast.error(`Error playing audio: ${err.message || 'Unknown error'}`);
-        }
+        playAudio();
       }
     }
   };
 
   const handleMuteToggle = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    toggleMute(audioRef);
   };
 
   const handleRetry = async (script: string, currentPathId?: string) => {
     if (!isGenerating && currentPathId) {
       setLocalError(null);
-      setIsAudioLoaded(false);
-      setLoadAttempts(0);
-      
-      try {
-        cleanup();
-        console.log("Regenerating speech...");
-        await generateSpeech(script, currentPathId);
-      } catch (err: any) {
-        console.error("Failed to regenerate speech:", err);
-        setLocalError(err.message || "Failed to regenerate speech");
-      }
+      await retryGeneration(script, currentPathId);
     }
   };
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-    const handleLoadedData = () => setIsAudioLoaded(true);
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('loadeddata', handleLoadedData);
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('loadeddata', handleLoadedData);
-    };
-  }, []);
 
   return {
     audioRef,
@@ -203,11 +74,11 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
     showControls,
     isGenerating,
     audioUrl,
-    error: combinedError,
+    error,
     setShowControls,
     handleTogglePlay,
     handleMuteToggle,
     handleRetry,
-    handleAudioEnd: () => setIsPlaying(false)
+    handleAudioEnd: () => pauseAudio()
   };
 };
