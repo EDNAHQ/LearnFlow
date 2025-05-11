@@ -7,7 +7,7 @@ interface RealtimeSpeechControlsProps {
   isConnected: boolean;
   isConnecting: boolean;
   isListening: boolean;
-  handleConnect: () => Promise<void>;
+  handleConnect: () => Promise<boolean>;  // Updated to match the hook's return type
   handleDisconnect: () => void;
   toggleListening: () => void;
 }

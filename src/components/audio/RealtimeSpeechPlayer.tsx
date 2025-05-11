@@ -33,6 +33,9 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
     pathId
   });
 
+  // We're not using the boolean return value, so this is fine as-is
+  // The component just needs to acknowledge the correct return type
+
   return (
     <Card className="w-full bg-[#1A1A1A] text-white border border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between">
