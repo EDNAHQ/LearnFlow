@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -26,19 +25,17 @@ export const getMarkdownComponents = (
     ),
     p: ({ node, children, ...props }) => {
       // Process paragraph content for questions and concepts if needed
-      if (topic && onInsightRequest && concepts && concepts.length > 0 && onConceptClick) {
+      if (topic && onInsightRequest) {
         let processedContent: React.ReactNode = children;
         
         // Check if we have a string to process
         if (typeof children === 'string') {
-          console.log(`Processing paragraph text (${children.length} chars) with ${concepts.length} concepts`);
+          // Process for questions first if onInsightRequest is available
+          processedContent = processTextWithQuestions(children, topic, onInsightRequest);
           
-          // First try to add concept links
-          processedContent = processTextWithConcepts(children, concepts, onConceptClick);
-          
-          // If it's still a string (no concept matches were found), process for questions
-          if (typeof processedContent === 'string') {
-            processedContent = processTextWithQuestions(processedContent, topic, onInsightRequest);
+          // Then try to add concept links if we have concepts and a click handler
+          if (typeof processedContent === 'string' && concepts && concepts.length > 0 && onConceptClick) {
+            processedContent = processTextWithConcepts(processedContent, concepts, onConceptClick);
           }
         }
         

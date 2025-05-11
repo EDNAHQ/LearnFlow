@@ -84,6 +84,19 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   };
 
+  // Handle question clicks for insights
+  const handleQuestionClick = (question: string) => {
+    console.log("Dispatching question event from ContentDisplay:", question);
+    
+    // Create a custom event to communicate with ContentInsightsManager
+    const event = new CustomEvent("ai:insight-request", {
+      detail: { question, topic }
+    });
+    
+    // Dispatch the event so ContentInsightsManager can catch it
+    window.dispatchEvent(event);
+  };
+
   if (isLoading) {
     return <div>Loading content...</div>;
   }
@@ -107,6 +120,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
+            onQuestionClick={handleQuestionClick}
           />
         )}
         
@@ -117,6 +131,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
+            onQuestionClick={handleQuestionClick}
           />
         )}
         

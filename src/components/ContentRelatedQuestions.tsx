@@ -14,6 +14,12 @@ const ContentRelatedQuestions = ({
   isLoading, 
   onQuestionClick 
 }: ContentRelatedQuestionsProps) => {
+  // Handle question click with logging
+  const handleQuestionClick = (question: string) => {
+    console.log("Question clicked in ContentRelatedQuestions:", question);
+    onQuestionClick(question);
+  };
+  
   // Always display the section, even when empty
   return (
     <div className="mt-8 border-t border-gray-200 pt-6">
@@ -38,7 +44,7 @@ const ContentRelatedQuestions = ({
           {questions.map((question, index) => (
             <li key={index}>
               <button
-                onClick={() => onQuestionClick(question)}
+                onClick={() => handleQuestionClick(question)}
                 className="text-[#6D42EF] hover:text-[#E84393] underline cursor-pointer text-left flex items-start group transition-colors"
               >
                 <span className="inline-block w-6 text-gray-600 shrink-0">

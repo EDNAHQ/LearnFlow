@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import RelatedTopicsSidebar from "./RelatedTopicsSidebar";
+import { ContentInsightsManager } from "./ContentInsightsManager";
 
 interface ContentPageLayoutProps {
   children: ReactNode;
@@ -39,6 +40,9 @@ const ContentPageLayout = ({
         {/* The remaining children (content) */}
         {Array.isArray(children) ? children.slice(1) : children}
       </div>
+
+      {/* Add ContentInsightsManager to handle AI insight events */}
+      {topic && <ContentInsightsManager topic={topic} />}
 
       {/* Related Topics Sidebar - now using Sheet component */}
       <RelatedTopicsSidebar 
