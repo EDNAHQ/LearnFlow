@@ -1,171 +1,93 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
-import { startBackgroundContentGeneration } from "@/utils/learning/backgroundContentGeneration";
-import { Step } from "@/components/LearningStep";
+import { useTopicManagement } from "@/hooks/navigation/useTopicManagement";
+import { useStepNavigation } from "@/hooks/navigation/useStepNavigation";
+import { useContentGeneration } from "@/hooks/navigation/useContentGeneration";
 
 export const useContentNavigation = () => {
-  const navigate = useNavigate();
   const { pathId, stepId } = useParams();
   const { user } = useAuth();
-  const [topic, setTopic] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [generatingContent, setGeneratingContent] = useState<boolean>(false);
-  const [generatedSteps, setGeneratedSteps] = useState<number>(0);
-  const topRef = useRef<HTMLDivElement>(null);
-  const [initialLoading, setInitialLoading] = useState<boolean>(true);
-  const contentGenerationStarted = useRef<boolean>(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/");
-      return;
-    }
+  // Get topic from session storage
+  const { topic } = useTopicManagement(pathId || null, user);
 
-    if (!pathId) {
-      navigate("/projects");
-      toast.error("Learning path not found. Please select a project.");
-      return;
-    }
-
-    // We still need to get the topic from sessionStorage initially
-    // In a more complete solution, we would fetch this from the database based on pathId
-    const storedTopic = sessionStorage.getItem("learn-topic");
-    
-    if (!storedTopic) {
-      // Fetch topic based on pathId from database
-      // For now, we'll keep using sessionStorage as a fallback
-      navigate("/projects");
-      toast.error("Learning topic not found. Please start a new learning path.");
-      return;
-    }
-
-    setTopic(storedTopic);
-  }, [navigate, user, pathId]);
-
-  // Set step from URL parameter if available
-  useEffect(() => {
-    if (stepId) {
-      const stepIndex = parseInt(stepId, 10);
-      if (!isNaN(stepIndex) && stepIndex >= 0) {
-        setCurrentStep(stepIndex);
-      }
-    }
-  }, [stepId]);
-
+  // Get learning steps data
   const {
     steps,
-    isLoading,
+    isLoading: stepsLoading,
     markStepAsComplete,
     generatingContent: bgGenerating,
     generatedSteps: bgGenerated,
   } = useLearningSteps(pathId || null, topic);
 
-  // Start background content generation when steps are loaded
+  // Step navigation
+  const {
+    currentStep,
+    topRef,
+    handleMarkComplete,
+    handleBack,
+    goToProjects,
+    navigateToStep,
+    initializeStep,
+    isLastStep
+  } = useStepNavigation(pathId || null, steps);
+
+  // Content generation status
+  const {
+    generatingContent,
+    generatedSteps,
+    initialLoading,
+    updateGenerationStatus
+  } = useContentGeneration(steps, pathId || null, topic, stepId || null);
+
+  // Set step from URL parameter if available
   useEffect(() => {
-    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current) {
-      console.log(`Starting background content generation for ${steps.length} steps`);
-      setGeneratingContent(true);
-      contentGenerationStarted.current = true;
-      
-      // Map the learning step data to match the Step interface
-      const stepsForGeneration: Step[] = steps.map(step => ({
-        id: step.id,
-        title: step.title,
-        description: step.content || "" // Use content as description
-      }));
-      
-      // Start background generation for all steps
-      startBackgroundContentGeneration(stepsForGeneration, topic, pathId)
-        .catch(err => {
-          console.error("Error starting background generation:", err);
-        });
-    }
-  }, [steps, pathId, topic]);
+    initializeStep(stepId || null);
+  }, [stepId, initializeStep]);
 
   // Update generation status from useLearningSteps
   useEffect(() => {
     if (steps.length > 0) {
-      setGeneratingContent(bgGenerating);
-      setGeneratedSteps(bgGenerated);
-      
-      console.log(`Content generation status updated: ${bgGenerated}/${steps.length} steps, generating: ${bgGenerating}`);
-      
-      // Only set initialLoading to false when content generation is complete or after a timeout
-      if (!bgGenerating && steps.length > 0 && bgGenerated >= steps.length) {
-        console.log("All content generated, ending loading state");
-        setInitialLoading(false);
-      }
+      updateGenerationStatus(bgGenerating, bgGenerated, steps.length, !!stepId);
     }
-  }, [bgGenerating, bgGenerated, steps.length]);
+  }, [bgGenerating, bgGenerated, steps.length, stepId, updateGenerationStatus]);
 
-  // Add a timeout to eventually disable initial loading after 30 seconds
-  // This is a safety measure in case content generation takes too long
+  // Handle redirect to first step when generation completes
   useEffect(() => {
-    if (initialLoading) {
-      const timer = setTimeout(() => {
-        if (initialLoading && steps.length > 0 && bgGenerated > 0) {
-          console.log("Loading timeout reached, ending loading state despite incomplete generation");
-          setInitialLoading(false);
-        }
-      }, 30000); // 30 seconds timeout
-      
-      return () => clearTimeout(timer);
+    // Only redirect if we're not already on a step page and generation is complete
+    if (!hasRedirected && !initialLoading && !generatingContent && pathId && steps.length > 0 && !stepId) {
+      console.log("Content generation complete. Navigating to first content page...");
+      setHasRedirected(true);
+      navigateToStep(0);
     }
-  }, [initialLoading, steps.length, bgGenerated]);
+  }, [generatingContent, generatedSteps, steps.length, pathId, hasRedirected, stepId, initialLoading, navigateToStep]);
 
-  const handleMarkComplete = async () => {
-    if (!steps[currentStep]) return;
-    
-    const success = await markStepAsComplete(steps[currentStep].id);
-    
-    if (success && currentStep < steps.length - 1) {
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      
-      // Update URL with the new step
-      navigate(`/content/${pathId}/step/${nextStep}`);
-      
-      setTimeout(() => {
-        topRef.current?.scrollIntoView({ behavior: 'smooth' });
-        window.scrollTo(0, 0);
-      }, 100);
-    }
+  // Wrap markStepAsComplete to pass it to the step navigation hook
+  const handleMarkCompleteWithStep = async () => {
+    await handleMarkComplete(markStepAsComplete);
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      const prevStep = currentStep - 1;
-      setCurrentStep(prevStep);
-      // Update URL with the previous step
-      navigate(`/content/${pathId}/step/${prevStep}`);
-    } else {
-      navigate("/projects");
-    }
-  };
-
-  const goToProjects = () => {
-    navigate("/projects");
-  };
-
-  const isLastStep = steps.length > 0 ? currentStep === steps.length - 1 : false;
-  const currentStepData = steps[currentStep];
+  // Memoize current step data to prevent re-renders
+  const currentStepData = useMemo(() => steps[currentStep], [steps, currentStep]);
 
   return {
     topic,
     currentStep,
     pathId: pathId || null,
     steps,
-    isLoading: isLoading || initialLoading,
+    isLoading: stepsLoading || initialLoading,
     generatingContent,
     generatedSteps,
-    handleMarkComplete,
+    handleMarkComplete: handleMarkCompleteWithStep,
     handleBack,
     goToProjects,
     isLastStep,
     currentStepData,
-    topRef
+    topRef,
+    navigateToStep
   };
 };

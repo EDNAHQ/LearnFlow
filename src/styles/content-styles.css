@@ -16,7 +16,11 @@
 }
 
 .content-section h1 {
-  @apply text-3xl mt-8 border-b border-brand-purple/20 pb-2 w-full;
+  @apply text-4xl mt-8 border-b border-brand-purple/20 pb-2 w-full;
+  background: linear-gradient(90deg, #6D42EF, #E84393);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .content-section h2 {
@@ -104,7 +108,7 @@
 /* Horizontal rules */
 .content-section hr {
   @apply my-8 border-0 h-0.5 rounded-full w-full;
-  background: linear-gradient(90deg, transparent, hsl(var(--brand-purple)), transparent);
+  background: linear-gradient(90deg, transparent, #6D42EF, transparent);
 }
 
 /* Tables */
@@ -128,4 +132,12 @@
 
 .content-section tbody tr:nth-child(even) {
   @apply bg-black/[0.02];
+}
+
+/* Text gradient styling */
+.text-gradient-purple {
+  background: linear-gradient(90deg, #6D42EF, #E84393);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

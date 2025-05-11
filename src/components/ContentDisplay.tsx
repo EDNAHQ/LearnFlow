@@ -1,11 +1,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useLearningSteps } from "@/hooks/useLearningSteps";
+import { useLearningSteps, LearningStepData } from "@/hooks/useLearningSteps";
 import { useContentMode } from "@/hooks/useContentMode";
 import TextModeDisplay from "./content/TextModeDisplay";
 import SlideModeDisplay from "./content/SlideModeDisplay";
-import PodcastModeDisplay from "./content/PodcastModeDisplay";
+import AudioModeDisplay from "./content/AudioModeDisplay";
 
 interface ContentDisplayProps {
   content?: string;
@@ -84,6 +84,19 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
     }
   };
 
+  // Handle question clicks for insights
+  const handleQuestionClick = (question: string) => {
+    console.log("Dispatching question event from ContentDisplay:", question);
+    
+    // Create a custom event to communicate with ContentInsightsManager
+    const event = new CustomEvent("ai:insight-request", {
+      detail: { question, topic }
+    });
+    
+    // Dispatch the event so ContentInsightsManager can catch it
+    window.dispatchEvent(event);
+  };
+
   if (isLoading) {
     return <div>Loading content...</div>;
   }
@@ -107,6 +120,7 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
+            onQuestionClick={handleQuestionClick}
           />
         )}
         
@@ -117,11 +131,18 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             detailedContent={detailedContent}
             pathId={pathId}
             topic={topic}
+            onQuestionClick={handleQuestionClick}
           />
         )}
         
         {mode === "podcast" && (
-          <PodcastModeDisplay />
+          <AudioModeDisplay 
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            pathId={pathId || ''}
+            stepId={displayStepId}
+            topic={topic || ''}
+          />
         )}
       </div>
     </div>

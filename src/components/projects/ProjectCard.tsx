@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -18,12 +17,14 @@ export const ProjectCard = ({ project, onDeleteProject, isDeleting }: ProjectCar
     // Store topic for reference (still useful for components that need it)
     sessionStorage.setItem("learn-topic", project.topic);
     
-    // Navigate to the new URL structure instead of just setting sessionStorage
+    // Check if the project is approved to determine navigation path
     if (project.is_approved) {
-      navigate(`/content/${project.id}`);
+      // If approved, navigate directly to the first step of the content
+      navigate(`/content/${project.id}/step/0`);
     } else {
+      // If not approved yet, navigate to the plan page
       navigate("/plan");
-      // Still need to store path ID for plan page
+      // Store path ID for plan page
       sessionStorage.setItem("learning-path-id", project.id);
     }
   };

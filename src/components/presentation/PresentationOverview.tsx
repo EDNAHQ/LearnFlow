@@ -37,7 +37,7 @@ const PresentationOverview = ({
     >
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-medium text-gray-800">Slides Overview</h3>
+          <h3 className="text-xl font-medium text-gray-800">All Slides ({slides.length})</h3>
           <Button 
             variant="outline" 
             size="icon" 
@@ -54,14 +54,18 @@ const PresentationOverview = ({
             <div
               key={index}
               onClick={handleSelectSlide(index)}
-              className={`p-4 rounded-lg cursor-pointer transition-all ${
+              className={`relative p-4 rounded-lg cursor-pointer transition-all ${
                 currentSlide === index 
                   ? 'bg-[#6D42EF] text-white shadow-md' 
                   : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
               }`}
             >
-              <div className="text-xs font-medium mb-2">Slide {index + 1}</div>
-              <p className="text-sm line-clamp-4">{slide}</p>
+              {/* Slide number indicator */}
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white text-[#6D42EF] flex items-center justify-center text-xs font-semibold">
+                {index + 1}
+              </div>
+              
+              <p className="text-sm line-clamp-4 mt-4">{slide}</p>
             </div>
           ))}
         </div>

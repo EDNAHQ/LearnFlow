@@ -1,83 +1,91 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { ElevenLabsClient } from "https://esm.sh/elevenlabs@0.2.2"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders, initSupabaseClient, ensureAudioBucketExists, checkExistingAudio, prepareTextForGeneration } from "./utils.ts"
+import { generateAudio } from "./elevenlabs.ts"
+import { storeAudioAndUpdatePath } from "./storage.ts"
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Parse the request body to get the text and voiceId
-    const { text, voiceId = "pFZP5JQG7iQjIQuC4Bku" } = await req.json()
+    console.log("Text-to-speech function called")
+    
+    // Parse the request body to get the text and pathId
+    const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb", pathId } = await req.json()
 
     if (!text) {
+      console.error("No text provided for speech generation")
       throw new Error('Text is required')
     }
 
-    // Get API key from environment variables
-    const apiKey = Deno.env.get('ELEVEN_LABS_API_KEY')
-    if (!apiKey) {
-      throw new Error('ELEVEN_LABS_API_KEY is not configured')
+    if (!pathId) {
+      console.error("No pathId provided")
+      throw new Error('PathId is required')
     }
 
-    console.log(`Text-to-speech request: ${text.length} characters, voice: ${voiceId}`)
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const supabase = initSupabaseClient(supabaseUrl!, supabaseServiceKey!)
+    console.log("Supabase client initialized successfully")
     
-    // Initialize ElevenLabs client
-    const client = new ElevenLabsClient({
-      apiKey: apiKey,
-    });
-
-    try {
-      // Generate audio from text
-      const audioData = await client.textToSpeech.convert(voiceId, {
-        output_format: "mp3_44100_128",
-        text: text,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
+    // Ensure audio_files bucket exists
+    await ensureAudioBucketExists(supabase)
+    
+    // Check for existing audio
+    const existingAudioUrl = await checkExistingAudio(supabase, pathId)
+    if (existingAudioUrl) {
+      return new Response(
+        JSON.stringify({ 
+          audioUrl: existingAudioUrl,
+          message: 'Using existing audio URL' 
+        }), 
+        {
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          }
         }
-      });
-      
-      if (!audioData || audioData.length === 0) {
-        throw new Error('No audio data received from Eleven Labs API');
-      }
-      
-      console.log(`Successfully generated audio: ${audioData.length} bytes`);
-      
-      // Return audio data directly as binary with proper Content-Type
-      return new Response(audioData, {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'audio/mpeg',
-        },
-      });
-    } catch (elevenlabsError: any) {
-      console.error('Eleven Labs API error:', elevenlabsError);
-      
-      // Provide more detailed error information
-      const errorResponse = elevenlabsError.response 
-        ? `Status code: ${elevenlabsError.response.status}\nBody: ${await elevenlabsError.response.text()}` 
-        : elevenlabsError.message;
-        
-      throw new Error(`Eleven Labs API error: ${errorResponse}`);
+      )
     }
-  } catch (error: any) {
-    console.error('Error in text-to-speech function:', error.message);
+
+    // Prepare text for generation
+    const trimmedText = prepareTextForGeneration(text)
+    
+    // Generate audio from text
+    const audioData = await generateAudio(trimmedText, voiceId)
+    
+    // Store audio and update learning path
+    const publicUrl = await storeAudioAndUpdatePath(supabase, pathId, audioData)
+    
+    // Return success response with the audio URL
+    return new Response(
+      JSON.stringify({ 
+        audioUrl: publicUrl,
+        message: 'Audio generated and stored successfully' 
+      }), 
+      {
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }
+      }
+    )
+  } catch (error) {
+    console.error('Error in text-to-speech function:', error.message)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        service: 'text-to-speech',
+        timestamp: new Date().toISOString()
+      }),
       {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
-    );
+    )
   }
-});
+})
