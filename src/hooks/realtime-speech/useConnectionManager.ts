@@ -1,7 +1,8 @@
+
 import { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { createRealtimeSpeechSession, RealtimeSpeechConnection } from '@/utils/realtime-speech';
-import { Message } from './types';
+import { Message, RealtimeSpeechSession } from './types';
 
 /**
  * Hook to manage the connection to the realtime speech service
@@ -75,7 +76,12 @@ export function useConnectionManager() {
       });
       
       // Connect to the session
-      await connection.connect(session);
+      // Passing only the properties needed by the connection
+      await connection.connect({
+        id: session.id,
+        url: session.url || '',
+        expires: session.expires || ''
+      });
       setIsConnected(true);
       
       // Send initial prompt if provided

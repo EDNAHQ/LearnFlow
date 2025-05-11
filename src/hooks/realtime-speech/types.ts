@@ -17,8 +17,11 @@ export interface RealtimeSpeechOptions {
 
 export interface RealtimeSpeechSession {
   id: string;
-  url: string;
-  expires: string;
+  token: string;
+  created_at: string;
+  expires_at: string;
+  url?: string;
+  expires?: string;
 }
 
 export interface RealtimeSpeechState {
