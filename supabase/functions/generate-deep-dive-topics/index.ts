@@ -59,15 +59,15 @@ Respond in JSON format:
 }
 `;
 
-    // Call OpenAI API with o3-mini model
+    // Call OpenAI API with gpt-4.1-mini model
     try {
-      console.log("Calling OpenAI API with o3-mini model");
+      console.log("Calling OpenAI API with gpt-4.1-mini model");
       
       const completion = await openai.chat.completions.create({
-        model: "o3-mini",
+        model: "gpt-4.1-mini",
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: "json_object" },
-        max_completion_tokens: 1000
+        max_tokens: 1000
       });
       
       // Parse the response

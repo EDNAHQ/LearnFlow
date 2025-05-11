@@ -41,7 +41,7 @@ serve(async (req) => {
     
     // Prepare the prompt for OpenAI
     const prompt = {
-      model: "o3-mini",
+      model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",

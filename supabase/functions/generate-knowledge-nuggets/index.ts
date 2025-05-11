@@ -34,8 +34,8 @@ serve(async (req) => {
       apiKey: OPENAI_API_KEY
     });
     
-    // First try with o3-mini (the cheaper model)
-    let model = "o3-mini";
+    // First try with gpt-4.1-mini
+    let model = "gpt-4.1-mini";
     let attempts = 0;
     const maxAttempts = 2;
     
@@ -80,8 +80,6 @@ serve(async (req) => {
             }
           ],
           response_format: { type: "json_object" },
-          // Note: Temperature parameter differs by model
-          ...(model !== "o3-mini" && { temperature: 0.7 }),
         });
 
         // Extract and validate the content
@@ -116,7 +114,7 @@ serve(async (req) => {
           console.error("JSON parsing error:", jsonError);
           console.error("Problematic content:", content);
           
-          // If this is our first attempt with o3-mini, try again with gpt-4o-mini
+          // If this is our first attempt with gpt-4.1-mini, try again with gpt-4o-mini
           if (attempts === 1) {
             console.log("Switching to gpt-4o-mini after JSON parsing error");
             model = "gpt-4o-mini";
@@ -142,7 +140,7 @@ serve(async (req) => {
       } catch (error) {
         console.error(`Error with model ${model}:`, error);
         
-        // If this is our first attempt with o3-mini, try again with gpt-4o-mini
+        // If this is our first attempt with gpt-4.1-mini, try again with gpt-4o-mini
         if (attempts === 1) {
           console.log("Switching to gpt-4o-mini after error");
           model = "gpt-4o-mini";

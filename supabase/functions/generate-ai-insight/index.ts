@@ -84,10 +84,10 @@ serve(async (req) => {
       `;
     }
 
-    // Try with gpt-4o-mini first as it's more reliable
+    // Try with gpt-4.1-mini first
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-mini",
         messages: [
           { 
             role: 'system', 
@@ -95,6 +95,7 @@ serve(async (req) => {
           },
           { role: 'user', content: prompt }
         ],
+        max_tokens: 500
       });
 
       const insight = completion.choices[0].message.content;
@@ -106,16 +107,39 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (error) {
-      console.error('Error with gpt-4o-mini model:', error);
+      console.error('Error with gpt-4.1-mini model:', error);
       
-      // If there's an error with gpt-4o-mini, we could try falling back to o3-mini
-      // but since we're already using the more reliable model first, we'll just
-      // return the error for now
-      
-      return new Response(
-        JSON.stringify({ error: error.message || 'Error generating insight' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      // If there's an error with gpt-4.1-mini, fall back to gpt-4o-mini
+      try {
+        console.log("Falling back to gpt-4o-mini model...");
+        
+        const fallbackCompletion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { 
+              role: 'system', 
+              content: `You are an expert educator creating concise and insightful explanations about topics related to ${topic}. You write using short paragraphs of 2-4 sentences maximum to improve readability.`
+            },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 500
+        });
+
+        const fallbackInsight = fallbackCompletion.choices[0].message.content;
+        
+        console.log(`Successfully generated insight with fallback model (${fallbackInsight.length} characters)`);
+
+        return new Response(
+          JSON.stringify({ insight: fallbackInsight }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (fallbackError) {
+        console.error('Error with fallback model:', fallbackError);
+        return new Response(
+          JSON.stringify({ error: fallbackError.message || 'Error generating insight' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
   } catch (error) {
     console.error('Error in generate-ai-insight function:', error);

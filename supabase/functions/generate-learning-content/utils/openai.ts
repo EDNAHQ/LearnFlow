@@ -1,4 +1,3 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import OpenAI from "https://esm.sh/openai@4.28.0";
 
@@ -17,8 +16,8 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
     apiKey: openAIApiKey
   });
   
-  // First try with o3-mini model
-  let currentModel = "o3-mini";
+  // First try with gpt-4.1-mini model
+  let currentModel = "gpt-4.1-mini";
   let fallbackAttempted = false;
   
   while (true) {
@@ -36,14 +35,8 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
         ],
       };
 
-      // Use max_completion_tokens for o3-mini model - INCREASED LIMIT FOR BOTH MODELS
-      if (currentModel === "o3-mini") {
-        // Increased from previous limit to ensure complete responses
-        params.max_completion_tokens = maxTokens;
-      } else {
-        // Use max_tokens for other models like gpt-4o-mini
-        params.max_tokens = maxTokens;
-      }
+      // Set max_tokens for models
+      params.max_tokens = maxTokens;
 
       // Set response_format for json_object requests
       if (responseFormat === "json_object") {
@@ -60,7 +53,7 @@ export async function callOpenAI(prompt: string, systemMessage: string, response
       console.log("OpenAI request params:", JSON.stringify({
         model: params.model,
         response_format: params.response_format,
-        max_tokens: params.max_tokens || params.max_completion_tokens,
+        max_tokens: params.max_tokens,
         estimated_prompt_tokens: prompt.length / 4, // Rough estimate of prompt token count
       }));
 

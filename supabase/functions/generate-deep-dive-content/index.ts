@@ -49,14 +49,14 @@ Create educational content that:
 Use Markdown formatting for headings, lists, and emphasis. Keep your explanation concise but thorough.
 `;
 
-    // Call OpenAI API with o3-mini model first, with fallback to gpt-4o-mini if needed
+    // Call OpenAI API with gpt-4.1-mini model first, with fallback to gpt-4o-mini if needed
     try {
-      console.log("Calling OpenAI API with o3-mini model");
+      console.log("Calling OpenAI API with gpt-4.1-mini model");
       
       const completion = await openai.chat.completions.create({
-        model: "o3-mini",
+        model: "gpt-4.1-mini",
         messages: [{ role: 'user', content: prompt }],
-        max_completion_tokens: 1500
+        max_tokens: 1500
       });
       
       const responseContent = completion.choices[0].message.content;
@@ -72,7 +72,7 @@ Use Markdown formatting for headings, lists, and emphasis. Keep your explanation
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (openaiError) {
-      console.error("OpenAI API error with o3-mini:", openaiError);
+      console.error("OpenAI API error with gpt-4.1-mini:", openaiError);
       console.log("Falling back to gpt-4o-mini model");
       
       try {
