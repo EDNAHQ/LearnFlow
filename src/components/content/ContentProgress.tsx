@@ -19,7 +19,7 @@ interface ContentProgressProps {
 }
 
 // Function to truncate text to a specific word count
-const truncateByWords = (text: string, wordLimit: number = 15): string => {
+const truncateByWords = (text: string, wordLimit: number = 10): string => {
   const words = text.trim().split(/\s+/);
   
   if (words.length <= wordLimit) {
@@ -45,7 +45,7 @@ const ContentProgress = memo(({
     setShowAllSteps(false);
   }, [onNavigateToStep]);
   
-  // Truncate the topic text to 15 words
+  // Truncate the topic text to 10 words
   const truncatedTopic = truncateByWords(topic);
   
   return (
@@ -116,4 +116,3 @@ const ContentProgress = memo(({
 ContentProgress.displayName = "ContentProgress";
 
 export default ContentProgress;
-
