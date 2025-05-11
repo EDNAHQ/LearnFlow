@@ -1,5 +1,5 @@
 
-import { callOpenAI, checkExistingContent, saveContentToSupabase } from "../utils/openai.ts";
+import { callOpenAI, checkExistingContent, saveContentToSupabase } from "../utils/openai/index.ts";
 
 export async function generateStepContent(
   stepId: string, 

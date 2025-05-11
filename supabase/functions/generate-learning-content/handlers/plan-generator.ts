@@ -1,5 +1,5 @@
 
-import { callOpenAI } from "../utils/openai.ts";
+import { callOpenAI } from "../utils/openai/index.ts";
 
 export async function generateLearningPlan(topic: string, corsHeaders: Record<string, string>) {
   if (!topic) {

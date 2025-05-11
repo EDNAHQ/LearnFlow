@@ -1,5 +1,5 @@
 
-import { callOpenAI } from "../utils/openai.ts";
+import { callOpenAI } from "../utils/openai/index.ts";
 
 export async function generateQuestions(content: string, topic: string, title: string, corsHeaders: Record<string, string>) {
   if (!content || !topic) {
