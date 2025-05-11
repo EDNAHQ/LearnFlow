@@ -6,4 +6,6 @@ hjivfywgkiwjvpquxndg = "hjivfywgkiwjvpquxndg"
 verify_jwt = true
 [functions.openai-tts]
 verify_jwt = true
+[functions.realtime-speech]
+verify_jwt = true
 
