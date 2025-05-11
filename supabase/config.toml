@@ -8,4 +8,3 @@ verify_jwt = true
 verify_jwt = true
 [functions.realtime-speech]
 verify_jwt = true
-

@@ -1,56 +1,106 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useLearningSteps } from '@/hooks/useLearningSteps';
-import { useConnectionManager } from './useConnectionManager';
-import { useLearningContext } from './useLearningContext';
-import { RealtimeSpeechOptions } from './types';
+import { useState, useCallback, useEffect } from 'react';
+import { createRealtimeSpeechSession } from '@/utils/realtime-speech/api';
+import { RealtimeSpeechOptions, RealtimeSpeechState, Message } from './types';
 
-/**
- * Hook for the realtime speech feature
- */
-export function useRealtimeSpeech({ topic, initialPrompt, pathId }: RealtimeSpeechOptions) {
-  const connection = useConnectionManager();
-  const learningContext = useLearningContext();
+export function useRealtimeSpeech(options: RealtimeSpeechOptions = {}) {
+  const [state, setState] = useState<RealtimeSpeechState>({
+    isConnecting: false,
+    isConnected: false,
+    isSpeaking: false,
+    isListening: false,
+    status: 'disconnected',
+    messages: [],
+    error: null
+  });
+
+  // Handle connecting to the speech service
+  const handleConnect = useCallback(async (): Promise<boolean> => {
+    if (state.isConnecting) return false;
+    
+    setState(prev => ({ ...prev, isConnecting: true, error: null }));
+    
+    try {
+      console.log("Attempting to connect to realtime speech service");
+      
+      // Initialize topic-specific instructions
+      const initialInstructions = options.initialPrompt || 
+        `Please provide information about ${options.topic || 'general knowledge'}`;
+      
+      // Create a session with the speech service
+      await createRealtimeSpeechSession({
+        instructions: initialInstructions,
+        voice: options.voice || 'nova',
+        topic: options.topic,
+        pathId: options.pathId
+      });
+      
+      // Add initial system message
+      setState(prev => ({
+        ...prev,
+        isConnecting: false,
+        isConnected: true,
+        status: 'connected',
+        messages: [
+          ...prev.messages,
+          {
+            id: Date.now().toString(),
+            role: 'system',
+            content: `Connected to AI assistant for ${options.topic || 'general knowledge'}`
+          }
+        ]
+      }));
+      
+      return true;
+    } catch (err: any) {
+      console.error("Failed to connect to realtime speech service:", err);
+      
+      setState(prev => ({
+        ...prev,
+        isConnecting: false,
+        isConnected: false,
+        status: 'error',
+        error: err.message || "Failed to connect to speech service"
+      }));
+      
+      return false;
+    }
+  }, [state.isConnecting, options.topic, options.initialPrompt, options.voice, options.pathId]);
   
-  // Fetch learning steps to provide context to the AI
-  const { steps, isLoading: stepsLoading } = useLearningSteps(pathId, topic);
-
-  // Clean up connection on unmount
+  // Handle disconnecting
+  const handleDisconnect = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isConnected: false,
+      isListening: false,
+      isSpeaking: false,
+      status: 'disconnected'
+    }));
+  }, []);
+  
+  // Toggle listening mode
+  const toggleListening = useCallback(() => {
+    if (!state.isConnected) return;
+    
+    setState(prev => ({
+      ...prev,
+      isListening: !prev.isListening
+    }));
+  }, [state.isConnected]);
+  
+  // Clean up on unmount
   useEffect(() => {
     return () => {
-      connection.disconnect();
+      if (state.isConnected) {
+        handleDisconnect();
+      }
     };
-  }, []);
-
-  // Connect to the realtime speech service
-  const handleConnect = useCallback(async () => {
-    const instructions = learningContext.getAssistantInstructions({ topic, steps });
-    
-    // Get the prompt to send
-    let promptToSend = initialPrompt;
-    if (!initialPrompt && !stepsLoading && steps.length > 0) {
-      promptToSend = learningContext.getDefaultInitialPrompt({ topic, steps });
-    }
-    
-    return connection.connect(instructions, promptToSend);
-  }, [topic, initialPrompt, steps, stepsLoading, connection, learningContext]);
-
+  }, [state.isConnected, handleDisconnect]);
+  
   return {
-    // Re-export connection state
-    isConnecting: connection.isConnecting,
-    isConnected: connection.isConnected,
-    isSpeaking: connection.isSpeaking,
-    isListening: connection.isListening,
-    status: connection.status,
-    messages: connection.messages,
-    
-    // Re-export connection methods
+    ...state,
     handleConnect,
-    handleDisconnect: connection.disconnect,
-    toggleListening: connection.toggleListening,
-    sendText: connection.sendText
+    handleDisconnect,
+    toggleListening
   };
 }
-
-// Re-export for backward compatibility
-export * from './types';

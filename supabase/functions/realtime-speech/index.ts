@@ -18,37 +18,37 @@ serve(async (req) => {
     }
 
     // Create a session with OpenAI
-    const response = await fetch('https://api.openai.com/v1/realtime', {
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        instructions: instructions || 'You are a helpful assistant',
-        modalities: modalities || ['audio', 'text'],
-        voice: voice || 'alloy'
+        model: "tts-1",
+        voice: voice || 'alloy',
+        input: instructions || 'Hello, this is a test of the realtime speech function.',
+        response_format: "mp3"
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI Realtime API error:', response.status, errorText);
-      throw new Error(`OpenAI Realtime API error: ${response.status}`);
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
     
-    const session = await response.json();
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        session: session
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
+    // Get audio data as array buffer
+    const audioData = new Uint8Array(await response.arrayBuffer());
+    
+    // Return the audio data directly
+    return new Response(audioData, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'audio/mpeg'
+      },
+      status: 200
+    });
   } catch (error) {
     console.error('Error in realtime-speech function:', error.message);
     

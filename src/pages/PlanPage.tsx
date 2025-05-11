@@ -36,6 +36,14 @@ const PlanPage = () => {
     }
   }, [pathId]);
 
+  // Ensure pathId persists on page reloads or navigation
+  useEffect(() => {
+    const storedPathId = sessionStorage.getItem("learning-path-id");
+    if (storedPathId && !pathId) {
+      console.log("Restoring pathId from session storage:", storedPathId);
+    }
+  }, [pathId]);
+
   return (
     <div className="min-h-screen bg-white">
       <PlanPageHeader handleReset={handleReset} />

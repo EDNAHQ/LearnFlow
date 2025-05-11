@@ -1,10 +1,21 @@
 
-// Types for the realtime speech hook modules
-import { RealtimeSpeechConnection } from '@/utils/realtime-speech';
-
 export interface Message {
-  role: string;
+  id: string;
+  role: 'user' | 'assistant' | 'system';
   content: string;
+}
+
+export interface RealtimeSpeechOptions {
+  topic?: string;
+  voice?: string;
+  initialPrompt?: string;
+  pathId?: string;
+}
+
+export interface RealtimeSpeechSession {
+  id: string;
+  url: string;
+  expires: string;
 }
 
 export interface RealtimeSpeechState {
@@ -12,17 +23,7 @@ export interface RealtimeSpeechState {
   isConnected: boolean;
   isSpeaking: boolean;
   isListening: boolean;
-  status: string;
+  status: 'disconnected' | 'connecting' | 'connected' | 'error';
   messages: Message[];
-}
-
-export interface RealtimeSpeechOptions {
-  topic: string;
-  initialPrompt?: string;
-  pathId?: string;
-}
-
-export interface RealtimeSpeechContextOptions {
-  topic: string;
-  steps: any[];
+  error: string | null;
 }
