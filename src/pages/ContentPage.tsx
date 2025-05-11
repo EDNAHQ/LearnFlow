@@ -160,8 +160,8 @@ const ContentPage = () => {
           transition={{duration: 0.2, ease: "easeOut"}} 
           className="w-full"
         >
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex justify-between items-center mb-3 w-full">
+          <div className="flex flex-col w-full">
+            <div className="mb-3 w-full">
               <ContentProgress 
                 topic={topic} 
                 currentStep={currentStep} 
@@ -171,12 +171,15 @@ const ContentPage = () => {
               />
             </div>
             
-            <StepPagination
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              onNavigate={navigateToStep}
-              steps={steps.map(step => ({ id: step.id, title: step.title }))}
-            />
+            {/* Step Pagination is now placed here, directly below ContentProgress */}
+            <div className="mb-4">
+              <StepPagination
+                currentStep={currentStep}
+                totalSteps={steps.length}
+                onNavigate={navigateToStep}
+                steps={steps.map(step => ({ id: step.id, title: step.title }))}
+              />
+            </div>
           </div>
           
           <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
