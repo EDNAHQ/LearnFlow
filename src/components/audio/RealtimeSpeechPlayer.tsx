@@ -122,8 +122,8 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
           AI Voice Assistant
         </CardTitle>
         <Badge 
-          variant={isConnected ? "success" : "secondary"}
-          className={isConnected ? "bg-green-600" : "bg-gray-600"}
+          variant={isConnected ? "outline" : "secondary"}
+          className={isConnected ? "border-green-500 bg-green-500/10 text-green-500" : "bg-gray-600"}
         >
           {status}
         </Badge>
