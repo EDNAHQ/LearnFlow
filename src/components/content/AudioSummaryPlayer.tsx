@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 import TextToSpeechPlayer from '@/components/TextToSpeechPlayer';
 import RealtimeSpeechPlayer from '@/components/audio/RealtimeSpeechPlayer';
+import { Info } from 'lucide-react';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
@@ -36,6 +37,10 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
     <Card className="bg-[#1A1A1A] border-gray-700 text-white">
       <CardHeader>
         <CardTitle className="text-xl">Interactive Audio Learning</CardTitle>
+        <div className="text-xs text-gray-400 flex items-center">
+          <Info className="w-3 h-3 mr-1" /> 
+          <span>AI-generated audio content. Voices are not from real humans.</span>
+        </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="regular" onValueChange={(v) => setMode(v as 'regular' | 'realtime')}>
