@@ -18,6 +18,17 @@ interface ContentProgressProps {
   onNavigateToStep: (step: number) => void;
 }
 
+// Function to truncate text to a specific word count
+const truncateByWords = (text: string, wordLimit: number = 10): string => {
+  const words = text.trim().split(/\s+/);
+  
+  if (words.length <= wordLimit) {
+    return text;
+  }
+  
+  return words.slice(0, wordLimit).join(' ') + '...';
+};
+
 // Memoize the component to prevent unnecessary re-renders
 const ContentProgress = memo(({
   topic,
@@ -34,12 +45,15 @@ const ContentProgress = memo(({
     setShowAllSteps(false);
   }, [onNavigateToStep]);
   
+  // Truncate the topic text to 10 words
+  const truncatedTopic = truncateByWords(topic);
+  
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-800">
-            {topic}
+          <h1 className="text-2xl font-bold text-gray-800 truncate max-w-[400px]" title={topic}>
+            {truncatedTopic}
           </h1>
           
           <Dialog open={showAllSteps} onOpenChange={setShowAllSteps}>
