@@ -56,6 +56,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
             <RealtimeSpeechPlayer
               topic={topic}
               initialPrompt={initialPrompt}
+              pathId={pathId}
             />
           </TabsContent>
         </Tabs>

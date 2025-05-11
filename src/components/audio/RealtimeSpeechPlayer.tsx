@@ -6,15 +6,18 @@ import { Mic, MicOff, Play, Square, Loader } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { createRealtimeSpeechSession, RealtimeSpeechConnection } from '@/utils/realtimeSpeech';
+import { useLearningSteps } from '@/hooks/useLearningSteps';
 
 interface RealtimeSpeechPlayerProps {
   topic?: string;
   initialPrompt?: string;
+  pathId?: string;
 }
 
 const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({ 
   topic = 'general knowledge', 
-  initialPrompt = ''
+  initialPrompt = '',
+  pathId
 }) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -23,6 +26,31 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
   const [status, setStatus] = useState('Not connected');
   const [messages, setMessages] = useState<Array<{role: string, content: string}>>([]);
   const connectionRef = useRef<RealtimeSpeechConnection | null>(null);
+  
+  // Fetch learning steps to provide context to the AI
+  const { steps, isLoading: stepsLoading } = useLearningSteps(pathId, topic);
+  
+  // Create a learning context from the available steps
+  const getLearningContext = () => {
+    if (!steps || steps.length === 0) {
+      return `Topic: ${topic}`;
+    }
+    
+    // Extract key information from steps to provide context
+    const stepSummaries = steps.map((step, index) => 
+      `Step ${index + 1}: ${step.title}`
+    ).join('\n');
+    
+    return `
+      Topic: ${topic}
+      Learning Path Structure:
+      ${stepSummaries}
+      
+      Use this learning path context to provide relevant answers. When answering questions,
+      refer to specific learning steps when appropriate. If the user asks about topics covered
+      in the learning path, mention which step contains that information.
+    `;
+  };
 
   useEffect(() => {
     // Cleanup on unmount
@@ -37,8 +65,9 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
     try {
       setIsConnecting(true);
       
-      // Create custom instructions based on topic
-      const instructions = `You are a friendly and helpful assistant specializing in ${topic}. Keep answers conversational, engaging, and informative.`;
+      // Create custom instructions based on topic and learning context
+      const learningContext = getLearningContext();
+      const instructions = `You are a friendly and helpful learning assistant specializing in ${topic}. ${learningContext} Keep answers conversational, engaging, and informative. Focus on helping the user understand concepts deeply and relate them to the learning materials.`;
       
       // Create a session
       const session = await createRealtimeSpeechSession({
@@ -84,9 +113,17 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
       await connection.connect(session);
       setIsConnected(true);
       
+      // Create a contextual initial prompt if none provided
+      let promptToSend = initialPrompt;
+      if (!initialPrompt && !stepsLoading && steps.length > 0) {
+        promptToSend = `I'm learning about ${topic}. This learning path has ${steps.length} steps, starting with "${steps[0]?.title}". Can you give me a brief introduction and explain how you can help me learn this topic?`;
+      } else if (!initialPrompt) {
+        promptToSend = `I'm learning about ${topic}. Can you give me a brief introduction and explain how you can help me learn this topic?`;
+      }
+      
       // Send initial prompt if provided
-      if (initialPrompt) {
-        await connection.sendText(initialPrompt);
+      if (promptToSend) {
+        await connection.sendText(promptToSend);
       }
       
       toast.success('Connected to voice assistant');
@@ -215,3 +252,4 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
 };
 
 export default RealtimeSpeechPlayer;
+
