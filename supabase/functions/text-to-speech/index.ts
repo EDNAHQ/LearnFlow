@@ -1,8 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders, initSupabaseClient, ensureAudioBucketExists, checkExistingAudio, prepareTextForGeneration } from "./utils.ts"
+import { corsHeaders, initSupabaseClient, ensureAudioBucketExists, checkExistingAudio, prepareTextForGeneration, storeAudioAndUpdatePath } from "../_shared/utils.ts"
 import { generateAudio } from "./elevenlabs.ts"
-import { storeAudioAndUpdatePath } from "./storage.ts"
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -88,4 +87,4 @@ serve(async (req) => {
       }
     )
   }
-})
+});

@@ -6,3 +6,4 @@ hjivfywgkiwjvpquxndg = "hjivfywgkiwjvpquxndg"
 verify_jwt = true
 [functions.openai-tts]
 verify_jwt = true
+
