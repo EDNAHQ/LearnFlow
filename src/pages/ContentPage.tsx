@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading"
 import ContentError from "@/components/content/ContentError";
 import ContentPageLayout from "@/components/content/ContentPageLayout";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+import StepPagination from "@/components/content/StepPagination";
 
 const ContentPage = () => {
   const {
@@ -158,13 +160,22 @@ const ContentPage = () => {
           transition={{duration: 0.2, ease: "easeOut"}} 
           className="w-full"
         >
-          <div className="flex justify-between items-center mb-3 w-full">
-            <ContentProgress 
-              topic={topic} 
-              currentStep={currentStep} 
-              totalSteps={steps.length} 
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex justify-between items-center mb-3 w-full">
+              <ContentProgress 
+                topic={topic} 
+                currentStep={currentStep} 
+                totalSteps={steps.length} 
+                steps={steps.map(step => ({ id: step.id, title: step.title }))}
+                onNavigateToStep={navigateToStep}
+              />
+            </div>
+            
+            <StepPagination
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              onNavigate={navigateToStep}
               steps={steps.map(step => ({ id: step.id, title: step.title }))}
-              onNavigateToStep={navigateToStep}
             />
           </div>
           
