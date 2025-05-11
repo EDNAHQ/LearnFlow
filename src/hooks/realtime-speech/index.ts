@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { createRealtimeSpeechSession } from '@/utils/realtime-speech/api';
 import { RealtimeSpeechOptions, RealtimeSpeechState, Message } from './types';
@@ -30,10 +29,11 @@ export function useRealtimeSpeech(options: RealtimeSpeechOptions = {}) {
       // Create a session with the speech service
       await createRealtimeSpeechSession({
         instructions: initialInstructions,
-        voice: options.voice || 'nova',
+        voice: options.voice,
+        topic: options.topic,
         initialPrompt: options.initialPrompt,
         pathId: options.pathId,
-        content: options.content // Pass the content to the API
+        content: options.content
       });
       
       // Add initial system message

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { createRealtimeSpeechSession, RealtimeSpeechConnection } from '@/utils/realtime-speech';
@@ -24,14 +23,16 @@ export function useConnectionManager() {
     
     // Handle different message types from OpenAI
     if (message.type === 'transcript') {
-      // Add user message to the chat
+      // Add user message to the chat with a unique ID
       setMessages(prev => [...prev, {
+        id: Date.now().toString(),
         role: 'user',
         content: message.text
       }]);
     } else if (message.type === 'assistant_message') {
-      // Add assistant message to the chat
+      // Add assistant message to the chat with a unique ID
       setMessages(prev => [...prev, {
+        id: Date.now().toString(),
         role: 'assistant',
         content: message.content
       }]);
@@ -93,6 +94,7 @@ export function useConnectionManager() {
     }
   }, [handleMessage, handleStatusChange]);
 
+  
   /**
    * Disconnect from the realtime speech service
    */

@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { RealtimeSpeechOptions, RealtimeSpeechSession } from "./types";
+import { RealtimeSpeechOptions, RealtimeSpeechSession } from "../../hooks/realtime-speech/types";
 
 export async function createRealtimeSpeechSession(options: RealtimeSpeechOptions = {}): Promise<RealtimeSpeechSession> {
   try {
@@ -14,7 +14,8 @@ export async function createRealtimeSpeechSession(options: RealtimeSpeechOptions
         topic: options.topic,
         initialPrompt: options.initialPrompt,
         pathId: options.pathId,
-        content: options.content // Make sure to include content
+        content: options.content,
+        modalities: options.modalities
       }
     });
 

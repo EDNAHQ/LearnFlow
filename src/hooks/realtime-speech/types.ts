@@ -10,7 +10,9 @@ export interface RealtimeSpeechOptions {
   voice?: string;
   initialPrompt?: string;
   pathId?: string;
-  content?: string; // Add content field for passing page content
+  content?: string;
+  instructions?: string;
+  modalities?: string[];
 }
 
 export interface RealtimeSpeechSession {
@@ -27,4 +29,13 @@ export interface RealtimeSpeechState {
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
   messages: Message[];
   error: string | null;
+}
+
+export interface RealtimeSpeechContextOptions {
+  topic: string;
+  steps: Array<{
+    id: string;
+    title: string;
+    content?: string;
+  }>;
 }

@@ -44,7 +44,7 @@ export function useLearningContext() {
    * Generate a contextual initial prompt if none was provided
    */
   const getDefaultInitialPrompt = useCallback(({ topic, steps }: RealtimeSpeechContextOptions) => {
-    if (steps.length > 0) {
+    if (steps && steps.length > 0) {
       return `I'm learning about ${topic}. This learning path has ${steps.length} steps, starting with "${steps[0]?.title}". Can you give me a brief introduction and explain how you can help me learn this topic?`;
     }
     
