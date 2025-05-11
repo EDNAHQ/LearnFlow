@@ -16,7 +16,7 @@
 }
 
 .content-section h1 {
-  @apply text-3xl mt-8 border-b border-brand-purple/20 pb-2 w-full;
+  @apply text-4xl mt-8 border-b border-brand-purple/20 pb-2 w-full;
   background: linear-gradient(90deg, #6D42EF, #E84393);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

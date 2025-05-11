@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -168,7 +169,7 @@ const ContentPage = () => {
             />
           </div>
           
-          <h1 className="text-2xl font-bold mb-4 py-[10px] text-brand-purple">
+          <h1 className="text-3xl font-bold mb-4 py-[10px] text-brand-purple">
             {currentStepData?.title || "Loading..."}
           </h1>
 
