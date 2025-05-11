@@ -1,14 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
-import { useAudioPlayer } from '@/hooks/useAudioPlayer';
-import { ScriptEditor } from './audio/ScriptEditor';
-import { AudioError } from './audio/AudioError';
-import { toast } from 'sonner';
-import { ScriptGenerationSection } from '../audio/ScriptGenerationSection';
-import { AudioPlayerSection } from '../audio/AudioPlayerSection';
+import TextToSpeechPlayer from '@/components/TextToSpeechPlayer';
+import RealtimeSpeechPlayer from '@/components/audio/RealtimeSpeechPlayer';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
@@ -17,147 +13,54 @@ interface AudioSummaryPlayerProps {
 
 const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
-  const { 
-    isGenerating: isGeneratingAudio, 
-    audioUrl, 
-    error: audioError,
-    scriptContent,
-    isGeneratingScript,
-    generateScript,
-    generateSpeech
-  } = useTextToSpeech();
-  
-  const [editableScript, setEditableScript] = useState<string>('');
-  const [showScriptEditor, setShowScriptEditor] = useState(false);
-  const [generationAttempted, setGenerationAttempted] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [mode, setMode] = useState<'regular' | 'realtime'>('regular');
 
-  const {
-    audioRef,
-    isPlaying,
-    isMuted,
-    isAudioLoaded,
-    showControls,
-    isGenerating,
-    error: playerError,
-    setShowControls,
-    handleTogglePlay,
-    handleMuteToggle,
-    handleRetry
-  } = useAudioPlayer(editableScript, pathId);
+  // Generate a title for the audio based on the learning path topic
+  const audioTitle = `Audio Summary: ${topic}`;
 
-  const error = audioError || playerError;
-
-  useEffect(() => {
-    if (scriptContent && !editableScript) {
-      setEditableScript(scriptContent);
+  // Create a summary of the learning path content
+  const generateSummary = () => {
+    if (!steps || steps.length === 0) {
+      return "No content available for audio summary.";
     }
-  }, [scriptContent, editableScript]);
-
-  const prepareDefaultScript = () => {
-    if (!steps || steps.length === 0) return '';
     
-    const introduction = `Here's a summary of what you'll learn about ${topic}:\n\n`;
-    const stepsContent = steps.map((step, index) => {
-      const content = step.detailed_content || step.content || '';
-      const firstParagraph = content.split('\n')[0] || content.substring(0, 200);
-      return `Step ${index + 1}: ${step.title}\n${firstParagraph}\n`;
-    }).join('\n');
-    
-    return introduction + stepsContent;
+    return steps
+      .map((step, index) => `Step ${index + 1}: ${step.title}. ${step.content}`)
+      .join("\n\n");
   };
 
-  const handleGenerateScript = async () => {
-    if (!isGeneratingScript && steps.length > 0) {
-      console.log("Generating script for entire project...");
-      setGenerationAttempted(true);
-      
-      try {
-        const script = await generateScript(steps, topic || 'this topic');
-        
-        if (script) {
-          setShowScriptEditor(true);
-          console.log("Script generation successful, length:", script.length);
-          return;
-        }
-      } catch (err) {
-        console.error("Error in script generation:", err);
-      }
-      
-      const defaultScript = prepareDefaultScript();
-      setEditableScript(defaultScript);
-      setShowScriptEditor(true);
-    }
-  };
+  const summary = generateSummary();
+  const initialPrompt = `I'm learning about ${topic}. Can you give me a brief introduction?`;
 
   return (
-    <div className="audio-summary-player rounded-md border border-gray-700 bg-[#1A1A1A] text-white p-4 my-4">
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold mb-2">Project Audio Summary</h3>
-        <p className="text-sm text-gray-400">
-          Generate and listen to an audio summary of the entire learning project.
-        </p>
-      </div>
-
-      {!scriptContent && !editableScript && !showScriptEditor && (
-        <ScriptGenerationSection
-          isGeneratingScript={isGeneratingScript}
-          isLoading={isLoading}
-          steps={steps}
-          handleGenerateScript={handleGenerateScript}
-        />
-      )}
-
-      {(scriptContent || editableScript) && showScriptEditor && (
-        <ScriptEditor
-          script={editableScript || scriptContent || ''}
-          isGenerating={isGenerating}
-          onScriptChange={setEditableScript}
-          onGenerateAudio={() => handleTogglePlay(editableScript || scriptContent || '', pathId)}
-          onToggleEditor={() => setShowScriptEditor(false)}
-        />
-      )}
-
-      {(scriptContent || editableScript) && !showScriptEditor && (
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setShowScriptEditor(true)}
-          className="mb-3 text-xs"
-        >
-          Edit Script
-        </Button>
-      )}
-
-      <AudioPlayerSection
-        isGenerating={isGenerating}
-        audioUrl={audioUrl}
-        isPlaying={isPlaying}
-        isMuted={isMuted}
-        showControls={showControls}
-        isAudioLoaded={isAudioLoaded}
-        editableScript={editableScript}
-        scriptContent={scriptContent}
-        pathId={pathId}
-        handleTogglePlay={handleTogglePlay}
-        handleMuteToggle={handleMuteToggle}
-        handleRetry={handleRetry}
-        setShowControls={setShowControls}
-        audioRef={audioRef}
-      />
-      
-      <AudioError 
-        error={error} 
-        noContent={steps.length === 0}
-        attempted={generationAttempted}
-      />
-      
-      {debugInfo && (
-        <div className="mt-2 p-2 bg-gray-800 text-xs text-yellow-400 rounded">
-          Debug: {debugInfo}
-        </div>
-      )}
-    </div>
+    <Card className="bg-[#1A1A1A] border-gray-700 text-white">
+      <CardHeader>
+        <CardTitle className="text-xl">Interactive Audio Learning</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="regular" onValueChange={(v) => setMode(v as 'regular' | 'realtime')}>
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="regular">Text-to-Speech</TabsTrigger>
+            <TabsTrigger value="realtime">Interactive Voice (AI)</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="regular">
+            <TextToSpeechPlayer
+              text={summary}
+              title={audioTitle}
+              pathId={pathId}
+            />
+          </TabsContent>
+          
+          <TabsContent value="realtime">
+            <RealtimeSpeechPlayer
+              topic={topic}
+              initialPrompt={initialPrompt}
+            />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 
