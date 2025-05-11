@@ -15,10 +15,11 @@ interface ContentSectionProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
+  onQuestionClick?: (question: string) => void;
 }
 
 // Use memo to prevent unnecessary re-renders
-const ContentSection = memo(({ title, content, index, detailedContent, topic, pathId }: ContentSectionProps) => {
+const ContentSection = memo(({ title, content, index, detailedContent, topic, pathId, onQuestionClick }: ContentSectionProps) => {
   const { handleTextSelection } = useTextSelection();
   
   // Use the extracted hook for state management
@@ -35,7 +36,13 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
   
   // Handle question clicking - pass it to ContentInsightsManager via ContentPage
   const handleQuestionClick = (question: string) => {
-    // This implementation will properly propagate the question up
+    // First try to use the prop if provided
+    if (onQuestionClick) {
+      onQuestionClick(question);
+      return;
+    }
+    
+    // Fallback to dispatching an event
     console.log("Question clicked in ContentSection:", question);
     
     // Create a custom event to communicate with ContentInsightsManager

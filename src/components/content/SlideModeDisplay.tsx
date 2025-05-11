@@ -8,6 +8,7 @@ interface SlideModeDisplayProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
+  onQuestionClick?: (question: string) => void;
 }
 
 const SlideModeDisplay = ({ 
@@ -15,7 +16,8 @@ const SlideModeDisplay = ({
   content, 
   detailedContent,
   pathId,
-  topic
+  topic,
+  onQuestionClick
 }: SlideModeDisplayProps) => {
   // Convert content to string with better handling of complex objects
   const safeContent = (() => {

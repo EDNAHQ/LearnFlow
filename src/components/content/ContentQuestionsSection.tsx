@@ -6,17 +6,17 @@ import ContentQuestionsGenerator from "./ContentQuestionsGenerator";
 interface ContentQuestionsSectionProps {
   loadedDetailedContent: string;
   topic?: string;
-  title: string;
-  stepId: string;
-  onQuestionClick: (question: string) => void;
+  title?: string;
+  stepId?: string;
+  onQuestionClick?: (question: string) => void;
 }
 
 const ContentQuestionsSection = ({ 
   loadedDetailedContent,
   topic,
-  title,
-  stepId,
-  onQuestionClick
+  title = "",
+  stepId = "",
+  onQuestionClick = () => {}
 }: ContentQuestionsSectionProps) => {
   const [relatedQuestions, setRelatedQuestions] = useState<string[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);

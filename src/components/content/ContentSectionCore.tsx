@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
 import ContentMarginNotesRenderer from "./ContentMarginNotesRenderer";
@@ -23,6 +23,9 @@ const ContentSectionCore = ({
   onTextSelection,
   onQuestionClick
 }: ContentSectionCoreProps) => {
+  // Create a ref for the content area for margin notes
+  const contentRef = useRef<HTMLDivElement>(null);
+  
   // Create markdown components with question and concept handlers
   const markdownComponents = getMarkdownComponents(
     topic || undefined,
@@ -34,6 +37,7 @@ const ContentSectionCore = ({
   return (
     <div className="content-area-wrapper">
       <div 
+        ref={contentRef}
         className="content-area"
         onMouseUp={onTextSelection}
         onTouchEnd={onTextSelection}
@@ -45,8 +49,10 @@ const ContentSectionCore = ({
         {/* Related questions at the bottom of content */}
         {topic && (
           <ContentQuestionsSection 
-            contentText={loadedDetailedContent}
+            loadedDetailedContent={loadedDetailedContent}
             topic={topic}
+            title={title}
+            stepId={stepId}
             onQuestionClick={onQuestionClick}
           />
         )}
@@ -56,6 +62,7 @@ const ContentSectionCore = ({
       <ContentMarginNotesRenderer 
         content={loadedDetailedContent} 
         topic={topic || ""} 
+        contentRef={contentRef}
       />
     </div>
   );
