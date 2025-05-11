@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { createRealtimeSpeechSession, RealtimeSpeechConnection } from '@/utils/realtimeSpeech';
+import { createRealtimeSpeechSession, RealtimeSpeechConnection } from '@/utils/realtime-speech';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
 
 interface RealtimeSpeechOptions {
