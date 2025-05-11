@@ -56,7 +56,8 @@ export const useAudioPlayer = (initialScript: string = '', pathId?: string) => {
   };
 
   const handleMuteToggle = () => {
-    toggleMute(audioRef);
+    // Fix: Call toggleMute without any arguments
+    toggleMute();
   };
 
   const handleRetry = async (script: string, currentPathId?: string) => {
