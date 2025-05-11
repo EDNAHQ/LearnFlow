@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLearningSteps } from '@/hooks/useLearningSteps';
@@ -10,28 +10,45 @@ import { Info } from 'lucide-react';
 interface AudioSummaryPlayerProps {
   pathId: string;
   topic: string;
+  content?: string;
+  title?: string;
 }
 
-const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }) => {
+const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ 
+  pathId, 
+  topic,
+  content,
+  title
+}) => {
   const { steps, isLoading } = useLearningSteps(pathId, topic);
   const [mode, setMode] = useState<'regular' | 'realtime'>('regular');
-
+  const [summary, setSummary] = useState<string>("");
+  
   // Generate a title for the audio based on the learning path topic
-  const audioTitle = `Audio Summary: ${topic}`;
+  const audioTitle = title ? `Audio: ${title}` : `Audio Summary: ${topic}`;
 
-  // Create a summary of the learning path content
-  const generateSummary = () => {
-    if (!steps || steps.length === 0) {
-      return "No content available for audio summary.";
+  // Create a summary of the learning path content or use provided content
+  useEffect(() => {
+    if (content) {
+      setSummary(content);
+      return;
     }
     
-    return steps
+    if (!steps || steps.length === 0) {
+      setSummary("No content available for audio summary.");
+      return;
+    }
+    
+    const generatedSummary = steps
       .map((step, index) => `Step ${index + 1}: ${step.title}. ${step.content}`)
       .join("\n\n");
-  };
+    
+    setSummary(generatedSummary);
+  }, [steps, content]);
 
-  const summary = generateSummary();
-  const initialPrompt = `I'm learning about ${topic}. Can you give me a brief introduction?`;
+  const initialPrompt = content 
+    ? `This is the content: ${content.substring(0, 200)}... Continue reading this content.` 
+    : `I'm learning about ${topic}. Can you give me a brief introduction?`;
 
   return (
     <Card className="bg-[#1A1A1A] border-gray-700 text-white">
@@ -62,6 +79,7 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({ pathId, topic }
               topic={topic}
               initialPrompt={initialPrompt}
               pathId={pathId}
+              content={content}
             />
           </TabsContent>
         </Tabs>

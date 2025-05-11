@@ -11,7 +11,13 @@ serve(async (req) => {
   }
 
   try {
-    const { instructions, modalities, voice } = await req.json();
+    const { instructions, voice, content, pathId } = await req.json();
+    
+    // Use the most specific content available for text-to-speech
+    const textToConvert = content || instructions || 
+      'Hello, this is a test of the realtime speech function.';
+    
+    console.log(`Converting text to speech for pathId: ${pathId}, content length: ${textToConvert.length}`);
     
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -27,7 +33,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "tts-1",
         voice: voice || 'alloy',
-        input: instructions || 'Hello, this is a test of the realtime speech function.',
+        input: textToConvert,
         response_format: "mp3"
       })
     });

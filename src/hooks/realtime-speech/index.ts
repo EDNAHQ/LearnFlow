@@ -24,15 +24,16 @@ export function useRealtimeSpeech(options: RealtimeSpeechOptions = {}) {
       console.log("Attempting to connect to realtime speech service");
       
       // Initialize topic-specific instructions
-      const initialInstructions = options.initialPrompt || 
+      const initialInstructions = options.content || options.initialPrompt || 
         `Please provide information about ${options.topic || 'general knowledge'}`;
       
       // Create a session with the speech service
       await createRealtimeSpeechSession({
         instructions: initialInstructions,
         voice: options.voice || 'nova',
-        topic: options.topic,
-        pathId: options.pathId
+        initialPrompt: options.initialPrompt,
+        pathId: options.pathId,
+        content: options.content // Pass the content to the API
       });
       
       // Add initial system message
@@ -65,7 +66,7 @@ export function useRealtimeSpeech(options: RealtimeSpeechOptions = {}) {
       
       return false;
     }
-  }, [state.isConnecting, options.topic, options.initialPrompt, options.voice, options.pathId]);
+  }, [state.isConnecting, options.topic, options.initialPrompt, options.voice, options.pathId, options.content]);
   
   // Handle disconnecting
   const handleDisconnect = useCallback(() => {

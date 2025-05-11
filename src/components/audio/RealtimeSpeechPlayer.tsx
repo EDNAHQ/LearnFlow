@@ -10,12 +10,14 @@ interface RealtimeSpeechPlayerProps {
   topic?: string;
   initialPrompt?: string;
   pathId?: string;
+  content?: string;
 }
 
 const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({ 
   topic = 'general knowledge', 
   initialPrompt = '',
-  pathId
+  pathId,
+  content
 }) => {
   const {
     isConnecting,
@@ -30,11 +32,9 @@ const RealtimeSpeechPlayer: React.FC<RealtimeSpeechPlayerProps> = ({
   } = useRealtimeSpeech({
     topic,
     initialPrompt,
-    pathId
+    pathId,
+    content
   });
-
-  // We're not using the boolean return value, so this is fine as-is
-  // The component just needs to acknowledge the correct return type
 
   return (
     <Card className="w-full bg-[#1A1A1A] text-white border border-gray-700">

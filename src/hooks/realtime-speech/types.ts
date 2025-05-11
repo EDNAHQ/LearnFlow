@@ -10,6 +10,7 @@ export interface RealtimeSpeechOptions {
   voice?: string;
   initialPrompt?: string;
   pathId?: string;
+  content?: string; // Add content field for passing page content
 }
 
 export interface RealtimeSpeechSession {

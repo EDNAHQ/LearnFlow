@@ -6,8 +6,16 @@ export async function createRealtimeSpeechSession(options: RealtimeSpeechOptions
   try {
     console.log("Creating realtime speech session with options:", options);
     
+    // Pass the content from the options
     const { data, error } = await supabase.functions.invoke('realtime-speech', {
-      body: options
+      body: {
+        instructions: options.instructions,
+        voice: options.voice || 'nova',
+        topic: options.topic,
+        initialPrompt: options.initialPrompt,
+        pathId: options.pathId,
+        content: options.content // Make sure to include content
+      }
     });
 
     if (error) {
