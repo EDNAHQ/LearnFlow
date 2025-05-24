@@ -29,8 +29,7 @@ const benefits = [
 const BenefitsSection = () => {
   return (
     <section className="w-full py-24 relative">
-      {/* Clean, subtle background */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMSkiPjxwYXRoIGQ9Ik0wIDBoNDBNMCA0MGg0ME00MCAwdjQwTTAgMHY0MCIgc3Ryb2tlPSJyZ2JhKDEyOCwxMjgsMTI4LDAuMikiIHN0cm9rZS13aWR0aD0iMSIvPjwvZz48L3N2Zz4=')]"></div>
+      {/* Clean background with no patterns */}
       
       <div className="container relative z-10">
         <div className="text-center mb-16">

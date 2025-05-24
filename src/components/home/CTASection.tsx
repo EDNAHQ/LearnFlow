@@ -14,8 +14,7 @@ const highlights = [
 const CTASection = () => {
   return (
     <section className="w-full py-24 relative overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-brand-purple/3 blur-3xl"></div>
+      {/* No background gradient */}
       
       <div className="container text-center relative z-10">
         <motion.div

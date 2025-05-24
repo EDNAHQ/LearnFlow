@@ -24,14 +24,7 @@ const features = [
 const FeaturesSection = () => {
   return (
     <section className="w-full py-24 bg-gray-50 relative overflow-hidden">
-      {/* Subtle decorative background */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
-        <svg width="100%" height="100%" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="400" cy="400" r="200" fill="none" stroke="#6D42EF" strokeWidth="20" />
-          <circle cx="400" cy="400" r="300" fill="none" stroke="#E84393" strokeWidth="15" />
-          <circle cx="400" cy="400" r="400" fill="none" stroke="#F5B623" strokeWidth="10" />
-        </svg>
-      </div>
+      {/* Clean background with no decorative elements */}
       
       <div className="container relative z-10">
         <motion.div 
