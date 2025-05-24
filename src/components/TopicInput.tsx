@@ -31,7 +31,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
             onChange={(e) => setTopic(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className={`pr-14 py-7 text-lg rounded-lg ${isFocused ? 'border-brand-purple' : 'border-gray-200'} ring-offset-brand-purple shadow-sm focus:shadow-md transition-shadow`}
+            className={`pr-14 py-8 text-lg rounded-xl ${isFocused ? 'border-brand-purple' : 'border-gray-200'} shadow-sm focus:shadow-lg transition-all`}
             disabled={loading}
             autoFocus
           />
@@ -39,7 +39,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
           <Button 
             type="submit" 
             disabled={!topic.trim() || loading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-lg"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 h-12 w-12 rounded-lg"
             variant={!topic.trim() ? "secondary" : "brand"}
           >
             <ArrowRight className="h-5 w-5" />
@@ -47,7 +47,7 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
         </div>
         
         {loading && (
-          <div className="mt-4 text-brand-purple flex items-center justify-center">
+          <div className="mt-6 text-brand-purple flex items-center justify-center">
             <div className="mr-2 h-5 w-5 border-2 border-brand-purple/30 border-t-brand-purple rounded-full animate-spin"></div>
             Creating your learning experience...
           </div>
