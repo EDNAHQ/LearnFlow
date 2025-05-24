@@ -49,7 +49,7 @@ export function AuthForm() {
   };
 
   return (
-    <div className="glass-panel-strong max-w-md w-full p-8">
+    <div className="glass-panel-strong max-w-md w-full p-8 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">
         {mode === "signin" ? "Sign In" : "Create Account"}
       </h2>
@@ -98,7 +98,8 @@ export function AuthForm() {
 
         <Button 
           type="submit" 
-          className="w-full bg-learn-600 hover:bg-learn-700 text-white py-2" 
+          variant="brand" 
+          className="w-full mt-6 h-12 text-base font-medium" 
           disabled={loading}
         >
           {loading ? (
@@ -117,7 +118,7 @@ export function AuthForm() {
           {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="text-learn-600 hover:underline font-medium"
+            className="text-brand-purple hover:underline font-medium"
             type="button"
           >
             {mode === "signin" ? "Sign Up" : "Sign In"}
