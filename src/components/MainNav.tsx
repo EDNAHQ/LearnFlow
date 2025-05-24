@@ -48,17 +48,19 @@ export function MainNav({ className }: MainNavProps) {
         <div className="mr-4 hidden md:flex">
           <Link to="/home" className="mr-6 flex items-center">
             <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <div className="p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
+              <div className="flex items-center">
+                <div className="mr-2 p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
                   <Brain className="h-5 w-5 text-white" />
                 </div>
-                <span className="hidden font-bold sm:inline-block">
-                  LearnFlow
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-base leading-tight">
+                    LearnFlow
+                  </span>
+                  <span className="text-xs text-foreground/60 leading-tight">
+                    by Enterprise DNA
+                  </span>
+                </div>
               </div>
-              <span className="hidden text-xs text-foreground/60 sm:inline-block ml-7">
-                by Enterprise DNA
-              </span>
             </div>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
@@ -103,15 +105,19 @@ export function MainNav({ className }: MainNavProps) {
               </SheetHeader>
               <div className="mt-4">
                 <div className="flex flex-col mb-6">
-                  <div className="flex items-center space-x-2">
-                    <div className="p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
+                  <div className="flex items-center">
+                    <div className="mr-2 p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
                       <Brain className="h-5 w-5 text-white" />
                     </div>
-                    <span className="font-bold">LearnFlow</span>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-base leading-tight">
+                        LearnFlow
+                      </span>
+                      <span className="text-xs text-foreground/60 leading-tight">
+                        by Enterprise DNA
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-xs text-foreground/60 ml-7">
-                    by Enterprise DNA
-                  </span>
                 </div>
                 <Link
                   to="/projects"
@@ -141,3 +147,4 @@ export function MainNav({ className }: MainNavProps) {
     </header>
   );
 }
+
