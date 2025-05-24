@@ -56,11 +56,6 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   // Set up realtime updates
   useRealtimeUpdates(
     pathId,
-    countGeneratedSteps,
-    setSteps,
-    setGeneratedSteps,
-    setGeneratingContent,
-    generatedSteps,
     fetchSteps
   );
 

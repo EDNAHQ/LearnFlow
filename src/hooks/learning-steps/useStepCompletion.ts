@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { markStepComplete } from "@/services/learningStepsService";
 import { LearningStepData } from "./types";
 
 export const useStepCompletion = (
@@ -15,26 +15,19 @@ export const useStepCompletion = (
         )
       );
 
-      // Then update the database
-      const { error } = await supabase
-        .from('learning_steps')
-        .update({ completed: true })
-        .eq('id', stepId);
+      await markStepComplete(stepId);
 
-      if (error) {
-        console.error("Error marking step as complete:", error);
-
-        // Revert optimistic update if server update fails
-        setSteps(prevSteps =>
-          prevSteps.map(step =>
-            step.id === stepId ? { ...step, completed: false } : step
-          )
-        );
-        return false;
-      }
       return true;
     } catch (error) {
       console.error("Error marking step as complete:", error);
+
+      // Revert optimistic update if server update fails
+      setSteps(prevSteps =>
+        prevSteps.map(step =>
+          step.id === stepId ? { ...step, completed: false } : step
+        )
+      );
+
       return false;
     }
   }, [setSteps]);

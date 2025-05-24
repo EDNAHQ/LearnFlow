@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchSteps } from "@/services/learningStepsService";
 import { LearningStepData } from "./types";
 
 export const useFetchLearningSteps = () => {
@@ -16,32 +16,12 @@ export const useFetchLearningSteps = () => {
     
     try {
       console.log("Fetching learning steps for path:", pathId);
-      
-      const { data, error } = await supabase
-        .from('learning_steps')
-        .select('*')
-        .eq('path_id', pathId)
-        .order('order_index', { ascending: true });
 
-      if (error) {
-        console.error("Error fetching learning steps:", error);
-        return;
-      }
+      const processedData = await fetchSteps(pathId);
 
-      if (data && data.length > 0) {
-        console.log(`Retrieved ${data.length} learning steps for path:`, pathId);
-        
-        // Process data to ensure all values are properly formatted as strings
-        const processedData = data.map(step => ({
-          ...step,
-          content: typeof step.content === 'string' 
-            ? step.content 
-            : (step.content ? JSON.stringify(step.content) : "No content available"),
-          detailed_content: typeof step.detailed_content === 'string'
-            ? step.detailed_content
-            : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
-        }));
-        
+      if (processedData.length > 0) {
+        console.log(`Retrieved ${processedData.length} learning steps for path:`, pathId);
+
         // Always update steps to ensure freshness
         setSteps(processedData);
         
