@@ -32,7 +32,7 @@ const HeroSection = () => {
           transition={{ duration: 0.7 }}
           className="w-full bg-white rounded-xl shadow-sm p-8 md:p-10"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent whitespace-nowrap overflow-hidden">
+          <h1 className="text-3xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent">
             What do you want to learn today?
           </h1>
           <TopicInput onSubmit={handleSubmit} loading={loading} />
