@@ -13,18 +13,16 @@ const highlights = [
 
 const CTASection = () => {
   return (
-    <section className="w-full py-24 relative overflow-hidden">
-      {/* No background gradient */}
-      
-      <div className="container text-center relative z-10">
+    <section className="w-full py-16 bg-white">
+      <div className="container text-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="bg-white rounded-2xl p-12 shadow-xl max-w-4xl mx-auto"
+          className="bg-white rounded-lg p-8 border border-gray-100 shadow-sm max-w-4xl mx-auto"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent">
             Ready to Transform Your Learning Experience?
           </h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -33,7 +31,7 @@ const CTASection = () => {
           <div className="flex justify-center">
             <Button 
               size="lg" 
-              className="bg-brand-purple hover:bg-brand-purple/90 border-none px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-brand-purple hover:bg-brand-purple/90 border-none px-8 py-6 text-lg"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
               Start Learning Now
@@ -41,7 +39,7 @@ const CTASection = () => {
             </Button>
           </div>
           
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
             {highlights.map((item, index) => (
               <motion.div 
                 key={index} 

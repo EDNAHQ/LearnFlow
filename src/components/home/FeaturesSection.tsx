@@ -23,16 +23,14 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section className="w-full py-24 bg-gray-50 relative overflow-hidden">
-      {/* Clean background with no decorative elements */}
-      
-      <div className="container relative z-10">
+    <section className="w-full py-16 bg-white relative">
+      <div className="container relative">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <span className="text-brand-purple font-medium text-sm tracking-wider uppercase mb-3 block">How It Works</span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Learn Faster with AI</h2>
@@ -47,7 +45,7 @@ const FeaturesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + (index * 0.2), duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-white border border-gray-100 rounded-xl p-8 shadow-md hover:shadow-xl transition-all duration-300"
+              className="bg-white border border-gray-100 rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center mb-6">
                 {feature.icon}

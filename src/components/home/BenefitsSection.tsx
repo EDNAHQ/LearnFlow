@@ -28,11 +28,9 @@ const benefits = [
 
 const BenefitsSection = () => {
   return (
-    <section className="w-full py-24 relative">
-      {/* Clean background with no patterns */}
-      
-      <div className="container relative z-10">
-        <div className="text-center mb-16">
+    <section className="w-full py-16 bg-gray-50">
+      <div className="container">
+        <div className="text-center mb-12">
           <span className="bg-brand-purple/10 text-brand-purple px-4 py-1.5 rounded-full font-medium inline-block mb-3 text-sm">WHY CHOOSE US</span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">Transform Your Learning Journey</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -50,7 +48,7 @@ const BenefitsSection = () => {
               transition={{ delay: 0.2 * index, duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <div className="mt-1 bg-gray-50 rounded-full p-3.5 border border-gray-100 h-fit shadow-sm">
+              <div className="mt-1 bg-white rounded-full p-3.5 border border-gray-100 h-fit shadow-sm">
                 {benefit.icon}
               </div>
               <div>
