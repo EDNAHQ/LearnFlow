@@ -1,47 +1,69 @@
 
-import React from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { useLearningSteaks } from "@/hooks/useLearningSteaks";
-import StreakIndicator from "@/components/user/StreakIndicator";
-import SocialShareButtons from "@/components/content/SocialShareButtons";
+import { Home, ArrowLeft, Loader2 } from "lucide-react";
+import { ModeToggle } from "@/components/ModeToggle";
 
 interface ContentHeaderProps {
-  title: string;
-  pathId?: string;
+  onBack: () => void;
+  onHome: () => void;
+  generatingContent: boolean;
+  generatedSteps: number;
+  totalSteps: number;
 }
 
-// Add a ContentHeader component that includes streak and sharing functionality
-const ContentHeader = ({ title, pathId }: ContentHeaderProps) => {
-  const navigate = useNavigate();
-  const { updateStreak } = useLearningSteaks();
-  
-  // Update streak when content is viewed
-  React.useEffect(() => {
-    if (title) {
-      updateStreak();
-    }
-  }, [title]);
-
+const ContentHeader = ({
+  onBack,
+  onHome,
+  generatingContent,
+  generatedSteps,
+  totalSteps
+}: ContentHeaderProps) => {
   return (
-    <header className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 border-b mb-6">
-      <div className="flex items-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mr-4"
-          onClick={() => navigate("/projects")}
+    <header className="sticky top-0 z-50 w-full border-b bg-black">
+      <div className="container flex h-14 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between w-full"
         >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back
-        </Button>
-        <h1 className="text-xl md:text-2xl font-bold">{title}</h1>
-      </div>
-      
-      <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-        <StreakIndicator />
-        <SocialShareButtons title={title} />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-1 text-white hover:bg-white/10"
+              onClick={onHome}
+            >
+              <Home className="h-4 w-4" />
+              <span>Projects</span>
+            </Button>
+            
+            <div className="h-5 w-px bg-gray-600"></div>
+            
+            <Button
+              variant="ghost"
+              className="flex items-center gap-1 text-white hover:bg-white/10"
+              onClick={onBack}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <ModeToggle />
+            
+            {/* Only show generation indicator when actively generating and not on an existing step page */}
+            {generatingContent && generatedSteps < totalSteps && (
+              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-white px-3 py-1 rounded-full">
+                <Loader2 className="w-3 h-3 animate-spin text-[#E84393]" />
+                <span className="text-[#E84393]">Generating ({generatedSteps}/{totalSteps})</span>
+              </div>
+            )}
+            <div className="text-sm font-medium text-white">
+              LearnFlow
+            </div>
+          </div>
+        </motion.div>
       </div>
     </header>
   );
