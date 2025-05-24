@@ -98,7 +98,7 @@ export function AuthForm() {
 
         <Button 
           type="submit" 
-          className="w-full bg-learn-600 hover:bg-learn-700" 
+          className="w-full bg-learn-600 hover:bg-learn-700 text-white py-2" 
           disabled={loading}
         >
           {loading ? (
