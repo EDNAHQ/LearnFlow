@@ -1,11 +1,12 @@
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useLearningSteps } from "@/hooks/useLearningSteps";
 import { useTopicManagement } from "@/hooks/navigation/useTopicManagement";
 import { useStepNavigation } from "@/hooks/navigation/useStepNavigation";
-import { useContentGeneration } from "@/hooks/navigation/useContentGeneration";
+import { useStartContentGeneration } from "@/hooks/navigation/useStartContentGeneration";
+import { useGenerationStatus } from "@/hooks/navigation/useGenerationStatus";
 
 export const useContentNavigation = () => {
   const { pathId, stepId } = useParams();
@@ -41,8 +42,18 @@ export const useContentNavigation = () => {
     generatingContent,
     generatedSteps,
     initialLoading,
-    updateGenerationStatus
-  } = useContentGeneration(steps, pathId || null, topic, stepId || null);
+    updateGenerationStatus,
+    handleGenerationStart,
+  } = useGenerationStatus(steps.length, stepId || null);
+
+  // Kick off generation when viewing a learning path
+  useStartContentGeneration(
+    steps,
+    pathId || null,
+    topic,
+    stepId || null,
+    handleGenerationStart
+  );
 
   // Set step from URL parameter if available
   useEffect(() => {
@@ -52,9 +63,9 @@ export const useContentNavigation = () => {
   // Update generation status from useLearningSteps
   useEffect(() => {
     if (steps.length > 0) {
-      updateGenerationStatus(bgGenerating, bgGenerated, steps.length, !!stepId);
+      updateGenerationStatus(bgGenerating, bgGenerated);
     }
-  }, [bgGenerating, bgGenerated, steps.length, stepId, updateGenerationStatus]);
+  }, [bgGenerating, bgGenerated, steps.length, updateGenerationStatus]);
 
   // Handle redirect to first step when generation completes
   useEffect(() => {
