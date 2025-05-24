@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
 import { motion } from "framer-motion";
-import { Sparkles, Book } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -25,8 +24,8 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[85vh] flex flex-col items-center justify-center py-12">
-      <div className="container max-w-4xl mx-auto px-4">
+    <section className="relative min-h-[80vh] flex flex-col items-center justify-center py-12">
+      <div className="container max-w-3xl mx-auto px-4">
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -49,36 +48,16 @@ const HeroSection = () => {
             LearnFlow uses AI to generate customized learning plans and content 
             based on any topic you want to explore. Get started in seconds!
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button 
-              size="lg"
-              className="bg-brand-purple hover:bg-opacity-90 text-white px-8"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Start Learning
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-gray-300 text-gray-800 hover:bg-gray-50"
-              onClick={() => navigate("/projects")}
-            >
-              <Book className="mr-2 h-5 w-5" />
-              View Projects
-            </Button>
-          </div>
         </motion.div>
 
-        {/* Topic Input Container */}
+        {/* Topic Input Container - Main Focus */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           className="w-full max-w-2xl mx-auto"
         >
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-2xl font-semibold mb-4 text-center">What do you want to learn today?</h2>
             <TopicInput onSubmit={handleSubmit} loading={loading} />
           </div>

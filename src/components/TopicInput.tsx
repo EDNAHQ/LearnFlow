@@ -31,14 +31,15 @@ const TopicInput = ({ onSubmit, loading = false }: TopicInputProps) => {
             onChange={(e) => setTopic(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            className={`pr-14 py-6 text-lg rounded-lg ${isFocused ? 'border-brand-purple' : 'border-gray-200'}`}
+            className={`pr-14 py-7 text-lg rounded-lg ${isFocused ? 'border-brand-purple' : 'border-gray-200'} ring-offset-brand-purple shadow-sm focus:shadow-md transition-shadow`}
             disabled={loading}
+            autoFocus
           />
           
           <Button 
             type="submit" 
             disabled={!topic.trim() || loading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 rounded-lg"
             variant={!topic.trim() ? "secondary" : "brand"}
           >
             <ArrowRight className="h-5 w-5" />
