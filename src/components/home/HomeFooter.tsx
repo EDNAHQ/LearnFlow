@@ -29,13 +29,6 @@ const HomeFooter = () => {
           </div>
           
           <div className="flex space-x-6 items-center">
-            <Link 
-              to="/why-free" 
-              className="text-gray-300 hover:text-white transition-colors flex items-center"
-            >
-              <span>Why is this free?</span>
-            </Link>
-            
             <a 
               href="https://github.com" 
               target="_blank" 

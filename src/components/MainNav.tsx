@@ -66,17 +66,6 @@ export function MainNav({ className }: MainNavProps) {
             >
               Projects
             </Link>
-            <Link
-              to="/why-free"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                isActive("/why-free")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/60"
-              )}
-            >
-              Why Free?
-            </Link>
           </nav>
         </div>
         <div className="ml-auto flex items-center space-x-4">
@@ -113,14 +102,6 @@ export function MainNav({ className }: MainNavProps) {
                 >
                   <User className="h-5 w-5 text-brand-purple" />
                   <span>Projects</span>
-                </Link>
-                <Link
-                  to="/why-free"
-                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                  onClick={closeMobileMenu}
-                >
-                  <HelpCircle className="h-5 w-5 text-brand-purple" />
-                  <span>Why Free?</span>
                 </Link>
                 {user && (
                   <Button
