@@ -33,9 +33,16 @@ const HeroSection = () => {
           transition={{ duration: 0.7 }}
           className="w-full bg-white rounded-xl shadow-sm p-8 md:p-10"
         >
-          <h1 className="text-3xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl md:text-5xl font-bold text-center bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent">
+              LearnFlow
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">by Enterprise DNA</p>
+          </div>
+          
+          <h2 className="text-2xl md:text-3xl font-medium mb-6 text-center text-gray-800">
             What do you want to learn today?
-          </h1>
+          </h2>
           
           {/* Learning modes visualization */}
           <motion.div 
