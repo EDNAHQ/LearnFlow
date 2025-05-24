@@ -1,65 +1,72 @@
 
-import { ReactNode, useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
-import RelatedTopicsSidebar from "./RelatedTopicsSidebar";
-import { ContentInsightsManager } from "./ContentInsightsManager";
+import React, { useEffect, useState } from "react";
+import { ContentHeader } from "@/components/content/ContentHeader";
+import { ContentNavigation } from "@/components/content/ContentNavigation";
+import ContentProgress from "@/components/content/ContentProgress";
+import ProgressMessage from "@/components/content/ProgressMessage";
+import RelatedTopicsSection from "@/components/content/RelatedTopicsSection";
+import { LearningStepData } from "@/hooks/learning-steps/types";
+import { useParams } from "react-router-dom";
 
 interface ContentPageLayoutProps {
-  children: ReactNode;
-  onGoToProjects: () => void;
-  topRef: React.RefObject<HTMLDivElement>;
-  topic: string | null;
-  currentContent?: string | null;
-  currentTitle?: string | null;
+  children: React.ReactNode;
+  title: string;
+  steps?: LearningStepData[];
+  currentStepIndex: number;
+  onNavigate: (index: number) => void;
 }
 
-const ContentPageLayout = ({ 
-  children, 
-  onGoToProjects,
-  topRef,
-  topic,
-  currentContent,
-  currentTitle
+const ContentPageLayout = ({
+  children,
+  title,
+  steps = [],
+  currentStepIndex,
+  onNavigate,
 }: ContentPageLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { pathId } = useParams<{ pathId: string }>();
+  const [completedSteps, setCompletedSteps] = useState(0);
+
+  // Calculate completed steps
+  useEffect(() => {
+    if (steps && steps.length > 0) {
+      const completed = steps.filter(step => step.completed).length;
+      setCompletedSteps(completed);
+    }
+  }, [steps]);
 
   return (
-    <div className="min-h-screen bg-[#1A1A1A] text-white w-full">
-      <div ref={topRef}></div>
-      
-      {/* This is the navigation area - keeping it black */}
-      <div className="bg-[#1A1A1A]">
-        {/* The first child is expected to be the ContentHeader component */}
-        {Array.isArray(children) ? children[0] : null}
-      </div>
-      
-      {/* This is the content area - making it white */}
-      <div className="bg-white text-gray-800">
-        {/* The remaining children (content) */}
-        {Array.isArray(children) ? children.slice(1) : children}
-      </div>
-
-      {/* Add ContentInsightsManager to handle AI insight events */}
-      {topic && <ContentInsightsManager topic={topic} />}
-
-      {/* Related Topics Sidebar - now using Sheet component */}
-      <RelatedTopicsSidebar 
-        topic={topic}
-        content={currentContent}
-        title={currentTitle}
-        open={sidebarOpen}
-        onOpenChange={setSidebarOpen}
-      />
-
-      <div className="fixed bottom-6 right-6">
-        <Button 
-          onClick={onGoToProjects}
-          className="bg-brand-purple text-white hover:bg-[#5835CB] shadow-md rounded-full p-3 h-auto"
-        >
-          <Home className="h-5 w-5" />
-        </Button>
+    <div className="flex flex-col min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-6 max-w-5xl">
+        <ContentHeader title={title} pathId={pathId} />
+        
+        {steps && steps.length > 0 && (
+          <ProgressMessage 
+            completedSteps={completedSteps} 
+            totalSteps={steps.length} 
+          />
+        )}
+        
+        <ContentProgress 
+          currentStep={currentStepIndex} 
+          totalSteps={steps?.length || 0} 
+          steps={steps?.map(step => ({ id: step.id, title: step.title })) || []}
+          onNavigate={onNavigate}
+        />
+        
+        <div className="my-6">{children}</div>
+        
+        <ContentNavigation
+          prev={currentStepIndex > 0 ? () => onNavigate(currentStepIndex - 1) : undefined}
+          next={
+            steps && currentStepIndex < steps.length - 1
+              ? () => onNavigate(currentStepIndex + 1)
+              : undefined
+          }
+        />
+        
+        {currentStepIndex === (steps?.length - 1) && (
+          <RelatedTopicsSection currentTopic={title} />
+        )}
       </div>
     </div>
   );

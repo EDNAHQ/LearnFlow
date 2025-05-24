@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
 import { motion } from "framer-motion";
+import { Star, Users, BookOpen } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -36,6 +37,33 @@ const HeroSection = () => {
             What do you want to learn today?
           </h1>
           <TopicInput onSubmit={handleSubmit} loading={loading} />
+          
+          {/* Social Proof Section */}
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="w-5 h-5 text-brand-purple mr-1" />
+                  <span className="font-bold text-lg">10,000+</span>
+                </div>
+                <p className="text-xs text-gray-500">Active Learners</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center mb-2">
+                  <BookOpen className="w-5 h-5 text-brand-pink mr-1" />
+                  <span className="font-bold text-lg">500+</span>
+                </div>
+                <p className="text-xs text-gray-500">Topics Available</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Star className="w-5 h-5 text-brand-gold mr-1" />
+                  <span className="font-bold text-lg">4.8/5</span>
+                </div>
+                <p className="text-xs text-gray-500">User Rating</p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
