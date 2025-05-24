@@ -101,6 +101,20 @@ const KnowledgeNuggetLoading = ({
     }
   }, [elapsedTime, generatedSteps, pathId, forceRedirect]);
 
+  // Format the topic to display nicely
+  const getFormattedTopic = () => {
+    if (!topic) return "your learning journey";
+    
+    // Remove any leading/trailing whitespace and ensure first character is lowercase
+    // so it fits grammatically in the "Crafting your [topic]" phrase
+    let formattedTopic = topic.trim();
+    if (formattedTopic.length > 0) {
+      formattedTopic = formattedTopic.charAt(0).toLowerCase() + formattedTopic.slice(1);
+    }
+    
+    return formattedTopic;
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-6">
       <div className="max-w-3xl w-full">
@@ -113,7 +127,7 @@ const KnowledgeNuggetLoading = ({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              Crafting your {topic} learning journey
+              Crafting your {getFormattedTopic()} learning journey
             </motion.span>
           </h2>
           
