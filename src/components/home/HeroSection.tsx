@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import TopicInput from "@/components/TopicInput";
 import { motion } from "framer-motion";
+import { BookText, Presentation, Headphones } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -35,6 +36,39 @@ const HeroSection = () => {
           <h1 className="text-3xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-gray-800 via-brand-purple to-brand-pink bg-clip-text text-transparent">
             What do you want to learn today?
           </h1>
+          
+          {/* Learning modes visualization */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="flex justify-center gap-6 md:gap-12 mb-8"
+          >
+            {/* Text Mode */}
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-brand-purple/10 flex items-center justify-center mb-2">
+                <BookText size={32} className="text-brand-purple" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">Read</span>
+            </div>
+            
+            {/* Presentation Mode */}
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-brand-pink/10 flex items-center justify-center mb-2">
+                <Presentation size={32} className="text-brand-pink" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">Present</span>
+            </div>
+            
+            {/* Audio Mode */}
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-brand-gold/10 flex items-center justify-center mb-2">
+                <Headphones size={32} className="text-brand-gold" />
+              </div>
+              <span className="text-sm font-medium text-gray-700">Audio</span>
+            </div>
+          </motion.div>
+          
           <TopicInput onSubmit={handleSubmit} loading={loading} />
         </motion.div>
       </div>
