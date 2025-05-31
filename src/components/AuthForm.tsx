@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
 
 type AuthMode = "signin" | "signup";
 
@@ -49,76 +49,100 @@ export function AuthForm() {
   };
 
   return (
-    <div className="glass-panel-strong max-w-md w-full p-8 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        {mode === "signin" ? "Sign In" : "Create Account"}
-      </h2>
+    <div className="w-full">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          {mode === "signin" ? "Welcome Back" : "Get Started"}
+        </h2>
+        <p className="text-gray-600">
+          {mode === "signin" 
+            ? "Sign in to continue your learning journey" 
+            : "Create your account to start learning"
+          }
+        </p>
+      </div>
       
+      {/* Error/Success Messages */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
           {success}
         </div>
       )}
       
-      <form onSubmit={handleAuth} className="space-y-4">
+      {/* Form */}
+      <form onSubmit={handleAuth} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Email
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
           </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="your@email.com"
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="pl-10 h-12"
+            />
+          </div>
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
             Password
           </label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-            minLength={6}
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              minLength={6}
+              className="pl-10 h-12"
+            />
+          </div>
         </div>
 
         <Button 
           type="submit" 
           variant="brand" 
-          className="w-full mt-6 h-12 text-base font-medium" 
+          className="w-full h-12 text-base font-semibold" 
           disabled={loading}
         >
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {mode === "signin" ? "Signing in..." : "Signing up..."}
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              {mode === "signin" ? "Signing in..." : "Creating account..."}
             </>
           ) : (
-            mode === "signin" ? "Sign In" : "Sign Up"
+            mode === "signin" ? "Sign In" : "Create Account"
           )}
         </Button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-muted-foreground">
+      {/* Mode Toggle */}
+      <div className="mt-8 text-center">
+        <p className="text-sm text-gray-600">
           {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="text-brand-purple hover:underline font-medium"
+            className="text-brand-purple hover:text-brand-purple/80 font-semibold transition-colors"
             type="button"
           >
             {mode === "signin" ? "Sign Up" : "Sign In"}

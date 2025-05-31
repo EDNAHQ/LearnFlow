@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthForm } from "@/components/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
+import { Brain, Sparkles, Users, TrendingUp } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -29,51 +30,135 @@ const AuthPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin"></div>
+        <div className="w-12 h-12 rounded-full border-4 border-brand-purple/20 border-t-brand-purple animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="text-center mb-12"
+    <div className="min-h-screen flex">
+      {/* Left Side - Creative CTA Content (2/3) */}
+      <motion.div 
+        className="flex-1 lg:flex-[2] bg-gradient-to-br from-[#1A1A1A] via-[#252525] to-[#1A1A1A] relative overflow-hidden flex items-center justify-center"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
       >
-        <div className="inline-block">
-          <div className="flex items-center justify-center mb-2">
-            <div className="relative w-16 h-16 bg-learn-100 rounded-2xl flex items-center justify-center before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-learn-50/50 before:rounded-2xl before:transform before:rotate-12">
-              <span className="relative z-10 text-learn-600 text-2xl font-bold">L</span>
-            </div>
-          </div>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-20 w-32 h-32 rounded-full border-2 border-brand-purple"></div>
+          <div className="absolute top-40 right-32 w-24 h-24 rounded-full border border-brand-pink"></div>
+          <div className="absolute bottom-32 left-40 w-16 h-16 rounded-full border border-brand-gold"></div>
+          <div className="absolute bottom-20 right-20 w-20 h-20 rounded-full border-2 border-brand-purple/50"></div>
         </div>
-        <motion.h1 
-          className="text-4xl md:text-5xl font-bold mb-3 bg-clip-text"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.7 }}
-        >
-          LearnFlow
-        </motion.h1>
-        <motion.p 
-          className="text-muted-foreground max-w-md mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-        >
-          Sign in to start your personalized learning journey.
-        </motion.p>
+
+        <div className="relative z-10 max-w-xl mx-auto px-8 text-center">
+          {/* Logo */}
+          <motion.div 
+            className="flex items-center justify-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <div className="mr-3 p-3 bg-gradient-to-br from-brand-purple to-brand-pink rounded-xl flex items-center justify-center">
+              <Brain className="h-8 w-8 text-white" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-bold text-2xl text-white leading-tight">
+                LearnFlow
+              </span>
+              <span className="text-sm text-white/60 leading-tight">
+                by Enterprise DNA
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Main Heading */}
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+          >
+            Transform Your Learning Journey with{" "}
+            <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
+              AI-Powered Education
+            </span>
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p 
+            className="text-lg text-white/80 mb-8 leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            Experience personalized learning paths, interactive content, and intelligent insights that adapt to your unique learning style.
+          </motion.p>
+
+          {/* Feature Highlights */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 bg-brand-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="h-6 w-6 text-brand-purple" />
+              </div>
+              <h3 className="font-semibold text-white mb-1">AI-Powered</h3>
+              <p className="text-sm text-white/60">Intelligent content generation</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-brand-pink/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Users className="h-6 w-6 text-brand-pink" />
+              </div>
+              <h3 className="font-semibold text-white mb-1">Collaborative</h3>
+              <p className="text-sm text-white/60">Learn with others</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-brand-gold/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="h-6 w-6 text-brand-gold" />
+              </div>
+              <h3 className="font-semibold text-white mb-1">Progressive</h3>
+              <p className="text-sm text-white/60">Track your growth</p>
+            </div>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div 
+            className="flex justify-center space-x-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
+          >
+            <div>
+              <div className="text-2xl font-bold text-white">10K+</div>
+              <div className="text-sm text-white/60">Learners</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-white">500+</div>
+              <div className="text-sm text-white/60">Courses</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-white">95%</div>
+              <div className="text-sm text-white/60">Success Rate</div>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
 
+      {/* Right Side - Authentication Form (1/3) */}
       <motion.div 
-        className="w-full max-w-md"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.7 }}
+        className="flex-1 lg:flex-[1] bg-white flex items-center justify-center p-8"
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
       >
-        <AuthForm />
+        <div className="w-full max-w-sm">
+          <AuthForm />
+        </div>
       </motion.div>
     </div>
   );
