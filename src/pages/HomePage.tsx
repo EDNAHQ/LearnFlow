@@ -5,7 +5,6 @@ import HeroSection from "@/components/home/HeroSection";
 import RecentProjectsSection from "@/components/home/RecentProjectsSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import BenefitsSection from "@/components/home/BenefitsSection";
-import CTASection from "@/components/home/CTASection";
 import HomeFooter from "@/components/home/HomeFooter";
 
 const HomePage = () => {
@@ -19,7 +18,6 @@ const HomePage = () => {
         <RecentProjectsSection />
         <FeaturesSection />
         <BenefitsSection />
-        <CTASection />
       </main>
       
       <HomeFooter />
