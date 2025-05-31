@@ -3,7 +3,6 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, Users, BookOpen } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -11,7 +10,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { getProjectStyling } from "@/components/projects/projectStylingUtils";
 
 interface RecentProject {
@@ -41,19 +40,6 @@ const RecentProjectsSection = () => {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getRandomUserCount = () => {
-    return Math.floor(Math.random() * 150) + 50; // Random between 50-200
-  };
 
   if (isLoading) {
     return (
@@ -106,49 +92,20 @@ const RecentProjectsSection = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {projects.map((project) => {
                 const styling = getProjectStyling(project.topic);
-                const userCount = getRandomUserCount();
                 
                 return (
                   <CarouselItem key={project.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                     <Card className={`h-full transition-all duration-300 hover:translate-y-[-2px] bg-gradient-to-br ${styling.color} backdrop-blur-sm ${styling.border} hover:shadow-lg`}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-full border border-white/50 shadow-sm">
+                      <CardContent className="p-6 flex items-center justify-center min-h-[120px]">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center mb-3">
+                            <div className="bg-white/80 backdrop-blur-sm p-2 rounded-full border border-white/50 shadow-sm">
                               {styling.icon}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-800 text-sm leading-tight line-clamp-2">
-                                {project.topic}
-                              </h3>
-                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent className="pt-0 space-y-3">
-                        {/* Stats */}
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                          <div className="flex items-center space-x-1 text-gray-600">
-                            <Users className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{userCount} learners</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-gray-600">
-                            <Clock className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{formatDate(project.created_at)}</span>
-                          </div>
-                        </div>
-
-                        {/* Status badge */}
-                        <div className="flex justify-start">
-                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            project.is_completed 
-                              ? 'bg-brand-purple/20 text-brand-purple' 
-                              : 'bg-brand-pink/20 text-brand-pink'
-                          }`}>
-                            <BookOpen className="w-3 h-3 mr-1 flex-shrink-0" />
-                            <span className="truncate">{project.is_completed ? 'Completed' : 'In Progress'}</span>
-                          </div>
+                          <h3 className="font-semibold text-gray-800 text-base leading-tight text-center">
+                            {project.topic}
+                          </h3>
                         </div>
                       </CardContent>
                     </Card>
