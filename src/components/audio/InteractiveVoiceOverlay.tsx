@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mic, MicOff, Volume2, MessageCircle } from 'lucide-react';
@@ -147,7 +148,7 @@ const InteractiveVoiceOverlay: React.FC<InteractiveVoiceOverlayProps> = ({
                 className="text-center space-y-8"
                 variants={contentVariants}
               >
-                {/* Voice Visual */}
+                {/* Voice Visual with LearnFlow Logo */}
                 <div className="relative">
                   <motion.div
                     className={`w-32 h-32 rounded-full mx-auto flex items-center justify-center transition-all duration-500 ${
@@ -165,7 +166,13 @@ const InteractiveVoiceOverlay: React.FC<InteractiveVoiceOverlayProps> = ({
                     ) : isListening ? (
                       <Mic className="w-12 h-12 text-white" />
                     ) : (
-                      <MessageCircle className="w-12 h-12 text-gray-400" />
+                      // LearnFlow Logo
+                      <div className="text-white font-bold text-lg tracking-wider">
+                        <div className="flex items-center justify-center">
+                          <span className="text-[#6D42EF]">L</span>
+                          <span>F</span>
+                        </div>
+                      </div>
                     )}
                   </motion.div>
                   
