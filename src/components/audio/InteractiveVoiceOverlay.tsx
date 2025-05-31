@@ -128,12 +128,24 @@ const InteractiveVoiceOverlay: React.FC<InteractiveVoiceOverlayProps> = ({
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-700">
-              <motion.h2 
-                className="text-2xl font-bold text-white"
+              <motion.div 
+                className="flex items-center"
                 variants={contentVariants}
               >
-                AI Voice Assistant
-              </motion.h2>
+                {/* LearnFlow Logo */}
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#6D42EF] to-[#E84393] rounded-lg flex items-center justify-center">
+                    <div className="text-white font-bold text-lg">
+                      <span className="text-white">L</span>
+                      <span className="text-white">F</span>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-white">
+                    <span className="text-[#6D42EF]">Learn</span>
+                    <span className="text-white">Flow</span>
+                  </div>
+                </div>
+              </motion.div>
               <Button
                 onClick={onClose}
                 variant="ghost"
