@@ -30,7 +30,7 @@ export function AuthForm() {
 
         if (error) throw error;
         
-        setSuccess("Sign up successful! Check your email for verification.");
+        setSuccess("Check your email to verify your account");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -39,10 +39,10 @@ export function AuthForm() {
 
         if (error) throw error;
         
-        setSuccess("Signed in successfully!");
+        setSuccess("Welcome back!");
       }
     } catch (error: any) {
-      setError(error.message || "Authentication failed");
+      setError(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -57,8 +57,8 @@ export function AuthForm() {
         </h2>
         <p className="text-gray-600">
           {mode === "signin" 
-            ? "Sign in to continue your learning journey" 
-            : "Create your account to start learning"
+            ? "Sign in to continue" 
+            : "Create your account"
           }
         </p>
       </div>
@@ -80,7 +80,7 @@ export function AuthForm() {
       <form onSubmit={handleAuth} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
+            Email
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -139,7 +139,7 @@ export function AuthForm() {
       {/* Mode Toggle */}
       <div className="mt-8 text-center">
         <p className="text-sm text-gray-600">
-          {mode === "signin" ? "Don't have an account? " : "Already have an account? "}
+          {mode === "signin" ? "New here? " : "Have an account? "}
           <button
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             className="text-brand-purple hover:text-brand-purple/80 font-semibold transition-colors"

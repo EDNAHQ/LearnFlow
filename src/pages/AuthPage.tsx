@@ -55,7 +55,7 @@ const AuthPage = () => {
         <div className="relative z-10 max-w-xl mx-auto px-8 text-center">
           {/* Logo */}
           <motion.div 
-            className="flex items-center justify-center mb-8"
+            className="flex items-center justify-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
@@ -75,30 +75,30 @@ const AuthPage = () => {
 
           {/* Main Heading */}
           <motion.h1 
-            className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight"
+            className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            Transform Your Learning Journey with{" "}
+            Learn Smarter with{" "}
             <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
-              AI-Powered Education
+              AI
             </span>
           </motion.h1>
 
-          {/* Description */}
+          {/* Simple Description */}
           <motion.p 
-            className="text-lg text-white/80 mb-8 leading-relaxed"
+            className="text-xl text-white/80 mb-12 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            Experience personalized learning paths, interactive content, and intelligent insights that adapt to your unique learning style.
+            Personalized learning paths that adapt to you
           </motion.p>
 
           {/* Feature Highlights */}
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+            className="grid grid-cols-3 gap-8 mb-12"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
@@ -108,42 +108,39 @@ const AuthPage = () => {
                 <Sparkles className="h-6 w-6 text-brand-purple" />
               </div>
               <h3 className="font-semibold text-white mb-1">AI-Powered</h3>
-              <p className="text-sm text-white/60">Intelligent content generation</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-brand-pink/20 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <Users className="h-6 w-6 text-brand-pink" />
               </div>
-              <h3 className="font-semibold text-white mb-1">Collaborative</h3>
-              <p className="text-sm text-white/60">Learn with others</p>
+              <h3 className="font-semibold text-white mb-1">Social</h3>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-brand-gold/20 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="h-6 w-6 text-brand-gold" />
               </div>
-              <h3 className="font-semibold text-white mb-1">Progressive</h3>
-              <p className="text-sm text-white/60">Track your growth</p>
+              <h3 className="font-semibold text-white mb-1">Results</h3>
             </div>
           </motion.div>
 
           {/* Stats */}
           <motion.div 
-            className="flex justify-center space-x-8 text-center"
+            className="flex justify-center space-x-12 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0, duration: 0.6 }}
           >
             <div>
-              <div className="text-2xl font-bold text-white">10K+</div>
+              <div className="text-3xl font-bold text-white">10K+</div>
               <div className="text-sm text-white/60">Learners</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">500+</div>
+              <div className="text-3xl font-bold text-white">500+</div>
               <div className="text-sm text-white/60">Courses</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">95%</div>
-              <div className="text-sm text-white/60">Success Rate</div>
+              <div className="text-3xl font-bold text-white">95%</div>
+              <div className="text-sm text-white/60">Success</div>
             </div>
           </motion.div>
         </div>
