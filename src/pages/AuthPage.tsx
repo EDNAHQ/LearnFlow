@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthForm } from "@/components/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, Sparkles, Users, TrendingUp } from "lucide-react";
+import { Brain } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -95,54 +95,6 @@ const AuthPage = () => {
           >
             Personalized learning paths that adapt to you
           </motion.p>
-
-          {/* Feature Highlights */}
-          <motion.div 
-            className="grid grid-cols-3 gap-8 mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <div className="text-center">
-              <div className="w-12 h-12 bg-brand-purple/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Sparkles className="h-6 w-6 text-brand-purple" />
-              </div>
-              <h3 className="font-semibold text-white mb-1">AI-Powered</h3>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-brand-pink/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <Users className="h-6 w-6 text-brand-pink" />
-              </div>
-              <h3 className="font-semibold text-white mb-1">Social</h3>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-brand-gold/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="h-6 w-6 text-brand-gold" />
-              </div>
-              <h3 className="font-semibold text-white mb-1">Results</h3>
-            </div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div 
-            className="flex justify-center space-x-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0, duration: 0.6 }}
-          >
-            <div>
-              <div className="text-3xl font-bold text-white">10K+</div>
-              <div className="text-sm text-white/60">Learners</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-white">500+</div>
-              <div className="text-sm text-white/60">Courses</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-white">95%</div>
-              <div className="text-sm text-white/60">Success</div>
-            </div>
-          </motion.div>
         </div>
       </motion.div>
 
