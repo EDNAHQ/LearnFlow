@@ -19,7 +19,6 @@ interface RecentProject {
   topic: string;
   created_at: string;
   is_completed: boolean;
-  progress?: number;
 }
 
 const RecentProjectsSection = () => {
@@ -38,26 +37,7 @@ const RecentProjectsSection = () => {
         return [];
       }
 
-      // Calculate progress for each project
-      const projectsWithProgress = await Promise.all(
-        (data || []).map(async (project) => {
-          const { data: steps } = await supabase
-            .from('learning_steps')
-            .select('id, completed')
-            .eq('path_id', project.id);
-
-          const completedSteps = steps ? steps.filter(step => step.completed).length : 0;
-          const totalSteps = steps ? steps.length : 0;
-          const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-
-          return {
-            ...project,
-            progress
-          };
-        })
-      );
-
-      return projectsWithProgress;
+      return data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -80,9 +60,6 @@ const RecentProjectsSection = () => {
       <section className="py-16 bg-gray-50">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
-              Recent Learning Flows
-            </h2>
             <p className="text-gray-600 text-lg">
               Discover what others are learning on the platform
             </p>
@@ -108,9 +85,6 @@ const RecentProjectsSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">
-            Recent Learning Flows
-          </h2>
           <p className="text-gray-600 text-lg">
             Discover what others are learning on the platform
           </p>
@@ -144,7 +118,7 @@ const RecentProjectsSection = () => {
                               {styling.icon}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-800 text-sm leading-tight truncate">
+                              <h3 className="font-semibold text-gray-800 text-sm leading-tight line-clamp-2">
                                 {project.topic}
                               </h3>
                             </div>
@@ -153,41 +127,27 @@ const RecentProjectsSection = () => {
                       </CardHeader>
                       
                       <CardContent className="pt-0 space-y-3">
-                        {/* Progress bar */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs text-gray-600">
-                            <span>Progress</span>
-                            <span>{project.progress}%</span>
-                          </div>
-                          <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full transition-all duration-300 ${project.is_completed ? 'bg-brand-purple' : 'bg-brand-pink'}`}
-                              style={{ width: `${project.progress}%` }}
-                            />
-                          </div>
-                        </div>
-
                         {/* Stats */}
                         <div className="grid grid-cols-2 gap-4 text-xs">
                           <div className="flex items-center space-x-1 text-gray-600">
-                            <Users className="w-3 h-3" />
-                            <span>{userCount} learners</span>
+                            <Users className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{userCount} learners</span>
                           </div>
                           <div className="flex items-center space-x-1 text-gray-600">
-                            <Clock className="w-3 h-3" />
-                            <span>{formatDate(project.created_at)}</span>
+                            <Clock className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{formatDate(project.created_at)}</span>
                           </div>
                         </div>
 
                         {/* Status badge */}
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-start">
                           <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             project.is_completed 
                               ? 'bg-brand-purple/20 text-brand-purple' 
                               : 'bg-brand-pink/20 text-brand-pink'
                           }`}>
-                            <BookOpen className="w-3 h-3 mr-1" />
-                            {project.is_completed ? 'Completed' : 'In Progress'}
+                            <BookOpen className="w-3 h-3 mr-1 flex-shrink-0" />
+                            <span className="truncate">{project.is_completed ? 'Completed' : 'In Progress'}</span>
                           </div>
                         </div>
                       </CardContent>
