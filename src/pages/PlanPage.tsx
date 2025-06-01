@@ -7,6 +7,7 @@ import PlanAuthError from "@/components/plan/PlanAuthError";
 import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
 import { usePlanPage } from "@/hooks/usePlanPage";
+import { useEffect } from "react";
 
 const PlanPage = () => {
   const {
@@ -23,6 +24,25 @@ const PlanPage = () => {
     handleLogin,
     handleDeletePlan
   } = usePlanPage();
+
+  // Debug logging to help trace pathId issues
+  useEffect(() => {
+    if (pathId) {
+      console.log("Plan page has pathId:", pathId);
+      // Store pathId in session storage to ensure it's available
+      sessionStorage.setItem("learning-path-id", pathId);
+    } else {
+      console.log("Plan page does not have pathId yet");
+    }
+  }, [pathId]);
+
+  // Ensure pathId persists on page reloads or navigation
+  useEffect(() => {
+    const storedPathId = sessionStorage.getItem("learning-path-id");
+    if (storedPathId && !pathId) {
+      console.log("Restoring pathId from session storage:", storedPathId);
+    }
+  }, [pathId]);
 
   return (
     <div className="min-h-screen bg-white">

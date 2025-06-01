@@ -3,6 +3,15 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+export type VoiceProvider = 'elevenlabs' | 'openai';
+export type OpenAIVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+
+export interface TextToSpeechOptions {
+  provider?: VoiceProvider;
+  voice?: string;
+  instructions?: string;
+}
+
 export function useTextToSpeech() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -12,7 +21,7 @@ export function useTextToSpeech() {
   const [scriptContent, setScriptContent] = useState<string | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
 
-  const generateSpeech = async (text: string, pathId: string) => {
+  const generateSpeech = async (text: string, pathId: string, options: TextToSpeechOptions = {}) => {
     if (!text) {
       const errorMsg = 'No text provided for speech generation';
       setError(errorMsg);
@@ -30,21 +39,28 @@ export function useTextToSpeech() {
     setIsGenerating(true);
     setError(null);
     
+    const provider = options.provider || 'openai'; // Default to OpenAI
+    
     try {
-      console.log(`Generating speech for path ${pathId} with text length ${text.length}`);
+      console.log(`Generating speech using ${provider} for path ${pathId} with text length ${text.length}`);
+      
+      // Determine which endpoint to call based on provider
+      const endpoint = provider === 'openai' ? 'openai-tts' : 'text-to-speech';
       
       // Call the Supabase Edge Function
-      const response = await supabase.functions.invoke('text-to-speech', {
+      const response = await supabase.functions.invoke(endpoint, {
         body: { 
           text,
-          pathId
+          pathId,
+          voice: options.voice || (provider === 'openai' ? 'nova' : 'JBFqnCBsd6RMkjVDRZzb'),
+          instructions: options.instructions || ''
         }
       });
       
-      console.log("Text-to-speech response:", response);
+      console.log(`${provider} response:`, response);
       
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate speech');
+        throw new Error(response.error.message || `Failed to generate speech with ${provider}`);
       }
       
       if (!response.data?.audioUrl) {

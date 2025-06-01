@@ -46,13 +46,22 @@ export function MainNav({ className }: MainNavProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
-          <Link to="/home" className="mr-6 flex items-center space-x-2">
-            <div className="p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
-              <Brain className="h-5 w-5 text-white" />
+          <Link to="/home" className="mr-6 flex items-center">
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <div className="mr-2 p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-base leading-tight">
+                    LearnFlow
+                  </span>
+                  <span className="text-xs text-foreground/60 leading-tight">
+                    by Enterprise DNA
+                  </span>
+                </div>
+              </div>
             </div>
-            <span className="hidden font-bold sm:inline-block">
-              LearnFlow
-            </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
@@ -65,17 +74,6 @@ export function MainNav({ className }: MainNavProps) {
               )}
             >
               Projects
-            </Link>
-            <Link
-              to="/why-free"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                isActive("/why-free")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/60"
-              )}
-            >
-              Why Free?
             </Link>
           </nav>
         </div>
@@ -106,6 +104,21 @@ export function MainNav({ className }: MainNavProps) {
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-4">
+                <div className="flex flex-col mb-6">
+                  <div className="flex items-center">
+                    <div className="mr-2 p-1.5 bg-gradient-to-br from-brand-purple to-brand-pink rounded-lg flex items-center justify-center">
+                      <Brain className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-base leading-tight">
+                        LearnFlow
+                      </span>
+                      <span className="text-xs text-foreground/60 leading-tight">
+                        by Enterprise DNA
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 <Link
                   to="/projects"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
@@ -113,14 +126,6 @@ export function MainNav({ className }: MainNavProps) {
                 >
                   <User className="h-5 w-5 text-brand-purple" />
                   <span>Projects</span>
-                </Link>
-                <Link
-                  to="/why-free"
-                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                  onClick={closeMobileMenu}
-                >
-                  <HelpCircle className="h-5 w-5 text-brand-purple" />
-                  <span>Why Free?</span>
                 </Link>
                 {user && (
                   <Button
@@ -142,3 +147,4 @@ export function MainNav({ className }: MainNavProps) {
     </header>
   );
 }
+

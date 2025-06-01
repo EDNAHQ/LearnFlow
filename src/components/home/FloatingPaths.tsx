@@ -2,8 +2,8 @@
 import { motion } from "framer-motion";
 
 function FloatingPaths({ position }: { position: number }) {
-    // Generate paths with subtle, thinner lines as originally designed
-    const paths = Array.from({ length: 35 }, (_, i) => ({
+    // Generate fewer paths with much thinner and subtler lines
+    const paths = Array.from({ length: 20 }, (_, i) => ({
         id: i,
         d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${
             380 - i * 5 * position
@@ -12,8 +12,8 @@ function FloatingPaths({ position }: { position: number }) {
         } ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${
             684 - i * 5 * position
         } ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`,
-        color: i % 2 === 0 ? `rgba(109, 66, 239, ${0.4})` : `rgba(232, 67, 147, ${0.4})`, // Using brand colors with consistent opacity
-        width: 0.8 + i * 0.02, // Thinner lines as originally preferred
+        color: i % 2 === 0 ? `rgba(109, 66, 239, ${0.15})` : `rgba(232, 67, 147, ${0.15})`, // Using brand colors with minimal opacity
+        width: 0.5 + i * 0.01, // Much thinner lines
     }));
 
     return (
@@ -31,11 +31,11 @@ function FloatingPaths({ position }: { position: number }) {
                         d={path.d}
                         stroke={path.color}
                         strokeWidth={path.width}
-                        strokeOpacity={0.6} // Consistent opacity for better visibility
-                        initial={{ pathLength: 0.3, opacity: 0.6 }}
+                        strokeOpacity={0.2} // Lower opacity for subtler effect
+                        initial={{ pathLength: 0.3, opacity: 0.2 }}
                         animate={{
                             pathLength: 1,
-                            opacity: [0.4, 0.7, 0.4], // Subtle opacity animation
+                            opacity: [0.1, 0.2, 0.1], // Very subtle opacity animation
                             pathOffset: [0, 1, 0],
                         }}
                         transition={{

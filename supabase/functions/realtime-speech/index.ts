@@ -1,11 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
-// CORS headers for cross-origin requests
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -14,81 +11,63 @@ serve(async (req) => {
   }
 
   try {
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    const { instructions, voice, content, pathId } = await req.json();
     
-    if (!OPENAI_API_KEY) {
+    // Use the most specific content available for text-to-speech
+    const textToConvert = content || instructions || 
+      'Hello, this is a test of the realtime speech function.';
+    
+    console.log(`Converting text to speech for pathId: ${pathId}, content length: ${textToConvert.length}`);
+    
+    if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Parse request body
-    const requestData = await req.json();
-    
-    // Extract parameters with defaults
-    const {
-      instructions = "You are a friendly assistant.",
-      modalities = ["audio", "text"],
-      voice = "alloy"
-    } = requestData;
-
-    console.log("Creating real-time speech session with OpenAI");
-    
-    // Prepare the request payload
-    const payload = {
-      model: "gpt-4o-realtime-preview",
-      modalities,
-      instructions,
-      voice
-    };
-
-    // Call OpenAI's real-time API to create a session
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+    // Create a session with OpenAI
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        model: "tts-1",
+        voice: voice || 'alloy',
+        input: textToConvert,
+        response_format: "mp3"
+      })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error response:', errorText);
-      throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
-
-    // Get the session data from OpenAI
-    const sessionData = await response.json();
     
-    console.log("Successfully created real-time session");
-
-    // Return the session data to the client
-    return new Response(
-      JSON.stringify({
-        success: true,
-        session: {
-          id: sessionData.id,
-          token: sessionData.client_secret.value,
-          created_at: sessionData.created_at,
-          expires_at: sessionData.expires_at
-        },
-        modalities
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
-
+    // Get audio data as array buffer
+    const audioData = new Uint8Array(await response.arrayBuffer());
+    
+    // Return the audio data directly
+    return new Response(audioData, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'audio/mpeg'
+      },
+      status: 200
+    });
   } catch (error) {
-    console.error('Error in realtime-speech function:', error);
+    console.error('Error in realtime-speech function:', error.message);
     
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message || 'Internal server error'
+        error: error.message,
+        service: 'realtime-speech',
+        timestamp: new Date().toISOString()
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }

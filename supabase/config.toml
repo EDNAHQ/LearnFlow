@@ -1,2 +1,10 @@
 
-project_id = "hjivfywgkiwjvpquxndg"
+hjivfywgkiwjvpquxndg = "hjivfywgkiwjvpquxndg"
+
+[functions]
+[functions.text-to-speech]
+verify_jwt = true
+[functions.openai-tts]
+verify_jwt = true
+[functions.realtime-speech]
+verify_jwt = true

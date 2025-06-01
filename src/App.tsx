@@ -13,7 +13,6 @@ import ContentPage from "./pages/ContentPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import ProjectsPage from "./pages/ProjectsPage";
-import WhyFreePage from "./pages/WhyFreePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -36,7 +35,6 @@ const App = () => (
                   <Route path="/content/:pathId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
                   <Route path="/content/:pathId/step/:stepId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
                   <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-                  <Route path="/why-free" element={<WhyFreePage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
