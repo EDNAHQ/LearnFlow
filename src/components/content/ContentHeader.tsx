@@ -1,11 +1,11 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Home, ArrowLeft, Loader2 } from "lucide-react";
-import { ModeToggle } from "@/components/ModeToggle";
+import { ModeToggle } from "@/components/theme";
+import { Home } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface ContentHeaderProps {
-  onBack: () => void;
   onHome: () => void;
   generatingContent: boolean;
   generatedSteps: number;
@@ -13,55 +13,74 @@ interface ContentHeaderProps {
 }
 
 const ContentHeader = ({
-  onBack,
   onHome,
   generatingContent,
   generatedSteps,
   totalSteps
 }: ContentHeaderProps) => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-black">
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-50 w-full bg-white backdrop-blur-lg border-b-2 border-gray-100 shadow-md">
+      <div className="absolute inset-0 bg-gradient-to-r from-[#6654f5]/3 via-[#ca5a8b]/3 to-[#f2b347]/3 pointer-events-none" />
+      <div className="container relative flex h-18 items-center py-3">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           className="flex items-center justify-between w-full"
         >
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              className="flex items-center gap-1 text-white hover:bg-white/10"
-              onClick={onHome}
-            >
-              <Home className="h-4 w-4" />
-              <span>Projects</span>
-            </Button>
-            
-            <div className="h-5 w-px bg-gray-600"></div>
-            
-            <Button
-              variant="ghost"
-              className="flex items-center gap-1 text-white hover:bg-white/10"
-              onClick={onBack}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back</span>
-            </Button>
+          {/* Left Side - Logo and Navigation */}
+          <div className="flex items-center gap-6">
+            {/* Main Logo */}
+            <Link to="/" className="flex items-center">
+              <div className="flex flex-col">
+                <span className="text-2xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight">
+                  LearnFlow
+                </span>
+                <span className="text-[10px] font-semibold text-gray-600 tracking-wide uppercase">
+                  Learning Mode
+                </span>
+              </div>
+            </Link>
+
+            <div className="h-8 w-px bg-gray-300"></div>
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="outline"
+                  className="text-gray-700 border-gray-300 hover:text-[#6654f5] hover:border-[#6654f5] hover:bg-[#6654f5]/5 transition-all duration-200 rounded-full px-5 py-2.5 font-semibold"
+                  onClick={onHome}
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  <span>Projects</span>
+                </Button>
+              </motion.div>
+
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Right Side - Status and Mode Toggle */}
+          <div className="flex items-center gap-4">
             <ModeToggle />
-            
-            {/* Only show generation indicator when actively generating and not on an existing step page */}
+
+            {/* Generation indicator with better styling */}
             {generatingContent && generatedSteps < totalSteps && (
-              <div className="flex items-center gap-2 text-sm bg-[#6D42EF]/20 text-white px-3 py-1 rounded-full">
-                <Loader2 className="w-3 h-3 animate-spin text-[#E84393]" />
-                <span className="text-[#E84393]">Generating ({generatedSteps}/{totalSteps})</span>
-              </div>
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="flex items-center gap-2 text-sm bg-gradient-to-r from-[#6654f5]/20 to-[#ca5a8b]/20 px-4 py-2.5 rounded-full border-2 border-[#6654f5]/40"
+              >
+                <div className="w-4 h-4 rounded-full border-2 border-[#ca5a8b] border-t-transparent animate-spin" />
+                <span className="font-semibold text-gray-700">
+                  Generating Content ({generatedSteps}/{totalSteps})
+                </span>
+              </motion.div>
             )}
-            <div className="text-sm font-medium text-white">
-              LearnFlow
-            </div>
           </div>
         </motion.div>
       </div>

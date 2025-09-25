@@ -27,17 +27,23 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   const { fetchLearningSteps } = useFetchLearningSteps();
   const { markStepAsComplete } = useStepCompletion(setSteps);
 
-  // Create a memoized version of fetchLearningSteps that includes our state
-  const fetchSteps = useCallback(() => {
+  // Create a stable version that doesn't depend on generatedSteps to avoid infinite loops
+  const fetchStepsRef = useRef<() => void>();
+
+  fetchStepsRef.current = useCallback(() => {
     return fetchLearningSteps(
-      pathId, 
-      countGeneratedSteps, 
-      setSteps, 
-      setGeneratedSteps, 
-      setGeneratingContent, 
+      pathId,
+      countGeneratedSteps,
+      setSteps,
+      setGeneratedSteps,
+      setGeneratingContent,
       generatedSteps
     );
-  }, [pathId, countGeneratedSteps, setSteps, setGeneratedSteps, setGeneratingContent, generatedSteps, fetchLearningSteps]);
+  }, [pathId, countGeneratedSteps, fetchLearningSteps, generatedSteps]);
+
+  const fetchSteps = useCallback(() => {
+    return fetchStepsRef.current?.();
+  }, [pathId]);
 
   // Initial fetch
   useEffect(() => {

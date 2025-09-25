@@ -1,7 +1,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { startBackgroundContentGeneration } from "@/utils/learning/backgroundContentGeneration";
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 
 export function useContentGeneration(steps: any[], pathId: string | null, topic: string | null, stepId: string | null) {
   const [generatingContent, setGeneratingContent] = useState<boolean>(false);
@@ -13,25 +12,11 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
   const lastUpdateTime = useRef<number>(Date.now());
   const updateThreshold = 2000; // Only update every 2 seconds
 
-  // Start background generation if viewing learning path
+  // Removed background fan-out. Content is generated per-step on first view.
   useEffect(() => {
-    if (steps.length > 0 && pathId && topic && !contentGenerationStarted.current && !stepId) {
-      console.log(`Starting background content generation for ${steps.length} steps`);
-      setGeneratingContent(true);
-      contentGenerationStarted.current = true;
-      
-      // Map the learning step data to match the Step interface
-      const stepsForGeneration: Step[] = steps.map(step => ({
-        id: step.id,
-        title: step.title,
-        description: step.content || "" // Use content as description
-      }));
-      
-      // Start background generation for all steps
-      startBackgroundContentGeneration(stepsForGeneration, topic, pathId)
-        .catch(err => {
-          console.error("Error starting background generation:", err);
-        });
+    if (steps.length > 0 && pathId && topic && !stepId) {
+      // Keep initial state consistent; actual generation status comes from useLearningSteps updates
+      setGeneratingContent(false);
     }
   }, [steps, pathId, topic, stepId]);
 

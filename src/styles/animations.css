@@ -42,16 +42,100 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .text-pretty {
     text-wrap: pretty;
   }
-  
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 bg-clip-text text-transparent;
+  }
+
   .text-gradient-purple {
     @apply bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent;
   }
-  
+
+  .brand-gradient {
+    @apply bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500;
+  }
+
+  .brand-gradient-light {
+    @apply bg-gradient-to-br from-purple-400/20 via-pink-400/20 to-yellow-400/20;
+  }
+
   .btn-hover-effect {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  @keyframes fade-down {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-down {
+    animation: fade-down 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes blob {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
   }
 }

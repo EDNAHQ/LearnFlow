@@ -1,6 +1,6 @@
 
 import { createPortal } from 'react-dom';
-import ContentMarginNote from "@/components/ContentMarginNote";
+import ContentMarginNote from "@/components/content/common/ContentMarginNote";
 import { MarginNote } from "@/utils/marginNotesUtils";
 
 interface MarginNotePortalsProps {

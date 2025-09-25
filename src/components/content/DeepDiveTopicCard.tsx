@@ -16,8 +16,8 @@ const DeepDiveTopicCard: React.FC<DeepDiveTopicCardProps> = ({
   onClick
 }) => {
   return (
-    <div 
-      className="bg-white hover:bg-gray-50 rounded-lg p-3 cursor-pointer border border-gray-100"
+    <div
+      className="bg-white hover:bg-gray-50 rounded-lg p-3 cursor-pointer border border-gray-200 hover:border-gray-300 transition-all duration-200"
       onClick={onClick}
     >
       <div className="flex items-center gap-3">
@@ -25,15 +25,15 @@ const DeepDiveTopicCard: React.FC<DeepDiveTopicCardProps> = ({
           <Book className="h-5 w-5 text-brand-purple" />
         </div>
         <div className="flex-1">
-          <h3 className="font-medium text-gray-800">{topic.title}</h3>
-          <p className="text-sm text-gray-500 line-clamp-2">{topic.description}</p>
+          <h3 className="font-medium text-gray-900">{topic.title}</h3>
+          <p className="text-sm text-gray-700 line-clamp-2">{topic.description}</p>
           <div className="flex items-center mt-1.5 gap-2">
             <Badge variant="outline" className="text-xs bg-brand-purple/10 text-brand-purple border-brand-purple/20">
               {formatSimilarity(topic.similarity)} match
             </Badge>
           </div>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-400" />
+        <ArrowRight className="h-4 w-4 text-gray-600" />
       </div>
     </div>
   );

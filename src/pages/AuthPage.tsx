@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { AuthForm } from "@/components/AuthForm";
+import { AuthForm } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { Brain } from "lucide-react";
 

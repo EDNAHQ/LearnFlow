@@ -6,6 +6,8 @@ export interface LearningProject {
   is_approved: boolean;
   is_completed: boolean;
   progress?: number;
+  title?: string;
+  description?: string;
 }
 
 export interface ProjectCardProps {
@@ -15,7 +17,6 @@ export interface ProjectCardProps {
 }
 
 export interface ProjectCategoryStyling {
-  icon: JSX.Element;
   color: string;
   border: string;
 }

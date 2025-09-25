@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useRef } from "react";
-import ContentRelatedQuestions from "../ContentRelatedQuestions";
+import ContentRelatedQuestions from "./common/ContentRelatedQuestions";
 import ContentQuestionsGenerator from "./ContentQuestionsGenerator";
 
 interface ContentQuestionsSectionProps {

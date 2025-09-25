@@ -1,7 +1,6 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { TableProperties } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useCallback, memo } from "react";
 
@@ -50,63 +49,104 @@ const ContentProgress = memo(({
   
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-3 gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex items-center justify-between mb-4 gap-2"
+      >
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-800 truncate max-w-[400px]" title={topic}>
+          <motion.h1
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-2xl font-bold bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] bg-clip-text text-transparent truncate max-w-[400px]"
+            title={topic}
+          >
             {truncatedTopic}
-          </h1>
-          
+          </motion.h1>
+
           <Dialog open={showAllSteps} onOpenChange={setShowAllSteps}>
             <DialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-[#6D42EF] hover:bg-[#6D42EF]/10"
-                aria-label="Table of contents"
-              >
-                <TableProperties className="h-5 w-5" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  className="text-[#6654f5] hover:bg-gradient-to-r hover:from-[#6654f5]/10 hover:to-[#ca5a8b]/10 rounded-xl transition-all duration-300 px-3 py-1 text-sm font-medium"
+                  aria-label="Table of contents"
+                >
+                  View All
+                </Button>
+              </motion.div>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white/95 backdrop-blur-lg border border-gray-200">
               <div className="pt-4">
-                <h3 className="text-lg font-semibold mb-4">All Steps</h3>
-                <div className="space-y-2">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] bg-clip-text text-transparent">
+                    Learning Journey Steps
+                  </h3>
+                </div>
+                <div className="space-y-3">
                   {steps && steps.length > 0 ? steps.map((step, index) => (
-                    <div 
-                      key={step.id} 
-                      className={`p-3 rounded-md cursor-pointer ${currentStep === index 
-                        ? 'bg-brand-purple text-white' 
-                        : 'hover:bg-gray-100'}`}
+                    <motion.div
+                      key={step.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                        currentStep === index
+                          ? 'brand-gradient text-white shadow-lg shadow-[#6654f5]/20'
+                          : 'bg-gray-50 hover:bg-gradient-to-r hover:from-[#6654f5]/5 hover:to-[#ca5a8b]/5 border border-gray-200 hover:border-[#6654f5]/30'
+                      }`}
                       onClick={() => handleStepSelect(index)}
                     >
                       <div className="flex items-center">
-                        <div className="mr-3 flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-brand-purple font-medium">
+                        <div className={`mr-4 flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-xl font-semibold transition-all duration-300 ${
+                          currentStep === index
+                            ? 'bg-white/20 text-white'
+                            : 'bg-gradient-to-br from-[#6654f5]/10 to-[#ca5a8b]/10 text-[#6654f5]'
+                        }`}>
                           {index + 1}
                         </div>
-                        <span className="text-sm font-medium">{step.title}</span>
+                        <span className="text-sm font-medium flex-1">{step.title}</span>
                       </div>
-                    </div>
+                    </motion.div>
                   )) : (
-                    <div className="p-3">No steps available</div>
+                    <div className="p-4 text-gray-500 text-center">No steps available</div>
                   )}
                 </div>
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        
-        <div className="text-sm bg-[#6D42EF]/10 text-[#6D42EF] py-1.5 rounded-full font-semibold px-[20px]">
-          Step {currentStep + 1} of {totalSteps}
-        </div>
-      </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+          className="relative"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] rounded-full blur opacity-30"></div>
+          <div className="relative bg-white text-sm py-2 rounded-full font-semibold px-5 border border-gray-100">
+            <span className="bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] bg-clip-text text-transparent">
+              Step {currentStep + 1} of {totalSteps}
+            </span>
+          </div>
+        </motion.div>
+      </motion.div>
       
-      <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
-        <div 
-          className="bg-[#6D42EF] h-full rounded-full transition-all duration-300" 
-          style={{
-            width: `${(currentStep + 1) / totalSteps * 100}%`
-          }}
-        />
+      <div className="relative">
+        <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden border border-gray-200">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${(currentStep + 1) / totalSteps * 100}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="h-full rounded-full relative overflow-hidden"
+          >
+            <div className="absolute inset-0 brand-gradient" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/20" />
+          </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,107 @@
 
-/* Main CSS file that imports all modular CSS files */
-@import './styles/base.css';
-@import './styles/components.css';
-@import './styles/animations.css';
-@import './styles/content-styles.css';
-@import './styles/content.css';
-@import './styles/legacy.css';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 250 84% 5%;
+    --card: 0 0% 98%;
+    --card-foreground: 250 84% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 250 84% 5%;
+    --primary: 248 80% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 250 84% 5%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 333 57% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 248 80% 66%;
+    --radius: 0.75rem;
+    --brand-blue: #6654f5;
+    --brand-pink: #ca5a8b;
+    --brand-yellow: #f2b347;
+    --brand-black: #0b0c18;
+  }
+
+  * {
+    @apply border-border selection:bg-primary/10 selection:text-primary;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/90 border border-white/20 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)];
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent;
+  }
+
+  .brand-gradient {
+    background: linear-gradient(135deg, #6654f5 0%, #ca5a8b 50%, #f2b347 100%);
+  }
+
+  .brand-gradient-light {
+    background: linear-gradient(135deg, rgba(102, 84, 245, 0.1) 0%, rgba(202, 90, 139, 0.1) 50%, rgba(242, 179, 71, 0.1) 100%);
+  }
+
+  .prose {
+    @apply max-w-none;
+  }
+
+  .prose p {
+    @apply leading-7 [&:not(:first-child)]:mt-6;
+  }
+
+  .prose h2 {
+    @apply text-2xl font-semibold tracking-tight mt-10 first:mt-0;
+  }
+
+  .prose h3 {
+    @apply text-xl font-semibold tracking-tight mt-8 first:mt-0;
+  }
+
+  .prose ul {
+    @apply my-6 ml-6 list-disc [&>li]:mt-2;
+  }
+
+  .prose blockquote {
+    @apply mt-6 border-l-2 pl-6 italic;
+  }
+}
+
+.loading-dots:after {
+  content: '.';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    content: '.';
+  }
+  40% {
+    content: '..';
+  }
+  60% {
+    content: '...';
+  }
+  80%, 100% {
+    content: '';
+  }
+}
+

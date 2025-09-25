@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { UserNav } from "@/components/UserNav";
+import { UserNav } from "@/components/navigation";
 
 interface PlanPageHeaderProps {
   handleReset: () => void;

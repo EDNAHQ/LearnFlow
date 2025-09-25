@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { generateLearningPlan } from "@/utils/learning";
 import { deleteLearningPath } from "@/utils/projectUtils";
 import { supabase } from "@/integrations/supabase/client";
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 
 export const usePlanPage = () => {
   const navigate = useNavigate();

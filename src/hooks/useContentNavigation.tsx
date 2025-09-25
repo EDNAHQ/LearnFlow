@@ -8,7 +8,7 @@ import { useStepNavigation } from "@/hooks/navigation/useStepNavigation";
 import { useContentGeneration } from "@/hooks/navigation/useContentGeneration";
 
 export const useContentNavigation = () => {
-  const { pathId, stepId } = useParams();
+  const { pathId, stepIndex } = useParams();
   const { user } = useAuth();
   const [hasRedirected, setHasRedirected] = useState(false);
 
@@ -42,29 +42,29 @@ export const useContentNavigation = () => {
     generatedSteps,
     initialLoading,
     updateGenerationStatus
-  } = useContentGeneration(steps, pathId || null, topic, stepId || null);
+  } = useContentGeneration(steps, pathId || null, topic, stepIndex || null);
 
   // Set step from URL parameter if available
   useEffect(() => {
-    initializeStep(stepId || null);
-  }, [stepId, initializeStep]);
+    initializeStep(stepIndex || null);
+  }, [stepIndex, initializeStep]);
 
   // Update generation status from useLearningSteps
   useEffect(() => {
     if (steps.length > 0) {
-      updateGenerationStatus(bgGenerating, bgGenerated, steps.length, !!stepId);
+      updateGenerationStatus(bgGenerating, bgGenerated, steps.length, !!stepIndex);
     }
-  }, [bgGenerating, bgGenerated, steps.length, stepId, updateGenerationStatus]);
+  }, [bgGenerating, bgGenerated, steps.length, stepIndex, updateGenerationStatus]);
 
   // Handle redirect to first step when generation completes
   useEffect(() => {
     // Only redirect if we're not already on a step page and generation is complete
-    if (!hasRedirected && !initialLoading && !generatingContent && pathId && steps.length > 0 && !stepId) {
+    if (!hasRedirected && !initialLoading && !generatingContent && pathId && steps.length > 0 && !stepIndex) {
       console.log("Content generation complete. Navigating to first content page...");
       setHasRedirected(true);
       navigateToStep(0);
     }
-  }, [generatingContent, generatedSteps, steps.length, pathId, hasRedirected, stepId, initialLoading, navigateToStep]);
+  }, [generatingContent, generatedSteps, steps.length, pathId, hasRedirected, stepIndex, initialLoading, navigateToStep]);
 
   // Wrap markStepAsComplete to pass it to the step navigation hook
   const handleMarkCompleteWithStep = async () => {

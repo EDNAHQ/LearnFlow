@@ -1,0 +1,31 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ]
+        },
+        "ayrshare": {
+            "command": "node",
+            "args": ["C:\\Users\\OEM\\.mcp\\ayrshare\\src\\index.js"]
+        },
+        "playwright": {
+            "command": "cmd",
+            "args": ["/c", "npx", "--yes", "@playwright/mcp@latest"]
+        },
+        "fetch": {
+            "command": "uvx",
+            "args": ["mcp-server-fetch"]
+        },
+        "sequential-thinking": {
+            "command": "cmd",
+            "args": ["/c", "npx", "--yes", "@modelcontextprotocol/server-sequential-thinking"]
+        },
+        "gemini-cli": {
+            "command": "cmd",
+            "args": ["/c", "npx", "--yes", "gemini-mcp-tool"]
+        }
+    }
+}

@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from "react";
-import AIInsightsDialog from "../AIInsightsDialog";
-import TextSelectionButton from "../TextSelectionButton";
+import AIInsightsDialog from "@/components/content/ai-insights/AIInsightsDialog";
+import TextSelectionButton from "@/components/content/common/TextSelectionButton";
 import { useTextSelection } from "@/hooks/useTextSelection";
 
 interface ContentInsightsManagerProps {

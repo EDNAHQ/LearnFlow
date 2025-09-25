@@ -1,6 +1,6 @@
 
 import React from "react";
-import ContentSection from "../ContentSection";
+import ContentSection from "./common/ContentSection";
 
 interface TextModeDisplayProps {
   title?: string;

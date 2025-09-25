@@ -1,5 +1,5 @@
 
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 import { generateStepContent } from "./generateStepContent";
 import { supabase } from "@/integrations/supabase/client";
 

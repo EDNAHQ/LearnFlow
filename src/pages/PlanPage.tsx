@@ -8,6 +8,7 @@ import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
 import { usePlanPage } from "@/hooks/usePlanPage";
 import { useEffect } from "react";
+import { Sparkles } from "lucide-react";
 
 const PlanPage = () => {
   const {
@@ -45,10 +46,17 @@ const PlanPage = () => {
   }, [pathId]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-[#6654f5]/5 to-[#ca5a8b]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-gradient-to-br from-[#f2b347]/5 to-[#6654f5]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-gradient-to-br from-[#ca5a8b]/5 to-[#f2b347]/5 rounded-full blur-3xl" />
+      </div>
+
       <PlanPageHeader handleReset={handleReset} />
 
-      <div className="container max-w-3xl mx-auto py-10 px-4">
+      <div className="container max-w-4xl mx-auto py-10 px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -63,20 +71,20 @@ const PlanPage = () => {
             handleReset={handleReset}
             handleDeletePlan={handleDeletePlan}
           />
-          
+
           {loading ? (
             <PlanLoading />
           ) : authError ? (
             <PlanAuthError handleLogin={handleLogin} />
           ) : (
             <>
-              <PlanStepsList 
-                steps={steps} 
+              <PlanStepsList
+                steps={steps}
                 activeStep={activeStep}
                 setActiveStep={setActiveStep}
               />
-              
-              <PlanActionButtons 
+
+              <PlanActionButtons
                 handleReset={handleReset}
                 handleApprove={handleApprove}
               />

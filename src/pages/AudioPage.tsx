@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { MainNav } from "@/components/MainNav";
+import { MainNav } from "@/components/navigation";
 import { motion } from "framer-motion";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { AudioPageHeader } from "@/components/audio-page/AudioPageHeader";
