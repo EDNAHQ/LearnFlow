@@ -1,49 +1,43 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './hooks/auth';
+import { ContentModeProvider } from './hooks/content';
+import { LearningCommandCenter } from './components/learning-command-center';
+import { FloatingNewProjectButton } from './components/projects/FloatingNewProjectButton';
+import HomePage from './pages/HomePage';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import SignUpSuccess from './pages/SignUpSuccess';
+import ForgotPassword from './pages/ForgotPassword';
+import ProjectsPage from './pages/ProjectsPage';
+import PlanPage from './pages/PlanPage';
+import ContentPage from './pages/ContentPage';
+import SettingsPage from './pages/SettingsPage';
 
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ContentModeProvider } from "@/hooks/useContentMode";
-import Index from "./pages/Index";
-import HomePage from "./pages/HomePage";
-import PlanPage from "./pages/PlanPage";
-import ContentPage from "./pages/ContentPage";
-import AuthPage from "./pages/AuthPage";
-import NotFound from "./pages/NotFound";
-import ProjectsPage from "./pages/ProjectsPage";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+export default function App() {
+  console.log('App rendering with real HomePage...');
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
+  return (
+    <BrowserRouter>
       <AuthProvider>
         <ContentModeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <BrowserRouter>
-              <div className="w-full min-w-full h-full">
-                <Routes>
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/" element={<Navigate to="/home" />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/plan" element={<ProtectedRoute><PlanPage /></ProtectedRoute>} />
-                  {/* Updated content routes with parameters */}
-                  <Route path="/content/:pathId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
-                  <Route path="/content/:pathId/step/:stepId" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
-                  <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-            </BrowserRouter>
-          </TooltipProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/signup-success" element={<SignUpSuccess />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth" element={<Navigate to="/sign-in" replace />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/plan" element={<PlanPage />} />
+            <Route path="/content/:pathId" element={<ContentPage />} />
+            <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+          <LearningCommandCenter />
+          <FloatingNewProjectButton />
         </ContentModeProvider>
       </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+    </BrowserRouter>
+  );
+}

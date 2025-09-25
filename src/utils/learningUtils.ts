@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 
 interface LearningPathData {
   id: string;

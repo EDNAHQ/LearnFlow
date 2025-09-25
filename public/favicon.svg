@@ -1,25 +1,14 @@
-
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
-  <!-- Background Circle -->
-  <circle cx="50" cy="50" r="48" fill="#1A1A1A" />
-  
-  <!-- Brain/Flow concept using brand colors -->
-  <path d="M50 25 C65 25, 75 40, 75 50 C75 65, 65 75, 50 75 C35 75, 25 65, 25 50 C25 40, 35 25, 50 25" 
-        fill="none" stroke="#6D42EF" stroke-width="4" stroke-linecap="round" />
-  
-  <!-- Connections representing learning paths -->
-  <path d="M35 45 L65 45" stroke="#E84393" stroke-width="3" stroke-linecap="round" />
-  <path d="M35 55 L65 55" stroke="#E84393" stroke-width="3" stroke-linecap="round" />
-  
-  <!-- Central node representing knowledge -->
-  <circle cx="50" cy="50" r="7" fill="#F5B623" />
-  
-  <!-- Smaller knowledge nodes -->
-  <circle cx="35" cy="45" r="4" fill="#E84393" />
-  <circle cx="65" cy="45" r="4" fill="#E84393" />
-  <circle cx="35" cy="55" r="4" fill="#E84393" />
-  <circle cx="65" cy="55" r="4" fill="#E84393" />
-  
-  <!-- Light effect -->
-  <circle cx="47" cy="47" r="2" fill="white" opacity="0.6" />
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6654f5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ca5a8b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f2b347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <circle cx="50" cy="50" r="48" fill="#0b0c18" />
+
+  <text x="50" y="72" font-family="Poppins, sans-serif" font-size="70" font-weight="700"
+        text-anchor="middle" fill="url(#brandGradient)">L</text>
 </svg>

@@ -53,7 +53,7 @@ export const getMarkdownComponents = (
     ol: ({ node, ...props }) => (
       <ol className="my-5 pl-6 space-y-3 list-decimal" {...props} />
     ),
-    li: ({ node, children, ...props }) => {
+    li: ({ node, children, ordered, ...props }) => {
       // Also process list items for concepts
       if (topic && concepts && concepts.length > 0 && onConceptClick && typeof children === 'string') {
         const withConcepts = processTextWithConcepts(children, concepts, onConceptClick);
@@ -83,6 +83,16 @@ export const getMarkdownComponents = (
           >
             {String(children).replace(/\n$/, "")}
           </SyntaxHighlighter>
+          <div className="mt-2 flex items-center justify-end">
+            <a
+              href="https://mentor.enterprisedna.co/code-explainer"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs text-brand-purple hover:text-brand-pink transition-colors underline"
+            >
+              Review this code on Mentor
+            </a>
+          </div>
         </div>
       ) : (
         <code className="px-1.5 py-0.5 rounded bg-gray-100 font-mono text-brand-pink text-sm" {...props}>

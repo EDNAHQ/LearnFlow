@@ -9,86 +9,116 @@ export const useRealtimeUpdates = (
   setGeneratedSteps: React.Dispatch<React.SetStateAction<number>>,
   setGeneratingContent: React.Dispatch<React.SetStateAction<boolean>>,
   generatedSteps: number,
-  fetchLearningSteps: Function
+  fetchLearningSteps: Function,
+  totalSteps?: number
 ) => {
   // Track last update time to throttle updates
   const lastUpdateRef = useRef<number>(Date.now());
-  const updateThrottleMs = 500; // Further reduced throttle time for more frequent updates
-  
-  // Track subscription status
-  const subscriptionActive = useRef<boolean>(false);
+  const updateThrottleMs = 500; // Faster updates to show progress
 
+  // Track subscription status and intervals
+  const subscriptionActive = useRef<boolean>(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const generationCompleteRef = useRef<boolean>(false);
+
+  // Store the fetch function in a ref to avoid dependency issues
+  const fetchRef = useRef(fetchLearningSteps);
+  fetchRef.current = fetchLearningSteps;
+
+  // Check if generation is complete and stop polling if needed
   useEffect(() => {
     if (!pathId) return;
-    
-    // Always fetch steps immediately when hook mounts or pathId changes
-    fetchLearningSteps();
-    
+
+    // Only mark as complete when ALL steps have content
+    if (totalSteps && totalSteps > 0 && generatedSteps >= totalSteps) {
+      generationCompleteRef.current = true;
+
+      // Clear any existing poll interval
+      if (pollIntervalRef.current) {
+        console.log("All content generation complete, stopping polling");
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+  }, [generatedSteps, pathId, totalSteps]);
+
+  useEffect(() => {
+    if (!pathId || generationCompleteRef.current) return;
+
     // Set up subscription to track generation progress
     try {
       const channel = supabase.channel(`steps-${pathId}`);
-      
+
       const subscription = channel
-        .on('postgres_changes', 
-          { 
-            event: 'UPDATE', 
-            schema: 'public', 
+        .on('postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
             table: 'learning_steps',
             filter: `path_id=eq.${pathId}`
-          }, 
+          },
           (payload) => {
             console.log('Step updated (realtime):', payload.new.id);
-            
-            // Throttle updates to prevent excessive re-renders but keep it fast enough to show progress
+
+            // Throttle updates to prevent excessive re-renders
             const now = Date.now();
             if (now - lastUpdateRef.current < updateThrottleMs) {
-              return; // Skip this update if too soon after the last one
+              return;
             }
             lastUpdateRef.current = now;
-            
-            // Force a refresh of all steps to ensure we have the latest data
-            fetchLearningSteps();
+
+            fetchRef.current();
           }
         )
         .subscribe((status) => {
           console.log(`Realtime subscription status: ${status}`);
           subscriptionActive.current = status === 'SUBSCRIBED';
-          
-          // If subscription failed, fall back to polling
-          if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-            console.log('Subscription failed, falling back to polling');
-            subscriptionActive.current = false;
-            
-            // Set up polling as fallback - use a ref to track the interval
-            const pollInterval = setInterval(() => {
-              fetchLearningSteps();
-            }, 2000); // Poll every 2 seconds
-            
-            return () => clearInterval(pollInterval);
-          }
         });
-        
+
       console.log("Subscription to learning steps updates established");
-        
-      // Set up polling even with active subscription as a backup
-      const backupPollInterval = setInterval(() => {
-        fetchLearningSteps();
-      }, 5000); // Backup poll every 5 seconds
-        
+
+      // Aggressive polling while content is generating
+      pollIntervalRef.current = setInterval(() => {
+        if (!generationCompleteRef.current) {
+          fetchRef.current();
+        } else {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+        }
+      }, 2000); // Poll every 2 seconds for fast updates
+
       return () => {
         channel.unsubscribe();
         subscriptionActive.current = false;
-        clearInterval(backupPollInterval);
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
       };
     } catch (error) {
       console.error("Error setting up realtime subscription:", error);
-      
-      // If subscription setup fails, fall back to aggressive polling
-      const pollInterval = setInterval(() => {
-        fetchLearningSteps();
-      }, 2000);
-      
-      return () => clearInterval(pollInterval);
+
+      if (!generationCompleteRef.current) {
+        pollIntervalRef.current = setInterval(() => {
+          if (!generationCompleteRef.current) {
+            fetchRef.current();
+          } else {
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+          }
+        }, 2000);
+      }
+
+      return () => {
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+      };
     }
-  }, [pathId, fetchLearningSteps, updateThrottleMs]);
+  }, [pathId]);
 };

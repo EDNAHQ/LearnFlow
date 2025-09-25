@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useTextToSpeech } from '@/hooks/audio';
 import { toast } from 'sonner';
 
 export const useAudioGeneration = () => {

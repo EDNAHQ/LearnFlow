@@ -26,7 +26,7 @@ export const ScriptGenerationSection: React.FC<ScriptGenerationSectionProps> = (
       <Button
         onClick={handleGenerateScript}
         disabled={isGeneratingScript || isLoading || steps.length === 0}
-        className="bg-purple-700 hover:bg-purple-600 text-white"
+        variant="brand"
       >
         {isGeneratingScript ? (
           <>

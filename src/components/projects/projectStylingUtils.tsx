@@ -1,53 +1,51 @@
 
-import { Book, Code, FileCode, Beaker, GraduationCap, BookOpen, CheckCircle } from "lucide-react";
 import { ProjectCategoryStyling, LearningProject, ProjectStatus } from "./types";
 
-// Project topic categories with associated icons and background colors
+// Project topic categories with associated colors
 export const projectCategories: Record<string, ProjectCategoryStyling> = {
-  "machine learning": { 
-    icon: <Beaker className="h-4 w-4" />, 
-    color: "from-brand-purple/20 to-brand-pink/20", 
-    border: "border-brand-purple" 
+  "machine learning": {
+    color: "from-brand-purple/20 to-brand-pink/20",
+    border: "border-brand-purple"
   },
-  "javascript": { 
-    icon: <Code className="h-4 w-4" />, 
-    color: "from-brand-gold/20 to-brand-purple/5", 
-    border: "border-brand-gold" 
+  "ai": {
+    color: "from-brand-purple/20 to-brand-pink/20",
+    border: "border-brand-purple"
   },
-  "python": { 
-    icon: <FileCode className="h-4 w-4" />, 
-    color: "from-brand-purple/20 to-brand-gold/10", 
-    border: "border-brand-purple" 
+  "javascript": {
+    color: "from-brand-gold/20 to-brand-purple/5",
+    border: "border-brand-gold"
   },
-  "history": { 
-    icon: <BookOpen className="h-4 w-4" />, 
-    color: "from-brand-pink/20 to-brand-purple/10", 
-    border: "border-brand-pink" 
+  "react": {
+    color: "from-brand-purple/20 to-brand-pink/10",
+    border: "border-brand-purple"
   },
-  "vba": { 
-    icon: <Code className="h-4 w-4" />, 
-    color: "from-brand-gold/20 to-brand-pink/10", 
-    border: "border-brand-gold" 
+  "typescript": {
+    color: "from-brand-purple/20 to-brand-gold/10",
+    border: "border-brand-purple"
   },
-  "api": { 
-    icon: <FileCode className="h-4 w-4" />, 
-    color: "from-brand-pink/20 to-brand-gold/10", 
-    border: "border-brand-pink" 
+  "python": {
+    color: "from-brand-purple/20 to-brand-gold/10",
+    border: "border-brand-purple"
   },
-  "open source": { 
-    icon: <Book className="h-4 w-4" />, 
-    color: "from-brand-purple/30 to-brand-pink/10", 
-    border: "border-brand-purple" 
+  "data": {
+    color: "from-brand-pink/20 to-brand-purple/10",
+    border: "border-brand-pink"
   },
-  "github": { 
-    icon: <Code className="h-4 w-4" />, 
-    color: "from-brand-pink/20 to-brand-purple/10", 
-    border: "border-brand-pink" 
+  "design": {
+    color: "from-brand-pink/20 to-brand-gold/10",
+    border: "border-brand-pink"
   },
-  "website": { 
-    icon: <GraduationCap className="h-4 w-4" />, 
-    color: "from-brand-gold/20 to-brand-purple/10", 
-    border: "border-brand-gold" 
+  "api": {
+    color: "from-brand-pink/20 to-brand-gold/10",
+    border: "border-brand-pink"
+  },
+  "web": {
+    color: "from-brand-gold/20 to-brand-purple/10",
+    border: "border-brand-gold"
+  },
+  "full-stack": {
+    color: "from-brand-purple/30 to-brand-pink/10",
+    border: "border-brand-purple"
   },
 };
 
@@ -62,10 +60,9 @@ export const getProjectStyling = (topic: string): ProjectCategoryStyling => {
   }
   
   // Default styling if no match
-  return { 
-    icon: <Book className="h-4 w-4" />, 
-    color: "from-brand-purple/20 to-brand-pink/10", 
-    border: "border-brand-purple" 
+  return {
+    color: "from-brand-purple/20 to-brand-pink/10",
+    border: "border-brand-purple"
   };
 };
 
@@ -79,21 +76,21 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const getProjectStatusLabel = (project: LearningProject): ProjectStatus => {
-  if (project.is_completed) return { 
-    label: 'Completed', 
-    bgColor: 'bg-brand-purple/20 text-brand-purple border border-brand-purple/30',
-    icon: <CheckCircle className="h-3.5 w-3.5 mr-1" />
-  };
-  
-  if (project.is_approved) return { 
-    label: 'In Progress', 
-    bgColor: 'bg-brand-pink/20 text-brand-pink border border-brand-pink/30',
+  if (project.is_completed) return {
+    label: 'Completed',
+    bgColor: 'bg-gradient-to-r from-[#6654f5]/10 to-[#ca5a8b]/10 text-[#6654f5] border border-[#6654f5]/20 font-medium',
     icon: null
   };
-  
-  return { 
-    label: 'Plan Created', 
-    bgColor: 'bg-brand-gold/20 text-brand-gold border border-brand-gold/30',
+
+  if (project.is_approved) return {
+    label: 'In Progress',
+    bgColor: 'bg-gradient-to-r from-[#ca5a8b]/10 to-[#f2b347]/10 text-[#ca5a8b] border border-[#ca5a8b]/20 font-medium',
+    icon: null
+  };
+
+  return {
+    label: 'Plan Created',
+    bgColor: 'bg-gradient-to-r from-[#f2b347]/10 to-[#6654f5]/10 text-[#f2b347] border border-[#f2b347]/20 font-medium',
     icon: null
   };
 };

@@ -2,8 +2,8 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { AuthForm } from "@/components/AuthForm";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthForm } from "@/components/auth";
+import { useAuth } from "@/hooks/auth";
 import { Brain } from "lucide-react";
 
 const AuthPage = () => {

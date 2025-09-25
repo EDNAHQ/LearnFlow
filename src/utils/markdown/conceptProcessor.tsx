@@ -1,6 +1,6 @@
 
 import React from "react";
-import ConceptLink from "@/components/content/ConceptLink";
+import ConceptLink from "@/components/content/concepts/ConceptLink";
 import { escapeRegExp } from "./textProcessors";
 
 // Process text with concept links

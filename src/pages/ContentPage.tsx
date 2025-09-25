@@ -2,21 +2,22 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { useContentMode } from "@/hooks/useContentMode";
-import { useContentNavigation } from "@/hooks/useContentNavigation";
-import ContentDisplay from "@/components/ContentDisplay";
+import { useContentMode } from "@/hooks/content";
+import { useContentNavigation } from "@/hooks/navigation";
+import ContentDisplay from "@/components/content/common/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
-import ContentProgress from "@/components/content/ContentProgress";
-import ContentNavigation from "@/components/content/ContentNavigation";
-import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading";
+import ContentNavigation from "@/components/content/navigation/ContentNavigation";
+import KnowledgeNuggetLoading from "@/components/content/loading/KnowledgeNuggetLoading";
 import ContentError from "@/components/content/ContentError";
-import ContentPageLayout from "@/components/content/ContentPageLayout";
+import ContentPageLayout from "@/components/content/layout/ContentPageLayout";
+import ContentMiniMap from "@/components/content/navigation/ContentMiniMap";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+import DeepDiveSection from "@/components/content/deep-dive/DeepDiveSection";
 
 const ContentPage = () => {
   const {
     pathId,
-    stepId
+    stepIndex
   } = useParams();
   const navigate = useNavigate();
   const {
@@ -40,7 +41,6 @@ const ContentPage = () => {
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [showLoadingPage, setShowLoadingPage] = useState(true);
 
   // Use the custom hook directly
   const {
@@ -54,41 +54,12 @@ const ContentPage = () => {
     setMode("text");
   }, [setMode]);
 
-  // Add a timeout to hide loading page after certain period even if generation is still in progress
-  useEffect(() => {
-    if (showLoadingPage && (!isLoading && steps.length > 0)) {
-      // If we have steps but generation is still happening, give it a bit of time then show content
-      const timer = setTimeout(() => {
-        if (generatedSteps > 0) {
-          console.log("Showing content page after timeout with partial generation");
-          setShowLoadingPage(false);
-        }
-      }, 10000); // Give it 10 seconds to start showing some progress
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showLoadingPage, isLoading, steps.length, generatedSteps]);
-
   // Handle generation complete redirect - only redirect if we're not on a step page
   useEffect(() => {
-    // Check if loading is completely done OR if we have enough steps generated
-    const generationComplete = (!isLoading && !generatingContent) || 
-                              (generatedSteps > 0 && generatedSteps === steps.length);
-    
-    // Only redirect if we're not already on a step page and generation is complete
-    if (!hasRedirected && generationComplete && pathId && steps.length > 0 && !stepId) {
-      console.log("Content generation complete. Navigating to first content page...");
+    const generationComplete = (!isLoading && !generatingContent) || (generatedSteps === steps.length && steps.length > 0);
+    if (!hasRedirected && generationComplete && pathId && steps.length > 0 && !stepIndex) {
       setHasRedirected(true);
       navigate(`/content/${pathId}/step/0`);
-    }
-    
-    // If we have at least one step generated, we can start showing content
-    if (showLoadingPage && generatedSteps > 0 && steps.length > 0) {
-      const initialGenerationTimeout = setTimeout(() => {
-        setShowLoadingPage(false);
-      }, 3000); // Give it 3 seconds after the first step is generated
-      
-      return () => clearTimeout(initialGenerationTimeout);
     }
   }, [
     generatingContent, 
@@ -97,9 +68,8 @@ const ContentPage = () => {
     pathId, 
     navigate, 
     hasRedirected, 
-    stepId, 
-    isLoading,
-    showLoadingPage
+    stepIndex, 
+    isLoading
   ]);
 
   // Handle question clicks for insights
@@ -115,8 +85,8 @@ const ContentPage = () => {
     window.dispatchEvent(event);
   };
 
-  // Show loading screen ONLY when no stepId is present OR we're in initial loading state
-  if ((isLoading || (generatingContent && showLoadingPage)) && !stepId) {
+  // Show loading screen ONLY on the path-level route (no stepIndex)
+  if ((isLoading || generatingContent) && !stepIndex) {
     return <KnowledgeNuggetLoading 
              topic={topic} 
              goToProjects={goToProjects} 
@@ -137,55 +107,77 @@ const ContentPage = () => {
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
   
   return (
-    <ContentPageLayout 
-      onGoToProjects={goToProjects} 
+    <ContentPageLayout
+      onGoToProjects={goToProjects}
       topRef={topRef}
       topic={topic}
-      currentContent={currentStepData?.detailed_content || safeContent}
-      currentTitle={currentStepData?.title}
+      miniMapSidebar={
+        steps.length > 0 ? (
+          <ContentMiniMap
+            steps={steps.map(step => ({
+              id: step.id,
+              title: step.title,
+              order_index: step.order_index || 0
+            }))}
+            currentStepIndex={currentStep}
+            onNavigateToStep={navigateToStep}
+          />
+        ) : undefined
+      }
     >
-      <ContentHeader 
-        onBack={handleBack} 
-        onHome={goToProjects} 
-        generatingContent={generatingContent} 
-        generatedSteps={generatedSteps} 
+      <ContentHeader
+        onHome={goToProjects}
+        generatingContent={generatingContent}
+        generatedSteps={generatedSteps}
         totalSteps={steps.length} 
       />
 
-      <div className="container max-w-[860px] mx-auto my-0 py-[30px]">
-        <motion.div 
-          initial={{opacity: 0}} 
-          animate={{opacity: 1}} 
-          transition={{duration: 0.2, ease: "easeOut"}} 
-          className="w-full"
+      <div className="relative w-full my-0 py-[40px] px-2 lg:px-6">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#6654f5]/5 to-[#ca5a8b]/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-[#f2b347]/5 to-[#6654f5]/5 rounded-full blur-3xl" />
+        </div>
+
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.5, ease: "easeOut"}}
+          className="relative w-full"
         >
-          <div className="flex justify-between items-center mb-3 w-full">
-            <ContentProgress 
-              topic={topic} 
-              currentStep={currentStep} 
-              totalSteps={steps.length} 
-              steps={steps.map(step => ({ id: step.id, title: step.title }))}
-              onNavigateToStep={navigateToStep}
-            />
-          </div>
-          
-          <h1 className="text-3xl font-bold mb-4 py-[10px] text-brand-purple">
-            {currentStepData?.title || "Loading..."}
-          </h1>
+          {/* Main Content Area with card styling */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mb-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
+          >
+            <div className="max-w-[1400px] mx-auto">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent mb-8">
+                {currentStepData?.title || "Loading..."}
+              </h1>
+              <ContentDisplay
+                content={safeContent}
+                index={currentStep}
+                detailedContent={currentStepData?.detailed_content}
+                pathId={pathId}
+                topic={topic}
+                title={currentStepData?.title || ""}
+                stepId={currentStepData?.id}
+              />
+            </div>
+          </motion.div>
 
-          <div className="mb-4 w-full">
-            <ContentDisplay 
-              content={safeContent} 
-              index={currentStep} 
-              detailedContent={currentStepData?.detailed_content} 
-              pathId={pathId} 
+          {/* Deep Dive Related Topics Section */}
+          <div className="max-w-[1400px] mx-auto">
+            <DeepDiveSection
               topic={topic}
-              title={currentStepData?.title || ""} 
-              stepId={currentStepData?.id}
+              content={currentStepData?.detailed_content || safeContent}
+              title={currentStepData?.title}
             />
           </div>
 
-          <div>
+          <div className="max-w-[1400px] mx-auto">
             <ContentNavigation currentStep={currentStep} totalSteps={steps.length} onPrevious={handleBack} onComplete={handleComplete} isLastStep={isLastStep} isSubmitting={isSubmitting} projectCompleted={projectCompleted} />
           </div>
         </motion.div>

@@ -10,46 +10,48 @@ const corsHeaders = {
 // Generate SVG image with LearnFlow branding
 function generateSVGImage() {
   // Brand colors
-  const deepPurple = "#6D42EF";
-  const vibrantPink = "#E84393"; 
-  const warmGold = "#F5B623";
-  const background = "#1A1A1A"; // Near-black background
-  
+  const brandPurple = "#6654f5";
+  const brandPink = "#ca5a8b";
+  const brandGold = "#f2b347";
+  const brandBlack = "#0b0c18";
+
   // SVG image with branding elements
   return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-    <!-- Background -->
-    <rect width="1200" height="630" fill="${background}" />
-    
-    <!-- Background pattern - dots -->
-    <g fill="${deepPurple}" opacity="0.15">
-      ${Array(30).fill(0).map((_, i) => 
-        Array(15).fill(0).map((_, j) => 
-          `<circle cx="${i * 40 + 20}" cy="${j * 40 + 20}" r="2" />`
-        ).join('')
-      ).join('')}
-    </g>
-    
-    <!-- Gradient circle -->
-    <circle cx="840" cy="200" r="300" fill="url(#gradientPink)" />
-    
-    <!-- Stylized "L" for LearnFlow -->
-    <path d="M120,180 L120,450 L280,450" stroke="${deepPurple}" stroke-width="30" fill="none" />
-    
-    <!-- Decorative element -->
-    <circle cx="280" cy="240" r="80" fill="${warmGold}" opacity="0.7" />
-    
-    <!-- Text content -->
-    <text x="350" y="280" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF">LearnFlow</text>
-    <text x="350" y="340" font-family="Arial, sans-serif" font-size="32" fill="${vibrantPink}">AI-Powered Learning Platform</text>
-    
-    <!-- Definitions -->
     <defs>
-      <radialGradient id="gradientPink" cx="0.5" cy="0.5" r="0.5">
-        <stop offset="0%" stop-color="${vibrantPink}" stop-opacity="0.2" />
-        <stop offset="50%" stop-color="${vibrantPink}" stop-opacity="0.07" />
-        <stop offset="100%" stop-color="${vibrantPink}" stop-opacity="0" />
-      </radialGradient>
+      <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${brandPurple}" />
+        <stop offset="50%" stop-color="${brandPink}" />
+        <stop offset="100%" stop-color="${brandGold}" />
+      </linearGradient>
+      <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${brandPurple}" stop-opacity="0.15" />
+        <stop offset="50%" stop-color="${brandPink}" stop-opacity="0.1" />
+        <stop offset="100%" stop-color="${brandGold}" stop-opacity="0.05" />
+      </linearGradient>
     </defs>
+
+    <!-- Background -->
+    <rect width="1200" height="630" fill="${brandBlack}" />
+    <rect width="1200" height="630" fill="url(#bgGradient)" />
+
+    <!-- Large branded "L" -->
+    <text x="100" y="520" font-family="Poppins, Arial, sans-serif" font-size="480" font-weight="700"
+          fill="url(#brandGradient)" opacity="0.2">L</text>
+
+    <!-- Main content -->
+    <g>
+      <text x="100" y="240" font-family="Poppins, Arial, sans-serif" font-size="92" font-weight="700"
+            fill="url(#brandGradient)">LearnFlow</text>
+      <text x="100" y="310" font-family="Poppins, Arial, sans-serif" font-size="38" font-weight="400"
+            fill="#FFFFFF" opacity="0.9">Personalized Learning Paths</text>
+      <text x="100" y="380" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="300"
+            fill="#FFFFFF" opacity="0.7">Master any topic at your own pace</text>
+    </g>
+
+    <!-- Decorative gradient orbs -->
+    <circle cx="950" cy="150" r="120" fill="${brandPurple}" opacity="0.3" />
+    <circle cx="1050" cy="480" r="80" fill="${brandPink}" opacity="0.25" />
+    <circle cx="850" cy="520" r="60" fill="${brandGold}" opacity="0.2" />
   </svg>`;
 }
 

@@ -11,9 +11,9 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { useDeepDiveTopics } from "@/hooks/useDeepDiveTopics";
-import DeepDiveTopicsList from "./DeepDiveTopicsList";
-import DeepDiveContentDialog from "./DeepDiveContentDialog";
+import { useDeepDiveTopics } from "@/hooks/content";
+import DeepDiveTopicsList from "./deep-dive/DeepDiveTopicsList";
+import DeepDiveContentDialog from "./deep-dive/DeepDiveContentDialog";
 
 interface RelatedTopicsSidebarProps {
   topic: string | null;

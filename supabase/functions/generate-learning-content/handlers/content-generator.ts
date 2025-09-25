@@ -78,7 +78,7 @@ export async function generateStepContent(
       throw new Error("Generated content appears to be truncated");
     }
 
-    // Save generated content to the database
+    // Save generated content to the database and rely on realtime to update clients
     await saveContentToSupabase(stepId, generatedContent, supabaseUrl, supabaseServiceKey);
     
     console.log(`Successfully saved content for step ${stepId}`);
@@ -89,8 +89,9 @@ export async function generateStepContent(
     );
   } catch (error) {
     console.error('Error in content generation:', error);
+    const message = error && (error as any).message ? (error as any).message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: `Content generation failed: ${error.message}` }),
+      JSON.stringify({ error: `Content generation failed: ${message}` }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

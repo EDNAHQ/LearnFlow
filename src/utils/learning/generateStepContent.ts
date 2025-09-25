@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 
 // Generate detailed content for a learning step using the edge function
 export const generateStepContent = async (step: Step, topic: string, silent = false): Promise<string> => {

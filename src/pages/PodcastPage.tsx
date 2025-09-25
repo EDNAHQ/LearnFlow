@@ -1,5 +1,5 @@
 
-import { MainNav } from "@/components/MainNav";
+import { MainNav } from "@/components/navigation";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

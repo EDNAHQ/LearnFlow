@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import { MainNav } from "@/components/MainNav";
+import { MainNav } from "@/components/navigation";
 import { motion } from "framer-motion";
-import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { useTextToSpeech } from "@/hooks/audio";
 import { AudioPageHeader } from "@/components/audio-page/AudioPageHeader";
 import { AudioCard } from "@/components/audio-page/AudioCard";
 

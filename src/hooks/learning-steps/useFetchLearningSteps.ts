@@ -42,17 +42,18 @@ export const useFetchLearningSteps = () => {
             : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
         }));
         
-        // Always update steps to ensure freshness
-        setSteps(processedData);
-        
-        // Count steps with detailed content
+        // Count steps with detailed content first
         const stepsWithDetailedContent = countGeneratedSteps(processedData);
-        
-        // Only update state if count has changed
+
+        // Only update state if count has changed to prevent unnecessary re-renders
         if (stepsWithDetailedContent !== generatedSteps) {
+          setSteps(processedData);
           setGeneratedSteps(stepsWithDetailedContent);
           setGeneratingContent(stepsWithDetailedContent < processedData.length);
           console.log(`Content generation status: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
+        } else {
+          // Still update steps but don't log or trigger other updates
+          setSteps(processedData);
         }
       } else {
         console.log("No learning steps found for path:", pathId);

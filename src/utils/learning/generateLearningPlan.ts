@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Step } from "@/components/LearningStep";
+import { Step } from "@/components/learning/LearningStep";
 import { startBackgroundContentGeneration } from "./backgroundContentGeneration";
 
 // Generate a learning plan for a given topic
