@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import TextToSpeechPlayer from '@/components/audio/TextToSpeechPlayer';
 import InteractiveVoiceOverlay from '@/components/audio/InteractiveVoiceOverlay';
-import { Info, Headphones, MessageCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { AI_STYLES } from '@/components/ai';
+import { cn } from '@/lib/utils';
 
 interface AudioSummaryPlayerProps {
   pathId: string;
@@ -37,53 +38,65 @@ const AudioSummaryPlayer: React.FC<AudioSummaryPlayerProps> = ({
 
   return (
     <>
-      <Card className="bg-[#1A1A1A] border-gray-700 text-white overflow-hidden">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <Headphones className="w-5 h-5 text-[#6D42EF]" />
-            Interactive Audio Learning
-          </CardTitle>
-          <div className="text-xs text-gray-400 flex items-center">
-            <Info className="w-3 h-3 mr-1" /> 
-            <span>AI-generated audio content. Voices are not from real humans.</span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Text-to-Speech Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-              <Headphones className="w-4 h-4" />
-              Listen to Content
-            </div>
-            <TextToSpeechPlayer
-              text={summary}
-              title={audioTitle}
-              pathId={pathId}
-            />
-          </div>
-
-          {/* Interactive Voice Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-              <MessageCircle className="w-4 h-4" />
-              Interactive AI Conversation
-            </div>
-            <div 
-              onClick={handleVoiceMode}
-              className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-[#6D42EF] to-[#E84393] p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/20"
-            >
-              <div className="relative z-10 text-center">
-                <MessageCircle className="w-8 h-8 mx-auto mb-3 text-white" />
-                <h3 className="text-lg font-semibold text-white mb-2">Voice Assistant</h3>
-                <p className="text-purple-100 text-sm">
-                  Have a conversation about {topic}
-                </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <Card className="bg-white border border-gray-200 overflow-hidden">
+          <CardHeader className="pb-4">
+            <h3 className={cn("text-xl font-semibold mb-1", AI_STYLES.gradients.text)}>
+              Interactive Audio Learning
+            </h3>
+            <p className="text-xs text-gray-500">
+              AI-generated audio content for enhanced learning
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Text-to-Speech Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-gray-800">
+                Listen to Content
+              </h4>
+              <div className="p-4 rounded-xl bg-gradient-to-r from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 border border-gray-200">
+                <TextToSpeechPlayer
+                  text={summary}
+                  title={audioTitle}
+                  pathId={pathId}
+                />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+
+            {/* Divider */}
+            <div className="relative h-px bg-gray-100">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-primary/20 to-transparent" />
+            </div>
+
+            {/* Interactive Voice Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-gray-800">
+                Interactive Conversation
+              </h4>
+              <motion.div
+                onClick={handleVoiceMode}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="group cursor-pointer rounded-xl p-6 bg-gradient-to-br from-brand-primary/5 to-brand-accent/5 border border-gray-200 hover:border-brand-primary/30 transition-all duration-300 hover:shadow-md"
+              >
+                <div className="text-center">
+                  <h5 className={cn("text-lg font-semibold mb-2", AI_STYLES.gradients.text)}>
+                    Voice Assistant
+                  </h5>
+                  <p className="text-sm text-gray-600">
+                    Have a conversation about {topic}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Interactive Voice Overlay */}
       <InteractiveVoiceOverlay

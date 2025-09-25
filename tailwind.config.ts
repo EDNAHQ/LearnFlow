@@ -53,9 +53,16 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "brand-purple": "#6D42EF",
-        "brand-pink": "#E84393",  // Adding brand-pink color
-        "brand-gold": "#F5B623",  // This was already defined in your CSS variables but not in Tailwind config
+        "brand-primary": "var(--brand-primary)",
+        "brand-accent": "var(--brand-accent)",
+        "brand-highlight": "var(--brand-highlight)",
+        "brand-purple": "#6654f5",
+        "brand-pink": "#ca5a8b",
+        "brand-gold": "#f2b347",
+        "ai-primary": "var(--ai-primary)",
+        "ai-accent": "var(--ai-accent)",
+        "ai-surface": "var(--ai-surface)",
+        "ai-border": "var(--ai-border)"
       },
       borderRadius: {
         lg: "var(--radius)",

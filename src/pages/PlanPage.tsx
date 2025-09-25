@@ -6,7 +6,7 @@ import PlanLoading from "@/components/plan/PlanLoading";
 import PlanAuthError from "@/components/plan/PlanAuthError";
 import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
-import { usePlanPage } from "@/hooks/usePlanPage";
+import { usePlanPage } from "@/hooks/projects";
 import { useEffect } from "react";
 import { Sparkles } from "lucide-react";
 

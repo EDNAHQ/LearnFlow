@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo, startTransition, useDeferredValue } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation";
 import ProjectCard from "@/components/projects/ProjectCard";
 import EmptyProjectsState from "@/components/projects/EmptyProjectsState";
 import ProjectsLoading from "@/components/projects/ProjectsLoading";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects } from "@/hooks/projects";
 import type { LearningProject } from "@/components/projects/types";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 import { useLearningCommandStore } from "@/store/learningCommandStore";
 // Icons removed for cleaner design
 
@@ -52,6 +52,7 @@ const ProjectsPage = () => {
   const { projects, loading, isDeleting, handleDeleteProject } = useProjects();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const deferredSearch = useDeferredValue(searchQuery);
 
   // Use demo projects if not logged in
   const displayProjects = user ? projects : demoProjects;
@@ -62,21 +63,23 @@ const ProjectsPage = () => {
     openWidget();
   };
 
-  // Filter projects based on search and filter
-  const filteredProjects = (displayProjects as Array<LearningProject & { title?: string; description?: string }>).filter(project => {
-    if (!project) return false;
+  // Filter projects based on search and filter (memoized for snappy UI)
+  const filteredProjects = useMemo(() => {
+    const list = displayProjects as Array<LearningProject & { title?: string; description?: string }>;
+    const searchLower = deferredSearch.toLowerCase();
+    return list.filter(project => {
+      if (!project) return false;
+      const matchesSearch =
+        (project.title && (project.title as string).toLowerCase().includes(searchLower)) ||
+        (project.topic && project.topic.toLowerCase().includes(searchLower)) ||
+        (project.description && (project.description as string).toLowerCase().includes(searchLower));
 
-    const searchLower = searchQuery.toLowerCase();
-    const matchesSearch =
-      (project.title && (project.title as string).toLowerCase().includes(searchLower)) ||
-      (project.topic && project.topic.toLowerCase().includes(searchLower)) ||
-      (project.description && (project.description as string).toLowerCase().includes(searchLower));
-
-    if (activeFilter === "all") return matchesSearch;
-    if (activeFilter === "in-progress") return matchesSearch && !project.is_completed;
-    if (activeFilter === "completed") return matchesSearch && project.is_completed;
-    return matchesSearch;
-  });
+      if (activeFilter === "all") return matchesSearch;
+      if (activeFilter === "in-progress") return matchesSearch && !project.is_completed;
+      if (activeFilter === "completed") return matchesSearch && project.is_completed;
+      return matchesSearch;
+    });
+  }, [displayProjects, deferredSearch, activeFilter]);
 
   // Calculate stats
   const totalProjects = displayProjects.length;
@@ -208,7 +211,7 @@ const ProjectsPage = () => {
                 key={filter.id}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveFilter(filter.id)}
+                onClick={() => startTransition(() => setActiveFilter(filter.id))}
                 className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-300 ${
                   activeFilter === filter.id
                     ? 'brand-gradient text-white shadow-lg shadow-[#6654f5]/20'
@@ -243,25 +246,24 @@ const ProjectsPage = () => {
               className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-12"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.3 }}
+              layout
             >
-              <AnimatePresence>
-                {filteredProjects.map((project, index) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <ProjectCard
-                      project={project}
-                      onDeleteProject={user ? handleDeleteProject : () => {}}
-                      isDeleting={isDeleting}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {filteredProjects.map((project) => (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ProjectCard
+                    project={project}
+                    onDeleteProject={user ? handleDeleteProject : () => {}}
+                    isDeleting={isDeleting}
+                  />
+                </motion.div>
+              ))}
             </motion.div>
           </>
         )}

@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './hooks/useAuth';
-import { ContentModeProvider } from './hooks/useContentMode';
-import { LearningCommandCenter } from './components/LearningCommandCenter';
-import { FloatingNewProjectButton } from './components/FloatingNewProjectButton';
+import { AuthProvider } from './hooks/auth';
+import { ContentModeProvider } from './hooks/content';
+import { LearningCommandCenter } from './components/learning-command-center';
+import { FloatingNewProjectButton } from './components/projects/FloatingNewProjectButton';
 import HomePage from './pages/HomePage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';

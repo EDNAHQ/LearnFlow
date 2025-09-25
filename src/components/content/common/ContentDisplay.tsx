@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { useContentMode } from "@/hooks/useContentMode";
-import TextModeDisplay from "../TextModeDisplay";
-import SlideModeDisplay from "../SlideModeDisplay";
-import AudioModeDisplay from "../AudioModeDisplay";
-import { generateStepContent } from "@/utils/learning/generateStepContent";
+import React from "react";
+import { useContentMode } from "@/hooks/content";
+import TextModeDisplay from "../display-modes/TextModeDisplay";
+import SlideModeDisplay from "../display-modes/SlideModeDisplay";
+import AudioModeDisplay from "../display-modes/AudioModeDisplay";
 
 interface ContentDisplayProps {
   content?: string;
@@ -35,24 +33,6 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   stepId
 }) => {
   const { mode } = useContentMode();
-  const [enhancing, setEnhancing] = useState<boolean>(false);
-
-  // Per-step generation on first view: if no detailed_content, generate in-place
-  useEffect(() => {
-    const maybeGenerate = async () => {
-      if (!stepId || !pathId || !topic) return;
-      if (detailedContent) return;
-      try {
-        setEnhancing(true);
-        await generateStepContent({ id: stepId, title: title || "", description: content || "" }, topic, true);
-      } catch (e) {
-        console.error("Per-step generation failed:", e);
-      } finally {
-        setEnhancing(false);
-      }
-    };
-    maybeGenerate();
-  }, [stepId, detailedContent, pathId, topic, title, content]);
 
   // Handle question clicks for insights
   const handleQuestionClick = (question: string) => {

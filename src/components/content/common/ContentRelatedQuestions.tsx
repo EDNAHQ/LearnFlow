@@ -1,6 +1,8 @@
 import React from "react";
-import { HelpCircle } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AI_STYLES } from "@/components/ai";
+import { cn } from "@/lib/utils";
 
 interface ContentRelatedQuestionsProps {
   questions: string[];
@@ -8,22 +10,20 @@ interface ContentRelatedQuestionsProps {
   onQuestionClick: (question: string) => void;
 }
 
-const ContentRelatedQuestions = ({ 
-  questions, 
-  isLoading, 
-  onQuestionClick 
+const ContentRelatedQuestions = ({
+  questions,
+  isLoading,
+  onQuestionClick
 }: ContentRelatedQuestionsProps) => {
-  // Handle question click with logging
   const handleQuestionClick = (question: string) => {
     console.log("Question clicked in ContentRelatedQuestions:", question);
     onQuestionClick(question);
   };
-  
-  // Always display the section, even when empty
+
   return (
     <div className="mt-8 border-t border-gray-200 pt-6">
-      <h3 className="text-lg font-semibold text-brand-purple mb-4 flex items-center gap-2">
-        <HelpCircle className="h-5 w-5 text-[#E84393]" />
+      <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", AI_STYLES.text.primary)}>
+        <Sparkles className={cn("h-5 w-5", AI_STYLES.text.accent)} />
         Explore Further
       </h3>
       
@@ -44,7 +44,11 @@ const ContentRelatedQuestions = ({
             <li key={index}>
               <button
                 onClick={() => handleQuestionClick(question)}
-                className="text-[#6D42EF] hover:text-[#E84393] underline cursor-pointer text-left flex items-start group transition-colors"
+                className={cn(
+                  "underline cursor-pointer text-left flex items-start group transition-colors",
+                  AI_STYLES.text.primary,
+                  "hover:text-brand-accent"
+                )}
               >
                 <span className="inline-block w-6 text-gray-600 shrink-0">
                   {index + 1}.

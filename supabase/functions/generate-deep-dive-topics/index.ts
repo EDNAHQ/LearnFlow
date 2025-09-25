@@ -34,8 +34,8 @@ serve(async (req) => {
 
     // Create a prompt for generating deep dive topics
     const prompt = `
-You are an expert learning assistant. Based on the following content about "${topic}", 
-suggest 3-5 related topics for deep dives that would enhance understanding. 
+You are an expert learning assistant. Based on the following content about "${topic}",
+suggest exactly 6 related topics for deep dives that would enhance understanding.
 These should be specific concepts or ideas that are related to but extend beyond the main content.
 
 Content: ${content}
@@ -116,7 +116,25 @@ Respond in JSON format:
           id: crypto.randomUUID(),
           title: `History of ${topic}`,
           description: `The evolution and development of ${topic} over time.`,
+          similarity: 0.8
+        },
+        {
+          id: crypto.randomUUID(),
+          title: `Common ${topic} Patterns`,
+          description: `Frequently used patterns and approaches in ${topic}.`,
           similarity: 0.75
+        },
+        {
+          id: crypto.randomUUID(),
+          title: `${topic} Best Practices`,
+          description: `Industry standards and recommended approaches for ${topic}.`,
+          similarity: 0.7
+        },
+        {
+          id: crypto.randomUUID(),
+          title: `Future of ${topic}`,
+          description: `Emerging trends and future developments in ${topic}.`,
+          similarity: 0.65
         }
       ];
       

@@ -1,0 +1,26 @@
+
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface ContentLoadingProps {
+  message?: string;
+  goToProjects: () => void;
+}
+
+const ContentLoading = ({ message = "Loading learning steps...", goToProjects }: ContentLoadingProps) => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
+      <Loader2 className="w-10 h-10 animate-spin mb-4 text-brand-primary" />
+      <p className="text-lg">{message}</p>
+      <Button
+        onClick={goToProjects}
+        variant="brand"
+        className="mt-4"
+      >
+        Go to Projects
+      </Button>
+    </div>
+  );
+};
+
+export default ContentLoading;

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRealtimeSpeech } from '@/hooks/useRealtimeSpeech';
+import { useRealtimeSpeech } from '@/hooks/realtime-speech';
 import RealtimeSpeechStatus from './RealtimeSpeechStatus';
 import MessagesList from './MessagesList';
 import RealtimeSpeechControls from './RealtimeSpeechControls';

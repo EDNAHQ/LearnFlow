@@ -1,10 +1,10 @@
 
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { SlideContent } from "./PresentationView";
 
 interface PresentationOverviewProps {
-  slides: string[];
+  slides: SlideContent[];
   currentSlide: number;
   onSelectSlide: (index: number) => void;
   onClose: () => void;
@@ -30,44 +30,103 @@ const PresentationOverview = ({
 
   return (
     <motion.div
-      className="fixed inset-0 bg-white z-50 p-8 overflow-y-auto"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 p-8 overflow-y-auto"
+      initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
+      exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      style={{
+        background: 'rgba(255, 255, 255, 0.95)'
+      }}
     >
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-medium text-gray-800">All Slides ({slides.length})</h3>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleClose} 
-            className="text-gray-800 hover:bg-gray-100"
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h3 className="text-2xl font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
+              All Slides
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">{slides.length} slides total</p>
+          </div>
+          <button
+            onClick={handleClose}
+            className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-4 py-2 rounded-xl hover:bg-white/50"
             type="button"
           >
-            <X className="h-5 w-5" />
-          </Button>
+            Close ✕
+          </button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              onClick={handleSelectSlide(index)}
-              className={`relative p-4 rounded-lg cursor-pointer transition-all ${
-                currentSlide === index 
-                  ? 'bg-[#6D42EF] text-white shadow-md' 
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
-            >
-              {/* Slide number indicator */}
-              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white text-[#6D42EF] flex items-center justify-center text-xs font-semibold">
-                {index + 1}
-              </div>
-              
-              <p className="text-sm line-clamp-4 mt-4">{slide}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {slides.map((slide, index) => {
+            const isActive = currentSlide === index;
+            return (
+              <motion.div
+                key={index}
+                onClick={handleSelectSlide(index)}
+                className="relative group cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03 }}
+                whileHover={{ y: -4 }}
+              >
+                {/* Gradient border for active slide */}
+                {isActive && (
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-2xl opacity-75 blur-sm animate-pulse" />
+                )}
+
+                {/* Card container */}
+                <div
+                  className={cn(
+                    "relative backdrop-blur-xl rounded-2xl p-5 transition-all duration-300 border",
+                    isActive
+                      ? "bg-white/90 border-transparent shadow-2xl"
+                      : "bg-white/60 border-gray-200/50 hover:bg-white/80 hover:border-gray-300/50 shadow-lg hover:shadow-xl"
+                  )}
+                >
+                  {/* Slide number with gradient */}
+                  <div className="absolute top-3 right-3">
+                    <div
+                      className={cn(
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
+                        isActive
+                          ? "bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold text-white"
+                          : "bg-gray-100 text-gray-600 group-hover:bg-gradient-to-r group-hover:from-brand-purple/20 group-hover:via-brand-pink/20 group-hover:to-brand-gold/20"
+                      )}
+                    >
+                      {index + 1}
+                    </div>
+                  </div>
+
+                  {/* Slide preview text */}
+                  <p
+                    className={cn(
+                      "text-sm leading-relaxed line-clamp-5 mt-2 transition-colors duration-300",
+                      isActive
+                        ? "text-gray-800 font-medium"
+                        : "text-gray-600",
+                      slide.type === 'code' && "font-mono text-xs"
+                    )}
+                  >
+                    {slide.type === 'code' ? (
+                      <>
+                        <span className="inline-block px-2 py-0.5 bg-gradient-to-r from-brand-purple/20 to-brand-pink/20 rounded text-xs font-sans mb-1">
+                          {slide.language?.toUpperCase() || 'CODE'}
+                        </span>
+                        <br />
+                        {slide.preview || slide.content.substring(0, 100) + '...'}
+                      </>
+                    ) : (
+                      slide.content
+                    )}
+                  </p>
+
+                  {/* Bottom gradient accent for active */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-b-2xl" />
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </motion.div>

@@ -7,7 +7,7 @@ import { BarLoader } from '@/components/ui/loader';
 import PodcastForm from './PodcastForm';
 import PodcastPreview from './PodcastPreview';
 import PodcastControls from './PodcastControls';
-import { usePodcastGenerator } from '@/hooks/usePodcastGenerator';
+import { usePodcastGenerator } from '@/hooks/podcast';
 
 interface PodcastCreatorProps {
   initialTranscript?: string;

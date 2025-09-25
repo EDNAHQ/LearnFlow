@@ -1,13 +1,14 @@
 import React from "react";
-import { LightbulbIcon } from "lucide-react";
-import { 
+import { Sparkles } from "lucide-react";
+import {
   Popover,
   PopoverTrigger,
   PopoverContent
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/ui";
 import { cn } from "@/lib/utils";
+import { AI_STYLES } from "@/components/ai";
 
 interface ContentMarginNoteProps {
   insight: string;
@@ -17,23 +18,24 @@ interface ContentMarginNoteProps {
 
 const ContentMarginNote = ({ insight, isLoading = false, className }: ContentMarginNoteProps) => {
   const isMobile = useIsMobile();
-  
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button 
+        <button
           className={cn(
-            "inline-flex items-center justify-center h-6 w-6 rounded-full bg-gradient-to-br from-[#6D42EF]/90 to-[#E84393]/90 text-white shadow-sm hover:shadow-md transition-all group touch-manipulation",
+            "inline-flex items-center justify-center h-6 w-6 rounded-full text-white shadow-sm hover:shadow-md transition-all group touch-manipulation",
+            AI_STYLES.gradients.brand,
             className
           )}
           aria-label="View additional insight"
           style={{ touchAction: "manipulation" }}
         >
-          <LightbulbIcon className="w-3 h-3 group-hover:scale-110 transition-transform" />
+          <Sparkles className="w-3 h-3 group-hover:scale-110 transition-transform" />
         </button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-72 p-4 shadow-lg border-[#6D42EF]/20 bg-white text-gray-800 z-50"
+      <PopoverContent
+        className={cn("w-72 p-4 shadow-lg z-50", AI_STYLES.borders.default)}
         side={isMobile ? "bottom" : "right"}
         align={isMobile ? "center" : "start"}
         sideOffset={5}
@@ -47,8 +49,8 @@ const ContentMarginNote = ({ insight, isLoading = false, className }: ContentMar
           </div>
         ) : (
           <div>
-            <h4 className="text-sm font-semibold text-[#6D42EF] mb-2">AI Insight</h4>
-            <p className="text-sm leading-relaxed">{insight}</p>
+            <h4 className={cn("text-sm font-semibold mb-2", AI_STYLES.text.primary)}>AI Insight</h4>
+            <p className={cn("text-sm leading-relaxed", AI_STYLES.text.body)}>{insight}</p>
           </div>
         )}
       </PopoverContent>

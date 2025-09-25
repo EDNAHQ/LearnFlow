@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTextToSpeech, OpenAIVoice } from '@/hooks/useTextToSpeech';
-import { useAudioPlayerState } from '@/hooks/useAudioPlayerState';
+import { useTextToSpeech, OpenAIVoice } from '@/hooks/audio';
+import { useAudioPlayerState } from '@/hooks/audio';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Loader2 } from 'lucide-react';

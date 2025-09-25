@@ -3,7 +3,9 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { TextSelectionPosition } from "@/hooks/useTextSelection";
+import type { TextSelectionPosition } from "@/hooks/content";
+import { AI_STYLES } from "@/components/ai";
+import { cn } from "@/lib/utils";
 
 interface TextSelectionButtonProps {
   position: TextSelectionPosition | null;
@@ -12,7 +14,6 @@ interface TextSelectionButtonProps {
 }
 
 const TextSelectionButton = ({ position, onInsightRequest, visible }: TextSelectionButtonProps) => {
-  // Fixed position at the bottom of the content area instead of following selection
   const buttonStyle = {
     position: "fixed",
     bottom: "20px",
@@ -35,17 +36,17 @@ const TextSelectionButton = ({ position, onInsightRequest, visible }: TextSelect
             <PopoverTrigger asChild>
               <Button
                 size="icon"
-                className="bg-[#6D42EF] hover:bg-[#6D42EF]/90 text-white rounded-full h-14 w-14 flex items-center justify-center shadow-md"
+                className={cn(AI_STYLES.buttons.ai, "rounded-full h-14 w-14 shadow-md")}
               >
                 <Sparkles className="h-6 w-6" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="bg-white p-3 w-60 shadow-lg border border-gray-200">
+            <PopoverContent className={cn("p-3 w-60 shadow-lg", AI_STYLES.borders.default)}>
               <div className="flex flex-col space-y-2">
-                <p className="text-sm font-medium text-gray-700">Get AI insights on your selection</p>
-                <Button 
+                <p className={cn("text-sm font-medium", AI_STYLES.text.body)}>Get AI insights on your selection</p>
+                <Button
                   onClick={onInsightRequest}
-                  className="w-full bg-[#6D42EF] hover:bg-[#6D42EF]/90"
+                  className={cn("w-full", AI_STYLES.buttons.ai)}
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Analyze Text

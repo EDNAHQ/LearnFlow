@@ -2,16 +2,17 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
-import { useContentMode } from "@/hooks/useContentMode";
-import { useContentNavigation } from "@/hooks/useContentNavigation";
+import { useContentMode } from "@/hooks/content";
+import { useContentNavigation } from "@/hooks/navigation";
 import ContentDisplay from "@/components/content/common/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
-import ContentProgress from "@/components/content/ContentProgress";
-import ContentNavigation from "@/components/content/ContentNavigation";
-import KnowledgeNuggetLoading from "@/components/content/KnowledgeNuggetLoading";
+import ContentNavigation from "@/components/content/navigation/ContentNavigation";
+import KnowledgeNuggetLoading from "@/components/content/loading/KnowledgeNuggetLoading";
 import ContentError from "@/components/content/ContentError";
-import ContentPageLayout from "@/components/content/ContentPageLayout";
+import ContentPageLayout from "@/components/content/layout/ContentPageLayout";
+import ContentMiniMap from "@/components/content/navigation/ContentMiniMap";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
+import DeepDiveSection from "@/components/content/deep-dive/DeepDiveSection";
 
 const ContentPage = () => {
   const {
@@ -40,7 +41,6 @@ const ContentPage = () => {
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
-  const [showLoadingPage, setShowLoadingPage] = useState(true);
 
   // Use the custom hook directly
   const {
@@ -53,8 +53,6 @@ const ContentPage = () => {
   useEffect(() => {
     setMode("text");
   }, [setMode]);
-
-  // Simplified: no additional timeouts for switching off loading; handled by route/redirect logic
 
   // Handle generation complete redirect - only redirect if we're not on a step page
   useEffect(() => {
@@ -109,12 +107,23 @@ const ContentPage = () => {
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
   
   return (
-    <ContentPageLayout 
-      onGoToProjects={goToProjects} 
+    <ContentPageLayout
+      onGoToProjects={goToProjects}
       topRef={topRef}
       topic={topic}
-      currentContent={currentStepData?.detailed_content || safeContent}
-      currentTitle={currentStepData?.title}
+      miniMapSidebar={
+        steps.length > 0 ? (
+          <ContentMiniMap
+            steps={steps.map(step => ({
+              id: step.id,
+              title: step.title,
+              order_index: step.order_index || 0
+            }))}
+            currentStepIndex={currentStep}
+            onNavigateToStep={navigateToStep}
+          />
+        ) : undefined
+      }
     >
       <ContentHeader
         onHome={goToProjects}
@@ -123,7 +132,7 @@ const ContentPage = () => {
         totalSteps={steps.length} 
       />
 
-      <div className="relative container max-w-[900px] mx-auto my-0 py-[40px] px-6">
+      <div className="relative w-full my-0 py-[40px] px-2 lg:px-6">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#6654f5]/5 to-[#ca5a8b]/5 rounded-full blur-3xl" />
@@ -136,29 +145,6 @@ const ContentPage = () => {
           transition={{duration: 0.5, ease: "easeOut"}}
           className="relative w-full"
         >
-          {/* Progress Section */}
-          <div className="mb-8">
-            <ContentProgress
-              topic={topic}
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              steps={steps.map(step => ({ id: step.id, title: step.title }))}
-              onNavigateToStep={navigateToStep}
-            />
-          </div>
-
-          {/* Title Section with gradient background */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mb-8 p-8 rounded-2xl bg-gradient-to-r from-[#6654f5]/5 via-[#ca5a8b]/5 to-[#f2b347]/5 border border-gray-100"
-          >
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent">
-              {currentStepData?.title || "Loading..."}
-            </h1>
-          </motion.div>
-
           {/* Main Content Area with card styling */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -166,18 +152,32 @@ const ContentPage = () => {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="mb-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
           >
-            <ContentDisplay
-              content={safeContent}
-              index={currentStep}
-              detailedContent={currentStepData?.detailed_content}
-              pathId={pathId}
-              topic={topic}
-              title={currentStepData?.title || ""}
-              stepId={currentStepData?.id}
-            />
+            <div className="max-w-[1400px] mx-auto">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent mb-8">
+                {currentStepData?.title || "Loading..."}
+              </h1>
+              <ContentDisplay
+                content={safeContent}
+                index={currentStep}
+                detailedContent={currentStepData?.detailed_content}
+                pathId={pathId}
+                topic={topic}
+                title={currentStepData?.title || ""}
+                stepId={currentStepData?.id}
+              />
+            </div>
           </motion.div>
 
-          <div>
+          {/* Deep Dive Related Topics Section */}
+          <div className="max-w-[1400px] mx-auto">
+            <DeepDiveSection
+              topic={topic}
+              content={currentStepData?.detailed_content || safeContent}
+              title={currentStepData?.title}
+            />
+          </div>
+
+          <div className="max-w-[1400px] mx-auto">
             <ContentNavigation currentStep={currentStep} totalSteps={steps.length} onPrevious={handleBack} onComplete={handleComplete} isLastStep={isLastStep} isSubmitting={isSubmitting} projectCompleted={projectCompleted} />
           </div>
         </motion.div>

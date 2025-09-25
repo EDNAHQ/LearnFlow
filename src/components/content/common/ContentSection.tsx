@@ -1,10 +1,10 @@
 import { memo } from "react";
-import ContentLoader from "../ContentLoader";
+import ContentLoader from "../loading/ContentLoader";
 import ContentDetailLoader from "../ContentDetailLoader";
-import ContentSectionCore from "../ContentSectionCore";
-import ContentSectionContainer from "../ContentSectionContainer";
-import { useContentSection } from "@/hooks/useContentSection";
-import { useTextSelection } from "@/hooks/useTextSelection";
+import ContentSectionCore from "../layout/ContentSectionCore";
+import ContentSectionContainer from "../layout/ContentSectionContainer";
+import { useContentSection } from "@/hooks/content";
+import { useTextSelection } from "@/hooks/content";
 import "@/styles/content.css";
 
 interface ContentSectionProps {

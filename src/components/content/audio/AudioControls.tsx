@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Volume2, VolumeX, Settings } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AudioControlsProps {
   isPlaying: boolean;
@@ -32,37 +32,49 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
         <Button
           onClick={onRetry}
           variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-white hover:bg-gray-800"
+          size="sm"
+          className={cn(
+            "h-8 px-3 text-xs font-medium",
+            "text-gray-700 hover:text-brand-primary",
+            "hover:bg-brand-primary/10",
+            "transition-all duration-200 rounded-lg"
+          )}
           title="Regenerate audio"
         >
-          <RefreshCw className="h-4 w-4" />
+          Regenerate
         </Button>
       )}
-      
+
       <Button
         onClick={onMuteToggle}
-        variant="ghost" 
-        size="icon"
+        variant="ghost"
+        size="sm"
         disabled={!audioUrl}
-        className="h-8 w-8 text-white hover:bg-gray-800"
+        className={cn(
+          "h-8 px-3 text-xs font-medium",
+          "text-gray-700 hover:text-brand-primary",
+          "hover:bg-brand-primary/10",
+          "disabled:opacity-40 disabled:cursor-not-allowed",
+          "transition-all duration-200 rounded-lg"
+        )}
         title={isMuted ? "Unmute" : "Mute"}
       >
-        {isMuted ? (
-          <VolumeX className="h-4 w-4" />
-        ) : (
-          <Volume2 className="h-4 w-4" />
-        )}
+        {isMuted ? "Unmute" : "Mute"}
       </Button>
-      
+
       <Button
         onClick={onToggleControls}
         variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-white hover:bg-gray-800"
+        size="sm"
+        className={cn(
+          "h-8 px-3 text-xs font-medium",
+          "text-gray-700 hover:text-brand-primary",
+          "hover:bg-brand-primary/10",
+          "transition-all duration-200 rounded-lg"
+        )}
         title={showControls ? "Hide Controls" : "Show Controls"}
       >
-        <Settings className="h-4 w-4" />
+        {showControls ? "Hide" : "Show"} Controls
       </Button>
     </div>
   );

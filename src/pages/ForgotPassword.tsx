@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
 

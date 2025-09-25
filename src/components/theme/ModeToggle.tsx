@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { BookOpen, Presentation, Volume2 } from "lucide-react";
-import { useContentMode } from "@/hooks/useContentMode";
+import { useContentMode } from "@/hooks/content";
 import { cn } from "@/lib/utils";
 
-export const ModeToggle = () => {
+export const ModeToggle = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { mode, setMode } = useContentMode();
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" data-component="ContentModeTabs" data-testid="content-mode-tabs" {...props}>
       <Button
         variant="ghost"
         size="sm"
@@ -50,6 +50,11 @@ export const ModeToggle = () => {
     </div>
   );
 };
+
+// Alias for AI/search discoverability
+export const ContentModeTabs = ModeToggle;
+// For better component identification in React DevTools and tooling
+ModeToggle.displayName = "ContentModeTabs";
 
 
 
