@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS ai_model_config (
 
 -- Insert default configurations
 INSERT INTO ai_model_config (function_type, provider, model, fallback_model, max_tokens, temperature) VALUES
-  ('content-generation', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 1500, 0.7),
+  ('content-generation', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 2500, 0.7),
   ('quick-insights', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 500, 0.7),
   ('deep-analysis', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o', 2000, 0.7),
   ('structured-extraction', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 1000, 0.2)
@@ -28,6 +28,15 @@ ON CONFLICT (function_type) DO UPDATE SET
 ALTER TABLE ai_model_config ENABLE ROW LEVEL SECURITY;
 
 -- Allow service role to manage config
-CREATE POLICY "Allow service role full access" ON ai_model_config
-  FOR ALL
-  USING (auth.jwt() ->> 'role' = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'ai_model_config'
+    AND policyname = 'Allow service role full access'
+  ) THEN
+    CREATE POLICY "Allow service role full access" ON ai_model_config
+      FOR ALL
+      USING (auth.jwt() ->> 'role' = 'service_role');
+  END IF;
+END $$;
