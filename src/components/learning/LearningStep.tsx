@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Sparkles, ChevronRight, CheckCircle } from "lucide-react";
+import { useMemo } from "react";
 
 export interface Step {
   id: string;
@@ -15,129 +15,109 @@ interface LearningStepProps {
   onClick?: () => void;
 }
 
+// Available images in public/images folder
+const AVAILABLE_IMAGES = [
+  "/images/sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_ae0bc824-7571-4682-8f82-3f6faa6c1865_0 (1).png",
+  "/images/sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_ae0bc824-7571-4682-8f82-3f6faa6c1865_0.png",
+  "/images/sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_ae0bc824-7571-4682-8f82-3f6faa6c1865_3.png",
+  "/images/sam.mckay.edna_Abstract_streams_of_glowing_lines_flowing_into_0943014d-588f-4ae4-bf32-7e8902c72d77_0.png",
+  "/images/sam.mckay.edna_Circular_abstract_loop_of_arrows_where_text_vo_24773bac-3ac6-4957-b42f-bc404a5eb4d1_1.png",
+  "/images/sam.mckay.edna_Floating_geometric_panels_with_glowing_icons_f_cd9121b1-2415-449c-9fd6-510878bd750a_0.png",
+  "/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png",
+  "/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_2.png"
+];
+
 const LearningStep = ({
   step,
   index,
   isActive = false,
   onClick
 }: LearningStepProps) => {
+  // Deterministically select image based on index
+  const imageUrl = useMemo(() => AVAILABLE_IMAGES[index % AVAILABLE_IMAGES.length], [index]);
+
   return (
     <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.5,
-        delay: index * 0.08,
+        duration: 0.6,
+        delay: index * 0.1,
         type: "spring",
-        stiffness: 100
+        stiffness: 80
       }}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.02, y: -3 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "relative group overflow-hidden transition-all duration-500 cursor-pointer",
-        isActive
-          ? "scale-[1.02]"
-          : "hover:scale-[1.01]"
+        "relative group overflow-hidden transition-all duration-500 cursor-pointer rounded-2xl w-3/4 mx-auto",
+        isActive ? "ring-4 ring-[#6654f5]/50 shadow-2xl shadow-[#6654f5]/30" : "hover:shadow-2xl hover:shadow-gray-300/50"
       )}
       onClick={onClick}
     >
-      {/* Background gradient effect */}
-      <div
-        className={cn(
-          "absolute inset-0 opacity-0 transition-opacity duration-500",
-          isActive && "opacity-100"
-        )}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#6654f5]/5 via-[#ca5a8b]/5 to-[#f2b347]/5" />
-      </div>
+      {/* Card container - Image left 25%, Content right 75% */}
+      <div className="relative overflow-hidden rounded-2xl flex min-h-[165px] bg-white">
 
-      {/* Main card */}
-      <div className={cn(
-        "relative bg-white rounded-2xl p-6 transition-all duration-500 border-2",
-        isActive
-          ? "border-[#6654f5]/30 shadow-xl shadow-[#6654f5]/10"
-          : "border-gray-100 hover:border-[#6654f5]/20 hover:shadow-lg hover:shadow-gray-200/50"
-      )}>
-        <div className="flex items-start gap-5">
-          {/* Step number with gradient background */}
+        {/* Left Image (25%) with overlaid number */}
+        <div className="relative w-1/4 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt=""
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-black/30" />
+
+          {/* Step Number Overlay on Image */}
           <motion.div
             animate={isActive ? {
-              rotate: [0, 360],
-              scale: [1, 1.1, 1]
+              scale: [1, 1.1, 1],
             } : {}}
             transition={{ duration: 0.6 }}
-            className="relative flex-shrink-0"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
             <div className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg transition-all duration-500",
+              "flex items-center justify-center w-12 h-12 rounded-xl font-bold text-xl transition-all duration-500 shadow-xl",
               isActive
-                ? "brand-gradient text-white shadow-lg shadow-[#6654f5]/30"
-                : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 group-hover:from-[#6654f5]/10 group-hover:to-[#ca5a8b]/10 group-hover:text-[#6654f5]"
+                ? "bg-white text-[#6654f5] shadow-white/50 ring-2 ring-white"
+                : "bg-white/90 backdrop-blur-sm text-[#6654f5] shadow-black/30"
             )}>
               {index + 1}
             </div>
-            {isActive && (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-1 -right-1"
-              >
-                <Sparkles className="h-4 w-4 text-[#f2b347]" />
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* Content */}
-          <div className="flex-1">
-            <h3 className={cn(
-              "text-lg font-semibold mb-2 flex items-center gap-2 transition-colors duration-300",
-              isActive
-                ? "text-[#6654f5]"
-                : "text-[#0b0c18] group-hover:text-[#6654f5]"
-            )}>
-              {step.title}
-              {isActive && (
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                >
-                  <CheckCircle className="h-5 w-5 text-[#6654f5]" />
-                </motion.div>
-              )}
-            </h3>
-            <p className={cn(
-              "text-sm leading-relaxed transition-colors duration-300",
-              isActive ? "text-gray-700" : "text-gray-600"
-            )}>
-              {step.description}
-            </p>
-          </div>
-
-          {/* Chevron indicator */}
-          <motion.div
-            animate={isActive ? { x: 5 } : { x: 0 }}
-            className={cn(
-              "flex-shrink-0 transition-all duration-300 opacity-0 group-hover:opacity-100",
-              isActive && "opacity-100"
-            )}
-          >
-            <ChevronRight className={cn(
-              "w-5 h-5 transition-colors duration-300",
-              isActive ? "text-[#6654f5]" : "text-gray-400"
-            )} />
           </motion.div>
         </div>
 
-        {/* Progress line for active step */}
+        {/* Right Content (75%) */}
+        <div className="relative flex-1 p-6 flex items-center bg-white">
+          <div className="w-full">
+            {/* Title */}
+            <h3 className={cn(
+              "text-lg font-bold mb-2 transition-colors duration-300",
+              isActive ? "text-[#6654f5]" : "text-[#0b0c18] group-hover:text-[#6654f5]"
+            )}>
+              {step.title}
+            </h3>
+
+            {/* Description */}
+            <p className="text-sm leading-relaxed text-gray-600">
+              {step.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Active Indicator */}
         {isActive && (
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="absolute bottom-0 left-0 h-1 brand-gradient"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="absolute top-4 right-4 w-3 h-3 rounded-full bg-[#6654f5] shadow-lg shadow-[#6654f5]/50 ring-4 ring-white"
           />
         )}
+
+        {/* Hover Glow Effect */}
+        <div className={cn(
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none",
+          "bg-gradient-to-br from-[#6654f5]/5 via-transparent to-[#ca5a8b]/5"
+        )} />
       </div>
     </motion.div>
   );

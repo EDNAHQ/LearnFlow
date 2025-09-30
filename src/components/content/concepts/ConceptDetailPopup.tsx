@@ -1,11 +1,8 @@
 
 import React, { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import AIDialog from "@/components/ai/AIDialog";
-import { AI_STYLES } from "@/components/ai";
-import { cn } from "@/lib/utils";
+import AIContentModal from "../modals/AIContentModal";
 
 interface ConceptDetailPopupProps {
   isOpen: boolean;
@@ -88,32 +85,24 @@ const ConceptDetailPopup: React.FC<ConceptDetailPopupProps> = ({
     setRetryCount(prev => prev + 1);
   };
 
+  const formattedContent = concept && detailedExplanation
+    ? `**Definition:** ${concept.definition || "No definition available"}\n\n---\n\n${detailedExplanation}`
+    : "";
+
   return (
-    <AIDialog
+    <AIContentModal
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
       title={concept?.term || "Concept Details"}
-      description={topic ? `In the context of ${topic}` : "Understanding this concept in depth"}
-      type="concept"
-      size="lg"
+      subtitle={topic ? `In the context of ${topic}` : "Understanding this concept in depth"}
+      content={formattedContent}
       isLoading={isLoading}
       error={error}
       onRetry={handleRetry}
-    >
-      <div className={cn(AI_STYLES.backgrounds.surface, "p-4 rounded-lg mb-4", AI_STYLES.borders.default)}>
-        <h3 className="text-sm uppercase text-gray-500 font-medium mb-2">Definition</h3>
-        <p className={AI_STYLES.text.body}>{concept?.definition || "No definition available"}</p>
-      </div>
-
-      {!isLoading && !error && detailedExplanation && (
-        <div className="prose prose-sm max-w-none dark:prose-invert">
-          <h3 className={cn("text-lg font-medium mb-3", AI_STYLES.text.primary)}>Detailed Explanation</h3>
-          <div className={AI_STYLES.text.body}>
-            <ReactMarkdown>{detailedExplanation}</ReactMarkdown>
-          </div>
-        </div>
-      )}
-    </AIDialog>
+      topic={topic || ""}
+      contentType="insight"
+      widthVariant="full"
+    />
   );
 };
 

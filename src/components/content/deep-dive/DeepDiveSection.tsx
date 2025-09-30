@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useDeepDiveTopics } from "@/hooks/content";
 import DeepDiveContentDialog from "./DeepDiveContentDialog";
 import { Badge } from "@/components/ui/badge";
-import { AI_STYLES } from "@/components/ai";
 import { cn } from "@/lib/utils";
 
 interface DeepDiveSectionProps {
@@ -30,8 +29,74 @@ const DeepDiveSection: React.FC<DeepDiveSectionProps> = ({
     generateDeepDiveContent
   } = useDeepDiveTopics(topic, content, title);
 
-  if (!topic || isLoading || error || filteredTopics.length === 0) {
+  // Debug logging
+  useEffect(() => {
+    console.log("🔍 [DeepDiveSection] State:", {
+      topic,
+      hasContent: !!content,
+      contentLength: content?.length,
+      title,
+      isLoading,
+      error,
+      topicsCount: filteredTopics.length,
+      topics: filteredTopics
+    });
+  }, [topic, content, title, isLoading, error, filteredTopics]);
+
+  // Don't render if no topic
+  if (!topic) {
+    console.log("⚠️ [DeepDiveSection] No topic provided, not rendering");
     return null;
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="p-4 rounded-xl bg-gradient-to-br from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 border border-gray-200"
+      >
+        <div className="text-sm text-gray-600">
+          Loading topics...
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="p-4 rounded-xl bg-red-50 border border-red-200"
+      >
+        <div className="text-sm text-red-700">
+          <p className="font-medium">Error loading topics</p>
+          <p className="text-xs text-red-600 mt-1">{error}</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Show empty state with helpful message
+  if (filteredTopics.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="p-4 rounded-xl bg-gradient-to-br from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 border border-gray-200"
+      >
+        <div className="text-sm text-gray-600">
+          <p className="font-medium text-gray-900">Generating topics...</p>
+          <p className="text-xs mt-1">Related topics for deeper exploration</p>
+        </div>
+      </motion.div>
+    );
   }
 
   return (
@@ -40,38 +105,36 @@ const DeepDiveSection: React.FC<DeepDiveSectionProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 border border-gray-200"
+        className="p-4 rounded-xl bg-gradient-to-br from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 border border-gray-200"
       >
-        <div className="mb-4">
-          <h3 className={cn("text-lg font-semibold", AI_STYLES.gradients.text)}>
-            Related Topics to Explore
+        <div className="mb-3">
+          <h3 className="text-base font-semibold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent">
+            Related Topics
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="space-y-2">
           {filteredTopics.map((relatedTopic, index) => (
             <motion.div
               key={relatedTopic.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
               onClick={() => generateDeepDiveContent(relatedTopic.id, relatedTopic.title)}
-              className="group bg-white hover:bg-gradient-to-br hover:from-brand-primary/5 hover:to-brand-accent/5 rounded-xl p-4 cursor-pointer border border-gray-200 hover:border-brand-primary/30 transition-all duration-200 hover:shadow-md"
+              className="group bg-white hover:bg-gradient-to-br hover:from-brand-primary/5 hover:to-brand-accent/5 rounded-lg p-3 cursor-pointer border border-gray-200 hover:border-brand-primary/30 transition-all duration-200 hover:shadow-sm"
             >
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-gray-900 mb-1 line-clamp-2 group-hover:text-brand-primary transition-colors">
-                  {relatedTopic.title}
-                </h4>
-                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                  {relatedTopic.description}
-                </p>
-                <Badge
-                  variant="outline"
-                  className="text-xs bg-brand-primary/10 text-brand-primary border-brand-primary/20"
-                >
-                  {formatSimilarity(relatedTopic.similarity)} match
-                </Badge>
-              </div>
+              <h4 className="font-medium text-sm text-gray-900 mb-1 line-clamp-2 group-hover:text-brand-primary transition-colors">
+                {relatedTopic.title}
+              </h4>
+              <p className="text-xs text-gray-600 line-clamp-2 mb-1.5">
+                {relatedTopic.description}
+              </p>
+              <Badge
+                variant="outline"
+                className="text-[10px] bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+              >
+                {formatSimilarity(relatedTopic.similarity)} match
+              </Badge>
             </motion.div>
           ))}
         </div>

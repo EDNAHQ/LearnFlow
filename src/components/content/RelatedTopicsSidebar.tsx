@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -53,17 +52,22 @@ const RelatedTopicsSidebar: React.FC<RelatedTopicsSidebarProps> = ({
         onClick={() => onOpenChange(!open)}
         variant="secondary"
         size="sm"
-        className="fixed right-6 top-20 z-50 rounded-full h-10 w-10 p-0 bg-brand-purple text-white hover:bg-[#5835CB] shadow-md"
+        className="fixed right-6 top-20 z-50 rounded-lg px-4 py-2 bg-brand-purple text-white hover:bg-[#5835CB] shadow-md text-sm font-medium"
       >
-        <Tag className="h-5 w-5" />
+        Related Topics
       </Button>
 
-      {/* Sheet from right side */}
+      {/* Bottom sheet for related topics */}
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-80 p-0 bg-white border-l border-gray-200">
+        <SheetContent
+          side="bottom"
+          overlayClassName="bg-transparent"
+          className="p-0 bg-white border-t border-gray-200 z-[120] h-[25vh] md:h-[50vh] rounded-t-2xl flex flex-col w-full md:w-1/2 ml-auto"
+          style={{ left: "auto" }}
+        >
           <SheetHeader className="p-4 border-b border-gray-200">
-            <SheetTitle className="text-brand-purple flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+            <div className="w-12 h-1.5 rounded-full bg-gray-300 mx-auto mb-2" />
+            <SheetTitle className="text-brand-purple font-bold">
               Deep Dive Topics
             </SheetTitle>
             <SheetDescription className="text-gray-500">
@@ -72,19 +76,16 @@ const RelatedTopicsSidebar: React.FC<RelatedTopicsSidebarProps> = ({
           </SheetHeader>
 
           <div className="px-4 py-3 border-b border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search related topics..."
-                className="w-full bg-gray-100 rounded-md py-2 pl-8 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Search related topics..."
+              className="w-full bg-gray-100 rounded-md py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
-          <div className="p-4 overflow-auto max-h-[calc(100vh-150px)]">
+          <div className="p-4 overflow-auto flex-1">
             <DeepDiveTopicsList
               isLoading={isLoading}
               error={error}

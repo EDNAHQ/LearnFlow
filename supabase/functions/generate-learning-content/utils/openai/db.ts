@@ -56,3 +56,42 @@ export async function saveContentToSupabase(
   
   console.log(`Successfully saved content for step ${stepId} (${content.length} characters)`);
 }
+
+// Get step context including description and previous step title
+export async function getStepContext(
+  stepId: string,
+  supabaseUrl: string,
+  supabaseServiceKey: string
+) {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  // Get current step details
+  const { data: currentStep, error } = await supabase
+    .from('learning_steps')
+    .select('path_id, order_index, content')
+    .eq('id', stepId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching step context:", error);
+    throw new Error("Failed to fetch step context");
+  }
+
+  // Get previous step title if it exists
+  let previousStepTitle = null;
+  if (currentStep.order_index > 0) {
+    const { data: prevStep } = await supabase
+      .from('learning_steps')
+      .select('title')
+      .eq('path_id', currentStep.path_id)
+      .eq('order_index', currentStep.order_index - 1)
+      .single();
+
+    previousStepTitle = prevStep?.title || null;
+  }
+
+  return {
+    description: currentStep.content || "",
+    previousStepTitle
+  };
+}

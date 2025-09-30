@@ -4,8 +4,8 @@ export const FeaturesSection = () => {
   const features = [
     {
       image: "/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png",
-      title: "AI-Powered Personalization",
-      description: "Our intelligent system learns your unique learning style and adapts content delivery for maximum retention."
+      title: "Adaptive Personalization",
+      description: "The platform adapts to your style and pace so content lands and sticks."
     },
     {
       image: "/images/sam.mckay.edna_Circular_abstract_loop_of_arrows_where_text_vo_24773bac-3ac6-4957-b42f-bc404a5eb4d1_1.png",
@@ -15,7 +15,7 @@ export const FeaturesSection = () => {
     {
       image: "/images/sam.mckay.edna_Abstract_streams_of_glowing_lines_flowing_into_0943014d-588f-4ae4-bf32-7e8902c72d77_0.png",
       title: "Accelerated Progress",
-      description: "Learn 3x faster with optimized content sequencing and spaced repetition techniques."
+      description: "Advance efficiently with optimized sequencing and spaced repetition techniques."
     },
     {
       image: "/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_2.png",
@@ -86,24 +86,31 @@ export const FeaturesSection = () => {
           })}
         </div>
 
-        {/* Stats section */}
-        <div className="mt-20 p-8 brand-gradient rounded-3xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">95%</div>
-              <div className="text-white/80">Completion Rate</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">3x</div>
-              <div className="text-white/80">Faster Learning</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">10k+</div>
-              <div className="text-white/80">Active Users</div>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">4.9</div>
-              <div className="text-white/80">User Rating</div>
+        {/* First‑week wins: learner‑centric goals (numbers about you, not us) */}
+        <div className="mt-20">
+          <div className="text-center mb-5">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white text-[#6654f5] text-xs font-medium shadow-sm">
+              Your first‑week wins
+            </span>
+          </div>
+          <div className="p-8 brand-gradient rounded-3xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+              <div>
+                <div className="text-3xl md:text-4xl font-bold mb-1">15 min</div>
+                <div className="text-white/80">Focus sessions</div>
+              </div>
+              <div>
+                <div className="text-3xl md:text-4xl font-bold mb-1">3 days</div>
+                <div className="text-white/80">Streak goal</div>
+              </div>
+              <div>
+                <div className="text-3xl md:text-4xl font-bold mb-1">1 skill</div>
+                <div className="text-white/80">Unlocked</div>
+              </div>
+              <div>
+                <div className="text-3xl md:text-4xl font-bold mb-1">1 project</div>
+                <div className="text-white/80">Started</div>
+              </div>
             </div>
           </div>
         </div>

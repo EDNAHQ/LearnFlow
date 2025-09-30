@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useConceptLinking } from "@/hooks/content";
+// Concept extraction has been removed from the UI and backend.
 
 interface UseContentSectionProps {
   content: string;
@@ -18,10 +18,10 @@ export function useContentSection({ content, detailedContent, topic }: UseConten
   const stepId = content.includes(':') ? content.split(":")[0] : '';
   
   // Get concepts from the loaded content once it's available
-  const { concepts, isLoading: conceptsLoading, hasResults, resetExtraction } = useConceptLinking(
-    loadedDetailedContent || '',
-    topic
-  );
+  // Concepts no longer extracted
+  const concepts: any[] = [];
+  const conceptsLoading = false;
+  const resetExtraction = () => {};
   
   // Reset state when content changes
   useEffect(() => {

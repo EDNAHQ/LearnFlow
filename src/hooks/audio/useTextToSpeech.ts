@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { EDGE_FUNCTIONS } from '@/integrations/supabase/functions';
 import { toast } from 'sonner';
 
 export type VoiceProvider = 'elevenlabs' | 'openai';
@@ -45,7 +46,7 @@ export function useTextToSpeech() {
       console.log(`Generating speech using ${provider} for path ${pathId} with text length ${text.length}`);
       
       // Determine which endpoint to call based on provider
-      const endpoint = provider === 'openai' ? 'openai-tts' : 'text-to-speech';
+      const endpoint = provider === 'openai' ? EDGE_FUNCTIONS.textToSpeechOpenAI : EDGE_FUNCTIONS.textToSpeechElevenLabs;
       
       // Call the Supabase Edge Function
       const response = await supabase.functions.invoke(endpoint, {

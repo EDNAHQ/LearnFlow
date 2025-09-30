@@ -28,7 +28,9 @@
       "Bash(dir:*)",
       "Bash(npm run lint:*)",
       "Bash(git mv:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx supabase:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

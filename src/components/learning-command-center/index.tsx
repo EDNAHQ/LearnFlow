@@ -14,13 +14,6 @@ import { generateLearningPlan } from '@/utils/learning/generateLearningPlan';
 import { useToast } from '@/hooks/ui';
 import { useAuth } from '@/hooks/auth';
 
-const quickTemplates = [
-  { label: 'Quick 15-min lesson', time: '15 mins' },
-  { label: 'Deep dive', time: '2-3 hours' },
-  { label: 'Project-based', time: '1 week' },
-  { label: 'Concept mastery', time: '2 weeks' }
-];
-
 const trendingTopics = [
   'React Hooks',
   'TypeScript Generics',
@@ -35,7 +28,6 @@ export const LearningCommandCenter: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   const {
     isOpen,
@@ -117,11 +109,8 @@ export const LearningCommandCenter: React.FC = () => {
     addRecentTopic(finalTopic);
 
     try {
-      // Store topic and template in session storage
+      // Store topic in session storage
       sessionStorage.setItem('learn-topic', finalTopic);
-      if (selectedTemplate) {
-        sessionStorage.setItem('learning-template', selectedTemplate);
-      }
 
       // Navigate to plan page
       navigate(`/plan?topic=${encodeURIComponent(finalTopic)}`);
@@ -219,42 +208,6 @@ export const LearningCommandCenter: React.FC = () => {
 
             {/* Content */}
             <div className="p-6 pt-4 max-h-[60vh] overflow-y-auto">
-              {/* Quick Templates */}
-              {!input && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">
-                    Quick Templates
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {quickTemplates.map((template) => {
-                      return (
-                        <button
-                          key={template.label}
-                          onClick={() => {
-                            setSelectedTemplate(template.label);
-                            inputRef.current?.focus();
-                          }}
-                          className={cn(
-                            "p-3 rounded-xl border transition-all text-left",
-                            "hover:border-[#6654f5]/30 hover:bg-gray-50",
-                            selectedTemplate === template.label
-                              ? "border-[#6654f5] bg-[#6654f5]/5"
-                              : "border-gray-200"
-                          )}
-                        >
-                          <div>
-                            <div className="font-medium text-sm text-gray-900">
-                              {template.label}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">{template.time}</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* Suggestions */}
               {suggestions.length > 0 && (
                 <div className="mb-6">
@@ -326,12 +279,9 @@ export const LearningCommandCenter: React.FC = () => {
 
             {/* Footer */}
             <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-4">
-                  <span>⌘L to open</span>
-                  <span>ESC to close</span>
-                </div>
-                <span>Powered by AI</span>
+              <div className="flex items-center gap-4 text-xs text-gray-500">
+                <span>⌘L to open</span>
+                <span>ESC to close</span>
               </div>
             </div>
           </motion.div>

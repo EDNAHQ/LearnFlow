@@ -1,6 +1,6 @@
 
 import React from "react";
-import AIDialog from "@/components/ai/AIDialog";
+import AIContentModal from "../modals/AIContentModal";
 
 interface DeepDiveContentDialogProps {
   open: boolean;
@@ -20,15 +20,16 @@ const DeepDiveContentDialog: React.FC<DeepDiveContentDialogProps> = ({
   topic
 }) => {
   return (
-    <AIDialog
+    <AIContentModal
       open={open}
       onOpenChange={onOpenChange}
       title={selectedTopic?.title || "Deep Dive"}
-      description={topic ? `Related to ${topic}` : "Exploring a related concept"}
-      type="deep-dive"
-      size="xl"
+      subtitle={undefined}
+      content={deepDiveContent || ""}
       isLoading={isGenerating}
-      content={deepDiveContent || undefined}
+      topic={topic || ""}
+      widthVariant="halfRight"
+      contentType="deep-dive"
     />
   );
 };
