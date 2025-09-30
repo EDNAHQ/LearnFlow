@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
-import ContentMarginNotesRenderer from "../margin-notes/ContentMarginNotesRenderer";
+// Margin notes removed
 import ContentSectionConcepts from "../concepts/ContentSectionConcepts";
 import ContentQuestionsSection from "../questions/ContentQuestionsSection";
 
@@ -11,21 +11,19 @@ interface ContentSectionCoreProps {
   topic?: string | null;
   title?: string;
   stepId?: string;
-  onTextSelection?: (e: React.MouseEvent | React.TouchEvent) => void;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, content?: string) => void;
 }
 
-const ContentSectionCore = ({ 
-  loadedDetailedContent, 
-  topic, 
-  title, 
+const ContentSectionCore = ({
+  loadedDetailedContent,
+  topic,
+  title,
   stepId,
-  onTextSelection,
   onQuestionClick
 }: ContentSectionCoreProps) => {
   // Create a ref for the content area for margin notes
   const contentRef = useRef<HTMLDivElement>(null);
-  
+
   // Create markdown components with question and concept handlers
   const markdownComponents = getMarkdownComponents(
     topic || undefined,
@@ -33,14 +31,12 @@ const ContentSectionCore = ({
     [], // Concepts array could be passed here if available
     undefined // Concept click handler could be passed here if needed
   );
-  
+
   return (
     <div className="content-area-wrapper">
-      <div 
+      <div
         ref={contentRef}
         className="content-area"
-        onMouseUp={onTextSelection}
-        onTouchEnd={onTextSelection}
       >
         <ReactMarkdown components={markdownComponents}>
           {loadedDetailedContent}
@@ -58,12 +54,7 @@ const ContentSectionCore = ({
         )}
       </div>
       
-      {/* Margin notes renderer if needed */}
-      <ContentMarginNotesRenderer 
-        content={loadedDetailedContent} 
-        topic={topic || ""} 
-        contentRef={contentRef}
-      />
+      {/* Margin notes removed */}
     </div>
   );
 };

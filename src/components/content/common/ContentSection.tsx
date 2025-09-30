@@ -4,7 +4,6 @@ import ContentDetailLoader from "../ContentDetailLoader";
 import ContentSectionCore from "../layout/ContentSectionCore";
 import ContentSectionContainer from "../layout/ContentSectionContainer";
 import { useContentSection } from "@/hooks/content";
-import { useTextSelection } from "@/hooks/content";
 import "@/styles/content.css";
 
 interface ContentSectionProps {
@@ -14,13 +13,11 @@ interface ContentSectionProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, content?: string) => void;
 }
 
 // Use memo to prevent unnecessary re-renders
 const ContentSection = memo(({ title, content, index, detailedContent, topic, pathId, onQuestionClick }: ContentSectionProps) => {
-  const { handleTextSelection } = useTextSelection();
-  
   // Use the extracted hook for state management
   const {
     isVisible,
@@ -32,25 +29,13 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
     handleConceptClick,
     focusedConcept
   } = useContentSection({ content, detailedContent, topic });
-  
-  // Handle question clicking - pass it to ContentInsightsManager via ContentPage
+
+  // Handle question clicking - pass it to parent with content
   const handleQuestionClick = (question: string) => {
-    // First try to use the prop if provided
-    if (onQuestionClick) {
-      onQuestionClick(question);
-      return;
-    }
-    
-    // Fallback to dispatching an event
     console.log("Question clicked in ContentSection:", question);
-    
-    // Create a custom event to communicate with ContentInsightsManager
-    const event = new CustomEvent("ai:insight-request", {
-      detail: { question, topic }
-    });
-    
-    // Dispatch the event so ContentInsightsManager can catch it
-    window.dispatchEvent(event);
+    if (onQuestionClick) {
+      onQuestionClick(question, loadedDetailedContent);
+    }
   };
 
   return (
@@ -75,7 +60,6 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
           topic={topic}
           title={title}
           stepId={stepId}
-          onTextSelection={handleTextSelection}
           onQuestionClick={handleQuestionClick}
         />
       )}

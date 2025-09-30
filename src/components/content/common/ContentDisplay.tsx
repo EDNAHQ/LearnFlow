@@ -12,6 +12,7 @@ interface ContentDisplayProps {
   topic?: string;
   title?: string;
   stepId?: string;
+  onQuestionClick?: (question: string, content?: string) => void;
 }
 
 interface LearningStep {
@@ -30,21 +31,17 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
   pathId,
   topic,
   title,
-  stepId
+  stepId,
+  onQuestionClick
 }) => {
   const { mode } = useContentMode();
 
-  // Handle question clicks for insights
+  // Handle question clicks - pass to parent with content
   const handleQuestionClick = (question: string) => {
-    console.log("Dispatching question event from ContentDisplay:", question);
-    
-    // Create a custom event to communicate with ContentInsightsManager
-    const event = new CustomEvent("ai:insight-request", {
-      detail: { question, topic }
-    });
-    
-    // Dispatch the event so ContentInsightsManager can catch it
-    window.dispatchEvent(event);
+    console.log("Question clicked from ContentDisplay:", question);
+    if (onQuestionClick) {
+      onQuestionClick(question, detailedContent || content);
+    }
   };
 
   if (!content && !title && !stepId) {

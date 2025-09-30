@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@shared/ai-provider": "./_shared/ai-provider/index.ts",
+    "@shared/ai-provider/": "./_shared/ai-provider/"
+  }
+}

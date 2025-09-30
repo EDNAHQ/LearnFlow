@@ -10,60 +10,40 @@ export function useMarginNotes(content: string, topic: string) {
 
   // Reset states when content changes
   useEffect(() => {
+    console.log("🔍 [useMarginNotes] Content/topic changed, resetting state");
     setMarginNotes([]);
     setMarginNotesGenerated(false);
     isUnmounting.current = false;
 
     return () => {
+      console.log("🔍 [useMarginNotes] Component unmounting");
       isUnmounting.current = true;
     };
   }, [content, topic]);
 
-  // Generate margin notes once content is loaded
+  // Margin notes are deprecated; keep hook no-op to avoid breaking imports
   const generateContentMarginNotes = async () => {
+    console.log("🔍 [useMarginNotes] Checking if should generate:", {
+      hasContent: !!content,
+      contentLength: content?.length,
+      hasTopic: !!topic,
+      marginNotesGenerated,
+      loadingMarginNotes,
+      isUnmounting: isUnmounting.current
+    });
+
     if (!content || !topic || marginNotesGenerated || loadingMarginNotes || isUnmounting.current) {
+      console.log("⚠️ [useMarginNotes] Skipping generation due to conditions");
       return;
     }
-    
-    setLoadingMarginNotes(true);
-    try {
-      console.log(`Generating margin notes for: ${topic}`);
-      
-      const notes = await generateMarginNotes(content, topic);
-      
-      if (isUnmounting.current) return;
-      
-      console.log(`Generated ${notes.length} margin notes for: ${topic}`);
-      
-      if (notes.length > 0) {
-        setMarginNotes(notes);
-      } else {
-        setMarginNotes([]);
-      }
-    } catch (error) {
-      console.error("Error generating margin notes:", error);
-      if (!isUnmounting.current) {
-        setMarginNotes([]);
-      }
-    } finally {
-      if (!isUnmounting.current) {
-        setLoadingMarginNotes(false);
-        setMarginNotesGenerated(true);
-      }
-    }
+
+    setLoadingMarginNotes(false);
+    setMarginNotesGenerated(true);
   };
 
   // Trigger margin notes generation once content is loaded
   useEffect(() => {
-    if (content && topic) {
-      if (!marginNotesGenerated && !loadingMarginNotes && !isUnmounting.current) {
-        // Small delay to ensure content is stable before generating notes
-        const timer = setTimeout(() => {
-          generateContentMarginNotes();
-        }, 300);
-        return () => clearTimeout(timer);
-      }
-    }
+    // No-op
   }, [content, topic, marginNotesGenerated, loadingMarginNotes]);
 
   return { marginNotes, loadingMarginNotes };

@@ -13,6 +13,7 @@ import ContentPageLayout from "@/components/content/layout/ContentPageLayout";
 import ContentMiniMap from "@/components/content/navigation/ContentMiniMap";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
 import DeepDiveSection from "@/components/content/deep-dive/DeepDiveSection";
+import ExploreFurtherSideModal from "@/components/content/modals/ExploreFurtherSideModal";
 
 const ContentPage = () => {
   const {
@@ -41,6 +42,11 @@ const ContentPage = () => {
 
   // Track if we've already redirected to avoid loops
   const [hasRedirected, setHasRedirected] = useState(false);
+
+  // Centralized modal state for Explore Further
+  const [exploreFurtherOpen, setExploreFurtherOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState("");
+  const [currentContent, setCurrentContent] = useState("");
 
   // Use the custom hook directly
   const {
@@ -72,17 +78,12 @@ const ContentPage = () => {
     isLoading
   ]);
 
-  // Handle question clicks for insights
-  const handleQuestionClick = (question: string) => {
+  // Handle question clicks - now triggers page-level modal
+  const handleQuestionClick = (question: string, content: string = "") => {
     console.log("Question clicked in ContentPage:", question);
-    
-    // Create a custom event to communicate with ContentInsightsManager
-    const event = new CustomEvent("ai:insight-request", {
-      detail: { question, topic }
-    });
-    
-    // Dispatch the event so ContentInsightsManager can catch it
-    window.dispatchEvent(event);
+    setSelectedQuestion(question);
+    setCurrentContent(content);
+    setExploreFurtherOpen(true);
   };
 
   // Show loading screen ONLY on the path-level route (no stepIndex)
@@ -113,15 +114,25 @@ const ContentPage = () => {
       topic={topic}
       miniMapSidebar={
         steps.length > 0 ? (
-          <ContentMiniMap
-            steps={steps.map(step => ({
-              id: step.id,
-              title: step.title,
-              order_index: step.order_index || 0
-            }))}
-            currentStepIndex={currentStep}
-            onNavigateToStep={navigateToStep}
-          />
+          <div className="space-y-12">
+            {/* Mini Map Navigation */}
+            <ContentMiniMap
+              steps={steps.map(step => ({
+                id: step.id,
+                title: step.title,
+                order_index: step.order_index || 0
+              }))}
+              currentStepIndex={currentStep}
+              onNavigateToStep={navigateToStep}
+            />
+
+            {/* Deep Dive Related Topics */}
+            <DeepDiveSection
+              topic={topic}
+              content={currentStepData?.detailed_content || safeContent}
+              title={currentStepData?.title}
+            />
+          </div>
         ) : undefined
       }
     >
@@ -164,24 +175,26 @@ const ContentPage = () => {
                 topic={topic}
                 title={currentStepData?.title || ""}
                 stepId={currentStepData?.id}
+                onQuestionClick={handleQuestionClick}
               />
             </div>
           </motion.div>
 
-          {/* Deep Dive Related Topics Section */}
-          <div className="max-w-[1400px] mx-auto">
-            <DeepDiveSection
-              topic={topic}
-              content={currentStepData?.detailed_content || safeContent}
-              title={currentStepData?.title}
-            />
-          </div>
-
+          {/* Navigation */}
           <div className="max-w-[1400px] mx-auto">
             <ContentNavigation currentStep={currentStep} totalSteps={steps.length} onPrevious={handleBack} onComplete={handleComplete} isLastStep={isLastStep} isSubmitting={isSubmitting} projectCompleted={projectCompleted} />
           </div>
         </motion.div>
       </div>
+
+      {/* Page-level AI Modal - renders outside content area */}
+      <ExploreFurtherSideModal
+        open={exploreFurtherOpen}
+        onOpenChange={setExploreFurtherOpen}
+        question={selectedQuestion}
+        topic={topic || ""}
+        content={currentContent}
+      />
     </ContentPageLayout>
   );
 };

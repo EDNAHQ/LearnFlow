@@ -9,7 +9,7 @@ interface TextModeDisplayProps {
   detailedContent?: string | null;
   pathId?: string;
   topic?: string;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, content?: string) => void;
 }
 
 const TextModeDisplay = ({ 

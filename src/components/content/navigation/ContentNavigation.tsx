@@ -23,80 +23,75 @@ const ContentNavigation = ({
 }: ContentNavigationProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="relative mt-12 mb-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="flex items-center justify-between mt-8 mb-4"
     >
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/5 via-brand-accent/5 to-brand-highlight/5 rounded-3xl blur-xl" />
-
-      <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 shadow-lg">
-        <div className="flex justify-between w-full max-w-[860px] mx-auto">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              variant="outline"
-              onClick={onPrevious}
-              disabled={currentStep === 0}
-              className="px-6 py-6 text-base font-semibold border-2 border-gray-300 hover:border-brand-accent text-gray-700 hover:text-brand-accent hover:bg-gradient-to-r hover:from-brand-accent/10 hover:to-brand-highlight/10 transition-all duration-300 rounded-full disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              ← Previous Step
-            </Button>
-          </motion.div>
-
-          {!isLastStep ? (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                className="px-8 py-6 text-base font-semibold bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-xl hover:opacity-90 transition-all duration-300 rounded-full"
-                onClick={onComplete}
-              >
-                Mark as Complete →
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              whileHover={{ scale: projectCompleted ? 1 : 1.02 }}
-              whileTap={{ scale: projectCompleted ? 1 : 0.98 }}
-            >
-              <Button
-                className={`px-8 py-6 text-base font-semibold ${
-                  projectCompleted
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-brand-highlight to-brand-accent hover:opacity-90'
-                } text-white shadow-xl transition-all duration-300 rounded-full`}
-                onClick={onComplete}
-                disabled={isSubmitting || projectCompleted}
-              >
-                {isSubmitting ? (
-                  "Completing Project..."
-                ) : projectCompleted ? (
-                  "✓ Project Completed"
-                ) : (
-                  "Complete Project →"
-                )}
-              </Button>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Progress hint */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-4"
+      {/* Previous Arrow */}
+      <button
+        onClick={onPrevious}
+        disabled={currentStep === 0}
+        className="group flex items-center gap-2 text-gray-600 hover:text-brand-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        <svg
+          className="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <p className="text-sm font-medium text-gray-700">
-            {isLastStep
-              ? projectCompleted
-                ? "🎉 Congratulations on completing your learning journey!"
-                : "You're on the final step! Complete it to finish your project."
-              : `${totalSteps - currentStep - 1} ${
-                  totalSteps - currentStep - 1 === 1 ? "step" : "steps"
-                } remaining after this one`}
-          </p>
-        </motion.div>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="text-sm font-medium">Previous</span>
+      </button>
+
+      {/* Center Progress Info */}
+      <div className="text-center">
+        <p className="text-xs text-gray-500">
+          Step {currentStep + 1} of {totalSteps}
+        </p>
       </div>
+
+      {/* Next/Complete Button */}
+      {!isLastStep ? (
+        <button
+          onClick={onComplete}
+          className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <span>Mark Complete</span>
+          <svg
+            className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      ) : (
+        <button
+          onClick={onComplete}
+          disabled={isSubmitting || projectCompleted}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity ${
+            projectCompleted
+              ? 'bg-green-500 text-white cursor-not-allowed'
+              : 'bg-gradient-to-r from-brand-highlight to-brand-accent text-white hover:opacity-90'
+          }`}
+        >
+          {isSubmitting ? (
+            "Completing..."
+          ) : projectCompleted ? (
+            <>✓ Completed</>
+          ) : (
+            <>
+              <span>Complete Project</span>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </>
+          )}
+        </button>
+      )}
     </motion.div>
   );
 };

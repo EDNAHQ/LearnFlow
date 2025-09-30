@@ -8,7 +8,7 @@ interface ContentQuestionsSectionProps {
   topic?: string;
   title?: string;
   stepId?: string;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, content?: string) => void;
 }
 
 const ContentQuestionsSection = ({ 
@@ -47,10 +47,12 @@ const ContentQuestionsSection = ({
       )}
       
       {/* Display related questions */}
-      <ContentRelatedQuestions 
+      <ContentRelatedQuestions
         questions={relatedQuestions}
         isLoading={loadingQuestions}
         onQuestionClick={onQuestionClick}
+        topic={topic}
+        content={loadedDetailedContent}
       />
     </>
   );

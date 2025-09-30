@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/learning/LearningStep";
+import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 
 // Generate detailed content for a learning step using the edge function
 export const generateStepContent = async (step: Step, topic: string, silent = false): Promise<string> => {
@@ -30,7 +31,7 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     try {
       console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
       
-      const response = await supabase.functions.invoke('generate-learning-content', {
+      const response = await supabase.functions.invoke(EDGE_FUNCTIONS.generateLearningContent, {
         body: {
           stepId: step.id,
           topic,

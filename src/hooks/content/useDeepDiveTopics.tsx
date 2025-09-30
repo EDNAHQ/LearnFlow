@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRelatedTopics } from "@/hooks/content";
 import { supabase } from "@/integrations/supabase/client";
+import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 
 export interface TopicDetails {
   id: string;
@@ -44,7 +45,7 @@ export function useDeepDiveTopics(topic: string | null, content?: string | null,
       
       console.log(`Generating deep dive content for "${topicTitle}"...`);
       
-      const { data, error } = await supabase.functions.invoke('generate-deep-dive-content', {
+      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTIONS.generateDeepDiveContent, {
         body: {
           topic: topic,
           title: topicTitle,

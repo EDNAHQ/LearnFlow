@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ParagraphNotesMapper from "./ParagraphNotesMapper";
 import MarginNotePortals from "./MarginNotePortals";
 import { useMarginNotes } from "@/hooks/content";
 import { MarginNote } from "@/utils/marginNotesUtils";
+import { Sparkles } from "lucide-react";
 
 interface ContentMarginNotesRendererProps {
   content: string;
@@ -13,11 +14,21 @@ interface ContentMarginNotesRendererProps {
 }
 
 const ContentMarginNotesRenderer = ({ content, topic, contentRef, onNotesGenerated }: ContentMarginNotesRendererProps) => {
-  const { marginNotes } = useMarginNotes(content, topic);
+  const { marginNotes, loadingMarginNotes } = useMarginNotes(content, topic);
   const [paragraphsWithNotes, setParagraphsWithNotes] = useState<Map<HTMLElement, MarginNote>>(new Map());
   const [renderPortals, setRenderPortals] = useState(false);
 
+  useEffect(() => {
+    console.log("🔍 [ContentMarginNotesRenderer] State update:", {
+      marginNotesCount: marginNotes.length,
+      loadingMarginNotes,
+      renderPortals,
+      mappedCount: paragraphsWithNotes.size
+    });
+  }, [marginNotes, loadingMarginNotes, renderPortals, paragraphsWithNotes]);
+
   const handleMapComplete = (noteMap: Map<HTMLElement, MarginNote>) => {
+    console.log(`✅ [ContentMarginNotesRenderer] Mapping complete: ${noteMap.size} notes mapped`);
     setParagraphsWithNotes(noteMap);
     setRenderPortals(true);
     // Call the onNotesGenerated callback if provided
@@ -28,15 +39,16 @@ const ContentMarginNotesRenderer = ({ content, topic, contentRef, onNotesGenerat
 
   return (
     <>
-      <ParagraphNotesMapper 
-        contentRef={contentRef} 
+      <ParagraphNotesMapper
+        contentRef={contentRef}
         marginNotes={marginNotes}
         onMapComplete={handleMapComplete}
       />
-      
-      {renderPortals && (
+
+      {renderPortals && paragraphsWithNotes.size > 0 && (
         <MarginNotePortals paragraphsWithNotes={paragraphsWithNotes} />
       )}
+
     </>
   );
 };

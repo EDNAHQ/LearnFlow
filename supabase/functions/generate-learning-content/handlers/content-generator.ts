@@ -1,5 +1,5 @@
 
-import { callOpenAI, checkExistingContent, saveContentToSupabase } from "../utils/openai/index.ts";
+import { callOpenAI, checkExistingContent, saveContentToSupabase, getStepContext } from "../utils/openai/index.ts";
 
 export async function generateStepContent(
   stepId: string, 
@@ -33,29 +33,83 @@ export async function generateStepContent(
     }
 
     console.log(`Generating content for step: ${title}`);
-    
-    // Streamlined, cleaner prompt to prevent truncation
+
+    // Get step context including description and previous step
+    const stepContext = await getStepContext(stepId, supabaseUrl, supabaseServiceKey);
+    const description = stepContext.description;
+    const previousStepTitle = stepContext.previousStepTitle;
+
+    // Use provided stepNumber or default to 1
+    const currentStepNumber = stepNumber ?? 1;
+    const totalStepsCount = totalSteps ?? 10;
+
+    // Determine learning phase based on step number
+    const phase = currentStepNumber <= 3 ? "foundational" :
+                  currentStepNumber <= 7 ? "intermediate" :
+                  "advanced";
+
+    const progressContext = {
+      foundational: "This is an introductory step. Assume the learner is encountering these concepts for the first time. Focus on clear definitions, simple examples, and building confidence.",
+      intermediate: "The learner now has foundational knowledge. Build on what they've learned, introduce more complexity, and show how concepts connect.",
+      advanced: "The learner has strong fundamentals. Focus on sophisticated applications, edge cases, best practices, and real-world scenarios."
+    };
+
+    const learningJourneyContext = currentStepNumber === 1 ? 'just started' :
+                                   currentStepNumber < 5 ? 'covered the basics' :
+                                   'built strong foundations';
+
+    const depthGuidance = phase === 'foundational' ? 'Keep it simple and clear' :
+                         phase === 'intermediate' ? 'Add nuance and complexity' :
+                         'Go deep with advanced insights';
+
+    const contentFocus = phase === 'foundational' ? 'Basic definitions and clear examples' :
+                        phase === 'intermediate' ? 'How this builds on earlier concepts' :
+                        'Advanced patterns and production considerations';
+
+    const exampleGuidance = phase === 'foundational' ? '1 very simple, relatable example' :
+                           phase === 'intermediate' ? '1-2 practical examples showing progression' :
+                           'Real-world scenarios and best practices';
+
+    const forwardConnection = currentStepNumber < totalStepsCount ?
+                             'Why this step matters for what comes next' :
+                             'How to apply everything learned';
+
+    // Build the improved prompt with contextual information
     const prompt = `
-    Create focused educational content about "${title}" related to ${topic}.
+Create educational content for Step ${currentStepNumber} of ${totalStepsCount} in a learning path about "${topic}".
 
-    Write 400-500 words covering these key areas:
-    - Core concepts and principles
-    - 1-2 practical examples or applications
-    - Connections to the broader topic
-    - Brief takeaway points
+**This Step's Focus:** "${title}"
+**Step Description:** "${description}"
+**Learning Phase:** ${phase.toUpperCase()} (Step ${currentStepNumber}/${totalStepsCount})
+${previousStepTitle ? `**Previous Step:** "${previousStepTitle}" (avoid repeating this content)` : ''}
 
-    Style requirements:
-    - SHORT PARAGRAPHS (2-3 sentences maximum)
-    - Clear, engaging educational tone
-    - Frequent paragraph breaks for readability
-    - No meta-references (don't call this "Part X" or refer to other sections)
-    - Direct approach that starts with substantive content
-    - Avoid redundant language patterns
-    
-    Keep the content concise but complete, making every word count.
-    `;
+**Context for This Phase:**
+${progressContext[phase]}
 
-    const systemMessage = `You are a concise educational content writer specializing in clear, focused explanations. Your writing features short paragraphs, practical examples, and readable formatting. Avoid filler words, redundancy, and overly complex terminology. Always complete your thoughts fully without getting cut off.`;
+**Content Requirements:**
+Write 400-500 words that:
+1. **Builds on the learning journey** - Reference that learners have ${learningJourneyContext}
+2. **Addresses THIS step's unique focus** - Make sure the content is specifically about "${title}", not just general "${topic}" information
+3. **Provides step-appropriate depth** - ${depthGuidance}
+4. **Connects forward** - ${forwardConnection}
+
+**Include:**
+- ${contentFocus}
+- ${exampleGuidance}
+- ${forwardConnection}
+
+**Style:**
+- SHORT PARAGRAPHS (2-3 sentences maximum)
+- Clear, engaging educational tone
+- NO meta-references like "In this section" or "Part ${currentStepNumber}"
+- Start directly with substantive content
+- Avoid repeating phrases from earlier steps
+- Frequent paragraph breaks for readability
+
+Keep the content concise but complete, making every word count.
+`;
+
+    const systemMessage = `You are an expert educational content writer who creates progressive learning experiences. You understand how to build knowledge step-by-step, with each piece of content building naturally on what came before. Your writing features short paragraphs, practical examples, and readable formatting. You avoid filler words, redundancy, and overly complex terminology. You always complete your thoughts fully without getting cut off.`;
     
     // Increased token limit to ensure complete responses
     const data = await callOpenAI(prompt, systemMessage, undefined, 1500);

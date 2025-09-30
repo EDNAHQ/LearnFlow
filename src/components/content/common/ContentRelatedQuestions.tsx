@@ -1,32 +1,34 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AI_STYLES } from "@/components/ai";
-import { cn } from "@/lib/utils";
 
 interface ContentRelatedQuestionsProps {
   questions: string[];
   isLoading: boolean;
-  onQuestionClick: (question: string) => void;
+  onQuestionClick: (question: string, content?: string) => void;
+  topic?: string;
+  content?: string;
 }
 
 const ContentRelatedQuestions = ({
   questions,
   isLoading,
-  onQuestionClick
+  onQuestionClick,
+  topic = "",
+  content = ""
 }: ContentRelatedQuestionsProps) => {
   const handleQuestionClick = (question: string) => {
     console.log("Question clicked in ContentRelatedQuestions:", question);
-    onQuestionClick(question);
+    // Call parent callback to trigger page-level modal
+    onQuestionClick(question, content);
   };
 
   return (
-    <div className="mt-8 border-t border-gray-200 pt-6">
-      <h3 className={cn("text-lg font-semibold mb-4 flex items-center gap-2", AI_STYLES.text.primary)}>
-        <Sparkles className={cn("h-5 w-5", AI_STYLES.text.accent)} />
+    <>
+      <div className="mt-8 border-t border-gray-200 pt-6">
+      <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent">
         Explore Further
       </h3>
-      
+
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((index) => (
@@ -44,13 +46,9 @@ const ContentRelatedQuestions = ({
             <li key={index}>
               <button
                 onClick={() => handleQuestionClick(question)}
-                className={cn(
-                  "underline cursor-pointer text-left flex items-start group transition-colors",
-                  AI_STYLES.text.primary,
-                  "hover:text-brand-accent"
-                )}
+                className="underline cursor-pointer text-left flex items-start group transition-colors text-brand-primary hover:text-brand-accent"
               >
-                <span className="inline-block w-6 text-gray-600 shrink-0">
+                <span className="inline-block w-6 text-brand-primary/60 group-hover:text-brand-accent shrink-0 transition-colors">
                   {index + 1}.
                 </span>
                 <span>{question}</span>
@@ -63,7 +61,8 @@ const ContentRelatedQuestions = ({
           Ask your own questions about this topic using the AI Insights feature!
         </p>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

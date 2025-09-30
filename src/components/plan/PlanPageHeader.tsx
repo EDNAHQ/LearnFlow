@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { UserNav } from "@/components/navigation";
 
 interface PlanPageHeaderProps {
@@ -18,7 +17,6 @@ const PlanPageHeader = ({ handleReset }: PlanPageHeaderProps) => {
               className="flex items-center gap-2 text-gray-700 hover:text-brand-purple" 
               onClick={handleReset}
             >
-              <ArrowLeft className="h-4 w-4" />
               <span>Back</span>
             </Button>
           </div>

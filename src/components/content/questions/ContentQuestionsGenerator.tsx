@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 import { toast } from "sonner";
 
 interface ContentQuestionsGeneratorProps {
@@ -40,13 +41,13 @@ const ContentQuestionsGenerator = ({
   useEffect(() => {
     const generateQuestions = async () => {
       if (!content || !topic || isGenerating) return;
-      
+
       setIsGenerating(true);
       console.log(`Generating questions for: ${title} (ID: ${stepId})`);
-      
+
       try {
         // First attempt with regular settings (will use o3-mini with fallback)
-        const response = await supabase.functions.invoke('generate-learning-content', {
+        const response = await supabase.functions.invoke(EDGE_FUNCTIONS.generateLearningContent, {
           body: {
             content: content.substring(0, 4000), // Limit content length
             topic,
@@ -54,29 +55,23 @@ const ContentQuestionsGenerator = ({
             generateQuestions: true
           }
         });
-        
+
         if (response.error) {
           console.error("Error generating questions:", response.error);
-          
-          // Use fallback questions after 1 retry
-          if (retryCount > 0) {
-            generateFallbackQuestions();
-          } else {
-            // Retry once
-            setRetryCount(prev => prev + 1);
-            setIsGenerating(false);
-          }
+
+          // Use fallback questions immediately on error
+          generateFallbackQuestions();
           return;
         }
-        
+
         const data = response.data;
-        
+
         if (!data || !data.questions || !Array.isArray(data.questions)) {
           console.error("Invalid response format for questions:", data);
           generateFallbackQuestions();
           return;
         }
-        
+
         console.log(`Generated ${data.questions.length} questions for: ${title}`);
         onQuestionsGenerated(data.questions);
       } catch (error) {
@@ -86,18 +81,14 @@ const ContentQuestionsGenerator = ({
         setIsGenerating(false);
       }
     };
-    
-    // Reset state when content changes
-    setIsGenerating(false);
-    setRetryCount(0);
-    
+
     // Small delay to prevent too many requests at once
     const timer = setTimeout(() => {
       generateQuestions();
     }, 1000);
-    
+
     return () => clearTimeout(timer);
-  }, [content, topic, title, stepId, onQuestionsGenerated, retryCount]);
+  }, [content, topic, title, stepId, onQuestionsGenerated]);
   
   // This is a "headless" component that doesn't render UI
   return null;

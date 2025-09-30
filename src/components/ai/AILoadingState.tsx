@@ -4,14 +4,15 @@ import { AI_STYLES } from "./constants";
 import { cn } from "@/lib/utils";
 
 interface AILoadingStateProps {
-  message?: string;
+  message?: string | null;
   size?: "sm" | "md" | "lg";
   variant?: "default" | "minimal" | "animated";
   className?: string;
 }
 
 const AILoadingState = ({
-  message = "Generating AI insights...",
+  // Default to no message – we want a clean logo-only loading state
+  message = null,
   size = "md",
   variant = "default",
   className
@@ -41,20 +42,18 @@ const AILoadingState = ({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="relative">
-          <Loader2 className={cn(iconSize, AI_STYLES.animations.spinner)} />
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-          >
-            <Sparkles className={cn(sizeClasses[size === "lg" ? "md" : "sm"], AI_STYLES.text.accent)} />
-          </motion.div>
-        </div>
+        {/* LearnFlow animated logo (replaces generic spinner + message) */}
+        <motion.div
+          className="flex flex-col items-center"
+          animate={{ scale: [1, 1.05, 1], opacity: [0.85, 1, 0.85] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <span className="text-2xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight">
+            LearnFlow
+          </span>
+        </motion.div>
         {message && (
-          <p className={cn("mt-3 text-sm font-medium", AI_STYLES.text.muted)}>
-            {message}
-          </p>
+          <p className={cn("mt-3 text-sm font-medium", AI_STYLES.text.muted)}>{message}</p>
         )}
       </motion.div>
     );
@@ -62,10 +61,17 @@ const AILoadingState = ({
 
   return (
     <div className={cn("flex flex-col items-center justify-center py-8", className)}>
-      <Loader2 className={cn(iconSize, AI_STYLES.animations.spinner, "mb-2")} />
-      {message && (
-        <p className={cn("text-sm", AI_STYLES.text.muted)}>{message}</p>
-      )}
+      {/* Minimal logo pulse for default variant as well */}
+      <motion.div
+        className="flex items-center"
+        animate={{ scale: [1, 1.05, 1], opacity: [0.85, 1, 0.85] }}
+        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <span className="text-xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight">
+          LearnFlow
+        </span>
+      </motion.div>
+      {message && <p className={cn("mt-2 text-sm", AI_STYLES.text.muted)}>{message}</p>}
     </div>
   );
 };

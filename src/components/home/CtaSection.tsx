@@ -9,29 +9,30 @@ interface CtaSectionProps {
 const CtaSection = ({ onStartLearning }: CtaSectionProps) => {
   return (
     <div className="py-32 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 brand-gradient opacity-30" />
+      {/* Keep brand tint very light so the artwork remains visible */}
+      <div className="absolute inset-0 brand-gradient opacity-5" />
 
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(255,255,255,0.04)_50%,transparent_70%)]" />
         <img
           src="/images/sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_ae0bc824-7571-4682-8f82-3f6faa6c1865_0.png"
           alt="Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-45 saturate-125 contrast-110"
+          className="absolute inset-0 w-full h-full object-cover opacity-100 saturate-110 contrast-110 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
+        {/* Global multiply darken to balance contrast without hiding details */}
+        <div className="absolute inset-0 bg-black/35 mix-blend-multiply" />
+        {/* Very light edge vignette to ground the section */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/25" />
       </div>
 
       <div className="max-w-4xl mx-auto text-center relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm mb-8 animate-fade-down">
-          <Sparkles className="w-4 h-4 text-white" />
-          <span className="text-sm font-medium text-white">Limited Time Offer</span>
-        </div>
+        {/* Localized radial scrim: stronger center, smooth falloff; keeps image readable while boosting text contrast */}
+        <div className="pointer-events-none absolute inset-0 mx-auto max-w-4xl bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.4)_45%,transparent_78%)]" aria-hidden="true" />
 
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-down" style={{ animationDelay: '0.2s' }}>
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 animate-fade-down drop-shadow-[0_8px_16px_rgba(0,0,0,0.75)]" style={{ animationDelay: '0.2s' }}>
           Ready to Transform Your Learning?
         </h2>
 
-        <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto font-light animate-fade-down" style={{ animationDelay: '0.4s' }}>
+        <p className="text-xl text-white mb-12 max-w-2xl mx-auto font-light animate-fade-down drop-shadow-[0_6px_12px_rgba(0,0,0,0.65)]" style={{ animationDelay: '0.4s' }}>
           Join thousands of learners who are already accelerating their growth with AI-powered personalized learning paths.
         </p>
 
@@ -65,7 +66,7 @@ const CtaSection = ({ onStartLearning }: CtaSectionProps) => {
             Get Started Now
             <ChevronRight className="ml-2 w-5 h-5" />
           </Button>
-          <p className="mt-4 text-sm text-white/70">
+          <p className="mt-4 text-sm text-white/80">
             30-day money-back guarantee • Cancel anytime
           </p>
         </div>

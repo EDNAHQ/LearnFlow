@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, BookOpen } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface HeroSectionProps {
   onStartLearning: () => void;
@@ -61,19 +61,19 @@ export const HeroSection = ({ onStartLearning }: HeroSectionProps) => {
             </Button>
           </div>
 
-          {/* Stats */}
+          {/* Value props (non-numeric, future-proof) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 animate-fade-up animation-delay-800">
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">10k+</div>
-              <div className="text-sm text-white/70">Active Learners</div>
+              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">Guided</div>
+              <div className="text-sm text-white/70">Clear steps that keep you moving</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">500+</div>
-              <div className="text-sm text-white/70">Learning Paths</div>
+              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">Personalized</div>
+              <div className="text-sm text-white/70">Learning paths tailored to your goals</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">98%</div>
-              <div className="text-sm text-white/70">Success Rate</div>
+              <div className="text-3xl sm:text-4xl font-bold text-white mb-2">Flexible</div>
+              <div className="text-sm text-white/70">Learn at your pace, anytime</div>
             </div>
           </div>
         </div>

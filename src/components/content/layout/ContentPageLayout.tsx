@@ -1,6 +1,5 @@
 
 import { ReactNode } from "react";
-import { ContentInsightsManager } from "../ContentInsightsManager";
 import { cn } from "@/lib/utils";
 
 interface ContentPageLayoutProps {
@@ -68,8 +67,6 @@ const ContentPageLayout = ({
         </div>
       </div>
 
-      {/* Add ContentInsightsManager to handle AI insight events */}
-      {topic && <ContentInsightsManager topic={topic} />}
     </div>
   );
 };
