@@ -4,7 +4,9 @@ export type FunctionType =
   | 'content-generation'
   | 'quick-insights'
   | 'deep-analysis'
-  | 'structured-extraction';
+  | 'structured-extraction'
+  | 'related-topics'
+  | 'chat-tutor';
 
 export type Provider = 'openrouter' | 'openai';
 

@@ -1,8 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import OpenAI from "https://esm.sh/openai@4.28.0";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+import { createAIClient } from "../_shared/ai-provider/index.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,16 +24,13 @@ serve(async (req) => {
     }
 
     console.log(`Generating deep dive topics for: ${topic} - ${title}`);
-    
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: openAIApiKey
-    });
+
+    // Initialize AI client
+    const aiClient = createAIClient();
 
     // Create a prompt for generating deep dive topics
-    const prompt = `
-You are an expert learning assistant. Based on the following content about "${topic}",
-suggest exactly 6 related topics for deep dives that would enhance understanding.
+    const prompt = `You are an expert learning assistant. Based on the following content about "${topic}",
+suggest exactly 4 related topics for deep dives that would enhance understanding.
 These should be specific concepts or ideas that are related to but extend beyond the main content.
 
 Content: ${content}
@@ -56,37 +51,33 @@ Respond in JSON format:
     },
     ...
   ]
-}
-`;
+}`;
 
-    // Call OpenAI API with gpt-4.1-mini model
+    // Call AI via centralized client
     try {
-      console.log("Calling OpenAI API with gpt-4.1-mini model");
-      
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4.1-mini",
+      console.log("Calling AI client with 'related-topics' function type");
+
+      const response = await aiClient.chat({
+        functionType: 'related-topics',
         messages: [{ role: 'user', content: prompt }],
-        response_format: { type: "json_object" },
-        max_tokens: 1000
+        responseFormat: 'json_object',
       });
-      
+
       // Parse the response
-      const responseContent = completion.choices[0].message.content;
-      
-      if (!responseContent) {
-        throw new Error("Empty response from OpenAI");
+      if (!response.content) {
+        throw new Error("Empty response from AI");
       }
-      
+
       try {
-        const parsedTopics = JSON.parse(responseContent);
-        console.log(`Generated ${parsedTopics.topics?.length || 0} deep dive topics`);
-        
+        const parsedTopics = JSON.parse(response.content);
+        console.log(`Generated ${parsedTopics.topics?.length || 0} deep dive topics using ${response.model}`);
+
         // Add random IDs if they don't exist
         const topicsWithIds = parsedTopics.topics.map(topic => ({
           ...topic,
           id: topic.id || crypto.randomUUID()
         }));
-        
+
         return new Response(
           JSON.stringify({ topics: topicsWithIds }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -95,8 +86,8 @@ Respond in JSON format:
         console.error("Failed to parse JSON response:", parseError);
         throw new Error("Invalid JSON response from AI");
       }
-    } catch (openaiError) {
-      console.error("OpenAI API error:", openaiError);
+    } catch (aiError) {
+      console.error("AI API error:", aiError);
       
       // Fallback to simpler approach if API call fails
       const fallbackTopics = [
@@ -123,23 +114,11 @@ Respond in JSON format:
           title: `Common ${topic} Patterns`,
           description: `Frequently used patterns and approaches in ${topic}.`,
           similarity: 0.75
-        },
-        {
-          id: crypto.randomUUID(),
-          title: `${topic} Best Practices`,
-          description: `Industry standards and recommended approaches for ${topic}.`,
-          similarity: 0.7
-        },
-        {
-          id: crypto.randomUUID(),
-          title: `Future of ${topic}`,
-          description: `Emerging trends and future developments in ${topic}.`,
-          similarity: 0.65
         }
       ];
-      
+
       return new Response(
-        JSON.stringify({ topics: fallbackTopics, error: openaiError.message }),
+        JSON.stringify({ topics: fallbackTopics, error: aiError.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

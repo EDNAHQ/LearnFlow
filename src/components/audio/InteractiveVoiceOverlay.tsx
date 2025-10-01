@@ -113,61 +113,42 @@ const InteractiveVoiceOverlay: React.FC<InteractiveVoiceOverlayProps> = ({
           variants={overlayVariants}
         >
           {/* Background overlay */}
-          <motion.div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black/90 to-pink-900/20 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          
+
+          {/* Close button - fixed top right, outside content */}
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+            className="fixed top-8 right-8 text-white bg-red-600/90 hover:bg-red-500 z-[100] rounded-full shadow-2xl border-2 border-white/30 w-12 h-12"
+          >
+            <X className="w-7 h-7" />
+          </Button>
+
           {/* Main content */}
-          <motion.div 
-            className="relative ml-auto w-full bg-gradient-to-br from-[#1A1A1A] via-[#252525] to-[#1A1A1A] flex flex-col"
+          <motion.div
+            className="relative ml-auto w-full bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 flex flex-col"
             variants={overlayVariants}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
-              <motion.div 
-                className="flex items-center"
-                variants={contentVariants}
-              >
-                {/* LearnFlow Logo */}
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-[#6D42EF] to-[#E84393] rounded-lg flex items-center justify-center">
-                    <div className="text-white font-bold text-lg">
-                      <span className="text-white">L</span>
-                      <span className="text-white">F</span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold text-white">
-                    <span className="text-[#6D42EF]">Learn</span>
-                    <span className="text-white">Flow</span>
-                  </div>
-                </div>
-              </motion.div>
-              <Button
-                onClick={onClose}
-                variant="ghost"
-                size="icon"
-                className="text-gray-400 hover:text-white hover:bg-gray-800"
-              >
-                <X className="w-6 h-6" />
-              </Button>
-            </div>
 
-            {/* Main Voice Interface */}
+            {/* Main Voice Interface - Centered */}
             <div className="flex-1 flex flex-col items-center justify-center p-8">
-              <motion.div variants={contentVariants}>
+              <motion.div variants={contentVariants} className="flex flex-col items-center">
                 <VoiceStatusDisplay
                   isConnected={isConnected}
                   isSpeaking={isSpeaking}
                   isListening={isListening}
                   topic={topic}
                 />
-                
+
                 {/* Controls */}
-                <div className="mt-8">
+                <div className="mt-12">
                   <VoiceControlsSection
                     isConnected={isConnected}
                     isConnecting={isConnecting}
@@ -179,9 +160,6 @@ const InteractiveVoiceOverlay: React.FC<InteractiveVoiceOverlayProps> = ({
                 </div>
               </motion.div>
             </div>
-
-            {/* Messages Section */}
-            <ConversationHistory messages={messages} />
           </motion.div>
         </motion.div>
       )}

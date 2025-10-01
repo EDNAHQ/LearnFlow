@@ -30,7 +30,8 @@
       "Bash(git mv:*)",
       "Bash(cat:*)",
       "Bash(mkdir:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(clip)"
     ]
   },
   "enableAllProjectMcpServers": true,

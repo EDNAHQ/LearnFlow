@@ -33,8 +33,8 @@ serve(async (req) => {
     // Enhance prompt with brand styling
     const enhancedPrompt = `${prompt}, modern minimalist style, purple and pink gradient colors, professional tech aesthetic, 4k, high quality, clean composition`
 
-    // Call Replicate API using qwen/qwen-image model
-    const replicateResponse = await fetch('https://api.replicate.com/v1/models/qwen/qwen-image/predictions', {
+    // Call Replicate API using black-forest-labs/flux-schnell model
+    const replicateResponse = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
@@ -43,8 +43,6 @@ serve(async (req) => {
       body: JSON.stringify({
         input: {
           prompt: enhancedPrompt,
-          guidance: 4,
-          num_inference_steps: 50,
         },
       }),
     })

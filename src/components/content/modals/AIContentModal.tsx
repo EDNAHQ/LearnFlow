@@ -72,19 +72,20 @@ const AIContentModal = ({
             onClick={handleClose}
           />
 
-          {/* Bottom sheet modal */}
+          {/* Bottom sheet modal with gradient border */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={
-              `fixed bottom-0 h-[25vh] md:h-[50vh] bg-white z-[120] overflow-hidden flex flex-col rounded-t-2xl shadow-2xl border-t border-gray-200 ` +
+              `fixed bottom-0 h-[25vh] md:h-[50vh] z-[120] rounded-t-2xl shadow-2xl p-[2px] bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] ` +
               (widthVariant === "halfRight"
                 ? "w-full md:w-1/2 right-0 left-auto"
                 : "inset-x-0 w-full")
             }
           >
+            <div className="h-full w-full bg-white rounded-t-2xl overflow-hidden flex flex-col">
             {/* Header */}
             <div className="flex-shrink-0 border-b border-gray-200 bg-white px-8 pt-2 pb-3">
               {/* Drag handle */}
@@ -146,6 +147,7 @@ const AIContentModal = ({
                 </div>
               </div>
             )}
+            </div>
           </motion.div>
         </>
       )}

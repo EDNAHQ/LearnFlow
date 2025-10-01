@@ -10,7 +10,7 @@ export async function createRealtimeSpeechSession(options: RealtimeSpeechOptions
     const { data, error } = await supabase.functions.invoke('realtime-speech', {
       body: {
         instructions: options.instructions,
-        voice: options.voice || 'nova',
+        voice: options.voice || 'alloy', // Changed from 'nova' to 'alloy' for Realtime API compatibility
         topic: options.topic,
         initialPrompt: options.initialPrompt,
         pathId: options.pathId,

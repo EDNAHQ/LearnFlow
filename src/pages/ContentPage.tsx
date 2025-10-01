@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/content";
 import { useContentNavigation } from "@/hooks/navigation";
+import { supabase } from "@/integrations/supabase/client";
+import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 import ContentDisplay from "@/components/content/common/ContentDisplay";
 import ContentHeader from "@/components/content/ContentHeader";
 import ContentNavigation from "@/components/content/navigation/ContentNavigation";
@@ -13,7 +15,7 @@ import ContentPageLayout from "@/components/content/layout/ContentPageLayout";
 import ContentMiniMap from "@/components/content/navigation/ContentMiniMap";
 import { useProjectCompletion } from "@/components/content/ProjectCompletion";
 import DeepDiveSection from "@/components/content/deep-dive/DeepDiveSection";
-import ExploreFurtherSideModal from "@/components/content/modals/ExploreFurtherSideModal";
+import AIContentModal from "@/components/content/modals/AIContentModal";
 
 const ContentPage = () => {
   const {
@@ -44,9 +46,13 @@ const ContentPage = () => {
   const [hasRedirected, setHasRedirected] = useState(false);
 
   // Centralized modal state for Explore Further
-  const [exploreFurtherOpen, setExploreFurtherOpen] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState("");
-  const [currentContent, setCurrentContent] = useState("");
+  const [exploreFurtherModal, setExploreFurtherModal] = useState({
+    open: false,
+    question: "",
+    content: "",
+    isLoading: false,
+    error: null as string | null
+  });
 
   // Use the custom hook directly
   const {
@@ -54,6 +60,51 @@ const ContentPage = () => {
     isSubmitting,
     projectCompleted
   } = useProjectCompletion(pathId, () => goToProjects());
+
+  // Handle Explore Further question clicks
+  const handleQuestionClick = async (question: string, content?: string) => {
+    console.log("Question clicked:", question);
+
+    // Open modal with loading state
+    setExploreFurtherModal({
+      open: true,
+      question,
+      content: "",
+      isLoading: true,
+      error: null
+    });
+
+    try {
+      const { data, error } = await supabase.functions.invoke(EDGE_FUNCTIONS.generateAIInsight, {
+        body: {
+          selectedText: content || currentStepData?.detailed_content || currentStepData?.content || "",
+          topic: topic || "",
+          question: question,
+        },
+      });
+
+      if (error) throw error;
+
+      setExploreFurtherModal(prev => ({
+        ...prev,
+        content: data.insight || "Sorry, I couldn't generate an insight for this question.",
+        isLoading: false
+      }));
+    } catch (err) {
+      console.error("Error generating AI insight:", err);
+      setExploreFurtherModal(prev => ({
+        ...prev,
+        error: "Failed to generate insight. Please try again.",
+        isLoading: false
+      }));
+    }
+  };
+
+  const handleRetryInsight = () => {
+    if (exploreFurtherModal.question) {
+      handleQuestionClick(exploreFurtherModal.question, exploreFurtherModal.content);
+    }
+  };
 
   // Set "text" (Read) mode by default when component mounts
   useEffect(() => {
@@ -78,13 +129,6 @@ const ContentPage = () => {
     isLoading
   ]);
 
-  // Handle question clicks - now triggers page-level modal
-  const handleQuestionClick = (question: string, content: string = "") => {
-    console.log("Question clicked in ContentPage:", question);
-    setSelectedQuestion(question);
-    setCurrentContent(content);
-    setExploreFurtherOpen(true);
-  };
 
   // Show loading screen ONLY on the path-level route (no stepIndex)
   if ((isLoading || generatingContent) && !stepIndex) {
@@ -187,13 +231,19 @@ const ContentPage = () => {
         </motion.div>
       </div>
 
-      {/* Page-level AI Modal - renders outside content area */}
-      <ExploreFurtherSideModal
-        open={exploreFurtherOpen}
-        onOpenChange={setExploreFurtherOpen}
-        question={selectedQuestion}
+      {/* Explore Further Modal */}
+      <AIContentModal
+        open={exploreFurtherModal.open}
+        onOpenChange={(open) => setExploreFurtherModal(prev => ({ ...prev, open }))}
+        title="Explore Further"
+        subtitle={exploreFurtherModal.question}
+        content={exploreFurtherModal.content}
+        isLoading={exploreFurtherModal.isLoading}
+        error={exploreFurtherModal.error}
+        onRetry={handleRetryInsight}
         topic={topic || ""}
-        content={currentContent}
+        widthVariant="halfRight"
+        contentType="explore-further"
       />
     </ContentPageLayout>
   );

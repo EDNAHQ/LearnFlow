@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <title>LearnFlow - Personalized Learning Paths</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Critical first-paint CSS to avoid UA defaults and font flashes */
+      html, body { height: 100%; }
+      body { margin: 0; background: #ffffff; color: #0b0c18; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-weight: 300; }
+      #root, #portal-root { isolation: isolate; }
+    </style>
 
     <!-- Primary Meta Tags -->
     <meta name="title" content="LearnFlow - Personalized Learning Paths">
@@ -30,7 +39,7 @@
     <meta name="theme-color" content="#6654f5">
 </head>
 <body>
-    <div id="root">Loading...</div>
+    <div id="root"></div>
     <div id="portal-root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>

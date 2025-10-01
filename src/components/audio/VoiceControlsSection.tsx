@@ -21,44 +21,37 @@ const VoiceControlsSection: React.FC<VoiceControlsSectionProps> = ({
   toggleListening
 }) => {
   return (
-    <div className="flex justify-center space-x-4">
+    <div className="flex justify-center gap-4">
       {!isConnected ? (
-        <Button 
+        <Button
           onClick={handleConnect}
           disabled={isConnecting}
           size="lg"
-          className="bg-gradient-to-r from-[#6D42EF] to-[#E84393] hover:from-[#5A35D1] hover:to-[#D63384] text-white px-8 py-3"
+          className="bg-gradient-to-r from-[#6D42EF] to-[#E84393] hover:from-[#5A35D1] hover:to-[#D63384] text-white px-8 py-4 rounded-full text-base font-medium shadow-lg"
         >
-          {isConnecting ? 'Connecting...' : 'Start Conversation'}
+          {isConnecting ? 'Connecting...' : 'Start'}
         </Button>
       ) : (
         <>
-          <Button 
+          <Button
             onClick={toggleListening}
-            size="lg"
-            variant={isListening ? "destructive" : "secondary"}
-            className={isListening ? "bg-red-600 hover:bg-red-700" : "bg-gray-700 hover:bg-gray-600"}
+            size="icon"
+            className={`w-16 h-16 rounded-full ${
+              isListening
+                ? 'bg-red-500 hover:bg-red-600'
+                : 'bg-gradient-to-r from-[#6D42EF] to-[#E84393] hover:from-[#5A35D1] hover:to-[#D63384]'
+            } text-white shadow-lg`}
           >
-            {isListening ? (
-              <>
-                <MicOff className="mr-2 h-5 w-5" />
-                Stop Listening
-              </>
-            ) : (
-              <>
-                <Mic className="mr-2 h-5 w-5" />
-                Start Talking
-              </>
-            )}
+            {isListening ? <MicOff className="h-7 w-7" /> : <Mic className="h-7 w-7" />}
           </Button>
-          
-          <Button 
+
+          <Button
             onClick={handleDisconnect}
-            variant="outline"
-            size="lg"
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-full px-6"
           >
-            End Chat
+            End
           </Button>
         </>
       )}

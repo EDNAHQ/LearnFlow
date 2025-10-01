@@ -1,9 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAIClient } from "../_shared/ai-provider/index.ts";
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,94 +13,64 @@ serve(async (req) => {
   }
 
   try {
-    // Parse request body
     const { selectedText, topic, question } = await req.json();
 
-    if (!topic) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required topic parameter' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!question) {
+      throw new Error('Question is required');
     }
-
-    console.log(`Generating insights for ${question ? 'question about' : 'selected text on'} topic: ${topic}`);
 
     // Initialize AI client
     const aiClient = createAIClient();
 
-    // Generate insights using AI
-    let prompt = '';
+    // Create a focused prompt for the question
+    const prompt = `You are an expert tutor helping a student understand "${topic}".
 
-    if (question) {
-      // If a specific question was asked about the content
-      prompt = `
-      You are an expert educator specialized in the topic of "${topic}".
+The student is asking: ${question}
 
-      A learner has a specific question about the content they're studying:
-      "${question}"
+${selectedText ? `Context from the current content:
+${selectedText}` : ''}
 
-      ${selectedText ? `This question relates to the following text:
-      """
-      ${selectedText}
-      """` : 'Answer this question in the context of the broader topic.'}
-
-      Please provide a clear, educational response to their question (150-250 words maximum).
-      Use short paragraphs of 2-4 sentences maximum, with frequent paragraph breaks.
-      Focus specifically on answering their question while providing context from the broader topic of ${topic}.
-      Include a concrete example or application if relevant.
-
-      Keep your response friendly, educational, and specifically focused on their question.
-      `;
-    } else {
-      // Default insight generation without a specific question
-      prompt = `
-      You are an expert educator specialized in the topic of "${topic}".
-
-      A learner has highlighted the following text while studying:
-
-      """
-      ${selectedText}
-      """
-
-      Please provide a concise but insightful explanation (100-150 words maximum) about this text.
-      Use short paragraphs of 2-4 sentences maximum.
-
-      Your explanation should:
-      1. Clarify any complex concepts mentioned
-      2. Provide additional context if needed
-      3. Explain why this concept is important in the broader context of ${topic}
-      4. Give a concrete, relevant example if applicable
-
-      Keep your response friendly, educational, and specifically focused on the highlighted text.
-      The learner wants to quickly understand this concept better without getting overwhelmed.
-      `;
-    }
-
-    const systemMessage = `You are an expert educator creating concise and insightful explanations about topics related to ${topic}. You write using short paragraphs of 2-4 sentences maximum to improve readability.`;
+Provide a clear, concise, and helpful explanation that directly answers their question.
+Keep your response focused, educational, and easy to understand.
+Use markdown formatting for better readability.`;
 
     const response = await aiClient.chat({
       functionType: 'quick-insights',
       messages: [
-        { role: 'system', content: systemMessage },
         { role: 'user', content: prompt }
       ],
-      maxTokens: 500,
+      max_tokens: 800,
+      temperature: 0.7
     });
 
-    const insight = response.content;
-
-    console.log(`Successfully generated insight (${insight.length} characters) using ${response.model}`);
+    const insight = response.content || "I couldn't generate an insight for this question.";
 
     return new Response(
       JSON.stringify({ insight }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
+
   } catch (error) {
     console.error('Error in generate-ai-insight function:', error);
 
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        error: error.message || 'Failed to generate insight',
+        insight: "Sorry, I couldn't generate an insight for this question. Please try again."
+      }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 });

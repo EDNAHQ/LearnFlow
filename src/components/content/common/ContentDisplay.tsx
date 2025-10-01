@@ -2,7 +2,9 @@ import React from "react";
 import { useContentMode } from "@/hooks/content";
 import TextModeDisplay from "../display-modes/TextModeDisplay";
 import SlideModeDisplay from "../display-modes/SlideModeDisplay";
+import ImagesModeDisplay from "../display-modes/ImagesModeDisplay";
 import AudioModeDisplay from "../display-modes/AudioModeDisplay";
+import ChatModeDisplay from "../display-modes/ChatModeDisplay";
 
 interface ContentDisplayProps {
   content?: string;
@@ -77,9 +79,28 @@ const ContentDisplay: React.FC<ContentDisplayProps> = ({
             onQuestionClick={handleQuestionClick}
           />
         )}
-        
+
+        {mode === "images" && (
+          <ImagesModeDisplay
+            stepId={displayStepId}
+            title={displayTitle}
+            topic={topic || ''}
+            pathId={pathId || ''}
+          />
+        )}
+
         {mode === "podcast" && (
-          <AudioModeDisplay 
+          <AudioModeDisplay
+            content={detailedContent || displayContent}
+            title={displayTitle}
+            pathId={pathId || ''}
+            stepId={displayStepId}
+            topic={topic || ''}
+          />
+        )}
+
+        {mode === "chat" && (
+          <ChatModeDisplay
             content={detailedContent || displayContent}
             title={displayTitle}
             pathId={pathId || ''}

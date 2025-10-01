@@ -1,7 +1,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 
-type ContentMode = "text" | "slides" | "podcast";
+type ContentMode = "text" | "slides" | "images" | "podcast" | "chat";
 
 interface ContentModeContextProps {
   mode: ContentMode;
@@ -27,7 +27,9 @@ export const ContentModeProvider = ({ children }: { children: ReactNode }) => {
   const toggleMode = () => {
     setMode(prev => {
       if (prev === "text") return "slides";
-      if (prev === "slides") return "podcast";
+      if (prev === "slides") return "images";
+      if (prev === "images") return "podcast";
+      if (prev === "podcast") return "chat";
       return "text";
     });
   };
