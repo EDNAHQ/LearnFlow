@@ -31,6 +31,20 @@ const FALLBACK_CONFIG: Record<FunctionType, ModelConfig> = {
     fallbackModel: 'openai/gpt-4o-mini',
     temperature: 0.2,
   },
+  'related-topics': {
+    provider: 'openrouter',
+    model: 'deepseek/deepseek-chat-v3.1:free',
+    maxTokens: 800,
+    fallbackModel: 'openai/gpt-4o-mini',
+    temperature: 0.7,
+  },
+  'chat-tutor': {
+    provider: 'openrouter',
+    model: 'deepseek/deepseek-chat-v3.1:free',
+    maxTokens: 1500,
+    fallbackModel: 'openai/gpt-4o-mini',
+    temperature: 0.8,
+  },
 };
 
 // Get site information from environment

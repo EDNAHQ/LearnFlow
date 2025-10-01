@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Presentation, Volume2 } from "lucide-react";
+import { BookOpen, Presentation, Image, Volume2, MessageSquare } from "lucide-react";
 import { useContentMode } from "@/hooks/content";
 import { cn } from "@/lib/utils";
 
 export const ModeToggle = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { mode, setMode } = useContentMode();
+  const inactiveClasses = "text-brand-primary hover:text-brand-primary bg-brand-primary/10 hover:bg-brand-primary/15 border border-brand-primary/30 rounded-full px-4";
+  const activeClasses = "bg-gradient-to-r from-brand-primary to-brand-accent text-white hover:text-brand-highlight font-medium border border-transparent rounded-full px-4 hover:brightness-105";
 
   return (
     <div className="flex items-center gap-2" data-component="ContentModeTabs" data-testid="content-mode-tabs" {...props}>
@@ -13,8 +15,8 @@ export const ModeToggle = (props: React.HTMLAttributes<HTMLDivElement>) => {
         size="sm"
         onClick={() => setMode("text")}
         className={cn(
-          "text-[#6D42EF] bg-[#6D42EF]/10 hover:bg-[#6D42EF]/15 border border-[#6D42EF]/30 rounded-full px-4",
-          mode === "text" && "bg-[#6D42EF] text-white font-medium border-[#6D42EF]"
+          inactiveClasses,
+          mode === "text" && activeClasses
         )}
         aria-pressed={mode === "text"}
       >
@@ -26,8 +28,8 @@ export const ModeToggle = (props: React.HTMLAttributes<HTMLDivElement>) => {
         size="sm"
         onClick={() => setMode("slides")}
         className={cn(
-          "text-[#E84393] bg-[#E84393]/10 hover:bg-[#E84393]/15 border border-[#E84393]/30 rounded-full px-4",
-          mode === "slides" && "bg-[#E84393] text-white font-medium border-[#E84393]"
+          inactiveClasses,
+          mode === "slides" && activeClasses
         )}
         aria-pressed={mode === "slides"}
       >
@@ -37,15 +39,41 @@ export const ModeToggle = (props: React.HTMLAttributes<HTMLDivElement>) => {
       <Button
         variant="ghost"
         size="sm"
+        onClick={() => setMode("images")}
+        className={cn(
+          inactiveClasses,
+          mode === "images" && activeClasses
+        )}
+        aria-pressed={mode === "images"}
+      >
+        <Image className="h-4 w-4 mr-2" />
+        Images
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setMode("podcast")}
         className={cn(
-          "text-[#F5B623] bg-[#F5B623]/10 hover:bg-[#F5B623]/15 border border-[#F5B623]/30 rounded-full px-4",
-          mode === "podcast" && "bg-[#F5B623] text-white font-medium border-[#F5B623]"
+          inactiveClasses,
+          mode === "podcast" && activeClasses
         )}
         aria-pressed={mode === "podcast"}
       >
         <Volume2 className="h-4 w-4 mr-2" />
         Audio
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setMode("chat")}
+        className={cn(
+          inactiveClasses,
+          mode === "chat" && activeClasses
+        )}
+        aria-pressed={mode === "chat"}
+      >
+        <MessageSquare className="h-4 w-4 mr-2" />
+        Chat
       </Button>
     </div>
   );

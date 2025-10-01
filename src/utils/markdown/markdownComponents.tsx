@@ -2,13 +2,10 @@ import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { processTextWithQuestions } from "./textProcessors";
-import { processTextWithConcepts } from "./conceptProcessor";
 
 export const getMarkdownComponents = (
-  topic?: string, 
-  onInsightRequest?: (question: string) => void,
-  concepts?: any[],
-  onConceptClick?: (concept: string) => void
+  topic?: string,
+  onInsightRequest?: (question: string) => void
 ) => {
   return {
     h1: ({ node, ...props }) => (
@@ -24,21 +21,16 @@ export const getMarkdownComponents = (
       <h4 className="text-lg font-semibold mt-5 mb-2 text-brand-purple/80" {...props} />
     ),
     p: ({ node, children, ...props }) => {
-      // Process paragraph content for questions and concepts if needed
+      // Process paragraph content for questions if needed
       if (topic && onInsightRequest) {
         let processedContent: React.ReactNode = children;
-        
+
         // Check if we have a string to process
         if (typeof children === 'string') {
-          // Process for questions first if onInsightRequest is available
+          // Process for questions
           processedContent = processTextWithQuestions(children, topic, onInsightRequest);
-          
-          // Then try to add concept links if we have concepts and a click handler
-          if (typeof processedContent === 'string' && concepts && concepts.length > 0 && onConceptClick) {
-            processedContent = processTextWithConcepts(processedContent, concepts, onConceptClick);
-          }
         }
-        
+
         return (
           <p className="my-4 text-lg leading-relaxed text-pretty relative group" {...props}>
             {processedContent}
@@ -54,13 +46,6 @@ export const getMarkdownComponents = (
       <ol className="my-5 pl-6 space-y-3 list-decimal" {...props} />
     ),
     li: ({ node, children, ordered, ...props }) => {
-      // Also process list items for concepts
-      if (topic && concepts && concepts.length > 0 && onConceptClick && typeof children === 'string') {
-        const withConcepts = processTextWithConcepts(children, concepts, onConceptClick);
-        return (
-          <li className="pl-2 text-lg leading-relaxed" {...props}>{withConcepts}</li>
-        );
-      }
       return <li className="pl-2 text-lg leading-relaxed" {...props}>{children}</li>;
     },
     blockquote: ({ node, ...props }) => (
@@ -100,9 +85,26 @@ export const getMarkdownComponents = (
         </code>
       );
     },
-    a: ({ node, ...props }) => (
-      <a className="text-brand-purple hover:text-brand-pink underline transition-colors" {...props} />
-    ),
+    a: ({ node, children, href, ...props }) => {
+      // Check if this is an "Explore Further" link (starts with #)
+      if (href?.startsWith('#') && onInsightRequest) {
+        const questionText = typeof children === 'string' ? children :
+                           Array.isArray(children) ? children.join('') : '';
+        return (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onInsightRequest(questionText);
+            }}
+            className="text-brand-purple hover:text-brand-pink underline transition-colors cursor-pointer text-left"
+            {...props}
+          >
+            {children}
+          </button>
+        );
+      }
+      return <a href={href} className="text-brand-purple hover:text-brand-pink underline transition-colors" {...props}>{children}</a>;
+    },
     img: ({ node, ...props }) => (
       <img className="rounded-lg border border-gray-200 shadow-sm my-4 max-w-full mx-auto" {...props} />
     ),

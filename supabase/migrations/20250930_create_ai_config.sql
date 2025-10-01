@@ -16,7 +16,8 @@ INSERT INTO ai_model_config (function_type, provider, model, fallback_model, max
   ('content-generation', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 2500, 0.7),
   ('quick-insights', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 500, 0.7),
   ('deep-analysis', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o', 2000, 0.7),
-  ('structured-extraction', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 1000, 0.2)
+  ('structured-extraction', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 1000, 0.2),
+  ('related-topics', 'openrouter', 'deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4o-mini', 800, 0.7)
 ON CONFLICT (function_type) DO UPDATE SET
   model = EXCLUDED.model,
   fallback_model = EXCLUDED.fallback_model,

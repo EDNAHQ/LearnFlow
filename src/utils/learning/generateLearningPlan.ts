@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/learning/LearningStep";
 import { startBackgroundContentGeneration } from "./backgroundContentGeneration";
+import { triggerMentalModelGeneration } from "@/utils/triggerMentalModelGeneration";
 
 // Generate a learning plan for a given topic
 export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
@@ -150,9 +151,15 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
     }
     
     console.log(`Successfully created ${steps.length} learning steps`);
-    
+
+    // Trigger mental model image generation in background
+    triggerMentalModelGeneration(pathId, topic).catch(error => {
+      console.error('Failed to trigger mental model generation:', error);
+      // Don't throw - this shouldn't block the learning plan creation
+    });
+
     // No need to start background generation here - it will start after plan approval
-    
+
     return steps;
   } catch (error) {
     console.error("Error generating learning plan:", error);

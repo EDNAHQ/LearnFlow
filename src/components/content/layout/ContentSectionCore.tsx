@@ -2,8 +2,6 @@
 import React, { useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
-// Margin notes removed
-import ContentSectionConcepts from "../concepts/ContentSectionConcepts";
 import ContentQuestionsSection from "../questions/ContentQuestionsSection";
 
 interface ContentSectionCoreProps {
@@ -24,12 +22,10 @@ const ContentSectionCore = ({
   // Create a ref for the content area for margin notes
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Create markdown components with question and concept handlers
+  // Create markdown components with question handlers
   const markdownComponents = getMarkdownComponents(
     topic || undefined,
-    onQuestionClick,  // Pass the question click handler
-    [], // Concepts array could be passed here if available
-    undefined // Concept click handler could be passed here if needed
+    onQuestionClick
   );
 
   return (

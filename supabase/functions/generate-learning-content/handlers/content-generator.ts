@@ -134,7 +134,7 @@ Keep the content concise but complete, making every word count.
 
     // Save generated content to the database and rely on realtime to update clients
     await saveContentToSupabase(stepId, generatedContent, supabaseUrl, supabaseServiceKey);
-    
+
     console.log(`Successfully saved content for step ${stepId}`);
 
     return new Response(

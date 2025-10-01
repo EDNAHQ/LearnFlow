@@ -27,29 +27,29 @@ serve(async (req) => {
     // Initialize AI client
     const aiClient = createAIClient();
 
-    // Create a prompt for generating deep dive content
+    // Create a prompt for generating brief overview content
     const prompt = `
-You are an expert educator specializing in creating clear, comprehensive learning materials.
-Generate a detailed explanation about "${title}" which is related to the broader topic of "${topic}".
+You are an expert educator specializing in creating clear, concise learning overviews.
+Generate a brief overview about "${title}" which is related to the broader topic of "${topic}".
 
 ${originalContent ? `Here is some context about the original topic: ${originalContent}` : ''}
 
-Create educational content that:
-1. Introduces the topic and why it's important
-2. Explains key concepts in a beginner-friendly way
-3. Provides specific examples or applications
-4. Highlights connections to the main topic
-5. Includes a brief summary
+Create a SHORT educational overview that:
+- Is only 2-3 paragraphs total
+- Introduces what this topic is and why it matters
+- Explains 2-3 key concepts briefly
+- Shows how it connects to the main topic
 
-Use Markdown formatting for headings, lists, and emphasis. Keep your explanation concise but thorough.
+Keep it concise and engaging - this is a preview to help learners decide if they want to explore this topic further.
+Use simple Markdown formatting if needed. NO lengthy explanations.
 `;
 
     const response = await aiClient.chat({
-      functionType: 'deep-analysis',
+      functionType: 'quick-insights',
       messages: [
         { role: 'user', content: prompt }
       ],
-      maxTokens: 1500,
+      maxTokens: 400,
     });
 
     const responseContent = response.content;
