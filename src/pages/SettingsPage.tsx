@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/auth';
+import { useEdnaMembership } from '@/hooks/auth/useEdnaMembership';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,12 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { MainNav } from '@/components/navigation';
-import { User, Brain, Save, Mail, Key, Palette } from 'lucide-react';
+import { User, Brain, Save, Mail, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { checkMembershipAndRedirect, loading: membershipLoading } = useEdnaMembership();
 
   // Account settings state
   const [email, setEmail] = useState(user?.email || '');
@@ -38,6 +40,11 @@ export default function SettingsPage() {
     } else {
       setPreferredFormat(preferredFormat.filter(f => f !== format));
     }
+  };
+
+  const handleEdnaLearnClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    checkMembershipAndRedirect();
   };
 
   const handleSave = () => {
@@ -154,6 +161,25 @@ export default function SettingsPage() {
                     <Label htmlFor="newFeatures">New feature announcements</Label>
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* EDNA Ecosystem */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">Enterprise DNA Ecosystem</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">EDNA Learn</h4>
+                  <p className="text-sm text-muted-foreground">Access our learning platform and courses</p>
+                </div>
+                <Button variant="outline" onClick={handleEdnaLearnClick} disabled={membershipLoading}>
+                  {membershipLoading ? "Checking..." : "Open EDNA Learn"}
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
