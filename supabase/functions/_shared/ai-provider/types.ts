@@ -6,7 +6,8 @@ export type FunctionType =
   | 'deep-analysis'
   | 'structured-extraction'
   | 'related-topics'
-  | 'chat-tutor';
+  | 'chat-tutor'
+  | 'topic-recommendations';
 
 export type Provider = 'openrouter' | 'openai';
 

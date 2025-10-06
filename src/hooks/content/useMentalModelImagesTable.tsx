@@ -112,7 +112,9 @@ export const useMentalModelImagesTable = ({ pathId }: UseMentalModelImagesTableP
 
     try {
       console.log('Updating status to generating for imageId:', imageId);
-      // Update status to generating
+      // Optimistically update local state so UI reflects progress immediately
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, status: 'generating', error: null, updated_at: new Date().toISOString() } : img));
+      // Persist status to DB
       await updateImageStatus(imageId, 'generating');
 
       console.log('Calling edge function for imageId:', imageId);
@@ -131,8 +133,38 @@ export const useMentalModelImagesTable = ({ pathId }: UseMentalModelImagesTableP
 
       console.log('Edge function response:', data);
       toast.success('Image generation started!');
+
+      // Poll as a fallback in case realtime misses events; stop when completed/failed
+      const startTime = Date.now();
+      const POLL_INTERVAL_MS = 3000;
+      const TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+      const interval = setInterval(async () => {
+        try {
+          const { data: refreshed, error: fetchError } = await supabase
+            .from('mental_model_images')
+            .select('*')
+            .eq('id', imageId)
+            .single();
+          if (fetchError) throw fetchError;
+
+          if (refreshed) {
+            setImages(prev => prev.map(img => img.id === imageId ? refreshed as MentalModelImage : img));
+            if (refreshed.status === 'completed' || refreshed.status === 'failed') {
+              clearInterval(interval);
+            }
+          }
+
+          if (Date.now() - startTime > TIMEOUT_MS) {
+            clearInterval(interval);
+          }
+        } catch (e) {
+          console.error('Polling error for image generation:', e);
+        }
+      }, POLL_INTERVAL_MS);
     } catch (error) {
       console.error('Error generating image:', error);
+      // Reflect failure both locally and in DB
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, status: 'failed', error: error instanceof Error ? error.message : 'Generation failed' } : img));
       await updateImageStatus(imageId, 'failed', error instanceof Error ? error.message : 'Generation failed');
       toast.error('Failed to generate image');
     }

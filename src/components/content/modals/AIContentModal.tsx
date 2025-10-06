@@ -137,7 +137,7 @@ const AIContentModal = ({
             {/* Footer with action buttons */}
             {!isLoading && content && (
               <div className="flex-shrink-0 border-t border-gray-200 bg-white px-8 py-4">
-                <div className="flex justify-end">
+                <div className="flex justify-start">
                   <button
                     onClick={handleClose}
                     className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] text-white font-medium hover:opacity-90 transition-opacity"
