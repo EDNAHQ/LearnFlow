@@ -1,4 +1,6 @@
 import React from 'react';
+import AILoadingState from '@/components/ai/AILoadingState';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { MentalModelImage } from './types';
@@ -14,6 +16,13 @@ export const ImageCard: React.FC<ImageCardProps> = ({
   index,
   onGenerate,
 }) => {
+  const [open, setOpen] = React.useState(false);
+
+  const canOpen = image.status === 'completed' && !!image.image_url;
+  const srcWithBust = image.image_url
+    ? `${image.image_url}${image.updated_at ? `?t=${encodeURIComponent(image.updated_at)}` : ''}`
+    : null;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -32,29 +41,23 @@ export const ImageCard: React.FC<ImageCardProps> = ({
         if (image.status === 'not_generated' || image.status === 'failed') {
           console.log('Calling onGenerate');
           onGenerate();
+        } else if (canOpen) {
+          setOpen(true);
         }
       }}
     >
       {/* Image Container */}
       <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-50">
-        {image.status === 'completed' && image.image_url ? (
+        {image.status === 'completed' && srcWithBust ? (
           <img
-            src={image.image_url}
+            src={srcWithBust}
             alt={image.prompt}
             className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : image.status === 'generating' ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="animate-pulse space-y-2">
-              <div className="w-16 h-16 mx-auto">
-                <svg className="animate-spin text-brand-primary" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-              <p className="text-sm text-gray-500 font-medium">Generating image...</p>
-            </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
+            <AILoadingState variant="animated" message="Generating image..." />
           </div>
         ) : image.status === 'not_generated' ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center group">
@@ -88,6 +91,21 @@ export const ImageCard: React.FC<ImageCardProps> = ({
           </p>
         )}
       </div>
+
+      {/* Lightbox Dialog for expanded view */}
+      {canOpen && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none">
+            <div className="relative">
+              <img
+                src={srcWithBust!}
+                alt={image.prompt}
+                className="w-full h-auto rounded-xl"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </motion.div>
   );
 };

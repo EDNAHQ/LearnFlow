@@ -1,49 +1,66 @@
 import type { ModelConfig, FunctionType } from './types.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Hardcoded fallback configuration (used if DB fetch fails)
+// Centralized, code-first defaults
+// Update DEFAULT_PRIMARY_MODEL to change the model across all function types in one place.
+const DEFAULT_PRIMARY_MODEL = Deno.env.get('DEFAULT_AI_MODEL') || 'x-ai/grok-code-fast-1';
+
+// Optional: centralized fallback model (some function types may override)
+const DEFAULT_FALLBACK_MODEL = Deno.env.get('FALLBACK_AI_MODEL') || 'openai/gpt-4o-mini';
+
+// If AI_CONFIG_SOURCE is set to 'db', we will load from the database; otherwise we use code config.
+const AI_CONFIG_SOURCE = (Deno.env.get('AI_CONFIG_SOURCE') || 'code').toLowerCase();
+
+// Code configuration used by default (and as fallback if DB fetch fails)
 const FALLBACK_CONFIG: Record<FunctionType, ModelConfig> = {
   'content-generation': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 2500,
-    fallbackModel: 'openai/gpt-4o-mini',
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
     temperature: 0.7,
   },
   'quick-insights': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 500,
-    fallbackModel: 'openai/gpt-4o-mini',
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
     temperature: 0.7,
   },
   'deep-analysis': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 2000,
     fallbackModel: 'openai/gpt-4o',
     temperature: 0.7,
   },
   'structured-extraction': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 1000,
-    fallbackModel: 'openai/gpt-4o-mini',
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
     temperature: 0.2,
   },
   'related-topics': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 800,
-    fallbackModel: 'openai/gpt-4o-mini',
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
     temperature: 0.7,
   },
   'chat-tutor': {
     provider: 'openrouter',
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 1500,
-    fallbackModel: 'openai/gpt-4o-mini',
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
     temperature: 0.8,
+  },
+  'topic-recommendations': {
+    provider: 'openrouter',
+    model: DEFAULT_PRIMARY_MODEL,
+    maxTokens: 1000,
+    fallbackModel: DEFAULT_FALLBACK_MODEL,
+    temperature: 0.7,
   },
 };
 
@@ -64,6 +81,11 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * Results are cached for 5 minutes to reduce DB calls.
  */
 export async function getAIConfig(functionType: FunctionType): Promise<ModelConfig> {
+  // If configured for code-first, return immediately from the code config
+  if (AI_CONFIG_SOURCE === 'code') {
+    return FALLBACK_CONFIG[functionType];
+  }
+
   // Return from cache if valid
   if (configCache && Date.now() < cacheExpiry) {
     return configCache[functionType];

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { generateLearningPlan } from '@/utils/learning/generateLearningPlan';
 import { useToast } from '@/hooks/ui';
 import { useAuth } from '@/hooks/auth';
+import { useRecommendedTopics } from '@/hooks/recommendations/useRecommendedTopics';
 
 const trendingTopics = [
   'React Hooks',
@@ -28,6 +29,7 @@ export const LearningCommandCenter: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { recommendations, isLoading: isLoadingRecommendations } = useRecommendedTopics();
 
   const {
     isOpen,
@@ -224,6 +226,33 @@ export const LearningCommandCenter: React.FC = () => {
                       >
                         <span className="text-gray-700">{suggestion}</span>
                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#6654f5] transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recommended Topics (Personalized) */}
+              {!input && user && recommendations.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-[#6654f5] mb-3">
+                    Recommended For You
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {recommendations.map((rec, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSubmit(rec.topic)}
+                        className="px-4 py-2 rounded-full border border-transparent bg-white text-sm font-medium text-gray-900 shadow-sm transition-all hover:shadow-md"
+                        style={{
+                          backgroundImage: 'linear-gradient(white, white), linear-gradient(90deg, #6654f5, #1EAEDB)',
+                          backgroundOrigin: 'border-box',
+                          backgroundClip: 'padding-box, border-box',
+                          borderColor: 'transparent'
+                        }}
+                        title={rec.reason}
+                      >
+                        {rec.topic}
                       </button>
                     ))}
                   </div>
