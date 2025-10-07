@@ -9,6 +9,9 @@ interface PresentationControlsProps {
   onNext: () => void;
   onExit?: () => void;
   onToggleOverview?: () => void;
+  isGeneratingImages?: boolean;
+  onToggleImages?: () => void;
+  imagesEnabled?: boolean;
 }
 
 const PresentationControls = ({
@@ -18,6 +21,9 @@ const PresentationControls = ({
   onNext,
   onToggleOverview,
   onExit,
+  isGeneratingImages,
+  onToggleImages,
+  imagesEnabled = false,
 }: PresentationControlsProps) => {
   const { setMode } = useContentMode();
 
@@ -50,14 +56,14 @@ const PresentationControls = ({
   };
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-8">
+    <div className="fixed bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-4 sm:px-8">
       {/* Glassmorphic floating control bar */}
       <div className="relative">
         {/* Gradient accent line on top */}
         <div className="absolute -top-px left-0 right-0 h-[2px] bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-t-2xl" />
 
-        <div className="backdrop-blur-xl bg-white/70 border border-white/40 rounded-2xl shadow-2xl p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="backdrop-blur-xl bg-white/80 border border-white/50 rounded-2xl shadow-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-white/50"
             onClick={handleToggleOverview}
@@ -65,6 +71,26 @@ const PresentationControls = ({
           >
             Overview
           </button>
+
+          {onToggleImages && (
+            <button
+              className={cn(
+                "text-sm font-medium transition-all duration-300 px-3 py-1.5 rounded-lg flex items-center gap-2",
+                imagesEnabled
+                  ? "bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold text-white"
+                  : "text-gray-700 hover:bg-white/50"
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleImages();
+              }}
+              type="button"
+              title={imagesEnabled ? "Turn off automatic image generation" : "Generate images for slides automatically"}
+            >
+              {isGeneratingImages ? "Generating Images..." : (imagesEnabled ? "Disable Auto Images" : "Enable Auto Images")}
+            </button>
+          )}
 
           <button
             className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-white/50"
@@ -76,7 +102,7 @@ const PresentationControls = ({
         </div>
       
         {/* Progress indicator with gradient */}
-        <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
           <div className="flex items-center gap-1.5">
             {Array.from({ length: totalSlides }, (_, i) => (
               <div
@@ -100,7 +126,7 @@ const PresentationControls = ({
           </div>
         </div>
       
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             className={cn(
               "text-sm font-medium px-4 py-2 rounded-xl transition-all duration-300",

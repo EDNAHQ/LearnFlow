@@ -187,7 +187,7 @@ const ContentPage = () => {
         totalSteps={steps.length} 
       />
 
-      <div className="relative w-full my-0 py-[40px] px-2 lg:px-6">
+      <div className="relative w-full my-0 py-[24px] sm:py-[32px] px-2 lg:px-6">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#6654f5]/5 to-[#ca5a8b]/5 rounded-full blur-3xl" />
@@ -205,10 +205,10 @@ const ContentPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="mb-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
+            className="mb-6 sm:mb-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 md:p-8"
           >
             <div className="max-w-[1400px] mx-auto">
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent mb-8">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent mb-4 sm:mb-8">
                 {currentStepData?.title || "Loading..."}
               </h1>
               <ContentDisplay

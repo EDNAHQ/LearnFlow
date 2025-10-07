@@ -10,6 +10,9 @@ export interface LearningProject {
   created_at: string;
   is_approved: boolean;
   is_completed: boolean;
+  is_public?: boolean;
+  view_count?: number;
+  like_count?: number;
   progress?: number;
 }
 
@@ -26,7 +29,7 @@ export const useProjects = () => {
       try {
         const { data, error } = await supabase
           .from('learning_paths')
-          .select('id, topic, created_at, is_approved, is_completed')
+          .select('id, topic, created_at, is_approved, is_completed, is_public, view_count, like_count')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 

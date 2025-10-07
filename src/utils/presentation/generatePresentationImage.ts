@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface GenerateImageOptions {
   prompt: string;
@@ -26,6 +26,12 @@ export const generatePresentationImage = async (
 
     if (error) {
       console.error('Error calling image generation function:', error);
+
+      // Check for common configuration issues
+      if (error.message?.includes('500') || error.message?.includes('Internal')) {
+        console.error('⚠️ Image generation failed - likely missing REPLICATE_API_TOKEN in Supabase Edge Function secrets');
+      }
+
       return {
         success: false,
         error: error.message || 'Failed to generate image',

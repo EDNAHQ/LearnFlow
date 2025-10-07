@@ -30,7 +30,7 @@ const PresentationOverview = ({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 p-8 overflow-y-auto"
+      className="fixed inset-0 z-50 p-4 sm:p-6 md:p-8 overflow-y-auto"
       initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
       animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
       exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
@@ -39,23 +39,23 @@ const PresentationOverview = ({
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-6 sm:mb-8">
           <div>
-            <h3 className="text-2xl font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
+            <h3 className="text-xl sm:text-2xl font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
               All Slides
             </h3>
             <p className="text-sm text-gray-600 mt-1">{slides.length} slides total</p>
           </div>
           <button
             onClick={handleClose}
-            className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-4 py-2 rounded-xl hover:bg-white/50"
+            className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-3 sm:px-4 py-2 rounded-xl hover:bg-white/50 self-start sm:self-auto"
             type="button"
           >
             Close ✕
           </button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {slides.map((slide, index) => {
             const isActive = currentSlide === index;
             return (

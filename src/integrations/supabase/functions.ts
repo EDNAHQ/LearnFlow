@@ -4,6 +4,7 @@ export const EDGE_FUNCTIONS = {
   // Learning content
   generateLearningContent: 'generate-learning-content', // generates step content and suggested questions
   generateAIInsight: 'generate-ai-insight', // generates AI insights for Explore Further questions
+  learningModesTransform: 'learning-modes-transform',
 
   // Related topics and deep dives
   listRelatedTopics: 'generate-deep-dive-topics', // produces related topics list

@@ -95,13 +95,15 @@ export const ImageCard: React.FC<ImageCardProps> = ({
       {/* Lightbox Dialog for expanded view */}
       {canOpen && (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-4xl p-0 bg-transparent border-none shadow-none">
-            <div className="relative">
-              <img
-                src={srcWithBust!}
-                alt={image.prompt}
-                className="w-full h-auto rounded-xl"
-              />
+          <DialogContent className="w-full h-[100dvh] sm:h-auto sm:max-w-4xl p-0 bg-transparent border-none shadow-none overflow-hidden">
+            <div className="relative w-full h-full sm:h-auto">
+              <div className="absolute inset-0 sm:static overflow-auto">
+                <img
+                  src={srcWithBust!}
+                  alt={image.prompt}
+                  className="w-full h-auto sm:rounded-xl"
+                />
+              </div>
             </div>
           </DialogContent>
         </Dialog>

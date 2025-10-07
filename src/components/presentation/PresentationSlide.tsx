@@ -44,7 +44,7 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
 
   return (
     <motion.div
-      className="absolute inset-0 flex items-center justify-center p-8 opacity-100 z-10"
+      className="absolute inset-0 flex items-center justify-center p-6 sm:p-10 md:p-16 opacity-100 z-10"
       initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
@@ -82,17 +82,17 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
       )}
 
       {/* Glassmorphic container with gradient border */}
-      <div className={`relative w-full ${hasSplitImage ? 'max-w-7xl' : 'max-w-6xl'} mx-auto`}>
+      <div className={`relative w-full ${hasSplitImage ? 'max-w-[90vw]' : 'max-w-[85vw]'} mx-auto`}>
         {/* Gradient border glow effect */}
         <div className="absolute -inset-1 bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-3xl opacity-20 blur-lg" />
 
         {/* Main slide container */}
         <motion.div
-          className={`relative backdrop-blur-xl rounded-3xl shadow-2xl border ${
+          className={`relative backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border ${
             hasHeroImage
               ? 'bg-white/10 border-white/20 text-white'
               : 'bg-white/80 border-white/40'
-          } ${hasSplitImage ? 'px-8 py-8' : 'px-16 py-14'}`}
+          } ${hasSplitImage ? 'px-8 sm:px-12 py-8 sm:py-12' : 'px-8 sm:px-16 md:px-20 py-10 sm:py-16 md:py-20'}`}
           animate={{
             scale: [1, 1.002, 1],
           }}
@@ -103,7 +103,7 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
           }}
         >
           {/* Slide number indicator with gradient */}
-          <div className="absolute top-8 right-8 flex items-center gap-2">
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 flex items-center gap-2">
             <span className="text-sm font-medium bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
               {slideNumber} / {totalSlides}
             </span>
@@ -111,29 +111,30 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
 
           {/* Split-screen layout for concept/technical images */}
           {hasSplitImage ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Image side */}
               <div className="relative">
-                <div className="relative overflow-hidden rounded-2xl">
+                <div className="relative overflow-hidden rounded-3xl shadow-2xl">
                   <img
                     src={slideContent.imageUrl}
                     alt="Visual representation"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover aspect-[4/3]"
                   />
                 </div>
               </div>
 
               {/* Content side */}
-              <div className="prose prose-lg max-w-none">
+              <div className="prose prose-lg sm:prose-xl lg:prose-2xl max-w-none">
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="text-gray-800 leading-[1.7] text-xl"
+                  className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
+                  style={{ lineHeight: '2.5', letterSpacing: '0.02em' }}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <p className="my-3">{children}</p>,
+                      p: ({ children }) => <p style={{ marginTop: '2.5rem', marginBottom: '2.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
                         <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                           {children}
@@ -152,10 +153,10 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
               </div>
             </div>
           ) : isLoadingImage && ['concept', 'technical'].includes(slideContent.imageType || '') && !slideContent.imageUrl ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Loading skeleton for image side */}
               <div className="relative">
-                <div className="relative overflow-hidden rounded-2xl aspect-video bg-gradient-to-br from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 animate-pulse">
+                <div className="relative overflow-hidden rounded-3xl aspect-[4/3] bg-gradient-to-br from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 animate-pulse shadow-2xl">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-gray-500 text-sm font-medium">Generating visual...</div>
                   </div>
@@ -163,16 +164,17 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
               </div>
 
               {/* Content side */}
-              <div className="prose prose-lg max-w-none">
+              <div className="prose prose-lg sm:prose-xl lg:prose-2xl max-w-none">
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="text-gray-800 leading-[1.7] text-xl"
+                  className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
+                  style={{ lineHeight: '2.5', letterSpacing: '0.02em' }}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <p className="my-3">{children}</p>,
+                      p: ({ children }) => <p style={{ marginTop: '2.5rem', marginBottom: '2.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
                         <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                           {children}
@@ -212,19 +214,19 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   {/* Subtle gradient glow behind code */}
                   <div className="absolute -inset-1 bg-gradient-to-r from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 rounded-2xl blur-sm" />
 
-                  <div className="relative backdrop-blur-sm bg-gray-900/95 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                  <div className="relative backdrop-blur-sm bg-gray-900/95 rounded-xl sm:rounded-2xl overflow-x-auto border border-white/10 shadow-2xl">
                     <SyntaxHighlighter
                       language={slideContent.language || 'text'}
                       style={vscDarkPlus}
                       customStyle={{
                         margin: 0,
-                        padding: '2rem',
+                        padding: '1rem 1.25rem',
                         background: 'transparent',
-                        fontSize: '1.1rem',
-                        lineHeight: '1.7',
+                        fontSize: '0.9rem',
+                        lineHeight: '1.6',
                       }}
                       showLineNumbers={slideContent.content.split('\n').length > 3}
-                      wrapLines={true}
+                      wrapLines={false}
                     >
                       {slideContent.content}
                     </SyntaxHighlighter>
@@ -233,20 +235,22 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
               </motion.div>
             </div>
           ) : (
-            <div className="prose prose-lg max-w-none">
+            <div className="prose prose-2xl sm:prose-3xl lg:prose-4xl max-w-none text-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
                 style={{
-                  fontWeight: slideContent.content.length < 150 ? 400 : 300,
-                  fontSize: slideContent.content.length < 100 ? '1.75rem' : slideContent.content.length < 200 ? '1.5rem' : '1.25rem',
+                  fontWeight: slideContent.content.length < 150 ? 500 : 400,
+                  fontSize: slideContent.content.length < 100 ? '3rem' : slideContent.content.length < 200 ? '2.5rem' : '2rem',
+                  lineHeight: '2.5',
+                  letterSpacing: '0.02em'
                 }}
-                className={hasHeroImage ? 'text-white leading-[1.7]' : 'text-gray-800 leading-[1.7]'}
+                className={hasHeroImage ? 'text-white' : 'text-gray-800'}
               >
                 <ReactMarkdown
                   components={{
-                    p: ({ children }) => <p className="my-3">{children}</p>,
+                    p: ({ children }) => <p style={{ marginTop: '2rem', marginBottom: '2rem' }}>{children}</p>,
                     strong: ({ children }) => (
                       <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                         {children}

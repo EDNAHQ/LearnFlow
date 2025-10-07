@@ -66,7 +66,7 @@ const ForgotPassword = () => {
       </div>
 
       {/* Form Section - Right 1/3 */}
-      <div className="w-full lg:w-1/3 flex flex-col justify-center px-8 lg:px-12 bg-white">
+      <div className="w-full lg:w-1/3 flex flex-col justify-center px-6 sm:px-8 lg:px-12 bg-white">
         <div className="w-full max-w-sm mx-auto">
           {/* Back to Sign In Link */}
           <Link
@@ -92,10 +92,10 @@ const ForgotPassword = () => {
 
           {!emailSent ? (
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 Reset Password
               </h2>
-              <p className="text-gray-600 mb-8">
+              <p className="text-gray-600 mb-6 sm:mb-8">
                 Enter your email and we'll send you a link to reset your password.
               </p>
 
@@ -123,7 +123,7 @@ const ForgotPassword = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] hover:opacity-90 text-white font-semibold py-6 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"
+                  className="w-full bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] hover:opacity-90 text-white font-semibold py-5 sm:py-6 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"
                   disabled={loading}
                 >
                   {loading ? (
@@ -140,7 +140,7 @@ const ForgotPassword = () => {
                 </Button>
               </form>
 
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200"></div>
@@ -150,7 +150,7 @@ const ForgotPassword = () => {
                   </div>
                 </div>
 
-                <div className="mt-6 text-center">
+                <div className="mt-4 sm:mt-6 text-center">
                   <p className="text-sm text-gray-600">
                     Remember your password?{' '}
                     <Link

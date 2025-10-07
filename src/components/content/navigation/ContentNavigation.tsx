@@ -26,7 +26,7 @@ const ContentNavigation = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="flex items-center justify-between mt-8 mb-4"
+      className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 mt-6 sm:mt-8 mb-4"
     >
       {/* Previous Arrow */}
       <button
@@ -46,7 +46,7 @@ const ContentNavigation = ({
       </button>
 
       {/* Center Progress Info */}
-      <div className="text-center">
+      <div className="text-center order-1 sm:order-none">
         <p className="text-xs text-gray-500">
           Step {currentStep + 1} of {totalSteps}
         </p>
@@ -56,7 +56,7 @@ const ContentNavigation = ({
       {!isLastStep ? (
         <button
           onClick={onComplete}
-          className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-accent text-white text-sm font-medium hover:opacity-90 transition-opacity w-full sm:w-auto"
         >
           <span>Mark Complete</span>
           <svg

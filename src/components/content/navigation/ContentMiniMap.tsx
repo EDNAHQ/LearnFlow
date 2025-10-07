@@ -49,18 +49,18 @@ const ContentMiniMap: React.FC<ContentMiniMapProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className={cn(
-        "bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/60 p-6 shadow-lg transition-all duration-300",
+        "bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200/60 p-4 sm:p-6 shadow-lg transition-all duration-300",
         isHovered && "shadow-xl border-brand-primary/30"
       )}>
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200/60">
-          <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide">
             Navigation
           </h3>
           <div className="flex items-center gap-2">
             <div className="text-xs text-gray-500">
               {currentStepIndex + 1}/{steps.length}
             </div>
-            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-10 sm:w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-brand-primary to-brand-accent"
                 initial={{ width: "0%" }}

@@ -47,7 +47,7 @@ export const TopicsSection = () => {
   };
 
   return (
-    <div className="py-32 px-6 bg-gradient-to-b from-white to-white">
+  <div className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-gradient-to-b from-white to-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full brand-gradient-light mb-6">
@@ -67,22 +67,22 @@ export const TopicsSection = () => {
           {/* Quick start input */}
           <form
             onSubmit={(e) => { e.preventDefault(); startTopic(customTopic); }}
-            className="mt-8 max-w-xl mx-auto flex items-center gap-3"
+            className="mt-8 max-w-xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
           >
             <input
               type="text"
               value={customTopic}
               onChange={(e) => setCustomTopic(e.target.value)}
               placeholder="What do you want to learn for your business?"
-              className="flex-1 px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#6654f5] bg-white text-[#0b0c18]"
+              className="w-full sm:flex-1 px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#6654f5] bg-white text-[#0b0c18]"
             />
-            <Button type="submit" className="brand-gradient text-white px-6">Start</Button>
+            <Button type="submit" className="w-full sm:w-auto brand-gradient text-white px-6">Start</Button>
           </form>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {/* Video tile */}
-          <div className="group relative col-span-2 md:col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+          <div className="group relative col-span-1 sm:col-span-2 md:col-span-2 sm:row-span-2 rounded-2xl overflow-hidden shadow-lg min-w-0">
             <video
               autoPlay
               loop

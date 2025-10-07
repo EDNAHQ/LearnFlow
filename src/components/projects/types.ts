@@ -8,6 +8,11 @@ export interface LearningProject {
   progress?: number;
   title?: string;
   description?: string;
+  is_public?: boolean;
+  published_at?: string;
+  view_count?: number;
+  like_count?: number;
+  fork_count?: number;
 }
 
 export interface ProjectCardProps {

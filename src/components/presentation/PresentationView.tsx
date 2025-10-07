@@ -5,6 +5,7 @@ import PresentationSlide from "./PresentationSlide";
 import PresentationControls from "./PresentationControls";
 import PresentationOverview from "./PresentationOverview";
 import { useContentMode } from "@/hooks/content";
+import { usePresentationImages } from "@/hooks/usePresentationImages";
 
 export interface SlideContent {
   type: 'text' | 'code' | 'mixed';
@@ -23,6 +24,7 @@ interface PresentationViewProps {
 const PresentationView = ({ content, title }: PresentationViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showOverview, setShowOverview] = useState(false);
+  const [enableImageGeneration, setEnableImageGeneration] = useState(true); // Can be toggled by user
   const { setMode } = useContentMode();
   const slidesProcessed = useRef(false);
 
@@ -146,11 +148,18 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
     slidesProcessed.current = false;
   }, [content]);
 
+  // Use the presentation images hook to enrich slides with AI-generated images
+  const {
+    slides: enrichedSlides,
+    loadingImages,
+    isLoading: isGeneratingImages
+  } = usePresentationImages(slides, title, enableImageGeneration);
+
   const goToNextSlide = useCallback(() => {
-    if (currentSlide < slides.length - 1) {
+    if (currentSlide < enrichedSlides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     }
-  }, [currentSlide, slides.length]);
+  }, [currentSlide, enrichedSlides.length]);
 
   const goToPreviousSlide = useCallback(() => {
     if (currentSlide > 0) {
@@ -168,11 +177,11 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
 
   // Go to a specific slide directly
   const goToSlide = useCallback((index: number) => {
-    if (index >= 0 && index < slides.length) {
+    if (index >= 0 && index < enrichedSlides.length) {
       setCurrentSlide(index);
       setShowOverview(false);
     }
-  }, [slides.length]);
+  }, [enrichedSlides.length]);
 
   // Use a memo-ed keyboard handler to avoid unnecessary re-renders
   useEffect(() => {
@@ -189,7 +198,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
         setShowOverview(prev => !prev);
       } else if (e.key >= "1" && e.key <= "9") {
         const slideNumber = parseInt(e.key, 10) - 1;
-        if (slideNumber < slides.length) {
+        if (slideNumber < enrichedSlides.length) {
           goToSlide(slideNumber);
         }
       }
@@ -197,9 +206,9 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNextSlide, goToPreviousSlide, showOverview, slides.length, goToSlide]);
+  }, [goToNextSlide, goToPreviousSlide, showOverview, enrichedSlides.length, goToSlide]);
 
-  if (slides.length === 0) {
+  if (enrichedSlides.length === 0) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-lg shadow-md border border-gray-200">
@@ -285,32 +294,36 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
       }} />
 
       <div className="relative min-h-screen flex flex-col">
-        <div className="flex-1 relative overflow-hidden">
-          {slides.map((slide, index) => (
+        <div className="flex-1 relative overflow-hidden pb-28 sm:pb-24">
+          {enrichedSlides.map((slide, index) => (
             <PresentationSlide
               key={index}
               slideContent={slide}
               isActive={currentSlide === index}
               slideNumber={index + 1}
-              totalSlides={slides.length}
+              totalSlides={enrichedSlides.length}
+              isLoadingImage={loadingImages[index]}
             />
           ))}
         </div>
-        
-        <PresentationControls 
+
+        <PresentationControls
           currentSlide={currentSlide}
-          totalSlides={slides.length}
+          totalSlides={enrichedSlides.length}
           onPrevious={goToPreviousSlide}
           onNext={goToNextSlide}
           onToggleOverview={toggleOverview}
           onExit={exitPresentation}
+          isGeneratingImages={isGeneratingImages}
+          onToggleImages={() => setEnableImageGeneration(prev => !prev)}
+          imagesEnabled={enableImageGeneration}
         />
       </div>
-      
+
       <AnimatePresence>
         {showOverview && (
           <PresentationOverview
-            slides={slides}
+            slides={enrichedSlides}
             currentSlide={currentSlide}
             onSelectSlide={goToSlide}
             onClose={() => setShowOverview(false)}
