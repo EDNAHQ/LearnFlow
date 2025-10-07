@@ -9,14 +9,14 @@ const PodcastPage = () => {
     <div className="min-h-screen bg-gray-50">
       <MainNav />
       
-      <main className="container max-w-6xl mx-auto px-4 py-8">
+      <main className="container max-w-6xl mx-auto px-4 py-8 sm:py-10 md:py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-10">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-800">
               AI Podcast Creator
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -24,7 +24,7 @@ const PodcastPage = () => {
             </p>
           </div>
           
-          <div className="bg-white shadow-lg rounded-lg p-10 text-center">
+          <div className="bg-white shadow-lg rounded-lg p-6 sm:p-8 md:p-10 text-center">
             <Music className="h-16 w-16 mx-auto text-brand-purple opacity-70 mb-4" />
             <h2 className="text-2xl font-bold mb-4">Coming Soon!</h2>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">

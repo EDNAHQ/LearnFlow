@@ -14,6 +14,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import PlanPage from './pages/PlanPage';
 import ContentPage from './pages/ContentPage';
 import SettingsPage from './pages/SettingsPage';
+import Community from './pages/Community';
 
 function AppContent() {
   const { processAutoSSO } = useEdnaMembership();
@@ -33,6 +34,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth" element={<Navigate to="/sign-in" replace />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/community" element={<Community />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/content/:pathId" element={<ContentPage />} />
         <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />

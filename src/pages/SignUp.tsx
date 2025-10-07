@@ -72,14 +72,14 @@ const SignUp = () => {
       </div>
 
       {/* Auth Form - Right 1/3 */}
-      <div className="w-full lg:w-1/3 flex flex-col justify-center px-8 lg:px-12 bg-white">
+      <div className="w-full lg:w-1/3 flex flex-col justify-center px-6 sm:px-8 lg:px-12 bg-white">
         <div className="w-full max-w-sm mx-auto">
           {/* Logo */}
           <div className="mb-12">
             <div className="flex flex-col items-center text-center">
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] rounded-lg blur-xl opacity-25"></div>
-                <h1 className="relative text-5xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight">
+                <h1 className="relative text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight">
                   LearnFlow
                 </h1>
               </div>
@@ -89,10 +89,10 @@ const SignUp = () => {
 
           {/* Form */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Create account
             </h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-6 sm:mb-8">
               Start your personalized learning journey today
             </p>
 
@@ -185,7 +185,7 @@ const SignUp = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] hover:opacity-90 text-white font-semibold py-6 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] hover:opacity-90 text-white font-semibold py-5 sm:py-6 shadow-lg hover:shadow-xl transition-all duration-200"
                 disabled={loading}
               >
                 {loading ? (
@@ -196,7 +196,7 @@ const SignUp = () => {
               </Button>
             </form>
 
-            <div className="mt-8">
+            <div className="mt-6 sm:mt-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
@@ -206,7 +206,7 @@ const SignUp = () => {
                 </div>
               </div>
 
-              <div className="mt-6 text-center">
+              <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   Already have an account?{' '}
                   <Link

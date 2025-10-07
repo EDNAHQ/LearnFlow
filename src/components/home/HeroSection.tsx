@@ -8,8 +8,8 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ onStartLearning }: HeroSectionProps) => {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-2">
-      <div className="relative min-h-[85vh] rounded-[3rem] overflow-hidden flex items-center justify-center">
+    <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[85vh] rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex items-center justify-center">
         {/* Video Background */}
         <video
           autoPlay

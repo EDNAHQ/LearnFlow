@@ -1,8 +1,9 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
 import ContentQuestionsSection from "../questions/ContentQuestionsSection";
+import LearningModesToolbar from "../common/LearningModesToolbar";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -28,6 +29,18 @@ const ContentSectionCore = ({
     onQuestionClick
   );
 
+  const getSelection = useCallback(() => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    // Ensure selection is inside the content area
+    const range = selection.getRangeAt(0);
+    const container = contentRef.current;
+    if (!container) return null;
+    if (!container.contains(range.commonAncestorContainer)) return null;
+    const text = selection.toString().trim();
+    return text.length > 0 ? text : null;
+  }, []);
+
   return (
     <div className="content-area-wrapper">
       <div
@@ -48,6 +61,14 @@ const ContentSectionCore = ({
             onQuestionClick={onQuestionClick}
           />
         )}
+
+        {/* Learn-it-your-way toolbar */}
+        <LearningModesToolbar
+          content={loadedDetailedContent}
+          topic={topic || undefined}
+          title={title}
+          getSelection={getSelection}
+        />
       </div>
       
       {/* Margin notes removed */}

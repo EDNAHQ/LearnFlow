@@ -97,7 +97,7 @@ const ProjectsPage = () => {
       <MainNav />
 
       {/* Hero Section with Video Background */}
-      <section className="relative h-[40vh] overflow-hidden">
+      <section className="relative min-h-[32vh] sm:h-[40vh] overflow-hidden">
         {/* Video Background */}
         <video
           autoPlay
@@ -142,7 +142,7 @@ const ProjectsPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-8"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-md mx-auto mt-8"
             >
               <div>
                 <div className="text-3xl font-bold text-white">{totalProjects}</div>
@@ -171,7 +171,7 @@ const ProjectsPage = () => {
             transition={{ duration: 0.5 }}
             className="mb-8 p-6 bg-gradient-to-r from-[#6654f5]/10 to-[#ca5a8b]/10 rounded-2xl border border-[#6654f5]/20"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-semibold text-[#0b0c18]">Demo Mode</h3>
                 <p className="text-sm text-gray-600">Sign in to access your personal learning projects and track progress</p>

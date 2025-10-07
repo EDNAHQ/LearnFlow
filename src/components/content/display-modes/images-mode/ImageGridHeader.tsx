@@ -21,26 +21,28 @@ export const ImageGridHeader: React.FC<ImageGridHeaderProps> = ({
 }) => {
   return (
     <div className="mb-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <motion.p
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-gray-600 text-lg flex-1"
+          className="text-gray-600 text-base sm:text-lg flex-1"
         >
           Visual representations to help you understand {topic}
         </motion.p>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             onClick={onReset}
             variant="ghost"
+            className="w-full sm:w-auto"
           >
             Reset All
           </Button>
           <Button
             onClick={onGenerateCustom}
             variant="outline"
+            className="w-full sm:w-auto"
           >
             Generate Custom Image
           </Button>

@@ -75,7 +75,7 @@ const StepPagination = ({
   const pageNumbers = getPaginationNumbers();
   
   return (
-    <div className="flex items-center justify-between w-full mb-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full mb-4">
       <div className="flex items-center">
         <Dialog open={showAllSteps} onOpenChange={setShowAllSteps}>
           <DialogTrigger asChild>
@@ -117,12 +117,12 @@ const StepPagination = ({
         </Dialog>
       </div>
       
-      <div className={cn("py-1.5 rounded-full font-semibold px-[20px] text-sm", AI_STYLES.backgrounds.surface, AI_STYLES.text.primary)}>
+      <div className={cn("py-1.5 rounded-full font-semibold px-[14px] sm:px-[20px] text-xs sm:text-sm", AI_STYLES.backgrounds.surface, AI_STYLES.text.primary)}>
         Step {currentStep + 1} of {totalSteps}
       </div>
       
       <Pagination>
-        <PaginationContent className="flex-wrap">
+        <PaginationContent className="flex-wrap justify-center sm:justify-start">
           <PaginationItem>
             <PaginationLink
               onClick={() => currentStep > 0 && onNavigate(currentStep - 1)}

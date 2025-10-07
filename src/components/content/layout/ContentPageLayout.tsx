@@ -46,10 +46,10 @@ const ContentPageLayout = ({
 
       {/* Split-screen layout: Content on left (70%), Mini-map on right (30%) */}
       <div className="relative z-10 bg-transparent text-gray-800">
-        <div className="mx-auto px-4 max-w-full">
+        <div className="mx-auto px-3 sm:px-4 max-w-full">
           <div className={cn(
-            "flex gap-6",
-            miniMapSidebar ? "grid grid-cols-1 lg:grid-cols-[1fr_400px]" : ""
+            "flex gap-4 sm:gap-6",
+            miniMapSidebar ? "grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px]" : ""
           )}>
             {/* Main content area */}
             <div className="w-full min-w-0">

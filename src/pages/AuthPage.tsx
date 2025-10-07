@@ -36,10 +36,10 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Creative CTA Content (2/3) */}
       <motion.div 
-        className="flex-1 lg:flex-[2] bg-gradient-to-br from-[#1A1A1A] via-[#252525] to-[#1A1A1A] relative overflow-hidden flex items-center justify-center"
+        className="flex-1 lg:flex-[2] bg-gradient-to-br from-[#1A1A1A] via-[#252525] to-[#1A1A1A] relative overflow-hidden flex items-center justify-center order-2 lg:order-1"
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
@@ -75,7 +75,7 @@ const AuthPage = () => {
 
           {/* Main Heading */}
           <motion.h1 
-            className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 md:mb-8 leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -88,7 +88,7 @@ const AuthPage = () => {
 
           {/* Simple Description */}
           <motion.p 
-            className="text-xl text-white/80 mb-12 leading-relaxed"
+            className="text-base md:text-xl text-white/80 mb-10 md:mb-12 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
@@ -100,7 +100,7 @@ const AuthPage = () => {
 
       {/* Right Side - Authentication Form (1/3) */}
       <motion.div 
-        className="flex-1 lg:flex-[1] bg-white flex items-center justify-center p-8"
+        className="flex-1 lg:flex-[1] bg-white flex items-center justify-center p-6 md:p-8 order-1 lg:order-2"
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}

@@ -24,6 +24,27 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            { name: "lucide-react", message: "Icons are banned in this codebase." },
+            { name: "react-icons", message: "Icons are banned in this codebase." },
+            { name: "@heroicons/react", message: "Icons are banned in this codebase." },
+            { name: "@mui/icons-material", message: "Icons are banned in this codebase." },
+            { name: "@tabler/icons-react", message: "Icons are banned in this codebase." },
+            { name: "@radix-ui/react-icons", message: "Icons are banned in this codebase." }
+          ],
+          patterns: [
+            "react-icons/*",
+            "@heroicons/*",
+            "@mui/icons-material/*",
+            "@tabler/icons-*",
+            "lucide-react/*",
+            "@radix-ui/react-icons/*"
+          ]
+        }
+      ],
     },
   }
 );
