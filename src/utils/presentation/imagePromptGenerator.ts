@@ -56,7 +56,7 @@ export const generateImagePrompt = (
   // Hero slide - full background image with brand colors
   if (isHeroSlide && topic) {
     return {
-      prompt: `Futuristic abstract digital art for "${topic}", flowing data streams and interconnected nodes, dominant purple (#6654f5) transitioning to pink (#ca5a8b) with gold (#f2b347) accents, dark background with glowing elements, cinematic lighting, ultra modern tech aesthetic, 4k quality`,
+      prompt: `Futuristic abstract digital art for "${topic}", flowing data streams and interconnected nodes, dominant purple (#6654f5) transitioning to pink (#ca5a8b) with gold (#f2b347) accents, dark background with glowing elements, cinematic lighting, ultra modern tech aesthetic, 4k quality, no text, no labels, no typography, no letters, no words, do not include any written characters`,
       shouldGenerate: true,
       type: 'hero'
     };
@@ -66,7 +66,7 @@ export const generateImagePrompt = (
   if (isProcess) {
     const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Clean infographic showing ${keyPhrase}, step-by-step flow diagram with connected nodes, purple (#6654f5) to pink (#ca5a8b) gradient arrows, white background, minimalist flat design, professional business presentation style`,
+      prompt: `Clean infographic showing ${keyPhrase}, step-by-step flow diagram with connected nodes, purple (#6654f5) to pink (#ca5a8b) gradient arrows, white background, minimalist flat design, professional business presentation style, no text, no labels, no typography, no letters, no words`,
       shouldGenerate: true,
       type: 'concept'
     };
@@ -76,7 +76,7 @@ export const generateImagePrompt = (
   if (isTechnical) {
     const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Technical architecture diagram for ${keyPhrase}, isometric 3D style, clean lines and shapes, purple (#6654f5) and pink (#ca5a8b) accent colors on white background, professional tech documentation style, modern and minimalist`,
+      prompt: `Technical architecture diagram for ${keyPhrase}, isometric 3D style, clean lines and shapes, purple (#6654f5) and pink (#ca5a8b) accent colors on white background, professional tech documentation style, modern and minimalist, no text, no labels, no typography, no letters, no words`,
       shouldGenerate: true,
       type: 'technical'
     };
@@ -86,7 +86,7 @@ export const generateImagePrompt = (
   if (isConceptual) {
     const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Abstract conceptual illustration of ${keyPhrase}, flowing organic shapes with geometric elements, vibrant gradient from purple (#6654f5) through pink (#ca5a8b) to gold (#f2b347), modern educational infographic style, clean and sophisticated`,
+      prompt: `Abstract conceptual illustration of ${keyPhrase}, flowing organic shapes with geometric elements, vibrant gradient from purple (#6654f5) through pink (#ca5a8b) to gold (#f2b347), modern educational infographic style, clean and sophisticated, no text, no labels, no typography, no letters, no words`,
       shouldGenerate: true,
       type: 'concept'
     };
@@ -96,7 +96,7 @@ export const generateImagePrompt = (
   if (contentLower.includes('data') || contentLower.includes('analytics') || contentLower.includes('metrics')) {
     const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Data visualization dashboard concept for ${keyPhrase}, modern charts and graphs, purple (#6654f5) to pink (#ca5a8b) gradient data points, dark mode interface, glowing neon accents, futuristic analytics aesthetic`,
+      prompt: `Data visualization dashboard concept for ${keyPhrase}, modern charts and graphs, purple (#6654f5) to pink (#ca5a8b) gradient data points, dark mode interface, glowing neon accents, futuristic analytics aesthetic, no text, no labels, no typography, no letters, no words`,
       shouldGenerate: true,
       type: 'technical'
     };
@@ -106,7 +106,7 @@ export const generateImagePrompt = (
   if (slideContent.match(/^#+\s/m) || slideContent.length < 200) {
     const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Minimalist abstract art representing ${keyPhrase}, soft gradient from purple (#6654f5) to pink (#ca5a8b), subtle geometric patterns, professional presentation background, elegant and modern`,
+      prompt: `Minimalist abstract art representing ${keyPhrase}, soft gradient from purple (#6654f5) to pink (#ca5a8b), subtle geometric patterns, professional presentation background, elegant and modern, no text, no labels, no typography, no letters, no words`,
       shouldGenerate: true,
       type: 'ambient'
     };

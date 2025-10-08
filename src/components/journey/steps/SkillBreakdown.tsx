@@ -55,18 +55,7 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
     }
   };
 
-  const getLevelLabel = (level: string) => {
-    switch (level) {
-      case 'foundational':
-        return 'Foundational Skills';
-      case 'core':
-        return 'Core Skills';
-      case 'advanced':
-        return 'Advanced Skills';
-      default:
-        return level;
-    }
-  };
+  const getLevelLabel = (level: string) => level;
 
   const getLevelDescription = (level: string) => {
     switch (level) {
@@ -101,7 +90,7 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
   if (!skills || skills.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-white/60">No skills available yet. Please go back and select a topic.</p>
+        <p className="text-gray-600">No skills available yet. Please go back and select a topic.</p>
       </div>
     );
   }
@@ -113,23 +102,17 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900">
       {/* Topic Context */}
       {topic && (
-        <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-          <h4 className="text-sm text-white/60 mb-1">Learning Path for</h4>
-          <p className="text-white font-semibold">{topic.title}</p>
+        <div className="p-2">
+          <p className="text-sm text-gray-700">{topic.title}</p>
         </div>
       )}
 
       {/* Selection Summary */}
       {selectedSkills.length > 0 && (
-        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-          <span className="text-sm text-white/80">
-            {selectedSkills.length} skills selected
-          </span>
-          <span className="text-sm text-white/60">{getTotalTime()}</span>
-        </div>
+        <div className="text-sm text-gray-600">{selectedSkills.length} selected</div>
       )}
 
       {/* Skill Levels */}
@@ -143,22 +126,8 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
             <div key={level} className="space-y-4">
               {/* Level Header */}
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    {getLevelLabel(level)}
-                  </h3>
-                  <p className="text-xs text-white/40 mt-1">
-                    {getLevelDescription(level)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => selectAllByLevel(level)}
-                  className={`text-xs px-4 py-1.5 rounded-full border transition-all ${
-                    allSelected
-                      ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                      : 'border-white/20 text-white/80 hover:bg-white/5'
-                  }`}
-                >
+                <h3 className="text-sm font-medium text-gray-700">{getLevelLabel(level)}</h3>
+                <button onClick={() => selectAllByLevel(level)} className="text-xs text-purple-700 hover:underline">
                   {allSelected ? 'Deselect All' : 'Select All'}
                 </button>
               </div>
@@ -175,47 +144,15 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
                       animate={{ opacity: 1 }}
                       transition={{ delay: index * 0.03 }}
                       onClick={() => toggleSkill(skill)}
-                      className={`p-4 rounded-xl border text-left transition-all ${
+                      className={`px-3 py-2 rounded-lg border text-left transition-colors ${
                         isSelected
-                          ? 'border-white/30 bg-white/5'
-                          : 'border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/5'
+                          ? 'border-purple-300 bg-purple-50'
+                          : 'border-gray-200 hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-white flex-1 pr-4">{skill.name}</h4>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-white/40">
-                            {skill.estimatedTime}
-                          </span>
-                          {isSelected && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="w-2 h-2 bg-white rounded-full"
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-white/60 mb-3">{skill.description}</p>
-
-                      {/* Prerequisites */}
-                      {skill.prerequisites.length > 0 && (
-                        <div className="mb-2">
-                          <p className="text-xs text-white/40 mb-1">Prerequisites</p>
-                          <div className="flex flex-wrap gap-1">
-                            {skill.prerequisites.map((prereq) => (
-                              <span key={prereq} className="text-xs px-2 py-0.5 bg-white/5 text-white/50 rounded">
-                                {prereq}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Outcomes */}
-                      <div className="text-xs text-white/40">
-                        You'll be able to: {skill.outcomes[0]}
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm text-gray-900">{skill.name}</h4>
+                        {isSelected && <span className="w-2 h-2 rounded-full bg-purple-500" />}
                       </div>
                     </motion.button>
                   );
@@ -224,14 +161,6 @@ const SkillBreakdown: React.FC<SkillBreakdownProps> = ({
             </div>
           );
         })}
-      </div>
-
-      {/* Tip */}
-      <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
-        <p className="text-sm text-white/80 font-medium mb-1">Smart Selection</p>
-        <p className="text-xs text-white/60">
-          We recommend starting with foundational skills. You can always add more advanced skills as you progress!
-        </p>
       </div>
     </div>
   );

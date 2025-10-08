@@ -130,11 +130,11 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                   className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
-                  style={{ lineHeight: '2.5', letterSpacing: '0.02em' }}
+                  style={{ lineHeight: '1.6', letterSpacing: '0.02em' }}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <p style={{ marginTop: '2.5rem', marginBottom: '2.5rem', lineHeight: 'inherit' }}>{children}</p>,
+                      p: ({ children }) => <p style={{ marginTop: '1.5rem', marginBottom: '1.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
                         <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                           {children}
@@ -170,11 +170,11 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                   className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
-                  style={{ lineHeight: '2.5', letterSpacing: '0.02em' }}
+                  style={{ lineHeight: '1.6', letterSpacing: '0.02em' }}
                 >
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <p style={{ marginTop: '2.5rem', marginBottom: '2.5rem', lineHeight: 'inherit' }}>{children}</p>,
+                      p: ({ children }) => <p style={{ marginTop: '1.5rem', marginBottom: '1.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
                         <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                           {children}
@@ -243,14 +243,14 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                 style={{
                   fontWeight: slideContent.content.length < 150 ? 500 : 400,
                   fontSize: slideContent.content.length < 100 ? '3rem' : slideContent.content.length < 200 ? '2.5rem' : '2rem',
-                  lineHeight: '2.5',
+                  lineHeight: '1.6',
                   letterSpacing: '0.02em'
                 }}
                 className={hasHeroImage ? 'text-white' : 'text-gray-800'}
               >
                 <ReactMarkdown
                   components={{
-                    p: ({ children }) => <p style={{ marginTop: '2rem', marginBottom: '2rem' }}>{children}</p>,
+                    p: ({ children }) => <p style={{ marginTop: '1.25rem', marginBottom: '1.25rem', lineHeight: 'inherit' }}>{children}</p>,
                     strong: ({ children }) => (
                       <strong className="font-semibold bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold bg-clip-text text-transparent">
                         {children}

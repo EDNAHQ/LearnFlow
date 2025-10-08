@@ -220,6 +220,29 @@ export const useMentalModelImagesTable = ({ pathId }: UseMentalModelImagesTableP
     }
   };
 
+  // Update image prompt
+  const updateImagePrompt = async (imageId: string, newPrompt: string) => {
+    try {
+      const { error } = await supabase
+        .from('mental_model_images')
+        .update({
+          prompt: newPrompt,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', imageId);
+
+      if (error) throw error;
+
+      // Update local state
+      setImages(prev => prev.map(img =>
+        img.id === imageId ? { ...img, prompt: newPrompt } : img
+      ));
+    } catch (error) {
+      console.error('Error updating image prompt:', error);
+      throw error;
+    }
+  };
+
   return {
     images,
     loading,
@@ -228,5 +251,6 @@ export const useMentalModelImagesTable = ({ pathId }: UseMentalModelImagesTableP
     resetFailedImages,
     createInitialPrompts,
     updateImageStatus,
+    updateImagePrompt,
   };
 };
