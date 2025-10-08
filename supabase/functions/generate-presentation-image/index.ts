@@ -30,8 +30,8 @@ serve(async (req) => {
 
     console.log('Generating image with Replicate:', { prompt, stepId, topic })
 
-    // Enhance prompt for better thematic images
-    const enhancedPrompt = `${prompt}, abstract conceptual art, modern minimalist design, professional photography, dramatic lighting, high quality, clean composition, sophisticated`
+    // Enhance prompt for better thematic images and explicitly forbid any text/typography
+    const enhancedPrompt = `${prompt}, abstract conceptual art, modern minimalist design, professional photography, dramatic lighting, high quality, clean composition, sophisticated, no text, no labels, no typography, no letters, no words`
 
     // Call Replicate API using black-forest-labs/flux-schnell model
     const replicateResponse = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {

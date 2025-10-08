@@ -7,41 +7,52 @@ export const useImageGeneration = (pathId: string, topic: string) => {
   const [customPrompt, setCustomPrompt] = useState('');
   const [showPromptInput, setShowPromptInput] = useState(false);
   const [isGeneratingCustom, setIsGeneratingCustom] = useState(false);
+  const [currentImageId, setCurrentImageId] = useState<string | null>(null);
 
   const {
     images,
     loading,
     generateImage,
     resetFailedImages,
-    createInitialPrompts
+    createInitialPrompts,
+    updateImagePrompt
   } = useMentalModelImagesTable({ pathId });
 
-  const handleGenerateCustomImage = useCallback(async () => {
-    if (!customPrompt.trim()) return;
+  const handleGenerateCustomImage = useCallback(async (imageId?: string, prompt?: string) => {
+    const finalPrompt = prompt || customPrompt.trim();
+    if (!finalPrompt) return;
 
     try {
       setIsGeneratingCustom(true);
 
-      // Call edge function with custom prompt
-      const { data, error } = await supabase.functions.invoke('generate-mental-model-images', {
-        body: {
-          pathId,
-          prompts: [customPrompt.trim()]
-        },
-      });
+      // If imageId provided, update existing image
+      if (imageId) {
+        await updateImagePrompt(imageId, finalPrompt);
+        await generateImage(imageId);
+      } else {
+        // Create new image with custom prompt
+        const { data, error } = await supabase.functions.invoke('generate-mental-model-images', {
+          body: {
+            pathId,
+            prompts: [finalPrompt]
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+      }
 
       setCustomPrompt('');
       setShowPromptInput(false);
-      toast.success('Custom image generation started!');
+      setCurrentImageId(null);
+      toast.success('Image generation started!');
     } catch (error) {
-      console.error('Failed to generate custom image:', error);
-      toast.error('Failed to generate custom image');
+      console.error('Failed to generate image:', error);
+      toast.error('Failed to generate image');
+      throw error; // Re-throw to handle in modal
     } finally {
       setIsGeneratingCustom(false);
     }
-  }, [customPrompt, pathId]);
+  }, [customPrompt, pathId, generateImage, updateImagePrompt]);
 
   const handleGenerateImage = useCallback(async (index: number) => {
     console.log('handleGenerateImage called with index:', index);
@@ -85,5 +96,7 @@ export const useImageGeneration = (pathId: string, topic: string) => {
     totalCount,
     isGeneratingAny,
     createInitialPrompts,
+    currentImageId,
+    setCurrentImageId,
   };
 };

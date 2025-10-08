@@ -31,6 +31,8 @@ const ImagesModeDisplay: React.FC<ImagesModeDisplayProps> = ({
     totalCount,
     isGeneratingAny,
     createInitialPrompts,
+    currentImageId,
+    setCurrentImageId,
   } = useImageGeneration(pathId, topic);
 
   const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
@@ -63,12 +65,7 @@ const ImagesModeDisplay: React.FC<ImagesModeDisplayProps> = ({
           isOpen={showSuggestionsModal}
           onClose={() => setShowSuggestionsModal(false)}
           onSelectPrompt={async (prompt) => {
-            setCustomPrompt(prompt);
-            setShowSuggestionsModal(false);
-            // Wait a tick for state to update
-            setTimeout(() => {
-              handleGenerateCustomImage();
-            }, 100);
+            await handleGenerateCustomImage(undefined, prompt);
           }}
           topic={topic}
           stepTitle={title}
@@ -97,12 +94,7 @@ const ImagesModeDisplay: React.FC<ImagesModeDisplayProps> = ({
         isOpen={showSuggestionsModal}
         onClose={() => setShowSuggestionsModal(false)}
         onSelectPrompt={async (prompt) => {
-          setCustomPrompt(prompt);
-          setShowSuggestionsModal(false);
-          // Wait a tick for state to update
-          setTimeout(() => {
-            handleGenerateCustomImage();
-          }, 100);
+          await handleGenerateCustomImage(undefined, prompt);
         }}
         topic={topic}
         stepTitle={title}
@@ -112,16 +104,11 @@ const ImagesModeDisplay: React.FC<ImagesModeDisplayProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {images.map((image, index) => (
           <ImageCardWithOptions
-            key={index}
+            key={image.id}
             image={image}
             index={index}
-            onGenerate={(customPrompt) => {
-              if (customPrompt) {
-                setCustomPrompt(customPrompt);
-                handleGenerateCustomImage();
-              } else {
-                handleGenerateImage(index);
-              }
+            onGenerate={(imageId) => {
+              handleGenerateImage(images.findIndex(img => img.id === imageId));
             }}
             topic={topic}
             stepTitle={title}

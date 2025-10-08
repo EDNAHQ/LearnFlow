@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import InterestDiscovery from './steps/InterestDiscovery';
 import TopicExploration from './steps/TopicExploration';
-import SkillBreakdown from './steps/SkillBreakdown';
-import LearningPlan from './steps/LearningPlan';
-import JourneyLoadingAnimation from './JourneyLoadingAnimation';
 import { useLearningJourney } from '../../hooks/journey/useLearningJourney';
 
 interface LearningJourneyWizardProps {
@@ -13,119 +11,99 @@ interface LearningJourneyWizardProps {
 }
 
 const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const totalSteps = 4;
+  const [topicHistory, setTopicHistory] = useState<string[]>([]);
 
   const {
     journeyData,
     updateJourneyData,
     generateTopics,
-    generateSkills,
-    generateLearningPlan,
+    generateSubTopics,
     isLoading,
     error
   } = useLearningJourney();
 
-  const handleNext = async () => {
-    if (currentStep < totalSteps) {
-      setIsTransitioning(true);
+  const handleTopicSelect = async (topic: any) => {
+    // Add selected topic to history
+    setTopicHistory([...topicHistory, topic.title]);
 
-      // Show loading animation briefly before transitioning
-      setTimeout(() => {
-        setCurrentStep(currentStep + 1);
-        setIsTransitioning(false);
-      }, 300);
-
-      // Trigger AI generation based on current step
-      if (currentStep === 1 && journeyData.selectedInterest) {
-        await generateTopics(journeyData.selectedInterest);
-      } else if (currentStep === 2 && journeyData.selectedTopic) {
-        await generateSkills(journeyData.selectedTopic);
-      } else if (currentStep === 3 && journeyData.selectedSkills) {
-        await generateLearningPlan();
-      }
-    }
+    // Generate subtopics for this topic
+    updateJourneyData({ selectedTopic: topic });
+    await generateSubTopics(topic);
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (topicHistory.length > 0) {
+      // Go back one level in topic hierarchy
+      const newHistory = [...topicHistory];
+      newHistory.pop();
+      setTopicHistory(newHistory);
+
+      if (newHistory.length === 0) {
+        // Back to initial topics
+        setCurrentStep(1);
+      }
+    } else if (currentStep === 2) {
+      // Back to interest selection
+      setCurrentStep(1);
+      updateJourneyData({ topics: [], selectedTopic: null });
     }
+  };
+
+  const handleInterestSelect = async (interest: any) => {
+    updateJourneyData({ selectedInterest: interest });
+    await generateTopics(interest);
+    setCurrentStep(2);
+  };
+
+  const handleStartLearning = (topic: any) => {
+    // Save topic to session storage and navigate to plan page
+    sessionStorage.setItem('learn-topic', topic.title);
+    navigate(`/plan?topic=${encodeURIComponent(topic.title)}`);
+    onClose();
   };
 
   const getStepTitle = () => {
-    switch (currentStep) {
-      case 1:
-        return "What sparks your curiosity?";
-      case 2:
-        return "Let's explore your interests";
-      case 3:
-        return "Building your skill roadmap";
-      case 4:
-        return "Your personalized learning journey";
-      default:
-        return "";
+    if (currentStep === 1) {
+      return "What do you want to learn?";
     }
+    if (topicHistory.length === 0) {
+      return "Pick a topic";
+    }
+    return topicHistory[topicHistory.length - 1];
   };
 
   const getStepDescription = () => {
-    switch (currentStep) {
-      case 1:
-        return "Tell us what excites you most and we'll help you discover amazing learning opportunities";
-      case 2:
-        return "Based on your interests, here are some fascinating topics you could dive into";
-      case 3:
-        return "Let's break down the skills you'll develop and see your learning path";
-      case 4:
-        return "Here's your custom curriculum to get started on your learning adventure";
-      default:
-        return "";
+    if (currentStep === 1) {
+      return "Choose an area of interest to explore";
     }
+    if (topicHistory.length === 0) {
+      return `${journeyData.topics.length} topics to explore`;
+    }
+    return `${journeyData.topics.length} subtopics to dive deeper`;
   };
 
   const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <InterestDiscovery
-            onSelect={(interest) => updateJourneyData({ selectedInterest: interest })}
-            selectedInterest={journeyData.selectedInterest}
-          />
-        );
-      case 2:
-        return (
-          <TopicExploration
-            topics={journeyData.topics}
-            onSelect={(topic) => updateJourneyData({ selectedTopic: topic })}
-            selectedTopic={journeyData.selectedTopic}
-            isLoading={isLoading}
-          />
-        );
-      case 3:
-        return (
-          <SkillBreakdown
-            skills={journeyData.skills}
-            topic={journeyData.selectedTopic}
-            onSelectSkills={(skills) => updateJourneyData({ selectedSkills: skills })}
-            selectedSkills={journeyData.selectedSkills}
-            isLoading={isLoading}
-          />
-        );
-      case 4:
-        return (
-          <LearningPlan
-            plan={journeyData.learningPlan}
-            isLoading={isLoading}
-            onStartLearning={() => {
-              // Handle starting the learning journey
-              onClose();
-            }}
-          />
-        );
-      default:
-        return null;
+    if (currentStep === 1) {
+      return (
+        <InterestDiscovery
+          onSelect={handleInterestSelect}
+          selectedInterest={journeyData.selectedInterest}
+          isLoading={isLoading}
+        />
+      );
     }
+
+    return (
+      <TopicExploration
+        topics={journeyData.topics}
+        onSelect={handleTopicSelect}
+        onStartLearning={handleStartLearning}
+        selectedTopic={journeyData.selectedTopic}
+        isLoading={isLoading}
+      />
+    );
   };
 
   if (!isOpen) return null;
@@ -147,31 +125,34 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
             Close
           </button>
 
-          {/* Progress Indicators */}
-          <div className="flex items-center gap-3 mb-6">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                    step === currentStep
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white'
-                      : step < currentStep
-                      ? 'bg-purple-100 text-purple-600'
-                      : 'bg-gray-100 text-gray-400'
-                  }`}
-                >
-                  {step}
-                </div>
-                {step < 4 && (
-                  <div
-                    className={`w-20 h-1 ml-3 rounded-full transition-all ${
-                      step < currentStep ? 'bg-purple-200' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          {/* Breadcrumb trail */}
+          {topicHistory.length > 0 && (
+            <div className="flex items-center gap-2 mb-4 text-sm text-gray-500">
+              <button
+                onClick={() => {
+                  setTopicHistory([]);
+                  setCurrentStep(1);
+                }}
+                className="hover:text-purple-600"
+              >
+                Start
+              </button>
+              {topicHistory.map((topic, idx) => (
+                <React.Fragment key={idx}>
+                  <span>/</span>
+                  <button
+                    onClick={() => {
+                      const newHistory = topicHistory.slice(0, idx + 1);
+                      setTopicHistory(newHistory);
+                    }}
+                    className="hover:text-purple-600"
+                  >
+                    {topic}
+                  </button>
+                </React.Fragment>
+              ))}
+            </div>
+          )}
 
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {getStepTitle()}
@@ -206,44 +187,14 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
         <div className="px-8 py-6 border-t border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
           <button
             onClick={handleBack}
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 && topicHistory.length === 0}
             className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${
-              currentStep === 1
+              currentStep === 1 && topicHistory.length === 0
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
             Back
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={
-              (currentStep === 1 && !journeyData.selectedInterest) ||
-              (currentStep === 2 && !journeyData.selectedTopic) ||
-              (currentStep === 3 && (!journeyData.selectedSkills || journeyData.selectedSkills.length === 0)) ||
-              isLoading
-            }
-            className={`px-8 py-2.5 rounded-lg font-medium transition-all ${
-              isLoading ||
-              (currentStep === 1 && !journeyData.selectedInterest) ||
-              (currentStep === 2 && !journeyData.selectedTopic) ||
-              (currentStep === 3 && (!journeyData.selectedSkills || journeyData.selectedSkills.length === 0))
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:shadow-lg transform hover:scale-105'
-            }`}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <span>{currentStep === totalSteps ? 'Get Started' : 'Continue'}</span>
-            )}
           </button>
         </div>
       </motion.div>

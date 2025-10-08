@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import JourneyLoadingAnimation from '../JourneyLoadingAnimation';
 
 interface InterestCategory {
   id: string;
@@ -11,6 +12,7 @@ interface InterestCategory {
 interface InterestDiscoveryProps {
   onSelect: (interest: { category: string; freeText?: string }) => void;
   selectedInterest: { category: string; freeText?: string } | null;
+  isLoading?: boolean;
 }
 
 const interestCategories: InterestCategory[] = [
@@ -64,7 +66,7 @@ const interestCategories: InterestCategory[] = [
   }
 ];
 
-const InterestDiscovery: React.FC<InterestDiscoveryProps> = ({ onSelect, selectedInterest }) => {
+const InterestDiscovery: React.FC<InterestDiscoveryProps> = ({ onSelect, selectedInterest, isLoading }) => {
   const [showFreeText, setShowFreeText] = useState(false);
   const [freeTextValue, setFreeTextValue] = useState('');
 
@@ -78,6 +80,15 @@ const InterestDiscovery: React.FC<InterestDiscoveryProps> = ({ onSelect, selecte
       onSelect({ category: 'custom', freeText: freeTextValue });
     }
   };
+
+  if (isLoading) {
+    return (
+      <JourneyLoadingAnimation
+        message="Discovering topics for you"
+        subMessage="Generating personalized learning topics..."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

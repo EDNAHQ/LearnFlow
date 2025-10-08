@@ -16,6 +16,7 @@ export interface Topic {
 interface TopicExplorationProps {
   topics: Topic[];
   onSelect: (topic: Topic) => void;
+  onStartLearning?: (topic: Topic) => void;
   selectedTopic: Topic | null;
   isLoading: boolean;
 }
@@ -23,21 +24,10 @@ interface TopicExplorationProps {
 const TopicExploration: React.FC<TopicExplorationProps> = ({
   topics,
   onSelect,
+  onStartLearning,
   selectedTopic,
   isLoading
 }) => {
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'Beginner Friendly';
-      case 'intermediate':
-        return 'Some Experience Needed';
-      case 'advanced':
-        return 'Advanced Level';
-      default:
-        return difficulty;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -67,112 +57,77 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Clean header */}
-      <div className="mb-6">
-        <p className="text-gray-600 text-sm">
-          We've analyzed your interests and found {topics.length} topics that align with your goals
-        </p>
-      </div>
-
-      {/* Topics Grid - Clean minimal cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
         {topics.map((topic, index) => {
           const isSelected = selectedTopic?.id === topic.id;
-
           return (
-            <motion.button
+            <motion.div
               key={topic.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.03 }}
-              onClick={() => onSelect(topic)}
-              className={`relative p-6 rounded-xl border-2 text-left transition-all ${
+              transition={{ delay: index * 0.015 }}
+              className={`group relative rounded-2xl border-2 transition-all duration-200 ${
                 isSelected
-                  ? 'border-purple-500 bg-purple-50 shadow-lg'
-                  : 'border-gray-200 hover:border-purple-300 bg-white hover:bg-purple-50/30'
+                  ? 'border-transparent bg-gradient-to-br from-[#6654f5]/10 via-[#ca5a8b]/10 to-[#f2b347]/10 shadow-lg'
+                  : 'border-gray-200 bg-white hover:border-transparent hover:bg-gradient-to-br hover:from-[#6654f5]/5 hover:via-[#ca5a8b]/5 hover:to-[#f2b347]/5 hover:shadow-md'
               }`}
             >
-              {/* Match Score and Trending */}
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-4">
+              {/* Gradient border on hover */}
+              {!isSelected && (
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-br from-[#6654f5]/20 via-[#ca5a8b]/20 to-[#f2b347]/20 -z-10 blur-sm" />
+              )}
+
+              {/* Main clickable area - explore deeper */}
+              <button
+                onClick={() => onSelect(topic)}
+                className="w-full text-left px-5 py-4 pb-3"
+              >
+                <span className={`font-medium transition-colors ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent'
+                    : 'text-gray-900 group-hover:bg-gradient-to-r group-hover:from-[#6654f5] group-hover:via-[#ca5a8b] group-hover:to-[#f2b347] group-hover:bg-clip-text group-hover:text-transparent'
+                }`}>
                   {topic.title}
-                </h3>
-                <div className="text-right">
-                  {topic.trending && (
-                    <span className="text-xs text-orange-500 font-medium block mb-1">
-                      🔥 Trending
-                    </span>
-                  )}
-                  <span className="text-xs font-medium text-purple-600">
-                    {topic.matchScore}% match
-                  </span>
-                </div>
-              </div>
+                </span>
+              </button>
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {topic.description}
-              </p>
-
-              {/* Metadata */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Level</span>
-                  <span className="text-gray-700 font-medium">{getDifficultyLabel(topic.difficulty)}</span>
+              {/* Action buttons */}
+              {onStartLearning && (
+                <div className="px-5 pb-4 flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStartLearning(topic);
+                    }}
+                    className="flex-1 px-2 py-1 text-[11px] font-medium text-white brand-gradient rounded-md hover:opacity-90 transition-opacity"
+                  >
+                    Start Learning
+                  </button>
+                  <button
+                    onClick={() => onSelect(topic)}
+                    className="flex-1 px-2 py-1 text-[11px] font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  >
+                    Explore →
+                  </button>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Time</span>
-                  <span className="text-gray-700 font-medium">{topic.timeCommitment}</span>
-                </div>
-              </div>
+              )}
 
-              {/* Career Paths */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-500 mb-2">Career paths</p>
-                <div className="flex flex-wrap gap-2">
-                  {topic.careerPaths.slice(0, 3).map((path) => (
-                    <span
-                      key={path}
-                      className={`text-xs px-3 py-1 rounded-full ${
-                        isSelected
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      {path}
-                    </span>
-                  ))}
-                  {topic.careerPaths.length > 3 && (
-                    <span className="text-xs text-gray-500">
-                      +{topic.careerPaths.length - 3}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Selected Indicator */}
+              {/* Selected indicator */}
               {isSelected && (
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute top-4 right-4 w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full flex items-center justify-center"
+                  className="absolute top-3 right-3 w-5 h-5 brand-gradient rounded-full flex items-center justify-center"
                 >
                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </motion.div>
               )}
-            </motion.button>
+            </motion.div>
           );
         })}
-      </div>
-
-      {/* Tip */}
-      <div className="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
-        <p className="text-sm text-purple-900 font-medium mb-1">💡 Pro Tip</p>
-        <p className="text-xs text-purple-700">
-          Choose a topic that excites you most. You can always explore others later.
-        </p>
       </div>
     </div>
   );

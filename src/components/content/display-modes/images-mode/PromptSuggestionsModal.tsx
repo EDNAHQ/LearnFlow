@@ -10,7 +10,7 @@ import { analyzeContentForPrompts, type PromptSuggestion } from '@/utils/images/
 interface PromptSuggestionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectPrompt: (prompt: string) => void;
+  onSelectPrompt: (prompt: string) => Promise<void>;
   topic: string;
   stepTitle?: string;
   currentContent?: string;
@@ -29,6 +29,8 @@ export const PromptSuggestionsModal: React.FC<PromptSuggestionsModalProps> = ({
   const [activeTab, setActiveTab] = useState('suggestions');
   const [suggestions, setSuggestions] = useState<PromptSuggestion[]>([]);
   const [detectedCategories, setDetectedCategories] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -42,6 +44,10 @@ export const PromptSuggestionsModal: React.FC<PromptSuggestionsModalProps> = ({
         setSelectedSuggestion(firstSuggestion);
         setCustomPrompt(firstSuggestion.promptTemplate);
       }
+
+      // Reset states when modal opens
+      setIsGenerating(false);
+      setError(null);
     }
   }, [isOpen, currentContent, topic, stepTitle]);
 
@@ -57,14 +63,24 @@ export const PromptSuggestionsModal: React.FC<PromptSuggestionsModalProps> = ({
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const prompt = activeTab === 'custom' || !selectedSuggestion
       ? customPrompt
       : selectedSuggestion.promptTemplate;
 
-    if (prompt.trim()) {
-      onSelectPrompt(prompt);
+    if (!prompt.trim()) return;
+
+    try {
+      setIsGenerating(true);
+      setError(null);
+      await onSelectPrompt(prompt);
+      // Only close on success
       onClose();
+    } catch (err) {
+      console.error('Error generating image:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate image');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -174,36 +190,53 @@ export const PromptSuggestionsModal: React.FC<PromptSuggestionsModalProps> = ({
           </Tabs>
         </div>
 
-        <div className="sticky bottom-0 z-10 flex justify-between items-center p-4 sm:p-6 bg-white border-t">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            Cancel
-          </Button>
-          <div className="flex gap-3">
-            {activeTab === 'suggestions' && selectedSuggestion && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setActiveTab('custom');
-                  setCustomPrompt(selectedSuggestion.promptTemplate);
-                }}
-              >
-                Customize
-              </Button>
-            )}
+        <div className="sticky bottom-0 z-10 bg-white border-t">
+          {error && (
+            <div className="px-4 sm:px-6 pt-4 pb-2">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-between items-center p-4 sm:p-6">
             <Button
-              onClick={handleGenerate}
-              disabled={!customPrompt.trim()}
-              className="relative overflow-hidden group"
+              variant="ghost"
+              onClick={onClose}
+              disabled={isGenerating}
+              className="text-gray-600 hover:text-gray-800"
             >
-              <div className="absolute inset-0 brand-gradient opacity-90 group-hover:opacity-100 transition-opacity" />
-              <span className="relative text-white font-medium">
-                Generate Image
-              </span>
+              Cancel
             </Button>
+            <div className="flex gap-3">
+              {activeTab === 'suggestions' && selectedSuggestion && !isGenerating && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActiveTab('custom');
+                    setCustomPrompt(selectedSuggestion.promptTemplate);
+                  }}
+                >
+                  Customize
+                </Button>
+              )}
+              <Button
+                onClick={handleGenerate}
+                disabled={!customPrompt.trim() || isGenerating}
+                className="relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 brand-gradient opacity-90 group-hover:opacity-100 transition-opacity" />
+                <span className="relative text-white font-medium">
+                  {isGenerating ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Generating...
+                    </span>
+                  ) : (
+                    'Generate Image'
+                  )}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

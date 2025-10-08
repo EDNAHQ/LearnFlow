@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createAIClient } from '../_shared/ai-provider/index.ts';
 
@@ -39,54 +40,27 @@ serve(async (req) => {
 
     switch (action) {
       case 'generate-topics':
-        systemPrompt += ' Generate 6-8 specific learning topics based on the user\'s interest.';
-        prompt = `Based on this interest: ${interest?.category}${interest?.freeText ? ` - "${interest.freeText}"` : ''}, generate learning topics.
+        systemPrompt += ' Generate 30-40 diverse, specific learning topics. Just topic names, nothing else. Respond with valid JSON.';
+        prompt = `Based on this interest: ${interest?.category}${interest?.freeText ? ` - "${interest.freeText}"` : ''}, generate 30-40 specific, diverse learning topics.
 
-Return a JSON array of topics with this structure:
-[
-  {
-    "id": "unique-id",
-    "title": "Topic Title",
-    "description": "2-3 sentence description",
-    "difficulty": "beginner|intermediate|advanced",
-    "timeCommitment": "e.g., 20-30 hours",
-    "careerPaths": ["Career 1", "Career 2", "Career 3"],
-    "trending": true/false,
-    "matchScore": 85-100
-  }
-]`;
+Make them concrete and actionable. Mix broad and narrow topics. No descriptions, just names.
+
+Return ONLY this JSON structure:
+{
+  "topics": ["Topic name 1", "Topic name 2", "Topic name 3", ... 30-40 total]
+}`;
         break;
 
       case 'generate-skills':
-        systemPrompt += ' Generate a comprehensive skill breakdown for the selected topic. IMPORTANT: Return a JSON array, not a single object.';
-        prompt = `For the topic "${topic?.title}" (${topic?.description}), create a skill roadmap.
+        systemPrompt += ' Generate 30-40 subtopics based on the parent topic. Just names. Respond with valid JSON.';
+        prompt = `For the topic "${topic?.title}", generate 30-40 related subtopics someone could dive deeper into.
 
-IMPORTANT: You MUST return a JSON ARRAY containing MULTIPLE skill objects, NOT a single object.
+Make them specific and diverse. Mix different angles, applications, and specializations.
 
-Return exactly this structure - an ARRAY of skill objects:
-[
-  {
-    "id": "skill-1",
-    "name": "First Skill Name",
-    "description": "Clear description of what this skill involves",
-    "level": "foundational",
-    "estimatedTime": "5 hours",
-    "prerequisites": [],
-    "outcomes": ["What you'll be able to do"]
-  },
-  {
-    "id": "skill-2",
-    "name": "Second Skill Name",
-    "description": "Description of second skill",
-    "level": "foundational",
-    "estimatedTime": "3 hours",
-    "prerequisites": [],
-    "outcomes": ["Outcome 1", "Outcome 2"]
-  },
-  // ... more skills here
-]
-
-Include 3-4 foundational skills, 4-5 core skills, and 2-3 advanced skills. Total should be 9-12 skills in the array.`;
+Return ONLY this JSON structure:
+{
+  "skills": ["Subtopic 1", "Subtopic 2", "Subtopic 3", ... 30-40 total]
+}`;
         break;
 
       case 'generate-plan':
@@ -153,13 +127,46 @@ Return a JSON object with this structure:
       throw new Error('Invalid response format from AI');
     }
 
-    return new Response(
-      JSON.stringify(result),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+    // Normalize result shape for each action to ensure consistent responses
+    try {
+      let normalized: any;
+      if (action === 'generate-topics') {
+        const topics: any = (result && Array.isArray(result.topics)) ? result.topics : Array.isArray(result) ? result : [];
+
+        if (!Array.isArray(topics) || topics.some((t: any) => typeof t !== 'string')) {
+          throw new Error('Invalid topics format');
+        }
+
+        normalized = { topics };
+      } else if (action === 'generate-skills') {
+        const skillsArr: any = (result && Array.isArray(result.skills)) ? result.skills : Array.isArray(result) ? result : [];
+        if (!Array.isArray(skillsArr) || skillsArr.some((s: any) => typeof s !== 'string')) {
+          throw new Error('Invalid skills format');
+        }
+        normalized = { skills: skillsArr };
+      } else if (action === 'generate-plan') {
+        // Accept a very small plan and forward as-is
+        const plan = (result && result.plan) ? result.plan : result;
+        if (!plan || typeof plan !== 'object') {
+          throw new Error('Invalid plan format');
+        }
+        normalized = { plan };
       }
-    );
+
+      return new Response(
+        JSON.stringify(normalized),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    } catch (normalizationError) {
+      console.error('Normalization error:', normalizationError);
+      return new Response(
+        JSON.stringify({ error: normalizationError.message || 'Response normalization failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
 
   } catch (error) {
     console.error('Error in generate-learning-journey:', error);

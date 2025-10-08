@@ -51,33 +51,27 @@ export const useLearningJourney = () => {
       console.log('Response data:', response.data);
       console.log('Response data type:', typeof response.data);
 
-      // Check if response.data is the actual array (not wrapped)
-      let topicsArray = response.data;
+      // Expect server to return { topics: string[] }
+      const topicNames: unknown = response.data && typeof response.data === 'object'
+        ? (response.data as any).topics
+        : undefined;
 
-      // If it's wrapped in { success: true, data: [...] }
-      if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-        topicsArray = response.data.data;
-      }
-
-      // Handle if the AI returned an object with topics property instead of an array
-      if (topicsArray && typeof topicsArray === 'object' && !Array.isArray(topicsArray)) {
-        if ('topics' in topicsArray) {
-          topicsArray = topicsArray.topics;
-        } else {
-          // Try to convert object values to array if it's indexed like {0: {...}, 1: {...}}
-          const keys = Object.keys(topicsArray);
-          if (keys.every(key => !isNaN(parseInt(key)))) {
-            topicsArray = Object.values(topicsArray);
-          }
-        }
-      }
-
-      if (!topicsArray || !Array.isArray(topicsArray)) {
-        console.error('Invalid response structure. Expected array but got:', topicsArray);
-        console.error('Full response.data:', response.data);
-        console.error('Keys in response.data:', response.data ? Object.keys(response.data) : 'null');
+      if (!Array.isArray(topicNames) || topicNames.some(t => typeof t !== 'string')) {
+        console.error('Invalid response structure for topics. Expected { topics: string[] } but got:', response.data);
         throw new Error('Invalid topics format from AI');
       }
+
+      // Map simple names to Topic objects with defaults for the UI
+      const topicsArray = topicNames.map((name: string, idx: number) => ({
+        id: `topic-${idx + 1}-${Math.random().toString(36).slice(2, 8)}`,
+        title: name,
+        description: '',
+        difficulty: 'beginner' as const,
+        timeCommitment: '10-20 hours',
+        careerPaths: [],
+        trending: false,
+        matchScore: 80,
+      }));
 
       console.log('Topics array to set:', topicsArray);
       updateJourneyData({ topics: topicsArray });
@@ -89,7 +83,7 @@ export const useLearningJourney = () => {
     }
   };
 
-  const generateSkills = async (topic: Topic) => {
+  const generateSubTopics = async (topic: Topic) => {
     setIsLoading(true);
     setError(null);
 
@@ -109,43 +103,34 @@ export const useLearningJourney = () => {
         throw response.error;
       }
 
-      console.log('Skills response from edge function:', response.data);
+      console.log('Subtopics response from edge function:', response.data);
 
-      let skillsArray = response.data;
+      // Expect { skills: string[] } (reusing skills endpoint for subtopics)
+      const subtopicNames: unknown = response.data && typeof response.data === 'object'
+        ? (response.data as any).skills
+        : undefined;
 
-      // Handle multiple response formats
-      if (skillsArray && typeof skillsArray === 'object' && !Array.isArray(skillsArray)) {
-        // Check if it's wrapped in { data: [...] }
-        if ('data' in skillsArray) {
-          skillsArray = skillsArray.data;
-        }
-        // Check if it has a skills property
-        else if ('skills' in skillsArray) {
-          skillsArray = skillsArray.skills;
-        }
-        // Check if it's a single skill object (has id, name, description properties)
-        else if ('id' in skillsArray && 'name' in skillsArray && 'description' in skillsArray) {
-          console.log('AI returned single skill object, wrapping in array');
-          skillsArray = [skillsArray];
-        }
-        // Check if it's an indexed object like {0: {...}, 1: {...}}
-        else {
-          const keys = Object.keys(skillsArray);
-          if (keys.length > 0 && keys.every(key => !isNaN(parseInt(key)))) {
-            skillsArray = Object.values(skillsArray);
-          }
-        }
+      if (!Array.isArray(subtopicNames) || subtopicNames.some(s => typeof s !== 'string')) {
+        console.error('Invalid subtopics response structure. Expected { skills: string[] } but got:', response.data);
+        throw new Error('No subtopics generated');
       }
 
-      if (!skillsArray || !Array.isArray(skillsArray)) {
-        console.error('Invalid skills response structure. Expected array but got:', skillsArray);
-        throw new Error('No skills generated');
-      }
+      // Map subtopics to Topic objects
+      const subtopicsArray = subtopicNames.map((name: string, idx: number) => ({
+        id: `topic-${idx + 1}-${Math.random().toString(36).slice(2, 8)}`,
+        title: name,
+        description: '',
+        difficulty: 'beginner' as const,
+        timeCommitment: '10-20 hours',
+        careerPaths: [],
+        trending: false,
+        matchScore: 80,
+      }));
 
-      updateJourneyData({ skills: skillsArray });
+      updateJourneyData({ topics: subtopicsArray });
     } catch (err) {
-      console.error('Error generating skills:', err);
-      setError(err.message || 'Failed to generate skills');
+      console.error('Error generating subtopics:', err);
+      setError(err.message || 'Failed to generate subtopics');
     } finally {
       setIsLoading(false);
     }
@@ -185,15 +170,36 @@ export const useLearningJourney = () => {
       let planData = response.data;
 
       // Handle multiple response formats
-      if (planData && typeof planData === 'object' && 'data' in planData) {
-        planData = planData.data;
+      if (planData && typeof planData === 'object') {
+        if ('data' in planData) {
+          planData = (planData as any).data;
+        } else if ('plan' in planData) {
+          planData = (planData as any).plan;
+        }
       }
 
-      if (!planData) {
+      if (!planData || typeof planData !== 'object') {
         throw new Error('No learning plan generated');
       }
 
-      updateJourneyData({ learningPlan: planData });
+      // Expand minimal plan into full shape with defaults
+      const expandedPlan: LearningPlanData = {
+        title: (planData as any).title || 'Your Learning Plan',
+        description: (planData as any).description || '',
+        totalDuration: (planData as any).totalDuration || '8 weeks',
+        weeklyCommitment: (planData as any).weeklyCommitment || '6-10 hours',
+        milestones: Array.isArray((planData as any).milestones) ? (planData as any).milestones : [],
+        firstProject: (planData as any).firstProject || {
+          title: 'Starter Project',
+          description: '',
+          skills: journeyData.selectedSkills.map(s => s.name),
+          estimatedTime: '6 hours'
+        },
+        resources: Array.isArray((planData as any).resources) ? (planData as any).resources : [],
+        nextSteps: Array.isArray((planData as any).nextSteps) ? (planData as any).nextSteps : [],
+      };
+
+      updateJourneyData({ learningPlan: expandedPlan });
     } catch (err) {
       console.error('Error generating learning plan:', err);
       setError(err.message || 'Failed to generate learning plan');
@@ -218,7 +224,7 @@ export const useLearningJourney = () => {
     journeyData,
     updateJourneyData,
     generateTopics,
-    generateSkills,
+    generateSubTopics,
     generateLearningPlan,
     resetJourney,
     isLoading,
