@@ -1,0 +1,3 @@
+/* /index.html 200
+/auth/signin /sign-in 301!
+/auth/* /sign-in 301!
