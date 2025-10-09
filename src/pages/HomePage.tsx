@@ -24,7 +24,7 @@ const HomePage = () => {
     // Check if user is logged in
     if (!user) {
       // Redirect to sign in page if not logged in
-      navigate('/auth/signin');
+      navigate('/sign-in');
       return;
     }
     // Show the Learning Journey Wizard instead of the regular widget
