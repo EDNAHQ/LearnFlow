@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize:videos": "node scripts/downsize-videos.js",
+    "optimize:videos:high": "node scripts/downsize-videos.js high",
+    "optimize:videos:low": "node scripts/downsize-videos.js low"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
