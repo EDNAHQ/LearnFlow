@@ -1,0 +1,4 @@
+# Don't commit backup videos to git - they're large and only needed locally
+backups/
+*.mp4.bak
+temp_*.mp4
