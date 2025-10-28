@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
@@ -7,16 +7,44 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ onStartLearning }: HeroSectionProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    // Attempt to play the video
+    const playVideo = async () => {
+      try {
+        await videoElement.play();
+        console.log('Video started playing successfully');
+      } catch (error) {
+        console.error('Error attempting to play video:', error);
+        // If autoplay is blocked, the video will still be visible as a poster frame
+      }
+    };
+
+    // Try to play once the video metadata is loaded
+    if (videoElement.readyState >= 2) {
+      playVideo();
+    } else {
+      videoElement.addEventListener('loadeddata', playVideo);
+      return () => videoElement.removeEventListener('loadeddata', playVideo);
+    }
+  }, []);
+
   return (
     <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[85vh] rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex items-center justify-center">
         {/* Video Background */}
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => console.error('Video loading error:', e)}
         >
           <source
             src="/videos/social_sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_902bb92b-8a56-4abb-9593-b4f8fd7cc0fa_0.mp4"
