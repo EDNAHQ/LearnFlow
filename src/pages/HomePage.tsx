@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/auth";
 import { MainNav } from "@/components/navigation";
 import { HeroSection } from "@/components/home/HeroSection";
+import { FeaturedPathsSection } from "@/components/home/FeaturedPathsSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TopicsSection } from "@/components/home/TopicsSection";
@@ -10,6 +11,7 @@ import CtaSection from "@/components/home/CtaSection";
 import HomeFooter from "@/components/home/HomeFooter";
 import { useLearningCommandStore } from "@/store/learningCommandStore";
 import LearningJourneyWizard from "@/components/journey/LearningJourneyWizard";
+import { FloatingNewProjectButton } from "@/components/projects/FloatingNewProjectButton";
 
 const HomePage = () => {
   console.log('HomePage rendering...');
@@ -36,6 +38,7 @@ const HomePage = () => {
       <MainNav />
       <main className="flex-1">
         <HeroSection onStartLearning={handleStartLearning} />
+        <FeaturedPathsSection />
         <FeaturesSection />
         <HowItWorksSection />
         <TopicsSection />
@@ -48,6 +51,11 @@ const HomePage = () => {
         isOpen={showJourneyWizard}
         onClose={() => setShowJourneyWizard(false)}
       />
+
+      {/* Floating New Project Button */}
+      {user && (
+        <FloatingNewProjectButton onClick={handleStartLearning} />
+      )}
     </div>
   );
 };

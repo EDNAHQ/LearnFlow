@@ -9,7 +9,10 @@ import ProjectsLoading from "@/components/projects/ProjectsLoading";
 import { useProjects } from "@/hooks/projects";
 import type { LearningProject } from "@/components/projects/types";
 import { useAuth } from "@/hooks/auth";
-import { useLearningCommandStore } from "@/store/learningCommandStore";
+import VideoBackground from "@/components/common/VideoBackground";
+import LearningJourneyWizard from "@/components/journey/LearningJourneyWizard";
+import { FloatingNewProjectButton } from "@/components/projects/FloatingNewProjectButton";
+import { LearningStreak } from "@/components/profile/LearningStreak";
 // Icons removed for cleaner design
 
 // Demo projects for non-logged in users
@@ -53,14 +56,19 @@ const ProjectsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const deferredSearch = useDeferredValue(searchQuery);
+  const [showJourneyWizard, setShowJourneyWizard] = useState(false);
 
   // Use demo projects if not logged in
   const displayProjects = user ? projects : demoProjects;
 
-  const openWidget = useLearningCommandStore((state) => state.openWidget);
-
   const handleNewProject = () => {
-    openWidget();
+    // Check if user is logged in
+    if (!user) {
+      navigate('/sign-in');
+      return;
+    }
+    // Open the Learning Journey Wizard
+    setShowJourneyWizard(true);
   };
 
   // Filter projects based on search and filter (memoized for snappy UI)
@@ -97,23 +105,13 @@ const ProjectsPage = () => {
       <MainNav />
 
       {/* Hero Section with Video Background */}
-      <section className="relative min-h-[32vh] sm:h-[40vh] overflow-hidden">
-        {/* Video Background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source
-            src="/videos/social_sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_68369123-6a21-4b9e-8697-722a42766ab7_0.mp4"
-            type="video/mp4"
-          />
-        </video>
-
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-black/40" />
+      <VideoBackground
+        videoSrc="/videos/social_sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_68369123-6a21-4b9e-8697-722a42766ab7_0.mp4"
+        imageSrc="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png"
+        className="min-h-[32vh] sm:h-[40vh] overflow-hidden"
+        overlayClassName="bg-black/40"
+      >
+        {/* Additional Overlays */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40" />
         <div className="absolute inset-0 brand-gradient opacity-30" />
 
@@ -159,10 +157,22 @@ const ProjectsPage = () => {
             </motion.div>
           </div>
         </div>
-      </section>
+      </VideoBackground>
 
       {/* Main Content */}
       <div className="container max-w-7xl mx-auto px-4 py-12">
+        {/* Learning Streak - only for logged in users */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <LearningStreak />
+          </motion.div>
+        )}
+
         {/* Show sign-in prompt for non-logged in users */}
         {!user && (
           <motion.div
@@ -293,6 +303,17 @@ const ProjectsPage = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Learning Journey Wizard Modal */}
+      <LearningJourneyWizard
+        isOpen={showJourneyWizard}
+        onClose={() => setShowJourneyWizard(false)}
+      />
+
+      {/* Floating New Project Button */}
+      {filteredProjects.length > 0 && user && (
+        <FloatingNewProjectButton onClick={handleNewProject} />
+      )}
     </div>
   );
 };

@@ -16,7 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { Eye, Heart, GitFork } from "lucide-react";
+import { Eye, Heart, GitFork, Star } from "lucide-react";
+import { getTopTrending } from "@/utils/trendingScore";
 
 interface CommunityPath {
   id: string;
@@ -25,11 +26,14 @@ interface CommunityPath {
   created_at: string;
   published_at: string | null;
   is_completed: boolean;
+  is_featured: boolean | null;
   view_count: number;
   like_count: number;
   fork_count: number;
   user_id: string;
   tags: string[] | null;
+  difficulty_level: string | null;
+  category: string | null;
   profile: {
     username: string | null;
   };
@@ -76,15 +80,23 @@ const Community = () => {
         query = query.order('like_count', { ascending: false });
       } else if (sortBy === 'views') {
         query = query.order('view_count', { ascending: false });
+      } else if (sortBy === 'featured') {
+        query = query.eq('is_featured', true).order('featured_at', { ascending: false });
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
+      // Apply trending sort client-side if needed
+      let processedData = data || [];
+      if (sortBy === 'trending') {
+        processedData = getTopTrending(processedData, processedData.length, 30);
+      }
+
       // Check if current user has liked each path
-      if (currentUserId && data) {
-        const pathIds = data.map(p => p.id);
+      if (currentUserId && processedData.length > 0) {
+        const pathIds = processedData.map(p => p.id);
         const { data: interactions } = await supabase
           .from('path_interactions')
           .select('path_id')
@@ -94,12 +106,12 @@ const Community = () => {
 
         const likedPaths = new Set(interactions?.map(i => i.path_id) || []);
 
-        setPaths(data.map(path => ({
+        setPaths(processedData.map(path => ({
           ...path,
           user_liked: likedPaths.has(path.id)
         })));
       } else {
-        setPaths(data || []);
+        setPaths(processedData);
       }
     } catch (error) {
       console.error('Error loading community paths:', error);
@@ -309,6 +321,8 @@ const Community = () => {
                 <SelectItem value="recent">Most Recent</SelectItem>
                 <SelectItem value="popular">Most Popular</SelectItem>
                 <SelectItem value="views">Most Viewed</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
+                <SelectItem value="trending">Trending</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -364,7 +378,13 @@ const Community = () => {
                   <CardHeader className="pb-4 relative">
                     {/* Status Badge */}
                     <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {path.is_featured && (
+                          <span className="inline-flex items-center gap-1 py-1 px-2 rounded-full text-xs font-medium bg-gradient-to-r from-[#6654f5] to-[#ca5a8b] text-white shadow-sm">
+                            <Star className="w-3 h-3 fill-white" />
+                            Featured
+                          </span>
+                        )}
                         {path.is_completed ? (
                           <span className="inline-flex items-center py-1 px-2 rounded-full text-xs font-medium bg-gradient-to-r from-[#6654f5]/10 to-[#ca5a8b]/10 text-[#6654f5] border border-[#6654f5]/20">
                             Completed
@@ -372,6 +392,11 @@ const Community = () => {
                         ) : (
                           <span className="inline-flex items-center py-1 px-2 rounded-full text-xs font-medium bg-gradient-to-r from-[#ca5a8b]/10 to-[#f2b347]/10 text-[#ca5a8b] border border-[#ca5a8b]/20">
                             Public Path
+                          </span>
+                        )}
+                        {path.difficulty_level && (
+                          <span className="inline-flex items-center py-1 px-2 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                            {path.difficulty_level.charAt(0).toUpperCase() + path.difficulty_level.slice(1)}
                           </span>
                         )}
                       </div>

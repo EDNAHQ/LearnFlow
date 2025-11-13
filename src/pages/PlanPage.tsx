@@ -7,7 +7,7 @@ import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
 import { usePlanPage } from "@/hooks/projects";
 import { useEffect, useRef } from "react";
-import ContentPageLayout from "@/components/content/layout/ContentPageLayout";
+import PlanFullPageLayout from "@/components/plan/layout/PlanFullPageLayout";
 import ContentHeader from "@/components/content/ContentHeader";
 
 const PlanPage = () => {
@@ -48,7 +48,7 @@ const PlanPage = () => {
   const topRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <ContentPageLayout onGoToProjects={handleReset} topRef={topRef} topic={topic}>
+    <PlanFullPageLayout topRef={topRef}>
       <ContentHeader
         onHome={handleReset}
         generatingContent={false}
@@ -56,18 +56,18 @@ const PlanPage = () => {
         totalSteps={steps.length}
       />
 
-      <div className="relative w-full my-0 py-[60px] px-4 lg:px-8">
+      <div className="relative w-full h-full flex items-center justify-center py-[60px] px-4 lg:px-8">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative w-full max-w-7xl mx-auto"
+          className="relative w-full"
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="mb-12 bg-gradient-to-br from-white via-white to-gray-50/30 rounded-3xl shadow-2xl border-2 border-gray-100/50 p-8 md:p-12"
+            className="mb-12 bg-gradient-to-br from-white via-white to-gray-50/30 rounded-3xl shadow-2xl border-2 border-gray-100/50 p-8 md:p-12 max-w-4xl mx-auto"
           >
             <PlanHeader
               topic={topic}
@@ -100,7 +100,7 @@ const PlanPage = () => {
           </motion.div>
         </motion.div>
       </div>
-    </ContentPageLayout>
+    </PlanFullPageLayout>
   );
 };
 

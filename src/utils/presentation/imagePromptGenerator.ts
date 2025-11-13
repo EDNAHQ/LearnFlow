@@ -1,3 +1,39 @@
+/**
+ * IMAGE PROMPT GENERATION - TEXT-FREE ABSTRACT IMAGERY STRATEGY
+ * ================================================================
+ * 
+ * CORE PHILOSOPHY:
+ * All generated presentation images MUST be:
+ * - 100% TEXT-FREE (no letters, words, typography, labels, symbols)
+ * - PURELY ABSTRACT (geometric shapes, colors, flows, patterns)
+ * - VISUALLY CONSISTENT (use brand colors across all images)
+ * - CONTENT-AGNOSTIC (imagery doesn't directly illustrate slide content)
+ * 
+ * WHY THIS APPROACH:
+ * 1. Images serve as VISUAL FRAMING around text content
+ * 2. Abstract imagery prevents cognitive overload
+ * 3. Consistent visual language reinforces brand
+ * 4. Audience focuses on slide text, not decoding image content
+ * 
+ * BRAND COLOR CONSISTENCY:
+ * Every image uses these colors for visual unity:
+ * - Primary: Purple (#6654f5)
+ * - Secondary: Pink (#ca5a8b)  
+ * - Accent: Gold (#f2b347)
+ * 
+ * PROMPT STRATEGY:
+ * Keywords from slide content determine VISUAL STYLE only:
+ * - Technical keywords → geometric, structured, layered aesthetic
+ * - Conceptual keywords → organic, flowing, interconnected forms
+ * - Process keywords → directional flow, movement, progression
+ * - General slides → minimalist, elegant, sophisticated
+ * 
+ * CRITICAL IN EVERY PROMPT:
+ * "No text, letters, words, typography, labels, or any written characters"
+ * This explicit instruction must appear multiple times to prevent
+ * AI models from including text in the generated images.
+ */
+
 export interface ImagePromptResult {
   prompt: string;
   shouldGenerate: boolean;
@@ -12,25 +48,10 @@ export const generateImagePrompt = (
 ): ImagePromptResult => {
   const contentLower = slideContent.toLowerCase();
 
-  // Extract key concepts from the content for more relevant prompts
-  const extractKeyPhrase = (content: string, maxLength: number = 100): string => {
-    // Remove markdown formatting
-    const cleaned = content
-      .replace(/^#+\s/gm, '')
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
-      .replace(/`/g, '')
-      .trim();
-
-    // Get first sentence or first N characters
-    const firstSentence = cleaned.match(/^[^.!?]+/)?.[0] || cleaned;
-    return firstSentence.substring(0, maxLength);
-  };
-
   // Check if this is a title/hero slide (first slide or contains headings)
   const isHeroSlide = slideIndex === 0 || contentLower.match(/^#+\s/m);
 
-  // Enhanced keyword detection
+  // Enhanced keyword detection - PURELY for determining visual style, NOT for inclusion in prompt
   const technicalKeywords = [
     'architecture', 'system', 'infrastructure', 'database', 'api',
     'server', 'cloud', 'network', 'workflow', 'pipeline', 'framework',
@@ -53,60 +74,63 @@ export const generateImagePrompt = (
   ];
   const isProcess = processKeywords.some(kw => contentLower.includes(kw));
 
-  // Hero slide - full background image with brand colors
+  // ==========================================
+  // BRAND COLOR PALETTE - CONSISTENT ACROSS ALL IMAGES
+  // ==========================================
+  // Primary: Purple (#6654f5)
+  // Secondary: Pink (#ca5a8b)
+  // Accent: Gold (#f2b347)
+  // These colors should appear in EVERY generated image for visual consistency
+
+  // Hero slide - dramatic, energetic abstract composition
   if (isHeroSlide && topic) {
     return {
-      prompt: `Futuristic abstract digital art for "${topic}", flowing data streams and interconnected nodes, dominant purple (#6654f5) transitioning to pink (#ca5a8b) with gold (#f2b347) accents, dark background with glowing elements, cinematic lighting, ultra modern tech aesthetic, 4k quality, no text, no labels, no typography, no letters, no words, do not include any written characters`,
+      prompt: `Abstract digital art with flowing geometric shapes and organic curves. Dominant color palette: deep purple transitioning to vibrant pink with gold accents. Layered transparent shapes creating depth. Flowing light trails and soft glowing particles. Modern tech aesthetic with cinematic lighting. 4K quality. CRITICAL: Absolutely no text, no letters, no words, no typography, no labels, no symbols, no written characters whatsoever. Pure visual imagery only.`,
       shouldGenerate: true,
       type: 'hero'
     };
   }
 
-  // Process/workflow visualization
+  // Process/workflow - flowing, connected, directional energy
   if (isProcess) {
-    const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Clean infographic showing ${keyPhrase}, step-by-step flow diagram with connected nodes, purple (#6654f5) to pink (#ca5a8b) gradient arrows, white background, minimalist flat design, professional business presentation style, no text, no labels, no typography, no letters, no words`,
+      prompt: `Abstract visualization of flow and connection using geometric shapes. Color palette: purple to pink gradient with gold highlights. Flowing lines and nodes creating a sense of movement and progression. Minimalist design with layered depth. Soft lighting and subtle shadows. Modern minimalist aesthetic. CRITICAL: No text, letters, words, typography, labels, or any written characters. Pure abstract imagery only.`,
       shouldGenerate: true,
       type: 'concept'
     };
   }
 
-  // Technical/architectural content
+  // Technical/architectural - structural, ordered, layered
   if (isTechnical) {
-    const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Technical architecture diagram for ${keyPhrase}, isometric 3D style, clean lines and shapes, purple (#6654f5) and pink (#ca5a8b) accent colors on white background, professional tech documentation style, modern and minimalist, no text, no labels, no typography, no letters, no words`,
+      prompt: `Abstract technical aesthetic using clean geometric structures and layered architectural forms. Color palette: purple, pink, and gold accents. Isometric or angular perspective suggesting 3D depth. Crisp lines, hexagons, grids, and connected nodes. Professional but artistic feel. Dark or white background with glowing elements. CRITICAL: Absolutely no text, no letters, no words, no typography, no labels. Pure visual structure and form only.`,
       shouldGenerate: true,
       type: 'technical'
     };
   }
 
-  // Conceptual/educational content
+  // Conceptual/educational - organic, flowing, interconnected
   if (isConceptual) {
-    const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Abstract conceptual illustration of ${keyPhrase}, flowing organic shapes with geometric elements, vibrant gradient from purple (#6654f5) through pink (#ca5a8b) to gold (#f2b347), modern educational infographic style, clean and sophisticated, no text, no labels, no typography, no letters, no words`,
+      prompt: `Abstract conceptual illustration with flowing organic shapes blending into geometric patterns. Color palette: vibrant purple to pink gradient with gold accents. Soft, dreamy atmosphere with layered transparency. Connected circles, spirals, and wave-like forms suggesting growth and interconnection. Modern abstract art style. CRITICAL: No text, no letters, no words, no typography, no labels, no symbols. Pure imagery and composition only.`,
       shouldGenerate: true,
       type: 'concept'
     };
   }
 
-  // Check for data/analytics content
+  // Data/analytics - structured, points, patterns, glowing
   if (contentLower.includes('data') || contentLower.includes('analytics') || contentLower.includes('metrics')) {
-    const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Data visualization dashboard concept for ${keyPhrase}, modern charts and graphs, purple (#6654f5) to pink (#ca5a8b) gradient data points, dark mode interface, glowing neon accents, futuristic analytics aesthetic, no text, no labels, no typography, no letters, no words`,
+      prompt: `Abstract data visualization with scattered points and connections creating patterns. Color palette: purple, pink, and gold glowing elements. Glowing particles, nodes, and connecting lines. Dark atmospheric background with luminescent accents. Futuristic, analytical aesthetic. Suggest complexity and information flow through purely visual means. CRITICAL: No text, letters, words, typography, labels, or any written information. Pure abstract pattern and visualization only.`,
       shouldGenerate: true,
       type: 'technical'
     };
   }
 
-  // Section headers or important slides
+  // Section headers or important slides - minimalist, impactful, gradient-focused
   if (slideContent.match(/^#+\s/m) || slideContent.length < 200) {
-    const keyPhrase = extractKeyPhrase(slideContent);
     return {
-      prompt: `Minimalist abstract art representing ${keyPhrase}, soft gradient from purple (#6654f5) to pink (#ca5a8b), subtle geometric patterns, professional presentation background, elegant and modern, no text, no labels, no typography, no letters, no words`,
+      prompt: `Minimalist abstract composition with soft gradient transitions. Color palette: purple fading to pink with subtle gold accents. Geometric shapes, curves, and flowing forms creating elegant negative space. Professional presentation aesthetic with sophisticated simplicity. Light or neutral background with subtle depth. CRITICAL: No text, no letters, no words, no typography, no labels, no characters of any kind. Pure visual elegance only.`,
       shouldGenerate: true,
       type: 'ambient'
     };

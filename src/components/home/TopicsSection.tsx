@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/auth';
 import { useLearningCommandStore } from '@/store/learningCommandStore';
+import VideoBackground from '@/components/common/VideoBackground';
+import { TrendingWidget } from '@/components/home/TrendingWidget';
 
 export const TopicsSection = () => {
   const navigate = useNavigate();
@@ -80,46 +82,49 @@ export const TopicsSection = () => {
           </form>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Video tile */}
-          <div className="group relative col-span-1 sm:col-span-2 md:col-span-2 sm:row-span-2 rounded-2xl overflow-hidden shadow-lg min-w-0">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Main topics grid */}
+          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Video tile */}
+            <VideoBackground
+              videoSrc="/videos/social_sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_68369123-6a21-4b9e-8697-722a42766ab7_2.mp4"
+              imageSrc="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_2.png"
+              className="group col-span-1 sm:col-span-2 md:col-span-2 sm:row-span-2 rounded-2xl overflow-hidden shadow-lg min-w-0"
+              overlayClassName="brand-gradient opacity-20"
             >
-              <source src="/videos/social_sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_68369123-6a21-4b9e-8697-722a42766ab7_2.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 brand-gradient opacity-20" />
-            <div className="absolute inset-0 p-6 flex items-end">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3">
-                <div className="text-sm font-medium text-[#6654f5]">Inspiration</div>
-                <div className="text-[#0b0c18] font-semibold">See how LearnFlow turns ideas into plans</div>
+              <div className="absolute inset-0 p-6 flex items-end">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3">
+                  <div className="text-sm font-medium text-[#6654f5]">Inspiration</div>
+                  <div className="text-[#0b0c18] font-semibold">See how LearnFlow turns ideas into plans</div>
+                </div>
               </div>
-            </div>
+            </VideoBackground>
+
+            {topics.map((topic, index) => (
+              <div
+                key={index}
+                onClick={() => startTopic(topic.title)}
+                className="group relative bg-white p-6 rounded-2xl border border-border hover:shadow-xl transition-all duration-300 cursor-pointer animate-fade-up"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className={`inline-flex p-3 rounded-xl ${topic.bgColor} mb-4 group-hover:scale-110 transition-transform`}>
+                  <div className={`h-6 w-6 rounded-md ${topic.color}`} />
+                </div>
+                <h3 className="text-lg font-semibold text-[#0b0c18] mb-2">
+                  {topic.title}
+                </h3>
+                <p className="text-sm text-[#0b0c18]/70 font-light">
+                  {topic.description}
+                </p>
+                <div className="absolute inset-0 rounded-2xl brand-gradient-light opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              </div>
+            ))}
           </div>
 
-          {topics.map((topic, index) => (
-            <div
-              key={index}
-              onClick={() => startTopic(topic.title)}
-              className="group relative bg-white p-6 rounded-2xl border border-border hover:shadow-xl transition-all duration-300 cursor-pointer animate-fade-up"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              <div className={`inline-flex p-3 rounded-xl ${topic.bgColor} mb-4 group-hover:scale-110 transition-transform`}>
-                <div className={`h-6 w-6 rounded-md ${topic.color}`} />
-              </div>
-              <h3 className="text-lg font-semibold text-[#0b0c18] mb-2">
-                {topic.title}
-              </h3>
-              <p className="text-sm text-[#0b0c18]/70 font-light">
-                {topic.description}
-              </p>
-              <div className="absolute inset-0 rounded-2xl brand-gradient-light opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-            </div>
-          ))}
+          {/* Trending sidebar */}
+          <div className="lg:col-span-1">
+            <TrendingWidget limit={5} />
+          </div>
         </div>
 
         <div className="text-center mt-16 animate-fade-up" style={{ animationDelay: '0.8s' }}>

@@ -54,65 +54,62 @@ export async function generateStepContent(
       advanced: "The learner has strong fundamentals. Focus on sophisticated applications, edge cases, best practices, and real-world scenarios."
     };
 
-    const learningJourneyContext = currentStepNumber === 1 ? 'just started' :
-                                   currentStepNumber < 5 ? 'covered the basics' :
-                                   'built strong foundations';
-
     const depthGuidance = phase === 'foundational' ? 'Keep it simple and clear' :
                          phase === 'intermediate' ? 'Add nuance and complexity' :
                          'Go deep with advanced insights';
 
     const contentFocus = phase === 'foundational' ? 'Basic definitions and clear examples' :
-                        phase === 'intermediate' ? 'How this builds on earlier concepts' :
+                        phase === 'intermediate' ? 'Core concepts with practical applications' :
                         'Advanced patterns and production considerations';
 
     const exampleGuidance = phase === 'foundational' ? '1 very simple, relatable example' :
-                           phase === 'intermediate' ? '1-2 practical examples showing progression' :
+                           phase === 'intermediate' ? '1-2 practical examples showing real-world application' :
                            'Real-world scenarios and best practices';
-
-    const forwardConnection = currentStepNumber < totalStepsCount ?
-                             'Why this step matters for what comes next' :
-                             'How to apply everything learned';
 
     // Build the improved prompt with contextual information
     const prompt = `
-Create educational content for Step ${currentStepNumber} of ${totalStepsCount} in a learning path about "${topic}".
+Create comprehensive educational content about "${title}" as part of a learning path on "${topic}".
 
-**This Step's Focus:** "${title}"
-**Step Description:** "${description}"
-**Learning Phase:** ${phase.toUpperCase()} (Step ${currentStepNumber}/${totalStepsCount})
-${previousStepTitle ? `**Previous Step:** "${previousStepTitle}" (avoid repeating this content)` : ''}
+**Primary Focus:** "${title}"
+**Context:** "${description}"
+**Learning Level:** ${phase.toUpperCase()}
+${previousStepTitle ? `**Note:** The previous chapter covered "${previousStepTitle}" - avoid repeating that material.` : ''}
 
-**Context for This Phase:**
+**Your Task:**
+Write 600-700 words of deep, focused educational content that thoroughly explores "${title}".
+
+**Phase-Appropriate Approach:**
 ${progressContext[phase]}
 
-**Content Requirements:**
-Write 400-500 words that:
-1. **Builds on the learning journey** - Reference that learners have ${learningJourneyContext}
-2. **Addresses THIS step's unique focus** - Make sure the content is specifically about "${title}", not just general "${topic}" information
-3. **Provides step-appropriate depth** - ${depthGuidance}
-4. **Connects forward** - ${forwardConnection}
+**Content Quality Standards:**
+1. **Laser-Focused** - Every paragraph should directly relate to "${title}", not just general information about "${topic}"
+2. **Comprehensive Coverage** - Dig deep into this specific subtopic. Cover the most important aspects thoroughly
+3. **Concrete Examples** - ${exampleGuidance}
+4. **Clarity and Depth** - ${depthGuidance}, but always prioritize understanding over brevity
+5. **Substantive Value** - Make every sentence count. No filler, no fluff
 
-**Include:**
+**What to Include:**
 - ${contentFocus}
-- ${exampleGuidance}
-- ${forwardConnection}
+- Practical, relatable examples that illuminate the concepts
+- Clear explanations that build genuine understanding
+- The "why" behind concepts, not just the "what"
 
-**Style:**
-- SHORT PARAGRAPHS (2-3 sentences maximum)
-- Clear, engaging educational tone
-- NO meta-references like "In this section" or "Part ${currentStepNumber}"
-- Start directly with substantive content
-- Avoid repeating phrases from earlier steps
-- Frequent paragraph breaks for readability
+**Writing Style:**
+- SHORT PARAGRAPHS (2-3 sentences maximum) for readability
+- Clear, engaging, conversational educational tone
+- NO meta-references like "In this section," "This chapter," or "Part ${currentStepNumber}"
+- Start immediately with substantive content
+- Use frequent paragraph breaks to maintain engagement
+- Write as if explaining to someone genuinely curious about this specific topic
 
-Keep the content concise but complete, making every word count.
+**Quality Over Everything:**
+Focus entirely on making this the best possible explanation of "${title}". Don't worry about connecting to other steps - just make THIS content exceptional.
 `;
 
-    const systemMessage = `You are an expert educational content writer who creates progressive learning experiences. You understand how to build knowledge step-by-step, with each piece of content building naturally on what came before. Your writing features short paragraphs, practical examples, and readable formatting. You avoid filler words, redundancy, and overly complex terminology. You always complete your thoughts fully without getting cut off.`;
-    
-    // Increased token limit to ensure complete responses
-    const data = await callOpenAI(prompt, systemMessage, undefined, 1500);
+    const systemMessage = `You are a master educator and expert content writer. You create deep, focused educational content that thoroughly explores specific topics. Your writing is clear, engaging, and substantive - you explain complex ideas in accessible ways while maintaining rigor. You use short paragraphs, concrete examples, and careful explanations. You avoid filler words, redundancy, and vague generalizations. You always complete your thoughts fully and deliver complete, polished content.`;
+
+    // Increased token limit to ensure complete responses for 600-700 words
+    const data = await callOpenAI(prompt, systemMessage, undefined, 2000);
     
     const generatedContent = data.choices[0].message.content;
     const contentLength = generatedContent.length;

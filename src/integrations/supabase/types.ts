@@ -103,6 +103,82 @@ export type Database = {
           },
         ]
       }
+      learning_sessions: {
+        Row: {
+          audio_completed: boolean | null
+          audio_played: boolean | null
+          content_mode: string | null
+          content_scrolled_percent: number | null
+          created_at: string
+          device_type: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          id: string
+          interactions_count: number | null
+          path_id: string | null
+          referrer_source: string | null
+          started_at: string
+          step_id: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_completed?: boolean | null
+          audio_played?: boolean | null
+          content_mode?: string | null
+          content_scrolled_percent?: number | null
+          created_at?: string
+          device_type?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          interactions_count?: number | null
+          path_id?: string | null
+          referrer_source?: string | null
+          started_at?: string
+          step_id?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_completed?: boolean | null
+          audio_played?: boolean | null
+          content_mode?: string | null
+          content_scrolled_percent?: number | null
+          created_at?: string
+          device_type?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          id?: string
+          interactions_count?: number | null
+          path_id?: string | null
+          referrer_source?: string | null
+          started_at?: string
+          step_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_sessions_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_sessions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "learning_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -123,6 +199,144 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      user_activity_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          path_id: string | null
+          step_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          path_id?: string | null
+          step_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          path_id?: string | null
+          step_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_events_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_activity_events_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "learning_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_activity_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          content_complexity: string | null
+          created_at: string
+          daily_learning_time_minutes: number | null
+          display_name: string | null
+          last_learning_date: string | null
+          learning_goals: string | null
+          learning_streak_days: number | null
+          learning_style: string | null
+          longest_streak_days: number | null
+          notification_preferences: Json | null
+          onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
+          preferred_formats: Json | null
+          preferred_learning_times: string[] | null
+          preferred_pace: string | null
+          timezone: string | null
+          total_learning_time_minutes: number | null
+          total_paths_completed: number | null
+          total_steps_completed: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          content_complexity?: string | null
+          created_at?: string
+          daily_learning_time_minutes?: number | null
+          display_name?: string | null
+          last_learning_date?: string | null
+          learning_goals?: string | null
+          learning_streak_days?: number | null
+          learning_style?: string | null
+          longest_streak_days?: number | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          preferred_formats?: Json | null
+          preferred_learning_times?: string[] | null
+          preferred_pace?: string | null
+          timezone?: string | null
+          total_learning_time_minutes?: number | null
+          total_paths_completed?: number | null
+          total_steps_completed?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          content_complexity?: string | null
+          created_at?: string
+          daily_learning_time_minutes?: number | null
+          display_name?: string | null
+          last_learning_date?: string | null
+          learning_goals?: string | null
+          learning_streak_days?: number | null
+          learning_style?: string | null
+          longest_streak_days?: number | null
+          notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          preferred_formats?: Json | null
+          preferred_learning_times?: string[] | null
+          preferred_pace?: string | null
+          timezone?: string | null
+          total_learning_time_minutes?: number | null
+          total_paths_completed?: number | null
+          total_steps_completed?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

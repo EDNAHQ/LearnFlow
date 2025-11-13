@@ -1,38 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install)",
-      "Bash(npm run dev:*)",
-      "mcp__playwright__browser_navigate",
-      "Bash(curl:*)",
-      "mcp__playwright__browser_console_messages",
-      "Bash(npx tsc:*)",
-      "Bash(pkill:*)",
-      "Bash(npx update-browserslist-db:*)",
-      "Bash(npm update:*)",
-      "Bash(taskkill:*)",
-      "Bash(npx vite:*)",
-      "Bash(npm ls:*)",
-      "Bash(netstat:*)",
-      "Bash(findstr:*)",
-      "Bash(npx kill-port:*)",
-      "Bash(taskkill.exe:*)",
-      "Bash(dir C:UsersGGPCCascadeProjectsLearnFlowpublicimages)",
-      "Bash(npm install:*)",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_type",
-      "mcp__playwright__browser_press_key",
-      "mcp__playwright__browser_close",
-      "mcp__playwright__browser_evaluate",
-      "Bash(tree:*)",
-      "Bash(dir:*)",
-      "Bash(npm run lint:*)",
-      "Bash(git mv:*)",
-      "Bash(cat:*)",
-      "Bash(mkdir:*)",
-      "Bash(npx supabase:*)",
-      "Bash(clip)"
-    ]
+      "Bash:*",
+      "Bash(supabase db push:*)",
+      "Bash(supabase link:*)",
+      "Bash(supabase db execute:*)",
+      "Skill(brand-guide-audit)",
+      "Bash(git checkout:*)"
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

@@ -11,49 +11,72 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
 
   // Generate a learning plan using OpenAI with a focused prompt
   const prompt = `
-  You are an expert educator creating a highly focused and specialized learning plan for the topic: "${topic}".
-  
-  Please create a comprehensive 10-step learning plan that will guide someone from beginner to advanced level SPECIFICALLY on the topic of ${topic}. 
+  You are an expert curriculum designer creating a highly focused and specialized learning plan for the topic: "${topic}".
+
+  Create a comprehensive 10-step learning plan that guides someone from beginner to advanced level SPECIFICALLY on "${topic}".
   The plan should be laser-focused on ${topic} without including tangential or loosely related topics.
-  
-  For each step, provide:
-  1. A clear, concise title (5-7 words max) that directly relates to ${topic}
-  2. A brief one-sentence description of what the learner will understand about ${topic} after completing this step
-  
-  Each step should build logically on the previous one, creating a coherent progression from fundamentals to advanced concepts, 
-  all while staying strictly within the boundaries of ${topic}.
-  
+
+  CRITICAL REQUIREMENTS:
+
+  **Step Differentiation:**
+  Each step must be DISTINCTLY DIFFERENT from all other steps. No two steps should cover similar ground or overlapping content.
+  Think carefully about the full learning journey and ensure each step has a unique, well-defined scope.
+
+  **For each step, provide:**
+  1. **Title** (5-7 words max): A clear, specific title that captures THIS step's unique focus within ${topic}
+  2. **Description** (2-3 detailed sentences, 40-60 words): A comprehensive description that:
+     - Clearly defines the SPECIFIC aspect of ${topic} this step covers
+     - Explains what makes this step DIFFERENT from the others
+     - Describes the concrete knowledge or skills the learner will gain
+     - Uses precise language to avoid ambiguity or overlap with other steps
+
+  **Logical Progression:**
+  Steps should build from fundamentals to advanced concepts, but each must maintain its distinct identity.
+  Avoid generic descriptions - be specific about what makes each step unique.
+
+  **Example of GOOD differentiation:**
+  Step 1: "Understanding Core Concepts" - "Learn the fundamental definitions, terminology, and basic principles that form the foundation of ${topic}. This step establishes the vocabulary and conceptual framework needed for all subsequent learning."
+  Step 2: "Practical Application Basics" - "Apply the core concepts through simple, hands-on exercises. This step focuses on translating theoretical knowledge into practical skills through guided practice and real-world examples."
+
+  **Example of BAD differentiation (too similar):**
+  Step 1: "Introduction to ${topic}" - "Learn about ${topic}."
+  Step 2: "Understanding ${topic}" - "Understand the basics of ${topic}."
+
   YOUR RESPONSE MUST BE VALID JSON with this exact structure:
   {
     "steps": [
       {
-        "title": "Introduction to [Specific Aspect of ${topic}]",
-        "description": "Understand the core principles of ${topic} and essential terminology."
+        "title": "Foundations and Core Concepts",
+        "description": "Master the fundamental definitions, terminology, and basic principles that form the foundation of ${topic}. This step establishes the essential vocabulary and conceptual framework needed for all subsequent learning, ensuring you have a solid base to build upon."
       },
       {
-        "title": "Second Step Title About ${topic}",
-        "description": "Brief description focusing specifically on ${topic}"
+        "title": "Practical Application Methods",
+        "description": "Learn how to apply core concepts through hands-on practice and real-world scenarios. This step focuses on translating theoretical knowledge into practical skills, helping you understand when and how to use different techniques in actual situations."
       }
-      // ... and so on, exactly 10 steps total
+      // ... and so on, exactly 10 steps total, each DISTINCTLY DIFFERENT
     ]
   }
-  
-  Ensure you format this as valid JSON with no trailing commas. Include exactly 10 steps, starting with fundamentals and moving to more advanced concepts.
+
+  Ensure you format this as valid JSON with no trailing commas. Include exactly 10 steps with rich, detailed, differentiated descriptions.
   The response must be parseable by JSON.parse().
   `;
 
   console.log("Generating focused learning plan for topic:", topic);
-  
+
   try {
-    const systemMessage = `You are an expert educator creating highly focused learning plans. Your plans should always be extremely specific to the requested topic without introducing unrelated concepts. 
-    
-    YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS. 
-    
-    Do not include markdown formatting, code blocks, or any text outside the JSON object. 
+    const systemMessage = `You are an expert curriculum designer and educational architect creating highly focused, well-differentiated learning plans.
+
+    Your primary goal is to ensure each step in the learning path is CLEARLY DISTINCT from all others - no overlap, no repetition, no ambiguity.
+    You write detailed descriptions that precisely define the scope and unique value of each step.
+    You avoid generic language and instead use specific, concrete descriptions that make it crystal clear what each step covers.
+
+    YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS.
+
+    Do not include markdown formatting, code blocks, or any text outside the JSON object.
     The response must be parseable by JSON.parse().`;
-    
-    // Explicitly request JSON response format
-    const data = await callOpenAI(prompt, systemMessage, "json_object");
+
+    // Explicitly request JSON response format with increased token limit for detailed descriptions
+    const data = await callOpenAI(prompt, systemMessage, "json_object", 1500);
     
     console.log("OpenAI response received successfully");
     

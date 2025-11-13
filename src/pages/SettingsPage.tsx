@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useEdnaMembership } from '@/hooks/auth/useEdnaMembership';
+import { useUserProfile } from '@/hooks/profile/useUserProfile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,15 +13,20 @@ import { Separator } from '@/components/ui/separator';
 import { MainNav } from '@/components/navigation';
 import { User, Brain, Save, Mail, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/ui/use-toast';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { checkMembershipAndRedirect, loading: membershipLoading } = useEdnaMembership();
+  const { profile, loading: profileLoading, updateProfile } = useUserProfile();
 
   // Account settings state
   const [email, setEmail] = useState(user?.email || '');
   const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [timezone, setTimezone] = useState('UTC');
 
   // Learning preferences state
   const [learningStyle, setLearningStyle] = useState('');
@@ -28,11 +34,35 @@ export default function SettingsPage() {
   const [contentComplexity, setContentComplexity] = useState('');
   const [learningGoals, setLearningGoals] = useState('');
   const [preferredFormat, setPreferredFormat] = useState<string[]>([]);
+  const [dailyLearningTime, setDailyLearningTime] = useState(30);
+  const [preferredTimes, setPreferredTimes] = useState<string[]>([]);
   const [notifications, setNotifications] = useState({
     dailyReminders: true,
     weeklyProgress: true,
     newFeatures: false
   });
+  const [saving, setSaving] = useState(false);
+
+  // Load profile data when it's available
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name || '');
+      setBio(profile.bio || '');
+      setTimezone(profile.timezone || 'UTC');
+      setLearningStyle(profile.learning_style || '');
+      setPreferredPace(profile.preferred_pace || '');
+      setContentComplexity(profile.content_complexity || '');
+      setLearningGoals(profile.learning_goals || '');
+      setPreferredFormat((profile.preferred_formats as string[]) || []);
+      setDailyLearningTime(profile.daily_learning_time_minutes || 30);
+      setPreferredTimes((profile.preferred_learning_times as string[]) || []);
+      setNotifications(profile.notification_preferences as any || {
+        dailyReminders: true,
+        weeklyProgress: true,
+        newFeatures: false
+      });
+    }
+  }, [profile]);
 
   const handleFormatChange = (format: string, checked: boolean) => {
     if (checked) {
@@ -42,24 +72,52 @@ export default function SettingsPage() {
     }
   };
 
+  const handleTimeChange = (time: string, checked: boolean) => {
+    if (checked) {
+      setPreferredTimes([...preferredTimes, time]);
+    } else {
+      setPreferredTimes(preferredTimes.filter(t => t !== time));
+    }
+  };
+
   const handleEdnaLearnClick = (e: React.MouseEvent) => {
     e.preventDefault();
     checkMembershipAndRedirect();
   };
 
-  const handleSave = () => {
-    // TODO: Implement save functionality with backend
-    console.log('Saving settings...', {
-      account: { email, displayName },
-      learning: {
-        learningStyle,
-        preferredPace,
-        contentComplexity,
-        learningGoals,
-        preferredFormat,
-        notifications
-      }
-    });
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+      await updateProfile({
+        display_name: displayName,
+        bio: bio,
+        timezone: timezone,
+        learning_style: learningStyle as any,
+        preferred_pace: preferredPace as any,
+        content_complexity: contentComplexity as any,
+        learning_goals: learningGoals,
+        preferred_formats: preferredFormat,
+        daily_learning_time_minutes: dailyLearningTime,
+        preferred_learning_times: preferredTimes,
+        notification_preferences: notifications,
+      });
+
+      toast({
+        title: 'Settings saved',
+        description: 'Your preferences have been updated successfully.',
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: 'Error saving settings',
+        description: 'There was a problem saving your preferences. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!user) {
@@ -116,6 +174,38 @@ export default function SettingsPage() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                   />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    placeholder="Tell us about yourself..."
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="timezone">Timezone</Label>
+                  <Select value={timezone} onValueChange={setTimezone}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your timezone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                      <SelectItem value="America/Chicago">Central Time</SelectItem>
+                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="Europe/London">London</SelectItem>
+                      <SelectItem value="Europe/Paris">Paris</SelectItem>
+                      <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
+                      <SelectItem value="Asia/Singapore">Singapore</SelectItem>
+                      <SelectItem value="Australia/Sydney">Sydney</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -279,14 +369,52 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="dailyLearningTime">Daily Learning Goal (minutes)</Label>
+                <Input
+                  id="dailyLearningTime"
+                  type="number"
+                  min="5"
+                  max="480"
+                  value={dailyLearningTime}
+                  onChange={(e) => setDailyLearningTime(parseInt(e.target.value) || 30)}
+                />
+                <p className="text-sm text-muted-foreground">
+                  How many minutes per day do you want to dedicate to learning?
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Preferred Learning Times</Label>
+                <p className="text-sm text-muted-foreground">
+                  When do you prefer to learn? (Select all that apply)
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {['Morning', 'Afternoon', 'Evening'].map((time) => (
+                    <div key={time} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={time}
+                        checked={preferredTimes.includes(time)}
+                        onCheckedChange={(checked) => handleTimeChange(time, checked as boolean)}
+                      />
+                      <Label htmlFor={time} className="text-sm">{time}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           {/* Save Button */}
           <div className="flex justify-end">
-            <Button onClick={handleSave} className="flex items-center gap-2">
+            <Button
+              onClick={handleSave}
+              className="flex items-center gap-2"
+              disabled={saving || profileLoading}
+            >
               <Save className="h-4 w-4" />
-              Save Settings
+              {saving ? 'Saving...' : 'Save Settings'}
             </Button>
           </div>
         </div>
