@@ -2,11 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useLearningCommandStore } from '@/store/learningCommandStore';
 
-export const FloatingNewProjectButton: React.FC = () => {
-  const openWidget = useLearningCommandStore((state) => state.openWidget);
+interface FloatingNewProjectButtonProps {
+  onClick: () => void;
+}
 
+export const FloatingNewProjectButton: React.FC<FloatingNewProjectButtonProps> = ({ onClick }) => {
   return (
     <motion.div
       className="fixed bottom-8 left-8 z-40"
@@ -16,7 +17,7 @@ export const FloatingNewProjectButton: React.FC = () => {
     >
       <div className="relative">
         <Button
-          onClick={openWidget}
+          onClick={onClick}
           size="lg"
           className="rounded-2xl w-auto px-6 h-14 brand-gradient text-white shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
         >

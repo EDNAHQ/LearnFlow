@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/ui";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Mail, Loader2, CheckCircle } from "lucide-react";
+import VideoBackground from "@/components/common/VideoBackground";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -51,19 +52,13 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-50 to-white">
-      {/* Video Section - Left 2/3 */}
-      <div className="hidden lg:block lg:w-2/3 relative overflow-hidden">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/videos/social_sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_902bb92b-8a56-4abb-9593-b4f8fd7cc0fa_3.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/50"></div>
-      </div>
+      {/* Video/Image Section - Left 2/3 */}
+      <VideoBackground
+        videoSrc="/videos/social_sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_902bb92b-8a56-4abb-9593-b4f8fd7cc0fa_3.mp4"
+        imageSrc="/images/sam.mckay.edna_Abstract_explosion_of_light_beams_turning_into_ae0bc824-7571-4682-8f82-3f6faa6c1865_3.png"
+        className="hidden lg:block lg:w-2/3 overflow-hidden"
+        overlayClassName="bg-gradient-to-r from-transparent via-transparent to-black/50"
+      />
 
       {/* Form Section - Right 1/3 */}
       <div className="w-full lg:w-1/3 flex flex-col justify-center px-6 sm:px-8 lg:px-12 bg-white">

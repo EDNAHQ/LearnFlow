@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/auth';
 import { ContentModeProvider } from './hooks/content';
-import { LearningCommandCenter } from './components/learning-command-center';
-import { FloatingNewProjectButton } from './components/projects/FloatingNewProjectButton';
 import { useEdnaMembership } from './hooks/auth/useEdnaMembership';
 import HomePage from './pages/HomePage';
 import SignIn from './pages/SignIn';
@@ -40,8 +38,6 @@ function AppContent() {
         <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
-      <LearningCommandCenter />
-      <FloatingNewProjectButton />
     </>
   );
 }

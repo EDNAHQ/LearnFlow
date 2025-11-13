@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/content";
 import { useContentNavigation } from "@/hooks/navigation";
+import { useLearningSession } from "@/hooks/analytics/useLearningSession";
 import { supabase } from "@/integrations/supabase/client";
 import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 import ContentDisplay from "@/components/content/common/ContentDisplay";
@@ -22,6 +23,13 @@ const ContentPage = () => {
     pathId,
     stepIndex
   } = useParams();
+
+  // Track learning session for analytics and streaks
+  useLearningSession({
+    pathId: pathId,
+    contentMode: 'learning',
+    referrerSource: 'content_page',
+  });
   const navigate = useNavigate();
   const {
     setMode
