@@ -19,7 +19,7 @@ export const LearningStreak: React.FC = () => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-orange-500 to-red-500 border-none text-white">
+    <Card className="bg-gradient-to-r from-[#f2b347] to-[#ca5a8b] border-none text-white">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

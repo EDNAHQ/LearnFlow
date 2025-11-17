@@ -9,6 +9,7 @@ interface SlideModeDisplayProps {
   pathId?: string;
   topic?: string;
   onQuestionClick?: (question: string, content?: string) => void;
+  onClose?: () => void;
 }
 
 const SlideModeDisplay = ({ 
@@ -17,7 +18,8 @@ const SlideModeDisplay = ({
   detailedContent,
   pathId,
   topic,
-  onQuestionClick
+  onQuestionClick,
+  onClose
 }: SlideModeDisplayProps) => {
   // Convert content to string with better handling of complex objects
   const safeContent = (() => {
@@ -65,10 +67,11 @@ const SlideModeDisplay = ({
   })();
   
   return (
-    <div className="bg-[#1A1A1A] rounded-xl shadow-md overflow-hidden w-full mx-auto">
+    <div className="bg-[#1A1A1A] rounded-xl shadow-md overflow-hidden w-full mx-auto pointer-events-none">
       <PresentationView 
         content={displayContent} 
         title={title}
+        onClose={onClose}
       />
     </div>
   );

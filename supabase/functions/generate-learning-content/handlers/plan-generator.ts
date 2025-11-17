@@ -1,7 +1,15 @@
 
 import { callOpenAI } from "../utils/openai/index.ts";
+import { getUserProfile, getContentPreferences, buildPersonalizationContext } from "../utils/personalization.ts";
 
-export async function generateLearningPlan(topic: string, corsHeaders: Record<string, string>) {
+export async function generateLearningPlan(
+  topic: string, 
+  corsHeaders: Record<string, string>,
+  userId?: string,
+  pathId?: string,
+  supabaseUrl?: string,
+  supabaseServiceKey?: string
+) {
   if (!topic) {
     return new Response(
       JSON.stringify({ error: 'Missing required topic parameter' }),
@@ -9,12 +17,33 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
     );
   }
 
+  // Fetch user profile and preferences if available
+  let userProfile = null;
+  let preferences = null;
+  let personalizationContext = '';
+
+  if (userId && pathId && supabaseUrl && supabaseServiceKey) {
+    try {
+      userProfile = await getUserProfile(userId, supabaseUrl, supabaseServiceKey);
+      preferences = await getContentPreferences(pathId, supabaseUrl, supabaseServiceKey);
+      personalizationContext = buildPersonalizationContext(userProfile, preferences);
+    } catch (error) {
+      console.log('Error fetching personalization data, using defaults:', error);
+    }
+  }
+
+  // Build personalized prompt
+  const personalizationNote = personalizationContext 
+    ? `\n\n**IMPORTANT - Personalization:**\nThis learning plan is being created for a specific learner. Use the personalization context below to tailor the plan to their needs, goals, and learning style. Make the content feel like it's written specifically for them.\n${personalizationContext}`
+    : '';
+
   // Generate a learning plan using OpenAI with a focused prompt
   const prompt = `
   You are an expert curriculum designer creating a highly focused and specialized learning plan for the topic: "${topic}".
 
   Create a comprehensive 10-step learning plan that guides someone from beginner to advanced level SPECIFICALLY on "${topic}".
   The plan should be laser-focused on ${topic} without including tangential or loosely related topics.
+${personalizationNote}
 
   CRITICAL REQUIREMENTS:
 
@@ -29,6 +58,8 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
      - Explains what makes this step DIFFERENT from the others
      - Describes the concrete knowledge or skills the learner will gain
      - Uses precise language to avoid ambiguity or overlap with other steps
+     ${userProfile ? `- Consider the learner's background: ${userProfile.role || 'general learner'}, ${userProfile.experience_level || 'beginner'} level` : ''}
+     ${userProfile?.goals_short_term ? `- Align with their goal: "${userProfile.goals_short_term}"` : ''}
 
   **Logical Progression:**
   Steps should build from fundamentals to advanced concepts, but each must maintain its distinct identity.
@@ -69,6 +100,7 @@ export async function generateLearningPlan(topic: string, corsHeaders: Record<st
     Your primary goal is to ensure each step in the learning path is CLEARLY DISTINCT from all others - no overlap, no repetition, no ambiguity.
     You write detailed descriptions that precisely define the scope and unique value of each step.
     You avoid generic language and instead use specific, concrete descriptions that make it crystal clear what each step covers.
+    ${userProfile ? `You personalize content to match the learner's background, goals, and learning style. Make it feel like you're creating this plan specifically for them.` : ''}
 
     YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS.
 

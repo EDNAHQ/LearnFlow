@@ -1,5 +1,3 @@
-
-import { motion } from "framer-motion";
 import PlanHeader from "@/components/plan/PlanHeader";
 import PlanLoading from "@/components/plan/PlanLoading";
 import PlanAuthError from "@/components/plan/PlanAuthError";
@@ -7,8 +5,7 @@ import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
 import { usePlanPage } from "@/hooks/projects";
 import { useEffect, useRef } from "react";
-import PlanFullPageLayout from "@/components/plan/layout/PlanFullPageLayout";
-import ContentHeader from "@/components/content/ContentHeader";
+import PlanImmersiveLayout from "@/components/plan/layout/PlanImmersiveLayout";
 
 const PlanPage = () => {
   const {
@@ -48,59 +45,46 @@ const PlanPage = () => {
   const topRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <PlanFullPageLayout topRef={topRef}>
-      <ContentHeader
-        onHome={handleReset}
-        generatingContent={false}
-        generatedSteps={0}
-        totalSteps={steps.length}
-      />
+    <PlanImmersiveLayout topRef={topRef}>
+      <div className="relative w-full h-screen flex flex-col overflow-hidden">
+        {/* Header - Compact */}
+        <PlanHeader
+          topic={topic}
+          pathId={pathId}
+          loading={loading}
+          authError={authError}
+          isDeleting={isDeleting}
+          handleReset={handleReset}
+          handleDeletePlan={handleDeletePlan}
+        />
 
-      <div className="relative w-full h-full flex items-center justify-center py-[60px] px-4 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="relative w-full"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="mb-12 bg-gradient-to-br from-white via-white to-gray-50/30 rounded-3xl shadow-2xl border-2 border-gray-100/50 p-8 md:p-12 max-w-4xl mx-auto"
-          >
-            <PlanHeader
-              topic={topic}
-              pathId={pathId}
-              loading={loading}
-              authError={authError}
-              isDeleting={isDeleting}
-              handleReset={handleReset}
-              handleDeletePlan={handleDeletePlan}
-            />
-
-            {loading ? (
-              <PlanLoading />
-            ) : authError ? (
-              <PlanAuthError handleLogin={handleLogin} />
-            ) : (
-              <>
+        {/* Main content area - Flexible, fills space */}
+        <div className="flex-1 flex items-center justify-center overflow-hidden min-h-0">
+          {loading ? (
+            <PlanLoading />
+          ) : authError ? (
+            <PlanAuthError handleLogin={handleLogin} />
+          ) : (
+            <div className="w-full h-full flex flex-col px-2 sm:px-4 lg:px-6">
+              {/* Steps grid - Takes most space */}
+              <div className="flex-1 flex items-center justify-center min-h-0 py-2">
                 <PlanStepsList
                   steps={steps}
                   activeStep={activeStep}
                   setActiveStep={setActiveStep}
                 />
-
-                <PlanActionButtons
-                  handleReset={handleReset}
-                  handleApprove={handleApprove}
-                />
-              </>
-            )}
-          </motion.div>
-        </motion.div>
+              </div>
+              
+              {/* Action buttons - Fixed at bottom with space for widget */}
+              <PlanActionButtons
+                handleReset={handleReset}
+                handleApprove={handleApprove}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </PlanFullPageLayout>
+    </PlanImmersiveLayout>
   );
 };
 

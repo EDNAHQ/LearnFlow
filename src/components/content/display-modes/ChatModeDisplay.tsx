@@ -7,8 +7,10 @@ import { useChat } from '@/hooks/content/useChat';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/auth';
-import ReactMarkdown from 'react-markdown';
+import SafeReactMarkdown from '@/components/ui/SafeReactMarkdown';
+import remarkGfm from 'remark-gfm';
 import { getMarkdownComponents } from '@/utils/markdown/markdownComponents';
+import { preprocessContent } from '@/utils/markdown/contentPreprocessor';
 
 interface ChatModeDisplayProps {
   content: string;
@@ -118,9 +120,12 @@ const ChatModeDisplay: React.FC<ChatModeDisplayProps> = ({
                   {message.role === 'user' ? (
                     <span className="whitespace-pre-wrap break-words text-gray-800">{message.content}</span>
                   ) : (
-                    <ReactMarkdown components={getMarkdownComponents(topic)}>
-                      {message.content}
-                    </ReactMarkdown>
+                    <SafeReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={getMarkdownComponents(topic)}
+                    >
+                      {preprocessContent(message.content)}
+                    </SafeReactMarkdown>
                   )}
                 </div>
               </div>

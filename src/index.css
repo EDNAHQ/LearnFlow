@@ -148,6 +148,48 @@
     }
   }
 
+  /* Wave flow animations - horizontal flowing motion */
+  @keyframes waveFlow1 {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  @keyframes waveFlow2 {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  @keyframes waveFlow3 {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  .wave-flow-1 {
+    animation: waveFlow1 20s linear infinite;
+  }
+
+  .wave-flow-2 {
+    animation: waveFlow2 15s linear infinite;
+    animation-delay: -5s;
+  }
+
+  .wave-flow-3 {
+    animation: waveFlow3 25s linear infinite;
+    animation-delay: -10s;
+  }
+
   .presentation-slide-enter {
     animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }

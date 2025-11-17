@@ -20,7 +20,7 @@ export const TrendingWidget: React.FC<TrendingWidgetProps> = ({ limit = 5 }) => 
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500">
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-r from-[#f2b347] to-[#ca5a8b]">
           <Flame className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -52,7 +52,7 @@ export const TrendingWidget: React.FC<TrendingWidgetProps> = ({ limit = 5 }) => 
                 <div className="p-3 rounded-xl bg-gray-50 hover:bg-gradient-to-r hover:from-[#6654f5]/5 hover:to-[#ca5a8b]/5 transition-all duration-300 border border-transparent hover:border-[#6654f5]/20">
                   {/* Rank badge */}
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold">
+                    <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-[#f2b347] to-[#ca5a8b] text-white text-xs font-bold">
                       {index + 1}
                     </div>
 
@@ -83,7 +83,7 @@ export const TrendingWidget: React.FC<TrendingWidgetProps> = ({ limit = 5 }) => 
                     </div>
 
                     {/* Trending indicator */}
-                    <TrendingUp className="w-4 h-4 text-orange-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <TrendingUp className="w-4 h-4 text-[#ca5a8b] flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               </motion.div>

@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import ReactMarkdown from "react-markdown";
+import SafeReactMarkdown from "@/components/ui/SafeReactMarkdown";
+import remarkGfm from "remark-gfm";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
+import { preprocessContent } from "@/utils/markdown/contentPreprocessor";
 import AILoadingState from "@/components/ai/AILoadingState";
 import AIErrorState from "@/components/ai/AIErrorState";
 
@@ -142,7 +144,8 @@ const AIContentModal = ({
                   <div className="max-w-none text-gray-800 text-sm leading-6">
                     {/* Match modal heading sizes to other dialogs */}
                     <div className="space-y-3">
-                      <ReactMarkdown
+                      <SafeReactMarkdown
+                        remarkPlugins={[remarkGfm]}
                         components={{
                           ...markdownComponents,
                           h1: ({ children }: any) => (
@@ -171,8 +174,8 @@ const AIContentModal = ({
                           ),
                         }}
                       >
-                        {content}
-                      </ReactMarkdown>
+                        {preprocessContent(content)}
+                      </SafeReactMarkdown>
                     </div>
                   </div>
                 )}

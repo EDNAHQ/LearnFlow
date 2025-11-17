@@ -1,10 +1,12 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useContentMode } from "@/hooks/content";
 import { useContentNavigation } from "@/hooks/navigation";
 import { useLearningSession } from "@/hooks/analytics/useLearningSession";
+import { useBehaviorTracking, usePromptTracking } from "@/hooks/analytics";
+import { useProgressTracking } from "@/hooks/capability";
 import { supabase } from "@/integrations/supabase/client";
 import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
 import ContentDisplay from "@/components/content/common/ContentDisplay";
@@ -30,6 +32,13 @@ const ContentPage = () => {
     contentMode: 'learning',
     referrerSource: 'content_page',
   });
+
+  // Track behavior and progress
+  const { trackContentView, trackContentComplete, trackTaskSuccess, trackTaskFailure, trackHintRequest, logBehavior } = useBehaviorTracking();
+  const { logPrompt } = usePromptTracking();
+  const { logProgress, markComplete } = useProgressTracking();
+  const contentViewStartTime = useRef<Date | null>(null);
+
   const navigate = useNavigate();
   const {
     setMode
@@ -69,9 +78,42 @@ const ContentPage = () => {
     projectCompleted
   } = useProjectCompletion(pathId, () => goToProjects());
 
+  // Track content view when step loads
+  useEffect(() => {
+    if (currentStepData?.id && pathId) {
+      contentViewStartTime.current = new Date();
+      trackContentView(
+        currentStepData.id,
+        'step',
+        pathId,
+        currentStepData.id
+      );
+    }
+  }, [currentStepData?.id, pathId, trackContentView]);
+
   // Handle Explore Further question clicks
   const handleQuestionClick = async (question: string, content?: string) => {
     console.log("Question clicked:", question);
+
+    // Track hint/question request for behavior analysis
+    trackHintRequest(
+      currentStepData?.id || '',
+      pathId || undefined,
+      currentStepData?.id
+    );
+
+    // Track the question as a prompt (intent signal)
+    logPrompt({
+      promptText: question,
+      contextUsed: content || currentStepData?.detailed_content || currentStepData?.content || "",
+      category: 'explanation',
+      pathId: pathId || undefined,
+      stepId: currentStepData?.id,
+      metadata: {
+        source: 'explore_further',
+        topic: topic || ''
+      }
+    });
 
     // Open modal with loading state
     setExploreFurtherModal({
@@ -92,6 +134,11 @@ const ContentPage = () => {
       });
 
       if (error) throw error;
+
+      // Update prompt log with response length (already logged above)
+      const responseLength = data.insight?.length || 0;
+      // Note: Response length is already tracked in the initial logPrompt call above
+      // We could enhance this to update the log, but for now single log is sufficient
 
       setExploreFurtherModal(prev => ({
         ...prev,
@@ -154,7 +201,55 @@ const ContentPage = () => {
     return <ContentError goToProjects={goToProjects} />;
   }
   
-  const handleComplete = isLastStep ? completePath : handleMarkComplete;
+  // Wrap completion handler to track progress
+  const handleCompleteWithTracking = async () => {
+    if (currentStepData?.id && pathId && contentViewStartTime.current) {
+      const completionTime = Math.floor(
+        (new Date().getTime() - contentViewStartTime.current.getTime()) / 1000
+      );
+
+      // Track content completion
+      trackContentComplete(
+        currentStepData.id,
+        'step',
+        completionTime,
+        pathId,
+        currentStepData.id
+      );
+
+      // Also log with metadata for discovery
+      logBehavior({
+        actionType: 'content_complete',
+        contentId: currentStepData.id,
+        contentType: 'step',
+        timeOnContent: completionTime,
+        pathId: pathId || undefined,
+        stepId: currentStepData.id,
+        metadata: { completionTime, timeOnContent: completionTime }
+      });
+
+      // Track progress
+      await logProgress({
+        moduleId: pathId,
+        stepId: currentStepData.id,
+        completionTime,
+        successRate: 100, // Assume success if they completed it
+        remediationNeeded: false
+      });
+
+      // Mark as complete in progress tracking
+      await markComplete(pathId, completionTime, currentStepData.id);
+    }
+
+    // Call original handler
+    if (isLastStep) {
+      await completePath();
+    } else {
+      await handleMarkComplete();
+    }
+  };
+
+  const handleComplete = handleCompleteWithTracking;
 
   // Ensure content is a string
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";
@@ -201,6 +296,40 @@ const ContentPage = () => {
           <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#6654f5]/5 to-[#ca5a8b]/5 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-[#f2b347]/5 to-[#6654f5]/5 rounded-full blur-3xl" />
         </div>
+
+        {/* Content Generation Banner - Show when generating */}
+        {generatingContent && generatedSteps < steps.length && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="relative mb-6 mx-auto max-w-[1400px]"
+          >
+            <div className="bg-gradient-to-r from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 border-2 border-brand-purple/30 rounded-xl p-4 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full border-2 border-brand-pink border-t-transparent animate-spin flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-gray-900">
+                    Generating content for your learning path...
+                  </p>
+                  <p className="text-xs sm:text-sm font-light text-gray-600 mt-1">
+                    {generatedSteps} of {steps.length} steps completed
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-24 sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${(generatedSteps / steps.length) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                      className="h-full bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{opacity: 0, y: 20}}

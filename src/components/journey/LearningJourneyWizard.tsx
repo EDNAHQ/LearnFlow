@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import InterestDiscovery from './steps/InterestDiscovery';
 import TopicExploration from './steps/TopicExploration';
+import ContentPreferences, { ContentPreferencesData } from './steps/ContentPreferences';
 import { useLearningJourney } from '../../hooks/journey/useLearningJourney';
+import { useBehaviorTracking } from '@/hooks/analytics';
+import { useUserProfile } from '../../hooks/profile/useUserProfile';
+import { useUserLearningProfile } from '@/hooks/personalization/useUserLearningProfile';
+import { useAuth } from '@/hooks/auth';
 
 interface LearningJourneyWizardProps {
   isOpen: boolean;
@@ -12,8 +17,72 @@ interface LearningJourneyWizardProps {
 
 const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { trackClick } = useBehaviorTracking();
   const [currentStep, setCurrentStep] = useState(1);
   const [topicHistory, setTopicHistory] = useState<string[]>([]);
+  const [contentPreferences, setContentPreferences] = useState<ContentPreferencesData>({});
+  const [selectedTopicForLearning, setSelectedTopicForLearning] = useState<any>(null);
+  const { profile } = useUserProfile();
+  const { profile: learningProfile } = useUserLearningProfile();
+  const { user } = useAuth();
+
+  // Auto-detect preferences from learning profile
+  const autoDetectedPreferences = useMemo(() => {
+    if (!learningProfile) return null;
+
+    const detected: ContentPreferencesData = {};
+
+    if (learningProfile.learningVelocity === 'fast') {
+      detected.content_style = 'practical';
+    } else if (learningProfile.learningVelocity === 'deliberate') {
+      detected.content_style = 'technical';
+    } else {
+      detected.content_style = 'conversational';
+    }
+
+    if (learningProfile.optimalSessionLength >= 45) {
+      detected.content_length = 'comprehensive';
+    } else if (learningProfile.optimalSessionLength >= 30) {
+      detected.content_length = 'detailed';
+    } else if (learningProfile.optimalSessionLength >= 20) {
+      detected.content_length = 'standard';
+    } else {
+      detected.content_length = 'brief';
+    }
+
+    if (learningProfile.preferredDifficulty >= 4 && learningProfile.avgSuccessRate >= 80) {
+      detected.content_complexity = 'expert';
+    } else if (learningProfile.preferredDifficulty >= 3 && learningProfile.avgSuccessRate >= 75) {
+      detected.content_complexity = 'advanced';
+    } else if (learningProfile.preferredDifficulty >= 2) {
+      detected.content_complexity = 'balanced';
+    } else {
+      detected.content_complexity = 'simplified';
+    }
+
+    if (learningProfile.prefersVisual) {
+      detected.preferred_examples = 'real-world';
+      detected.learning_approach = 'visual';
+    } else if (learningProfile.prefersAudio) {
+      detected.learning_approach = 'conceptual';
+      detected.preferred_examples = 'mixed';
+    } else if (learningProfile.skipRate < 0.1 && learningProfile.hintUsageRate < 0.2) {
+      detected.learning_approach = 'hands-on';
+      detected.preferred_examples = 'code-focused';
+    } else if (learningProfile.remediationFrequency > 0.3) {
+      detected.learning_approach = 'analytical';
+      detected.preferred_examples = 'theoretical';
+    } else {
+      detected.learning_approach = 'balanced';
+      detected.preferred_examples = 'real-world';
+    }
+
+    return detected;
+  }, [learningProfile]);
+
+  const hasEnoughData = learningProfile && 
+                        learningProfile.totalLearningTimeMinutes >= 30 && 
+                        learningProfile.avgSuccessRate > 0;
 
   const {
     journeyData,
@@ -34,7 +103,11 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
   };
 
   const handleBack = () => {
-    if (topicHistory.length > 0) {
+    if (currentStep === 3) {
+      // Back from preferences to topic selection
+      setCurrentStep(2);
+      setSelectedTopicForLearning(null);
+    } else if (topicHistory.length > 0) {
       // Go back one level in topic hierarchy
       const newHistory = [...topicHistory];
       newHistory.pop();
@@ -52,21 +125,61 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
   };
 
   const handleInterestSelect = async (interest: any) => {
+    // Track interest selection
+    trackClick(`interest-${interest.category || interest.id}`, 'content');
+    
     updateJourneyData({ selectedInterest: interest });
     await generateTopics(interest);
     setCurrentStep(2);
   };
 
   const handleStartLearning = (topic: any) => {
+    // Track topic selection - critical data point!
+    trackClick(`topic-${topic.title}`, 'content');
+    
+    // Store topic
+    setSelectedTopicForLearning(topic);
+    
+    // If we have enough data, auto-apply preferences and skip to plan
+    if (hasEnoughData && autoDetectedPreferences) {
+      setContentPreferences(autoDetectedPreferences);
+      sessionStorage.setItem('content-preferences', JSON.stringify(autoDetectedPreferences));
+      sessionStorage.setItem('learn-topic', topic.title);
+      navigate(`/plan?topic=${encodeURIComponent(topic.title)}`);
+      onClose();
+    } else {
+      // Not enough data, show preferences step
+      setCurrentStep(3);
+    }
+  };
+
+  const handlePreferencesContinue = () => {
+    if (!selectedTopicForLearning) return;
+    
+    // Save preferences to session storage
+    sessionStorage.setItem('content-preferences', JSON.stringify(contentPreferences));
+    
     // Save topic to session storage and navigate to plan page
-    sessionStorage.setItem('learn-topic', topic.title);
-    navigate(`/plan?topic=${encodeURIComponent(topic.title)}`);
+    sessionStorage.setItem('learn-topic', selectedTopicForLearning.title);
+    navigate(`/plan?topic=${encodeURIComponent(selectedTopicForLearning.title)}`);
+    onClose();
+  };
+
+  const handlePreferencesSkip = () => {
+    if (!selectedTopicForLearning) return;
+    
+    // Save topic to session storage and navigate to plan page
+    sessionStorage.setItem('learn-topic', selectedTopicForLearning.title);
+    navigate(`/plan?topic=${encodeURIComponent(selectedTopicForLearning.title)}`);
     onClose();
   };
 
   const getStepTitle = () => {
     if (currentStep === 1) {
       return "What do you want to learn?";
+    }
+    if (currentStep === 3) {
+      return "Customize Your Learning";
     }
     if (topicHistory.length === 0) {
       return "Pick a topic";
@@ -76,9 +189,22 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
 
   const getStepDescription = () => {
     if (currentStep === 1) {
+      // Personalized greeting based on profile
+      if (profile?.role) {
+        return `Hi ${profile.role}! Let's find the perfect learning path for you.`;
+      }
       return "Choose an area of interest to explore";
     }
+    if (currentStep === 3) {
+      return selectedTopicForLearning 
+        ? `We'll personalize your learning path for "${selectedTopicForLearning.title}" based on your preferences.`
+        : "";
+    }
     if (topicHistory.length === 0) {
+      // Personalized message based on user's goals
+      if (profile?.goals_short_term) {
+        return `We found ${journeyData.topics.length} topics tailored to help you "${profile.goals_short_term}"`;
+      }
       return `${journeyData.topics.length} topics to explore`;
     }
     return `${journeyData.topics.length} subtopics to dive deeper`;
@@ -91,6 +217,17 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
           onSelect={handleInterestSelect}
           selectedInterest={journeyData.selectedInterest}
           isLoading={isLoading}
+        />
+      );
+    }
+
+    if (currentStep === 3) {
+      return (
+        <ContentPreferences
+          preferences={contentPreferences}
+          onPreferencesChange={setContentPreferences}
+          onContinue={handlePreferencesContinue}
+          onSkip={handlePreferencesSkip}
         />
       );
     }
@@ -109,15 +246,16 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white w-full max-w-5xl h-[85vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ opacity: 0, scale: 0.96, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 20 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="bg-white w-full max-w-7xl h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border border-gray-100"
       >
-        {/* Header */}
-        <div className="relative px-8 pt-8 pb-6 border-b border-gray-200 flex-shrink-0">
+        {/* Header - More spacious and immersive */}
+        <div className="relative px-8 pt-8 pb-6 border-b border-gray-200 flex-shrink-0 bg-gradient-to-b from-white to-gray-50/50">
           <button
             onClick={onClose}
             className="absolute top-8 right-8 text-gray-500 hover:text-gray-700 transition-colors text-sm font-medium"
@@ -127,13 +265,13 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
 
           {/* Breadcrumb trail */}
           {topicHistory.length > 0 && (
-            <div className="flex items-center gap-2 mb-4 text-sm text-gray-500">
+            <div className="flex items-center gap-2 mb-4 text-sm text-gray-500 font-light">
               <button
                 onClick={() => {
                   setTopicHistory([]);
                   setCurrentStep(1);
                 }}
-                className="hover:text-purple-600"
+                className="hover:text-brand-purple transition-colors"
               >
                 Start
               </button>
@@ -145,7 +283,7 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
                       const newHistory = topicHistory.slice(0, idx + 1);
                       setTopicHistory(newHistory);
                     }}
-                    className="hover:text-purple-600"
+                    className="hover:text-brand-purple transition-colors"
                   >
                     {topic}
                   </button>
@@ -154,15 +292,15 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
             </div>
           )}
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-medium text-gradient mb-2">
             {getStepTitle()}
           </h2>
-          <p className="text-gray-600 text-base">
+          <p className="text-gray-600 text-base font-light leading-relaxed">
             {getStepDescription()}
           </p>
         </div>
 
-        {/* Content - Scrollable area */}
+        {/* Content - More spacious with better padding */}
         <div className="flex-1 px-8 py-6 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
@@ -184,7 +322,7 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
         </div>
 
         {/* Footer - Fixed at bottom */}
-        <div className="px-8 py-6 border-t border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
+        <div className="px-8 py-5 border-t border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
           <button
             onClick={handleBack}
             disabled={currentStep === 1 && topicHistory.length === 0}
@@ -196,6 +334,11 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
           >
             Back
           </button>
+          {currentStep === 3 && (
+            <p className="text-xs font-light text-gray-500">
+              Optional: Skip to use default settings
+            </p>
+          )}
         </div>
       </motion.div>
     </div>

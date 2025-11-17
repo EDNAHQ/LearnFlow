@@ -69,25 +69,49 @@
 
 /* Code blocks */
 .content-section pre {
-  @apply my-6 rounded-lg overflow-hidden border border-brand-purple/30 shadow-lg w-full;
+  @apply my-8 rounded-xl overflow-hidden border border-brand-purple/20 shadow-xl w-full;
   max-width: 100%;
+  position: relative;
+  background: #1a1a1a;
+}
+
+.content-section pre::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(102, 84, 245, 0.05) 0%, rgba(202, 90, 139, 0.05) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .content-section pre code {
-  @apply block p-5 overflow-x-auto text-base w-full;
-  background-color: #1A1A1A;
-  color: white;
+  @apply block p-6 overflow-x-auto text-base w-full relative z-10;
+  background-color: transparent;
+  color: #e5e7eb;
   max-width: 100%;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre;
+  word-break: normal;
+  line-height: 1.7;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Language tag for code blocks */
+.content-section pre::after {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  right: 0;
+  @apply px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white bg-brand-purple/90 rounded-tl-lg rounded-br-lg;
+  z-index: 20;
 }
 
 /* Inline code */
 .content-section p code,
 .content-section li code {
-  @apply px-1.5 py-0.5 rounded text-brand-pink text-sm;
-  background-color: rgba(26, 26, 26, 0.05);
-  font-family: monospace;
+  @apply px-2 py-1 rounded-md text-brand-pink text-sm font-medium;
+  background-color: rgba(102, 84, 245, 0.1);
+  border: 1px solid rgba(102, 84, 245, 0.2);
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
 }
 
 /* Blockquotes */

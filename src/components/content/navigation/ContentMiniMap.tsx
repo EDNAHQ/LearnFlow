@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useBehaviorTracking } from "@/hooks/analytics";
+import { useParams } from "react-router-dom";
 
 interface MiniMapStep {
   id: string;
@@ -21,8 +23,28 @@ const ContentMiniMap: React.FC<ContentMiniMapProps> = ({
   onNavigateToStep,
   className
 }) => {
+  const { pathId } = useParams();
+  const { logBehavior } = useBehaviorTracking();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleStepClick = (index: number) => {
+    // Track step navigation via minimap
+    logBehavior({
+      actionType: 'click',
+      contentId: steps[index]?.id || `step-${index}`,
+      contentType: 'step',
+      pathId: pathId || undefined,
+      stepId: steps[index]?.id,
+      metadata: {
+        navigation: 'minimap',
+        fromStep: currentStepIndex,
+        toStep: index,
+        stepTitle: steps[index]?.title
+      }
+    });
+    onNavigateToStep(index);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,7 +102,7 @@ const ContentMiniMap: React.FC<ContentMiniMapProps> = ({
             return (
               <motion.button
                 key={step.id}
-                onClick={() => onNavigateToStep(index)}
+                onClick={() => handleStepClick(index)}
                 className={cn(
                   "w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 group relative overflow-hidden",
                   isCurrent && "bg-gradient-to-r from-brand-primary/10 to-brand-accent/10 border border-brand-primary/30",

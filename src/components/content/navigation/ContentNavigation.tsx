@@ -1,6 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useBehaviorTracking } from "@/hooks/analytics";
+import { useParams } from "react-router-dom";
 
 interface ContentNavigationProps {
   currentStep: number;
@@ -21,6 +23,42 @@ const ContentNavigation = ({
   isSubmitting,
   projectCompleted
 }: ContentNavigationProps) => {
+  const { pathId } = useParams();
+  const { logBehavior } = useBehaviorTracking();
+
+  const handlePrevious = () => {
+    // Track step navigation
+    logBehavior({
+      actionType: 'click',
+      contentId: `step-${currentStep - 1}`,
+      contentType: 'step',
+      pathId: pathId || undefined,
+      metadata: {
+        navigation: 'previous',
+        fromStep: currentStep,
+        toStep: currentStep - 1
+      }
+    });
+    onPrevious();
+  };
+
+  const handleComplete = () => {
+    // Track step completion navigation
+    logBehavior({
+      actionType: 'click',
+      contentId: `step-${currentStep + 1}`,
+      contentType: 'step',
+      pathId: pathId || undefined,
+      metadata: {
+        navigation: isLastStep ? 'complete_project' : 'next_step',
+        fromStep: currentStep,
+        toStep: currentStep + 1,
+        isLastStep
+      }
+    });
+    onComplete();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -30,7 +68,7 @@ const ContentNavigation = ({
     >
       {/* Previous Arrow */}
       <button
-        onClick={onPrevious}
+        onClick={handlePrevious}
         disabled={currentStep === 0}
         className="group flex items-center gap-2 text-gray-600 hover:text-brand-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
@@ -55,7 +93,7 @@ const ContentNavigation = ({
       {/* Next/Complete Button */}
       {!isLastStep ? (
         <button
-          onClick={onComplete}
+          onClick={handleComplete}
           className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-accent text-white text-sm font-medium hover:opacity-90 transition-opacity w-full sm:w-auto"
         >
           <span>Mark Complete</span>
@@ -70,7 +108,7 @@ const ContentNavigation = ({
         </button>
       ) : (
         <button
-          onClick={onComplete}
+          onClick={handleComplete}
           disabled={isSubmitting || projectCompleted}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity ${
             projectCompleted

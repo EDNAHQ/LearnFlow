@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateStepContent } from "@/utils/learning";
 
 interface ContentDetailLoaderProps {
@@ -20,20 +20,24 @@ const ContentDetailLoader = ({
   onContentLoaded 
 }: ContentDetailLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedRef = useRef<boolean>(false);
+  const previousDetailedContentRef = useRef<string | null | undefined>(detailedContent);
   
-  // Update loaded content when detailed content prop changes
+  // Update loaded content when detailed content prop changes - only once per change
   useEffect(() => {
-    if (detailedContent && typeof detailedContent === 'string') {
+    if (detailedContent && typeof detailedContent === 'string' && previousDetailedContentRef.current !== detailedContent) {
       console.log("Using provided detailed content");
+      hasLoadedRef.current = true;
+      previousDetailedContentRef.current = detailedContent;
       onContentLoaded(detailedContent);
     }
   }, [detailedContent, onContentLoaded]);
 
-  // If no detailed content, try to load it
+  // If no detailed content, try to load it - only once per stepId
   useEffect(() => {
     const loadContent = async () => {
-      // Only load if we don't have detailed content and aren't already loading
-      if (!detailedContent && stepId && topic && !isLoading) {
+      // Only load if we don't have detailed content, haven't loaded yet, and aren't already loading
+      if (!detailedContent && stepId && topic && !isLoading && !hasLoadedRef.current) {
         console.log("Generating content for step:", stepId);
         setIsLoading(true);
         
@@ -51,13 +55,16 @@ const ContentDetailLoader = ({
           
           if (typeof generatedContent === 'string') {
             console.log("Content generated successfully");
+            hasLoadedRef.current = true;
             onContentLoaded(generatedContent);
           } else {
             console.error("Generated content is not a string:", generatedContent);
+            hasLoadedRef.current = true;
             onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
           }
         } catch (error) {
           console.error("Error loading content:", error);
+          hasLoadedRef.current = true;
           onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
         } finally {
           setIsLoading(false);
@@ -67,6 +74,12 @@ const ContentDetailLoader = ({
     
     loadContent();
   }, [detailedContent, stepId, title, content, topic, isLoading, onContentLoaded]);
+  
+  // Reset hasLoadedRef when stepId changes
+  useEffect(() => {
+    hasLoadedRef.current = false;
+    previousDetailedContentRef.current = undefined;
+  }, [stepId]);
 
   return null; // This is a non-visual component
 };

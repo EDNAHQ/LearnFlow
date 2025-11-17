@@ -6,6 +6,11 @@
       "Bash(supabase link:*)",
       "Bash(supabase db execute:*)",
       "Skill(brand-guide-audit)",
+      "Skill(brand-enforcement)",
+      "Skill(form-patterns)",
+      "Skill(edge-function-templates)",
+      "Skill(error-handling)",
+      "Skill(component-templates)",
       "Bash(git checkout:*)"
     ],
     "defaultMode": "bypassPermissions"

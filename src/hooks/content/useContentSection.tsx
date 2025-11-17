@@ -9,10 +9,16 @@ interface UseContentSectionProps {
 }
 
 export function useContentSection({ content, detailedContent, topic }: UseContentSectionProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [loadedDetailedContent, setLoadedDetailedContent] = useState<string | null>(null);
   const [contentLoaded, setContentLoaded] = useState(false);
   const [focusedConcept, setFocusedConcept] = useState<string | null>(null);
+  
+  // Use refs to track previous values and prevent infinite loops
+  // Initialize refs as undefined to detect first mount
+  const previousContentRef = useRef<string | undefined>(undefined);
+  const previousDetailedContentRef = useRef<string | null | undefined>(undefined);
+  const contentLoadedRef = useRef<boolean>(false);
   
   // Extract step ID from content if it's in expected format
   const stepId = content.includes(':') ? content.split(":")[0] : '';
@@ -23,44 +29,66 @@ export function useContentSection({ content, detailedContent, topic }: UseConten
   const conceptsLoading = false;
   const resetExtraction = () => {};
   
-  // Reset state when content changes
+  // Reset state when content changes - use refs to detect actual changes
   useEffect(() => {
-    setIsVisible(false);
+    const isFirstMount = previousContentRef.current === undefined;
+    const contentChanged = previousContentRef.current !== content;
+    const detailedContentChanged = previousDetailedContentRef.current !== detailedContent;
     
-    // Only reset content if it has changed significantly
-    if (!loadedDetailedContent || content.substring(0, 20) !== loadedDetailedContent.substring(0, 20)) {
-      setLoadedDetailedContent(null);
-      setContentLoaded(false);
+    // On first mount, just initialize refs and keep visible
+    if (isFirstMount) {
+      previousContentRef.current = content;
+      previousDetailedContentRef.current = detailedContent;
+      setIsVisible(true);
+      return;
     }
     
-    // Animation effect for fading in the content - use a fixed short timeout
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
+    // On subsequent changes, animate visibility
+    if (contentChanged || detailedContentChanged) {
+      setIsVisible(false);
+      
+      // Only reset content if it has changed significantly
+      if (contentChanged) {
+        setLoadedDetailedContent(null);
+        setContentLoaded(false);
+        contentLoadedRef.current = false;
+      }
+      
+      // Update refs
+      previousContentRef.current = content;
+      previousDetailedContentRef.current = detailedContent;
+      
+      // Animation effect for fading in the content - use a fixed short timeout
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 100);
 
-    return () => clearTimeout(timer);
-  }, [content, detailedContent, topic, loadedDetailedContent]);
+      return () => clearTimeout(timer);
+    }
+  }, [content, detailedContent, topic]);
 
   // Initialize with detailed content if available - only do this once per content change
   useEffect(() => {
-    if (detailedContent && typeof detailedContent === 'string' && !contentLoaded) {
+    if (detailedContent && typeof detailedContent === 'string' && !contentLoadedRef.current) {
       console.log("Using provided detailed content, length:", detailedContent.length);
       setLoadedDetailedContent(detailedContent);
       setContentLoaded(true);
+      contentLoadedRef.current = true;
     }
-  }, [detailedContent, contentLoaded]);
+  }, [detailedContent]);
 
-  // Handle content detail loading - memoize callback
+  // Handle content detail loading - use ref to prevent re-creation
   const handleContentLoaded = useCallback((loadedContent: string) => {
-    if (typeof loadedContent === 'string' && !contentLoaded) {
+    if (typeof loadedContent === 'string' && !contentLoadedRef.current) {
       console.log("Content loaded successfully, length:", loadedContent.length);
       setLoadedDetailedContent(loadedContent);
       setContentLoaded(true);
+      contentLoadedRef.current = true;
       
       // Reset concept extraction when new content is loaded
       resetExtraction();
     }
-  }, [contentLoaded, resetExtraction]);
+  }, []);
 
   // Handle concept clicking
   const handleConceptClick = useCallback((conceptTerm: string) => {

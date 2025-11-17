@@ -38,85 +38,98 @@ const LearningStep = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{
-        duration: 0.6,
-        delay: index * 0.1,
+        duration: 0.3,
+        delay: index * 0.03,
         type: "spring",
-        stiffness: 80
+        stiffness: 150
       }}
-      whileHover={{ scale: 1.02, y: -3 }}
+      whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "relative group overflow-hidden transition-all duration-500 cursor-pointer rounded-2xl w-3/4 mx-auto",
-        isActive ? "ring-4 ring-[#6654f5]/50 shadow-2xl shadow-[#6654f5]/30" : "hover:shadow-2xl hover:shadow-gray-300/50"
+        "relative group overflow-hidden transition-all duration-300 cursor-pointer rounded-xl h-full flex flex-col shadow-md",
+        isActive 
+          ? "ring-2 ring-brand-purple shadow-lg shadow-brand-purple/30" 
+          : "hover:shadow-lg"
       )}
       onClick={onClick}
     >
-      {/* Card container - Image left 25%, Content right 75% */}
-      <div className="relative overflow-hidden rounded-2xl flex min-h-[165px] bg-white">
+      {/* Card container - White background with image overlay */}
+      <div className="relative overflow-hidden rounded-xl flex flex-col h-full bg-white border border-gray-200 shadow-sm">
 
-        {/* Left Image (25%) with overlaid number */}
-        <div className="relative w-1/4 overflow-hidden">
+        {/* Image section with dark overlay for text contrast */}
+        <div className="relative h-24 sm:h-28 md:h-32 overflow-hidden">
           <img
             src={imageUrl}
             alt=""
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-black/30" />
+          {/* Dark overlay to ensure white text is visible */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
-          {/* Step Number Overlay on Image */}
+          {/* Step Number Overlay */}
           <motion.div
             animate={isActive ? {
               scale: [1, 1.1, 1],
             } : {}}
-            transition={{ duration: 0.6 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            transition={{ duration: 0.4 }}
+            className="absolute top-2 left-2"
           >
             <div className={cn(
-              "flex items-center justify-center w-12 h-12 rounded-xl font-bold text-xl transition-all duration-500 shadow-xl",
+              "flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg font-bold text-base sm:text-lg transition-all duration-300 shadow-lg",
               isActive
-                ? "bg-white text-[#6654f5] shadow-white/50 ring-2 ring-white"
-                : "bg-white/90 backdrop-blur-sm text-[#6654f5] shadow-black/30"
+                ? "bg-white text-brand-purple shadow-white/50 ring-2 ring-white"
+                : "bg-white text-brand-purple shadow-black/20"
             )}>
               {index + 1}
             </div>
           </motion.div>
+
+          {/* Active indicator */}
+          {isActive && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-brand-purple shadow-lg shadow-brand-purple/50 ring-2 ring-white/50"
+            />
+          )}
         </div>
 
-        {/* Right Content (75%) */}
-        <div className="relative flex-1 p-6 flex items-center bg-white">
-          <div className="w-full">
-            {/* Title */}
+        {/* Content section - White background, dark text */}
+        <div className="relative flex-1 p-3 sm:p-4 flex flex-col justify-between bg-white min-h-0">
+          <div className="flex-1 min-h-0">
+            {/* Title - Dark text, bold */}
             <h3 className={cn(
-              "text-lg font-bold mb-2 transition-colors duration-300",
-              isActive ? "text-[#6654f5]" : "text-[#0b0c18] group-hover:text-[#6654f5]"
+              "text-sm sm:text-base font-bold mb-1.5 sm:mb-2 transition-colors duration-300 line-clamp-2 leading-tight",
+              isActive ? "text-gradient" : "text-brand-black"
             )}>
               {step.title}
             </h3>
 
-            {/* Description */}
-            <p className="text-sm leading-relaxed text-gray-600">
+            {/* Description - Dark gray text for readability */}
+            <p className="text-xs sm:text-sm font-light leading-relaxed text-gray-700 line-clamp-3">
               {step.description}
             </p>
           </div>
-        </div>
 
-        {/* Active Indicator */}
-        {isActive && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="absolute top-4 right-4 w-3 h-3 rounded-full bg-[#6654f5] shadow-lg shadow-[#6654f5]/50 ring-4 ring-white"
-          />
-        )}
+          {/* Step indicator bar */}
+          <div className="mt-2 h-0.5 rounded-full overflow-hidden bg-gray-200">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: isActive ? "100%" : "0%" }}
+              transition={{ duration: 0.3 }}
+              className="h-full brand-gradient"
+            />
+          </div>
+        </div>
 
         {/* Hover Glow Effect */}
         <div className={cn(
-          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none",
-          "bg-gradient-to-br from-[#6654f5]/5 via-transparent to-[#ca5a8b]/5"
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl",
+          "bg-gradient-to-br from-brand-purple/5 via-transparent to-brand-pink/5"
         )} />
       </div>
     </motion.div>
@@ -124,5 +137,3 @@ const LearningStep = ({
 };
 
 export default LearningStep;
-
-

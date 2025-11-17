@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import {
   Menu,
   Sparkles,
-  Github,
   User,
+  UserCircle,
 } from "lucide-react";
 import { UserNav } from "@/components/navigation";
 
@@ -102,19 +102,6 @@ export function MainNav({ className }: MainNavProps) {
                 Pricing
               </a>
             )}
-            <a
-              href="https://github.com/EDNAHQ/LearnFlow"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:opacity-80"
-              aria-label="GitHub Repository"
-            >
-              <img
-                src="/github-icon-1-logo.webp"
-                alt="GitHub"
-                className="h-6 w-6 object-contain"
-              />
-            </a>
           </nav>
           {user ? (
             <UserNav />
@@ -164,6 +151,16 @@ export function MainNav({ className }: MainNavProps) {
                     by Enterprise DNA
                   </span>
                 </div>
+                {user && (
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
+                    onClick={closeMobileMenu}
+                  >
+                    <UserCircle className="h-6 w-6 text-brand-purple" />
+                    <span>My Profile</span>
+                  </Link>
+                )}
                 <Link
                   to="/projects"
                   className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
@@ -202,20 +199,6 @@ export function MainNav({ className }: MainNavProps) {
                     <span>Pricing</span>
                   </a>
                 )}
-                <a
-                  href="https://github.com/EDNAHQ/LearnFlow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 py-2 px-4 rounded-md hover:bg-secondary"
-                  onClick={closeMobileMenu}
-                >
-                  <img
-                    src="/github-icon-1-logo.webp"
-                    alt="GitHub"
-                    className="h-6 w-6 object-contain"
-                  />
-                  <span>GitHub</span>
-                </a>
                 {!user && (
                   <div className="flex items-center gap-3 px-4 pt-2">
                     <Button

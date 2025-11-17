@@ -60,6 +60,7 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
           topic={topic}
           title={title}
           stepId={stepId}
+          pathId={pathId}
           onQuestionClick={handleQuestionClick}
         />
       )}

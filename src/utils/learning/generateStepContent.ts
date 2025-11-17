@@ -31,6 +31,9 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
     try {
       console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
       
+      // Get user ID for personalization
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const response = await supabase.functions.invoke(EDGE_FUNCTIONS.generateLearningContent, {
         body: {
           stepId: step.id,
@@ -38,7 +41,9 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           title: step.title,
           stepNumber: stepData.order_index + 1,
           totalSteps: 10,
-          silent // Pass the silent parameter to suppress notifications
+          silent, // Pass the silent parameter to suppress notifications
+          userId: user?.id,
+          pathId: stepData.path_id
         }
       });
       

@@ -1,7 +1,6 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/theme";
 import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_STYLES } from "@/components/ai";
@@ -71,21 +70,21 @@ const ContentHeader = ({
             </div>
           </div>
 
-          {/* Right Side - Status and Mode Toggle */}
-          <div className="flex items-center gap-2 sm:gap-4" data-section="mode-switcher">
-            <ModeToggle data-component="ContentModeTabs" />
-
-            {/* Generation indicator with better styling */}
+          {/* Right Side - Status */}
+          <div className="flex items-center gap-2 sm:gap-4" data-section="status-indicator">
+            {/* Generation indicator with better styling - visible on all screen sizes */}
             {generatingContent && generatedSteps < totalSteps && (
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="hidden sm:flex items-center gap-2 text-xs sm:text-sm bg-gradient-to-r from-brand-primary/20 to-brand-accent/20 px-3 sm:px-4 py-2 rounded-full border-2 border-brand-primary/40"
+                className="flex items-center gap-2 text-xs sm:text-sm bg-gradient-to-r from-brand-purple/20 to-brand-pink/20 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 border-brand-purple/40 shadow-sm"
               >
-                <div className="w-4 h-4 rounded-full border-2 border-brand-accent border-t-transparent animate-spin" />
-                <span className="font-semibold text-gray-700">
-                  Generating Content ({generatedSteps}/{totalSteps})
+                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-brand-pink border-t-transparent animate-spin" />
+                <span className="font-semibold text-gray-700 whitespace-nowrap">
+                  <span className="hidden sm:inline">Generating Content </span>
+                  <span className="sm:hidden">Gen </span>
+                  ({generatedSteps}/{totalSteps})
                 </span>
               </motion.div>
             )}
