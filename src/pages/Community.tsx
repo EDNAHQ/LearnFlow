@@ -18,6 +18,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Eye, Heart, GitFork, Star } from "lucide-react";
 import { getTopTrending } from "@/utils/trendingScore";
+import { LiveActivityFeed } from "@/components/community/LiveActivityFeed";
+import { DiscoveryHub } from "@/components/community/DiscoveryHub";
+import { CommunityPulse } from "@/components/community/CommunityPulse";
 
 interface CommunityPath {
   id: string;
@@ -237,61 +240,55 @@ const Community = () => {
     <div className="min-h-screen bg-background">
       <MainNav />
 
-      {/* Hero Section with Background */}
-      <section className="relative min-h-[400px] bg-gradient-to-br from-[#6654f5] via-[#ca5a8b] to-[#f2b347] overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
+      {/* Compact Hero Channel */}
+      <section className="relative bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
           <img
             src="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_2.png"
             alt=""
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover"
           />
         </div>
-
-        {/* Dark overlays to enhance readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-purple/20 via-brand-pink/20 to-brand-gold/20" />
-
-        {/* Content */}
-        <div className="relative h-full flex items-center justify-center py-20">
-          <div className="text-center text-white px-4">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
-            >
-              Community Learning
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-white/80 max-w-2xl mx-auto"
-            >
-              Discover and share knowledge with learners around the world
-            </motion.p>
-
-            {/* Stats */}
+        <div className="relative container max-w-7xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-2xl md:text-3xl font-bold text-white"
+              >
+                Community Learning
+              </motion.h1>
+            </div>
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-8 max-w-md mx-auto mt-8"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-6 md:gap-8"
             >
-              <div>
-                <div className="text-3xl font-bold text-white">{totalPaths}</div>
-                <div className="text-sm text-white/70">Public Paths</div>
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{totalPaths}</div>
+                <div className="text-xs text-white/70">Paths</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-white">{totalViews}</div>
-                <div className="text-sm text-white/70">Total Views</div>
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{totalViews}</div>
+                <div className="text-xs text-white/70">Views</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-white">{totalLikes}</div>
-                <div className="text-sm text-white/70">Total Likes</div>
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{totalLikes}</div>
+                <div className="text-xs text-white/70">Likes</div>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Compact Community Widgets */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="container max-w-7xl mx-auto px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CommunityPulse />
+            <LiveActivityFeed />
+            <DiscoveryHub />
           </div>
         </div>
       </section>

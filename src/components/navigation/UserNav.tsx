@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, UserCircle } from "lucide-react";
 
 export function UserNav() {
   const { user, signOut } = useAuth();
@@ -57,6 +57,10 @@ export function UserNav() {
           </div>
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/profile")}>
+          <UserCircle className="mr-2 h-4 w-4" />
+          <span>My Profile</span>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/projects")}>
           <User className="mr-2 h-4 w-4" />
           <span>My Projects</span>

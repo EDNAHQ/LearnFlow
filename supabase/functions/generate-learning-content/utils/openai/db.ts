@@ -23,6 +23,43 @@ export async function checkExistingContent(
   return data?.detailed_content || null;
 }
 
+// Clean meta-commentary from generated content
+export function cleanMetaCommentary(content: string): string {
+  if (!content) return content;
+  
+  let cleaned = content;
+  
+  // Remove word count patterns (e.g., "Word Count: 682", "### Word Count: 682")
+  cleaned = cleaned.replace(/^#{1,6}\s*Word\s+Count\s*:\s*\d+.*$/gmi, '');
+  cleaned = cleaned.replace(/^Word\s+Count\s*:\s*\d+.*$/gmi, '');
+  cleaned = cleaned.replace(/###\s*Word\s+Count.*$/gmi, '');
+  
+  // Remove meta-commentary patterns
+  cleaned = cleaned.replace(/^This\s+content\s+is.*$/gmi, '');
+  cleaned = cleaned.replace(/^In\s+summary.*$/gmi, '');
+  cleaned = cleaned.replace(/^Note\s*:\s*This\s+content.*$/gmi, '');
+  
+  // Remove lines that are purely meta-commentary
+  const metaPatterns = [
+    /^This\s+section\s+contains.*$/gmi,
+    /^The\s+above\s+content.*$/gmi,
+    /^Content\s+generated\s+for.*$/gmi,
+    /^Word\s+count\s+target.*$/gmi,
+  ];
+  
+  metaPatterns.forEach(pattern => {
+    cleaned = cleaned.replace(pattern, '');
+  });
+  
+  // Clean up multiple consecutive newlines
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+  
+  // Trim whitespace
+  cleaned = cleaned.trim();
+  
+  return cleaned;
+}
+
 // Save generated content to Supabase
 export async function saveContentToSupabase(
   stepId: string,
@@ -30,15 +67,18 @@ export async function saveContentToSupabase(
   supabaseUrl: string,
   supabaseServiceKey: string
 ) {
+  // Clean meta-commentary before saving
+  const cleanedContent = cleanMetaCommentary(content);
+  
   // Validate content before saving
-  if (!content || content.length < 200) {
-    console.error("Content appears to be truncated or too short:", content);
+  if (!cleanedContent || cleanedContent.length < 200) {
+    console.error("Content appears to be truncated or too short:", cleanedContent);
     throw new Error("Generated content is too short or incomplete");
   }
   
   // Check for common truncation patterns
-  if (content.endsWith("...") || content.endsWith("…")) {
-    console.error("Content appears to be truncated at the end:", content.slice(-50));
+  if (cleanedContent.endsWith("...") || cleanedContent.endsWith("…")) {
+    console.error("Content appears to be truncated at the end:", cleanedContent.slice(-50));
     throw new Error("Generated content appears to be truncated");
   }
   
@@ -46,7 +86,7 @@ export async function saveContentToSupabase(
   
   const { error } = await supabase
     .from('learning_steps')
-    .update({ detailed_content: content })
+    .update({ detailed_content: cleanedContent })
     .eq('id', stepId);
     
   if (error) {
@@ -54,7 +94,7 @@ export async function saveContentToSupabase(
     throw new Error(`Failed to save generated content: ${error.message}`);
   }
   
-  console.log(`Successfully saved content for step ${stepId} (${content.length} characters)`);
+  console.log(`Successfully saved content for step ${stepId} (${cleanedContent.length} characters)`);
 }
 
 // Get step context including description and previous step title

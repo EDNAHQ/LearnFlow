@@ -48,17 +48,25 @@ const PresentationControls = ({
   const handleExit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onExit) {
-      onExit();
-    } else {
-      setMode("text");
+    e.nativeEvent.stopImmediatePropagation();
+    console.log('Exit button clicked', { onExit: !!onExit });
+    try {
+      if (onExit) {
+        console.log('Calling onExit callback');
+        onExit();
+      } else {
+        console.log('Calling setMode("text")');
+        setMode("text");
+      }
+    } catch (error) {
+      console.error('Error in handleExit:', error);
     }
   };
 
   return (
-    <div className="fixed bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-4 sm:px-8">
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 sm:px-8 pointer-events-auto">
       {/* Glassmorphic floating control bar */}
-      <div className="relative">
+      <div className="relative pointer-events-auto">
         {/* Gradient accent line on top */}
         <div className="absolute -top-px left-0 right-0 h-[2px] bg-gradient-to-r from-brand-purple via-brand-pink to-brand-gold rounded-t-2xl" />
 
@@ -93,9 +101,14 @@ const PresentationControls = ({
           )}
 
           <button
-            className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-white/50"
+            className="text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-brand-purple hover:via-brand-pink hover:to-brand-gold hover:bg-clip-text hover:text-transparent transition-all duration-300 px-3 py-1.5 rounded-lg hover:bg-white/50 relative z-50 cursor-pointer"
             onClick={handleExit}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             type="button"
+            aria-label="Exit presentation mode"
           >
             Exit
           </button>

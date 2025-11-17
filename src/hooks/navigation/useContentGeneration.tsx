@@ -27,9 +27,8 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
       lastUpdateTime.current = now;
       
       // Only update if values changed to prevent unnecessary re-renders
-      // If we're on a step page, don't show generating status
-      const shouldShowGenerating = bgGenerating && !hasStepId;
-      setGeneratingContent(prev => shouldShowGenerating !== prev ? shouldShowGenerating : prev);
+      // Show generating status even when on a step page so users can see progress
+      setGeneratingContent(prev => bgGenerating !== prev ? bgGenerating : prev);
       setGeneratedSteps(prev => bgGenerated !== prev ? bgGenerated : prev);
       
       // Only set initialLoading to false when content generation is complete or after a timeout

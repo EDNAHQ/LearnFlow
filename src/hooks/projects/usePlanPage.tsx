@@ -45,6 +45,9 @@ export const usePlanPage = () => {
           return;
         }
         
+        setLoading(true);
+        setAuthError(false);
+        
         const plan = await generateLearningPlan(storedTopic);
         setSteps(plan);
         
@@ -72,6 +75,8 @@ export const usePlanPage = () => {
     
     if (user) {
       fetchPlan();
+    } else {
+      setLoading(false);
     }
   }, [navigate, user]);
 

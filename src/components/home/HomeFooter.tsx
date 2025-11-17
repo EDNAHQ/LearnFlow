@@ -17,20 +17,6 @@ export const HomeFooter = () => {
             <a href="https://enterprisedna.co/pricing" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Pricing
             </a>
-            <a
-              href="https://github.com/EDNAHQ/LearnFlow"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-              aria-label="GitHub Repository"
-            >
-              <img
-                src="/github-icon-1-logo.webp"
-                alt="GitHub"
-                className="h-4 w-4 object-contain"
-              />
-              <span>GitHub</span>
-            </a>
           </div>
         </div>
         

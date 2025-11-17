@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import LearningStep, { Step } from "@/components/learning/LearningStep";
 
@@ -9,36 +8,52 @@ interface PlanStepsListProps {
 }
 
 const PlanStepsList = ({ steps, activeStep, setActiveStep }: PlanStepsListProps) => {
+  // Always use 5 columns for desktop, 2 for mobile/tablet
+  const getGridCols = () => {
+    return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="mb-16"
+      transition={{ duration: 0.6, delay: 0.3 }}
+      className="relative w-full h-full flex flex-col"
     >
-      {/* Section header */}
+      {/* Section header - Very compact */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="text-center mb-12"
+        transition={{ duration: 0.6, delay: 0.4 }}
+        className="text-center mb-3 sm:mb-4 flex-shrink-0"
       >
-        <h2 className="text-3xl font-bold text-[#0b0c18] mb-3">Your Learning Journey</h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Click on any step below to explore its details and begin your mastery
-        </p>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-brand-black mb-1">
+          Your Learning Journey
+        </h2>
       </motion.div>
 
-      {/* Steps list - centered with max width */}
-      <div className="max-w-5xl mx-auto space-y-6">
+      {/* Grid container - 5 columns, fills space */}
+      <div className={`grid ${getGridCols()} gap-3 sm:gap-4 w-full max-w-7xl mx-auto flex-1 min-h-0 auto-rows-fr px-2`}>
         {steps.map((step, index) => (
-          <LearningStep
+          <motion.div
             key={step.id}
-            step={step}
-            index={index}
-            isActive={activeStep === index}
-            onClick={() => setActiveStep(index)}
-          />
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.4,
+              delay: index * 0.03,
+              type: "spring",
+              stiffness: 120,
+            }}
+            className="w-full min-h-0"
+          >
+            <LearningStep
+              step={step}
+              index={index}
+              isActive={activeStep === index}
+              onClick={() => setActiveStep(index)}
+            />
+          </motion.div>
         ))}
       </div>
     </motion.div>

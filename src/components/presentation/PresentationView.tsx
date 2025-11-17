@@ -19,9 +19,10 @@ export interface SlideContent {
 interface PresentationViewProps {
   content: string;
   title?: string;
+  onClose?: () => void;
 }
 
-const PresentationView = ({ content, title }: PresentationViewProps) => {
+const PresentationView = ({ content, title, onClose }: PresentationViewProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showOverview, setShowOverview] = useState(false);
   const [enableImageGeneration, setEnableImageGeneration] = useState(true); // Can be toggled by user
@@ -172,8 +173,13 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
   }, []);
 
   const exitPresentation = useCallback(() => {
-    setMode("text");
-  }, [setMode]);
+    console.log('Exit presentation called', { onClose: !!onClose });
+    if (onClose) {
+      onClose();
+    } else {
+      setMode("text");
+    }
+  }, [setMode, onClose]);
 
   // Go to a specific slide directly
   const goToSlide = useCallback((index: number) => {
@@ -186,17 +192,27 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
   // Use a memo-ed keyboard handler to avoid unnecessary re-renders
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showOverview) return;
+      if (showOverview) {
+        if (e.key === "Escape") {
+          setShowOverview(false);
+        }
+        return;
+      }
       
       if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
         goToNextSlide();
       } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
         goToPreviousSlide();
       } else if (e.key === "Escape") {
-        setShowOverview(false);
-      } else if (e.key === "o") {
+        e.preventDefault();
+        exitPresentation();
+      } else if (e.key === "o" || e.key === "O") {
+        e.preventDefault();
         setShowOverview(prev => !prev);
       } else if (e.key >= "1" && e.key <= "9") {
+        e.preventDefault();
         const slideNumber = parseInt(e.key, 10) - 1;
         if (slideNumber < enrichedSlides.length) {
           goToSlide(slideNumber);
@@ -206,7 +222,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNextSlide, goToPreviousSlide, showOverview, enrichedSlides.length, goToSlide]);
+  }, [goToNextSlide, goToPreviousSlide, showOverview, enrichedSlides.length, goToSlide, exitPresentation]);
 
   if (enrichedSlides.length === 0) {
     return (
@@ -220,7 +236,7 @@ const PresentationView = ({ content, title }: PresentationViewProps) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-40 overflow-hidden"
+      className="fixed inset-0 z-40 overflow-hidden pointer-events-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

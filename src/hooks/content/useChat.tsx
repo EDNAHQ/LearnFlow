@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { usePromptTracking } from '@/hooks/analytics';
 
 export interface ChatMessage {
   id: string;
@@ -25,6 +26,7 @@ interface UseChatReturn {
 }
 
 export const useChat = ({ topic, content, pathId }: UseChatProps): UseChatReturn => {
+  const { logPrompt } = usePromptTracking();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,18 @@ export const useChat = ({ topic, content, pathId }: UseChatProps): UseChatReturn
       });
 
       if (functionError) throw functionError;
+
+      // Track the prompt for personalization
+      logPrompt({
+        promptText: userMessage,
+        contextUsed: `${topic}: ${content.substring(0, 500)}`,
+        pathId: pathId,
+        responseLength: data.response?.length || 0,
+        metadata: {
+          conversationLength: messages.length + 1,
+          topic
+        }
+      });
 
       // Add assistant response
       const assistantMessage: ChatMessage = {

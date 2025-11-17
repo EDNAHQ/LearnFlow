@@ -2,21 +2,24 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/auth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserProfile } from "@/hooks/profile/useUserProfile";
+import CapabilityOnboardingWizard from "@/components/onboarding/CapabilityOnboardingWizard";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const { profile, loading: profileLoading, refetch } = useUserProfile();
   const [profileChecked, setProfileChecked] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const checkAndCreateProfile = async () => {
       if (!user) {
-        setProfileLoading(false);
+        setProfileChecked(true);
         return;
       }
 
       try {
-        // Check if profile exists
+        // Check if basic profile exists
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -47,19 +50,33 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
         setProfileChecked(true);
       } catch (error) {
         console.error("Profile verification failed:", error);
-      } finally {
-        setProfileLoading(false);
       }
     };
 
     if (user && !profileChecked) {
       checkAndCreateProfile();
     } else if (!user) {
-      setProfileLoading(false);
+      setProfileChecked(true);
     }
   }, [user, profileChecked]);
 
-  if (loading || profileLoading) {
+  // Check onboarding status once profile is loaded
+  useEffect(() => {
+    if (profileChecked && profile && !profileLoading) {
+      // Show onboarding if not completed
+      if (!profile.onboarding_completed) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [profile, profileLoading, profileChecked]);
+
+  const handleOnboardingComplete = async () => {
+    setShowOnboarding(false);
+    // Refetch profile to get updated onboarding status
+    await refetch();
+  };
+
+  if (loading || profileLoading || !profileChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-4 border-learn-200 border-t-learn-500 animate-spin"></div>
@@ -80,7 +97,17 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {showOnboarding && (
+        <CapabilityOnboardingWizard
+          isOpen={showOnboarding}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
+      {children}
+    </>
+  );
 }
 
 

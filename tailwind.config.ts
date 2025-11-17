@@ -59,6 +59,7 @@ const config: Config = {
         "brand-purple": "#6654f5",
         "brand-pink": "#ca5a8b",
         "brand-gold": "#f2b347",
+        "brand-black": "#0b0c18",
         "ai-primary": "var(--ai-primary)",
         "ai-accent": "var(--ai-accent)",
         "ai-surface": "var(--ai-surface)",

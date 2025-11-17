@@ -1,16 +1,23 @@
 
 import React, { useRef, useCallback } from "react";
-import ReactMarkdown from "react-markdown";
+import SafeReactMarkdown from "@/components/ui/SafeReactMarkdown";
+import remarkGfm from "remark-gfm";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
+import { preprocessContent } from "@/utils/markdown/contentPreprocessor";
 import ContentQuestionsSection from "../questions/ContentQuestionsSection";
 import LearningModesToolbar from "../common/LearningModesToolbar";
+import { ContentStyleAdjuster } from "../common/ContentStyleAdjuster";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
   topic?: string | null;
   title?: string;
   stepId?: string;
+  pathId?: string;
+  stepNumber?: number;
+  totalSteps?: number;
   onQuestionClick?: (question: string, content?: string) => void;
+  onContentUpdated?: (newContent: string) => void;
 }
 
 const ContentSectionCore = ({
@@ -18,7 +25,11 @@ const ContentSectionCore = ({
   topic,
   title,
   stepId,
-  onQuestionClick
+  pathId,
+  stepNumber,
+  totalSteps,
+  onQuestionClick,
+  onContentUpdated
 }: ContentSectionCoreProps) => {
   // Create a ref for the content area for margin notes
   const contentRef = useRef<HTMLDivElement>(null);
@@ -28,6 +39,9 @@ const ContentSectionCore = ({
     topic || undefined,
     onQuestionClick
   );
+
+  // Preprocess content to detect and format code blocks
+  const processedContent = preprocessContent(loadedDetailedContent);
 
   const getSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -47,9 +61,12 @@ const ContentSectionCore = ({
         ref={contentRef}
         className="content-area"
       >
-        <ReactMarkdown components={markdownComponents}>
-          {loadedDetailedContent}
-        </ReactMarkdown>
+        <SafeReactMarkdown 
+          remarkPlugins={[remarkGfm]}
+          components={markdownComponents}
+        >
+          {processedContent}
+        </SafeReactMarkdown>
         
         {/* Related questions at the bottom of content */}
         {topic && (
@@ -69,6 +86,21 @@ const ContentSectionCore = ({
           title={title}
           getSelection={getSelection}
         />
+
+        {/* Style adjustment button */}
+        {stepId && topic && title && (
+          <div className="mt-4 flex justify-end">
+            <ContentStyleAdjuster
+              stepId={stepId}
+              topic={topic}
+              title={title}
+              stepNumber={stepNumber}
+              totalSteps={totalSteps}
+              pathId={pathId || undefined}
+              onContentUpdated={onContentUpdated}
+            />
+          </div>
+        )}
       </div>
       
       {/* Margin notes removed */}

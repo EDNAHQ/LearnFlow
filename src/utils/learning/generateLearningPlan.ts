@@ -64,35 +64,88 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
       }));
     }
   } else {
-    // Create a new learning path
+    // Get content preferences from session storage
+    let contentPreferences: Record<string, any> = {};
+    try {
+      const storedPrefs = sessionStorage.getItem('content-preferences');
+      if (storedPrefs) {
+        contentPreferences = JSON.parse(storedPrefs);
+      }
+    } catch (e) {
+      console.log('No content preferences found or error parsing:', e);
+    }
+
+    // Filter to only include valid learning_paths columns
+    // Valid content preference columns: content_style, content_length, content_complexity, preferred_examples, learning_approach
+    const validPreferences: Record<string, any> = {};
+    const validKeys = ['content_style', 'content_length', 'content_complexity', 'preferred_examples', 'learning_approach'];
+    for (const key of validKeys) {
+      if (contentPreferences[key] !== undefined && contentPreferences[key] !== null) {
+        validPreferences[key] = contentPreferences[key];
+      }
+    }
+
+    // Create a new learning path with preferences
     console.log("Creating new learning path for topic:", topic);
-    const { data: newPath, error: createError } = await supabase
+    
+    // Try to insert with preferences first, fallback to basic insert if columns don't exist
+    let newPath;
+    let createError;
+    
+    const insertData: Record<string, any> = {
+      topic,
+      user_id: user.id,
+      is_approved: false,
+      ...validPreferences
+    };
+    
+    const { data, error } = await supabase
       .from('learning_paths')
-      .insert({
-        topic,
-        user_id: user.id,
-        is_approved: false
-      })
+      .insert(insertData)
       .select();
+    
+    createError = error;
+    newPath = data;
+    
+    // If error is about missing columns, try without preferences
+    if (createError && createError.message?.includes('column') && createError.message?.includes('schema cache')) {
+      console.warn("Content preference columns not found, creating path without preferences:", createError.message);
+      const { data: basicData, error: basicError } = await supabase
+        .from('learning_paths')
+        .insert({
+          topic,
+          user_id: user.id,
+          is_approved: false
+        })
+        .select();
+      
+      createError = basicError;
+      newPath = basicData;
+    }
       
     if (createError || !newPath || newPath.length === 0) {
       console.error("Error creating new learning path:", createError);
-      throw new Error("Failed to create learning path");
+      throw new Error(`Failed to create learning path: ${createError?.message || 'Unknown error'}`);
     }
     
     pathId = newPath[0].id;
     console.log("New learning path created:", pathId);
+    
+    // Clear preferences from session storage after use
+    sessionStorage.removeItem('content-preferences');
   }
   
   // Now generate the learning plan steps using AI
   try {
     console.log("Calling edge function to generate learning plan");
     
-    // Call the edge function to generate a learning plan
+    // Call the edge function to generate a learning plan with user context
     const response = await supabase.functions.invoke('generate-learning-content', {
       body: {
         topic,
-        generatePlan: true
+        generatePlan: true,
+        userId: user.id,
+        pathId: pathId
       }
     });
     

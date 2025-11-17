@@ -1,7 +1,7 @@
 
 import { motion } from "framer-motion";
 import { memo, useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
+import SafeReactMarkdown from "@/components/ui/SafeReactMarkdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import type { SlideContent } from "./PresentationView";
@@ -132,7 +132,8 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
                   style={{ lineHeight: '1.6', letterSpacing: '0.02em' }}
                 >
-                  <ReactMarkdown
+                  <SafeReactMarkdown
+                    remarkPlugins={[]}
                     components={{
                       p: ({ children }) => <p style={{ marginTop: '1.5rem', marginBottom: '1.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
@@ -148,7 +149,7 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                     }}
                   >
                     {slideContent.content}
-                  </ReactMarkdown>
+                  </SafeReactMarkdown>
                 </motion.div>
               </div>
             </div>
@@ -172,7 +173,8 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   className="text-gray-800 text-2xl sm:text-3xl lg:text-4xl"
                   style={{ lineHeight: '1.6', letterSpacing: '0.02em' }}
                 >
-                  <ReactMarkdown
+                  <SafeReactMarkdown
+                    remarkPlugins={[]}
                     components={{
                       p: ({ children }) => <p style={{ marginTop: '1.5rem', marginBottom: '1.5rem', lineHeight: 'inherit' }}>{children}</p>,
                       strong: ({ children }) => (
@@ -188,7 +190,7 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                     }}
                   >
                     {slideContent.content}
-                  </ReactMarkdown>
+                  </SafeReactMarkdown>
                 </motion.div>
               </div>
             </div>
@@ -248,7 +250,8 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                 }}
                 className={hasHeroImage ? 'text-white' : 'text-gray-800'}
               >
-                <ReactMarkdown
+                <SafeReactMarkdown
+                  remarkPlugins={[]}
                   components={{
                     p: ({ children }) => <p style={{ marginTop: '1.25rem', marginBottom: '1.25rem', lineHeight: 'inherit' }}>{children}</p>,
                     strong: ({ children }) => (
@@ -272,7 +275,7 @@ const PresentationSlide = memo(({ slideContent, isActive, slideNumber, totalSlid
                   }}
                 >
                   {slideContent.content}
-                </ReactMarkdown>
+                </SafeReactMarkdown>
               </motion.div>
             </div>
           )}

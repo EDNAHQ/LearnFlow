@@ -1,4 +1,4 @@
-import { useState, useMemo, startTransition, useDeferredValue } from "react";
+import { useState, useMemo, startTransition, useDeferredValue, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -9,10 +9,12 @@ import ProjectsLoading from "@/components/projects/ProjectsLoading";
 import { useProjects } from "@/hooks/projects";
 import type { LearningProject } from "@/components/projects/types";
 import { useAuth } from "@/hooks/auth";
-import VideoBackground from "@/components/common/VideoBackground";
+import { useBehaviorTracking } from "@/hooks/analytics";
 import LearningJourneyWizard from "@/components/journey/LearningJourneyWizard";
 import { FloatingNewProjectButton } from "@/components/projects/FloatingNewProjectButton";
-import { LearningStreak } from "@/components/profile/LearningStreak";
+import { useUserProfile } from "@/hooks/profile/useUserProfile";
+import { Flame } from "lucide-react";
+import { ContinueLearning } from "@/components/projects/ContinueLearning";
 // Icons removed for cleaner design
 
 // Demo projects for non-logged in users
@@ -52,16 +54,24 @@ const demoProjects = [
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const { trackClick, trackSearch } = useBehaviorTracking();
   const { projects, loading, isDeleting, handleDeleteProject } = useProjects();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const deferredSearch = useDeferredValue(searchQuery);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
+  
+  const streak = profile?.learning_streak_days || 0;
+  const showStreak = user && profile && streak > 0;
 
   // Use demo projects if not logged in
   const displayProjects = user ? projects : demoProjects;
 
   const handleNewProject = () => {
+    // Track new project creation intent
+    trackClick('new-project-button', 'content');
+    
     // Check if user is logged in
     if (!user) {
       navigate('/sign-in');
@@ -70,6 +80,13 @@ const ProjectsPage = () => {
     // Open the Learning Journey Wizard
     setShowJourneyWizard(true);
   };
+
+  // Track search queries
+  useEffect(() => {
+    if (deferredSearch.trim().length > 0) {
+      trackSearch(deferredSearch);
+    }
+  }, [deferredSearch, trackSearch]);
 
   // Filter projects based on search and filter (memoized for snappy UI)
   const filteredProjects = useMemo(() => {
@@ -104,74 +121,63 @@ const ProjectsPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <MainNav />
 
-      {/* Hero Section with Video Background */}
-      <VideoBackground
-        videoSrc="/videos/social_sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_68369123-6a21-4b9e-8697-722a42766ab7_0.mp4"
-        imageSrc="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png"
-        className="min-h-[32vh] sm:h-[40vh] overflow-hidden"
-        overlayClassName="bg-black/40"
-      >
-        {/* Additional Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40" />
-        <div className="absolute inset-0 brand-gradient opacity-30" />
-
-        {/* Content */}
-        <div className="relative h-full flex items-center justify-center">
-          <div className="text-center text-white px-4">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
-            >
-              Your Learning Journey
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-white/80 max-w-2xl mx-auto"
-            >
-              Track your progress, celebrate achievements, and continue growing
-            </motion.p>
-
-            {/* Stats */}
+      {/* Compact Hero Section */}
+      <section className="relative bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <img
+            src="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="relative container max-w-7xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-2xl md:text-3xl font-bold text-white"
+              >
+                Your Learning Journey
+              </motion.h1>
+            </div>
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-md mx-auto mt-8"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-6 md:gap-8"
             >
-              <div>
-                <div className="text-3xl font-bold text-white">{totalProjects}</div>
-                <div className="text-sm text-white/70">Projects</div>
+              {/* Learning Streak */}
+              {showStreak && (
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/30">
+                  <Flame className="h-4 w-4 text-white" />
+                  <div className="text-white">
+                    <div className="text-xs font-medium opacity-90 leading-none">Streak</div>
+                    <div className="text-sm font-bold leading-tight">{streak} {streak === 1 ? 'day' : 'days'}</div>
+                  </div>
+                </div>
+              )}
+              {/* Stats */}
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{totalProjects}</div>
+                <div className="text-xs text-white/70">Projects</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-gradient">{completionRate}%</div>
-                <div className="text-sm text-white/70">Complete</div>
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{completedProjects}</div>
+                <div className="text-xs text-white/70">Completed</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-white">{completedProjects}</div>
-                <div className="text-sm text-white/70">Achieved</div>
+              <div className="text-center">
+                <div className="text-xl md:text-2xl font-bold text-white">{completionRate}%</div>
+                <div className="text-xs text-white/70">Complete</div>
               </div>
             </motion.div>
           </div>
         </div>
-      </VideoBackground>
+      </section>
 
       {/* Main Content */}
       <div className="container max-w-7xl mx-auto px-4 py-12">
-        {/* Learning Streak - only for logged in users */}
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
-          >
-            <LearningStreak />
-          </motion.div>
-        )}
+        {/* Continue Where You Left Off - Enhanced with insights */}
+        {user && <ContinueLearning />}
 
         {/* Show sign-in prompt for non-logged in users */}
         {!user && (
@@ -305,10 +311,12 @@ const ProjectsPage = () => {
       </div>
 
       {/* Learning Journey Wizard Modal */}
-      <LearningJourneyWizard
-        isOpen={showJourneyWizard}
-        onClose={() => setShowJourneyWizard(false)}
-      />
+      {showJourneyWizard && (
+        <LearningJourneyWizard
+          isOpen={showJourneyWizard}
+          onClose={() => setShowJourneyWizard(false)}
+        />
+      )}
 
       {/* Floating New Project Button */}
       {filteredProjects.length > 0 && user && (

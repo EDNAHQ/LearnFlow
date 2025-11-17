@@ -12,10 +12,12 @@ import { ProjectCardProps } from "./types";
 import { getProjectStyling, formatDate } from "./projectStylingUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useBehaviorTracking } from "@/hooks/analytics";
 
 export const ProjectCard = ({ project, onDeleteProject, isDeleting }: ProjectCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackClick } = useBehaviorTracking();
   const [showRelatedTopics, setShowRelatedTopics] = useState(false);
   const [isPublic, setIsPublic] = useState(project.is_public || false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -55,6 +57,9 @@ export const ProjectCard = ({ project, onDeleteProject, isDeleting }: ProjectCar
   };
 
   const handleProjectClick = (project: ProjectCardProps['project']) => {
+    // Track project click - critical for understanding what users want to learn
+    trackClick(`project-${project.id}`, 'project');
+    
     // Store topic for reference (still useful for components that need it)
     sessionStorage.setItem("learn-topic", project.topic);
     

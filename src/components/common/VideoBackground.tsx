@@ -15,12 +15,9 @@ interface VideoBackgroundProps {
 /**
  * VideoBackground Component
  *
- * A responsive background component that shows:
- * - Static images on mobile/tablet devices (< 1024px)
- * - Video on desktop devices (>= 1024px)
- *
- * This ensures better performance and avoids blank backgrounds on mobile devices
- * where videos often fail to load properly.
+ * Always shows the image as base layer.
+ * On desktop (>= 1024px), overlays video on top.
+ * On mobile/tablet (< 1024px), only shows image.
  */
 export default function VideoBackground({
   videoSrc,
@@ -34,25 +31,25 @@ export default function VideoBackground({
   poster,
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [showVideo, setShowVideo] = useState(true); // Default to showing video on desktop
 
   useEffect(() => {
-    // Check if device is mobile/tablet on mount
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+    const checkScreenSize = () => {
+      // Show video on desktop (>= 1024px), hide on mobile/tablet (< 1024px)
+      setShowVideo(window.innerWidth >= 1024);
     };
 
-    // Initial check
-    checkMobile();
+    // Check immediately
+    checkScreenSize();
 
-    // Listen for resize events
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // Listen for resize
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   useEffect(() => {
-    // Only attempt to play video if not mobile
-    if (isMobile) return;
+    // Only attempt to play video if we're showing it
+    if (!showVideo) return;
 
     const videoElement = videoRef.current;
     if (!videoElement) return;
@@ -60,9 +57,9 @@ export default function VideoBackground({
     const playVideo = async () => {
       try {
         await videoElement.play();
-        console.log('Video started playing successfully');
       } catch (error) {
         console.error('Error attempting to play video:', error);
+        // Don't hide video on error, let poster image show
         if (onError) {
           onError(error as Event);
         }
@@ -76,30 +73,37 @@ export default function VideoBackground({
       videoElement.addEventListener('loadeddata', playVideo);
       return () => videoElement.removeEventListener('loadeddata', playVideo);
     }
-  }, [isMobile, onError]);
+  }, [showVideo, onError]);
 
   return (
     <div className={`relative ${className}`}>
-      {/* Mobile/Tablet: Show static image */}
-      {isMobile ? (
-        <img
-          src={imageSrc}
-          alt="Background"
-          className={`absolute inset-0 w-full h-full object-cover ${imageClassName}`}
-          loading="eager"
-        />
-      ) : (
-        /* Desktop: Show video */
+      {/* Base layer: Image always visible - ensures something is always shown */}
+      <img
+        src={imageSrc}
+        alt="Background"
+        className={`absolute inset-0 w-full h-full object-cover z-0 ${imageClassName}`}
+        loading="eager"
+        onError={(e) => {
+          console.error('Image failed to load:', imageSrc);
+        }}
+        onLoad={() => {
+          console.log('Image loaded successfully:', imageSrc);
+        }}
+      />
+      
+      {/* Overlay layer: Video only on desktop */}
+      {showVideo && (
         <video
           ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
-          poster={poster}
-          className={`absolute inset-0 w-full h-full object-cover ${videoClassName}`}
+          poster={poster || imageSrc}
+          className={`absolute inset-0 w-full h-full object-cover z-[1] ${videoClassName}`}
           onError={(e) => {
             console.error('Video loading error:', e);
+            // Video failed, but image is still showing underneath
             if (onError) onError(e.nativeEvent);
           }}
         >

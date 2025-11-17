@@ -1,7 +1,9 @@
 
 import React from "react";
-import ReactMarkdown from "react-markdown";
+import SafeReactMarkdown from "@/components/ui/SafeReactMarkdown";
+import remarkGfm from "remark-gfm";
 import { getMarkdownComponents } from "./markdown/markdownComponents";
+import { preprocessContent } from "./markdown/contentPreprocessor";
 
 export const formatContent = (
   text: string, 
@@ -16,6 +18,9 @@ export const formatContent = (
     text = String(text || "Content could not be displayed properly");
   }
 
+  // Preprocess content to detect and format code blocks
+  const processedText = preprocessContent(text);
+
   // Debug logging for concepts
   if (concepts && concepts.length > 0) {
     console.log(`formatContent received ${concepts.length} concepts for highlighting`);
@@ -25,8 +30,11 @@ export const formatContent = (
   const components = getMarkdownComponents(topic, onInsightRequest, concepts, onConceptClick);
 
   return (
-    <ReactMarkdown components={components}>
-      {text}
-    </ReactMarkdown>
+    <SafeReactMarkdown 
+      remarkPlugins={[remarkGfm]}
+      components={components}
+    >
+      {processedText}
+    </SafeReactMarkdown>
   );
 };

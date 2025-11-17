@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/auth';
 import { ContentModeProvider } from './hooks/content';
+import { PersonalizationDiscoveryProvider } from './contexts/PersonalizationDiscoveryContext';
 import { useEdnaMembership } from './hooks/auth/useEdnaMembership';
 import HomePage from './pages/HomePage';
 import SignIn from './pages/SignIn';
@@ -12,6 +13,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import PlanPage from './pages/PlanPage';
 import ContentPage from './pages/ContentPage';
 import SettingsPage from './pages/SettingsPage';
+import ProfilePage from './pages/ProfilePage';
 import Community from './pages/Community';
 
 function AppContent() {
@@ -37,6 +39,7 @@ function AppContent() {
         <Route path="/content/:pathId" element={<ContentPage />} />
         <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </>
   );
@@ -49,7 +52,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ContentModeProvider>
-          <AppContent />
+          <PersonalizationDiscoveryProvider>
+            <AppContent />
+          </PersonalizationDiscoveryProvider>
         </ContentModeProvider>
       </AuthProvider>
     </BrowserRouter>

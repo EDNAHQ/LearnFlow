@@ -1,0 +1,306 @@
+# LearnFlow Development Rules
+
+## 🚫 NO DOCUMENTATION - CRITICAL
+
+**NEVER generate documentation files (README.md, docs, comments, etc.) unless explicitly requested by the user.**
+
+- Do NOT create documentation files automatically
+- Do NOT add extensive code comments explaining what code does
+- Do NOT write README files unless specifically asked
+- Do NOT create markdown documentation files
+- Focus on writing code, not explaining it
+- Only provide documentation when the user explicitly asks for it
+
+**This rule applies to ALL responses. Documentation slows down development and is not wanted.**
+
+---
+
+## ✅ Before You Start Coding
+
+**Quick checklist to prevent common issues:**
+
+1. **Plan the feature** - Use `.claude/skills/feature-planning/SKILL.md` to break down the feature systematically
+2. **Check existing code first** - Is there already a component/hook that does this?
+3. **Reference skills** - Don't write from scratch, check `.claude/skills/` first
+4. **Use existing UI components** - Check `src/components/ui/` before creating new ones
+5. **Follow import order** - See "Quick Reference Patterns" section
+6. **Brand colors only** - No arbitrary Tailwind colors
+7. **Error handling** - Always include try-catch and error states
+8. **Loading states** - Show loading indicators for async operations
+9. **TypeScript types** - Use proper types, avoid `any`
+10. **Responsive design** - Test mobile, tablet, desktop
+11. **Accessibility** - See accessibility checklist below
+
+### Feature Planning Quick Reference
+
+When starting a new feature, systematically consider:
+- **Data**: What tables/columns are needed?
+- **Backend**: Do we need an edge function? What operations?
+- **Frontend**: What components, hooks, pages?
+- **State**: Local state, global state, or server state?
+- **Integration**: What existing code can be reused?
+
+**Full framework**: See `.claude/skills/feature-planning/SKILL.md`
+
+---
+
+## 🎨 BRAND ENFORCEMENT - CRITICAL
+
+**BEFORE creating or modifying ANY UI component, feature, or styling:**
+
+1. **MUST reference**: `.claude/skills/brand-enforcement/SKILL.md`
+2. **MUST verify**: All colors, typography, icons, and design patterns follow the brand style guide
+3. **MUST check**: `docs/BRAND_STYLE_GUIDE.md` for brand standards
+
+### Brand Requirements Summary:
+
+**Colors (ONLY these allowed):**
+- `brand-purple` (#6654f5)
+- `brand-pink` (#ca5a8b)
+- `brand-gold` (#f2b347)
+- `brand-black` (#0b0c18)
+- `white` (#ffffff)
+- Gradients: `brand-gradient`, `text-gradient`, `brand-gradient-light`
+
+**Typography:**
+- Font: Poppins ONLY (Light 300, Medium 500, Bold 700)
+- Headlines: `font-medium` (Poppins Medium)
+- Body: `font-light` (Poppins Light)
+- Emphasis: `font-bold` (Poppins Bold)
+
+**Icons:**
+- Library: `lucide-react` ONLY
+- No other icon libraries allowed
+
+**Design Principles:**
+- Large sections: white or black backgrounds
+- Brand colors: accents only, not large backgrounds
+- Use gradients strategically for CTAs and highlights
+- Clean, modern aesthetic with generous white space
+
+### When Creating Components:
+
+1. Check existing components for patterns (`src/components/home/HeroSection.tsx`, `src/components/navigation/MainNav.tsx`)
+2. Use brand colors from Tailwind config (`tailwind.config.ts`)
+3. Use CSS utility classes from `src/index.css` (`.brand-gradient`, `.text-gradient`)
+4. Follow spacing and border radius patterns from existing components
+
+### Code Review Checklist:
+
+Before submitting any UI code, verify:
+- [ ] No arbitrary colors (no `bg-blue-500`, `text-red-600`, etc.)
+- [ ] Only Lucide React icons imported
+- [ ] Poppins font family (default, no need to specify)
+- [ ] Proper font weights (`font-medium` for headlines, `font-light` for body)
+- [ ] Brand gradients used for CTAs (`brand-gradient` class)
+- [ ] Large sections use white/black backgrounds
+- [ ] Brand colors used as accents only
+
+---
+
+## General Development Rules
+
+- Use TypeScript for all new code
+- Follow existing code patterns and structure
+- Use existing UI components from `src/components/ui/` when possible
+- Maintain consistent spacing and layout patterns
+- Test responsive design (mobile, tablet, desktop)
+
+---
+
+## ⚡ Quick Reference Patterns
+
+### Import Organization (Always Follow This Order)
+```typescript
+// 1. React & React hooks
+import { useState, useCallback, useEffect } from 'react';
+
+// 2. Third-party libraries
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+
+// 3. Internal hooks
+import { useAuth } from '@/hooks/auth';
+import { useUserProfile } from '@/hooks/profile';
+
+// 4. Components (UI first, then feature components)
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { MyFeatureComponent } from '@/components/feature/MyFeatureComponent';
+
+// 5. Utilities & helpers
+import { cn } from '@/lib/utils';
+import { formatDate } from '@/utils/formatDate';
+
+// 6. Integrations
+import { supabase } from '@/integrations/supabase/client';
+
+// 7. Types (if needed)
+import type { UserProfile } from '@/hooks/profile';
+```
+
+### Common Utilities
+- **Class merging**: Use `cn()` from `@/lib/utils` (combines clsx + tailwind-merge)
+- **Supabase client**: Import from `@/integrations/supabase/client`
+- **Error handling**: Reference `.claude/skills/error-handling/SKILL.md`
+- **Component templates**: Reference `.claude/skills/component-templates/SKILL.md`
+
+### Hook Pattern (Standard)
+```typescript
+export const useMyHook = () => {
+  const [data, setData] = useState<DataType | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // ... fetch logic
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { data, loading, error, fetchData };
+};
+```
+
+### Supabase Query Pattern
+```typescript
+const { data, error } = await supabase
+  .from('table_name')
+  .select('*')
+  .eq('column', value);
+
+if (error) throw error;
+```
+
+### File Naming Conventions
+- Components: `PascalCase.tsx` (e.g., `UserProfile.tsx`)
+- Hooks: `camelCase.ts` or `camelCase.tsx` with `use` prefix (e.g., `useUserData.ts`)
+- Utils: `camelCase.ts` (e.g., `formatDate.ts`)
+- Stores: `camelCaseStore.ts` (e.g., `learningStore.ts`)
+
+---
+
+## 🚀 Speed Optimizations
+
+### Always Use Existing Patterns
+- **Loading states**: Use `AILoadingState` component (see component-templates skill)
+- **Error states**: Use `AIErrorState` component (see error-handling skill)
+- **Forms**: Use `react-hook-form` with Zod validation (see form-patterns skill)
+- **Toast notifications**: Use `sonner` toast library
+- **Icons**: Only `lucide-react` (see brand-enforcement skill)
+
+### Common Shortcuts
+- Use `cn()` utility for conditional classes: `cn("base-class", condition && "conditional-class")`
+- Use existing UI components from `src/components/ui/` - don't recreate
+- Reference skills for templates instead of writing from scratch
+- Check existing hooks before creating new ones - many patterns already exist
+
+### Performance Reminders
+- Use `useCallback` for functions passed to child components
+- Use `useMemo` for expensive computations
+- Use `React.memo` for expensive components
+- Lazy load heavy routes with `React.lazy()` and `Suspense`
+
+---
+
+## 📚 Skill References (Don't Duplicate - Reference These)
+
+- **Brand Guidelines**: `.claude/skills/brand-enforcement/SKILL.md`
+- **Component Templates**: `.claude/skills/component-templates/SKILL.md`
+- **Error Handling**: `.claude/skills/error-handling/SKILL.md`
+- **Code Architecture**: `.claude/skills/code-architecture/SKILL.md`
+- **Supabase Patterns**: `.claude/skills/supabase-quick-access/SKILL.md`
+- **Form Patterns**: `.claude/skills/form-patterns/SKILL.md`
+- **Edge Functions**: `.claude/skills/edge-function-templates/SKILL.md`
+- **Feature Planning**: `.claude/skills/feature-planning/SKILL.md` ⭐ **Use this for breaking down new features**
+
+**When creating code, reference these skills instead of duplicating patterns.**
+
+---
+
+## ⚠️ Common Mistakes to Avoid
+
+- ❌ Don't create new UI components when shadcn/ui components exist
+- ❌ Don't use arbitrary Tailwind colors (use brand colors only)
+- ❌ Don't use other icon libraries (only lucide-react)
+- ❌ Don't forget error handling in async functions
+- ❌ Don't forget loading states for async operations
+- ❌ Don't use `any` type - use proper TypeScript types
+- ❌ Don't create documentation unless explicitly asked
+- ❌ Don't duplicate patterns that exist in skills - reference them instead
+
+---
+
+## 🔄 Workflow Shortcuts
+
+### Git Commands (Quick Reference)
+- **Branch naming**: `{type}/{descriptive-name}` (e.g., `feature/add-user-profile`, `bugfix/fix-navbar`)
+- **Commit format**: `{type}: {description}` (e.g., `feat: add user profile`, `fix: resolve navbar issue`)
+- **Full workflow**: See `.claude/skills/github-workflow/SKILL.md` for details
+
+### Common Supabase Commands
+- **Push migrations**: `supabase db push`
+- **Regenerate types**: `supabase gen types typescript --project-id hjivfywgkiwjvpquxndg > src/integrations/supabase/types.ts`
+- **Deploy function**: `supabase functions deploy <function-name> --project-ref hjivfywgkiwjvpquxndg`
+- **Full reference**: See `.claude/skills/supabase-quick-access/SKILL.md`
+
+### Development Workflow
+1. Check existing components/hooks before creating new ones
+2. Reference skills for patterns instead of writing from scratch
+3. Use existing UI components from `src/components/ui/`
+4. Follow import organization pattern
+5. Test responsive design (mobile, tablet, desktop)
+
+---
+
+## 📍 Common File Locations
+
+### Most Used Components
+- **UI Components**: `src/components/ui/` (shadcn/ui components)
+- **Auth**: `src/components/auth/`
+- **Content**: `src/components/content/`
+- **Home**: `src/components/home/`
+- **Learning**: `src/components/learning/`, `src/components/journey/`
+- **Projects**: `src/components/projects/`
+
+### Most Used Hooks
+- **Auth**: `@/hooks/auth/useAuth` - User authentication state
+- **Profile**: `@/hooks/profile/useUserProfile` - User profile data
+- **Learning Steps**: `@/hooks/learning-steps/useLearningSteps` - Learning step management
+- **Content**: `@/hooks/content/useChat` - AI chat functionality
+- **Navigation**: `@/hooks/navigation/useStepNavigation` - Step navigation
+- **Projects**: `@/hooks/projects/useProjects` - Project management
+
+### Common Supabase Tables
+- `learning_paths` - Learning paths/topics
+- `learning_steps` - Individual learning steps
+- `user_profiles` - User profile data
+- `behavior_logs` - User behavior tracking
+- `progress_tracking` - Learning progress
+- `work_outputs` - User work submissions
+- `prompt_logs` - AI prompt tracking
+
+**Note**: Always use TypeScript types from `src/integrations/supabase/types.ts` - regenerate after migrations!
+
+---
+
+## ♿ Quick Accessibility Checklist
+
+- [ ] All images have `alt` attributes
+- [ ] Buttons have descriptive text (not just icons)
+- [ ] Form inputs have associated labels
+- [ ] Interactive elements are keyboard accessible
+- [ ] Color contrast meets WCAG AA standards
+- [ ] Focus states are visible
+- [ ] ARIA labels used for complex interactions
+
+---
+
+**Remember: Brand consistency is non-negotiable. When in doubt, check the brand enforcement skill and existing components.**
+

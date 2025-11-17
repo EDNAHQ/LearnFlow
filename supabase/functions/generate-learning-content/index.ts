@@ -25,7 +25,11 @@ serve(async (req) => {
       generatePlan, 
       generateQuestions: shouldGenerateQuestions, 
       content, 
-      silent 
+      silent,
+      userId,
+      pathId,
+      regenerate,
+      stylePreferences
     } = await req.json();
 
     // If generateQuestions is true, generate related questions for the content
@@ -35,9 +39,9 @@ serve(async (req) => {
     
     // If generatePlan is true, we'll generate a learning plan
     if (generatePlan) {
-      return await generateLearningPlan(topic, corsHeaders);
+      return await generateLearningPlan(topic, corsHeaders, userId, pathId, supabaseUrl, supabaseServiceKey);
     } else {
-      // Detailed content generation
+      // Detailed content generation (with optional regeneration and style preferences)
       return await generateStepContent(
         stepId, 
         topic, 
@@ -46,7 +50,11 @@ serve(async (req) => {
         totalSteps, 
         supabaseUrl, 
         supabaseServiceKey, 
-        corsHeaders
+        corsHeaders,
+        userId,
+        pathId,
+        regenerate,
+        stylePreferences
       );
     }
   } catch (error) {
