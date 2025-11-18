@@ -167,5 +167,11 @@ export const getMarkdownComponents = (
     td: ({ node, ...props }) => (
       <td className="px-4 py-3 text-sm border-t border-gray-100" {...props} />
     ),
+    tbody: ({ node, ...props }) => (
+      <tbody {...props} />
+    ),
+    tr: ({ node, ...props }) => (
+      <tr className="hover:bg-gray-50" {...props} />
+    ),
   };
 };

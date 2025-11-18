@@ -287,7 +287,8 @@ const ContentPage = () => {
         onHome={goToProjects}
         generatingContent={generatingContent}
         generatedSteps={generatedSteps}
-        totalSteps={steps.length} 
+        totalSteps={steps.length}
+        projectTitle={topic}
       />
 
       <div className="relative w-full my-0 py-[24px] sm:py-[32px] px-2 lg:px-6">

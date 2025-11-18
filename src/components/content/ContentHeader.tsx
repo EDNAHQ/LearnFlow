@@ -11,6 +11,7 @@ interface ContentHeaderProps {
   generatingContent: boolean;
   generatedSteps: number;
   totalSteps: number;
+  projectTitle?: string | null;
 }
 
 // ContentTopNavigation: top bar with logo, Projects button, and mode tabs
@@ -19,7 +20,8 @@ const ContentHeader = ({
   onHome,
   generatingContent,
   generatedSteps,
-  totalSteps
+  totalSteps,
+  projectTitle
 }: ContentHeaderProps) => {
   return (
     <header
@@ -66,6 +68,17 @@ const ContentHeader = ({
                   <span>Projects</span>
                 </Button>
               </motion.div>
+              
+              {projectTitle && (
+                <>
+                  <div className="hidden md:block h-8 w-px bg-gray-300"></div>
+                  <div className="hidden md:flex items-center min-w-0">
+                    <span className="text-base md:text-lg font-semibold text-gray-800 truncate max-w-[200px] lg:max-w-[300px]" title={projectTitle}>
+                      {projectTitle}
+                    </span>
+                  </div>
+                </>
+              )}
 
             </div>
           </div>
