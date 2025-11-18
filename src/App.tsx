@@ -15,6 +15,7 @@ import ContentPage from './pages/ContentPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import Community from './pages/Community';
+import AdminGenerateTopics from './pages/AdminGenerateTopics';
 
 function AppContent() {
   const { processAutoSSO } = useEdnaMembership();
@@ -40,6 +41,7 @@ function AppContent() {
         <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin/generate-topics" element={<AdminGenerateTopics />} />
       </Routes>
     </>
   );

@@ -13,28 +13,54 @@ interface SafeReactMarkdownProps {
 interface SafeReactMarkdownState {
   hasError: boolean;
   error: Error | null;
+  useBasicMarkdown: boolean;
 }
 
 class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkdownState> {
+  private markdownKey: number = 0;
+
   constructor(props: SafeReactMarkdownProps) {
     super(props);
     this.state = {
       hasError: false,
       error: null,
+      useBasicMarkdown: false,
     };
   }
 
   static getDerivedStateFromError(error: Error): SafeReactMarkdownState {
-    return { hasError: true, error };
+    // If it's a remark-gfm error, try without it
+    const isGfmError = error.message && (
+      error.message.includes('inTable') || 
+      error.message.includes('remark-gfm') ||
+      error.message.includes('gfm')
+    );
+    
+    if (isGfmError) {
+      return { hasError: false, error: null, useBasicMarkdown: true };
+    }
+    return { hasError: true, error, useBasicMarkdown: false };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('SafeReactMarkdown caught an error:', error, errorInfo);
+    // If it's a remark-gfm error, increment key to force remount without gfm
+    const isGfmError = error.message && (
+      error.message.includes('inTable') || 
+      error.message.includes('remark-gfm') ||
+      error.message.includes('gfm')
+    );
+    
+    if (isGfmError && !this.state.useBasicMarkdown) {
+      this.markdownKey += 1;
+      this.setState({ useBasicMarkdown: true });
+    }
   }
 
   componentDidUpdate(prevProps: SafeReactMarkdownProps) {
     if (prevProps.children !== this.props.children) {
-      this.setState({ hasError: false, error: null });
+      this.setState({ hasError: false, error: null, useBasicMarkdown: false });
+      this.markdownKey = 0;
     }
   }
 
@@ -61,9 +87,29 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
     }
 
     try {
+      // If remark-gfm causes errors, fall back to basic markdown
+      let remarkPlugins = this.props.remarkPlugins || [];
+      
+      // Filter out remark-gfm if we've encountered errors before
+      if (this.state.useBasicMarkdown) {
+        remarkPlugins = remarkPlugins.filter((plugin: any) => {
+          // Check if it's remark-gfm by checking the plugin reference or name
+          if (!plugin) return true;
+          // Check by reference (if it's the imported remarkGfm)
+          if (plugin === remarkGfm) return false;
+          // Check by string representation
+          const pluginStr = plugin.toString();
+          if (pluginStr.includes('remark-gfm') || pluginStr.includes('gfm')) return false;
+          // Check by name property
+          if (plugin.name && (plugin.name.includes('gfm') || plugin.name.includes('remark-gfm'))) return false;
+          return true;
+        });
+      }
+      
       return (
         <ReactMarkdown
-          remarkPlugins={this.props.remarkPlugins || [remarkGfm]}
+          key={this.markdownKey}
+          remarkPlugins={remarkPlugins}
           components={this.props.components}
           className={this.props.className}
         >

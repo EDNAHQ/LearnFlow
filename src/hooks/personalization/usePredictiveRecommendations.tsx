@@ -15,35 +15,41 @@ export const usePredictiveRecommendations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { user, session, loading: authLoading } = useAuth();
-  const hasAuthenticatedRef = useRef(false);
+  const hasFetchedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Reset flag when auth state changes
-    hasAuthenticatedRef.current = false;
-
     // Don't make requests while auth is loading
     if (authLoading) {
-      setRecommendations([]);
-      setIsLoading(false);
-      setError(null);
       return;
     }
 
-    // If auth is loaded but no user/session, don't make any requests
+    // If auth is loaded but no user/session, clear state and don't make any requests
     if (!user || !session || !session.access_token) {
-      setRecommendations([]);
-      setIsLoading(false);
-      setError(null);
+      // Only clear if we had data before (user logged out)
+      if (hasFetchedRef.current !== null) {
+        setRecommendations([]);
+        setIsLoading(false);
+        setError(null);
+        hasFetchedRef.current = null;
+      }
       return;
     }
 
-    // Mark as authenticated and proceed
-    hasAuthenticatedRef.current = true;
+    // Create a unique key for this user/session combination
+    const fetchKey = `${user.id}-${session.access_token.substring(0, 20)}`;
+
+    // Only fetch if we haven't fetched for this user/session yet
+    if (hasFetchedRef.current === fetchKey) {
+      return;
+    }
+
+    // Mark that we're fetching for this session
+    hasFetchedRef.current = fetchKey;
     let cancelled = false;
 
     const fetchRecommendations = async () => {
-      // Triple-check authentication before making the request
-      if (cancelled || !hasAuthenticatedRef.current || !user || !session || !session.access_token) {
+      // Check if cancelled or session changed
+      if (cancelled || hasFetchedRef.current !== fetchKey) {
         return;
       }
 
@@ -54,6 +60,7 @@ export const usePredictiveRecommendations = () => {
         // Final check before API call
         if (!user || !session || !session.access_token) {
           setIsLoading(false);
+          hasFetchedRef.current = null;
           return;
         }
 
@@ -68,7 +75,7 @@ export const usePredictiveRecommendations = () => {
           }
         );
 
-        if (cancelled || !hasAuthenticatedRef.current) return;
+        if (cancelled || hasFetchedRef.current !== fetchKey) return;
 
         if (functionError) {
           // Suppress 401 errors completely - they're expected when not authenticated
@@ -80,30 +87,31 @@ export const usePredictiveRecommendations = () => {
           if (is401) {
             setRecommendations([]);
             setIsLoading(false);
+            hasFetchedRef.current = null;
             return;
           }
           console.error('Error fetching predictive recommendations:', functionError);
           setError(functionError as Error);
+          setIsLoading(false);
           return;
         }
 
-        if (cancelled || !hasAuthenticatedRef.current) return;
+        if (cancelled || hasFetchedRef.current !== fetchKey) return;
         setRecommendations(data?.recommendations || []);
+        setIsLoading(false);
       } catch (err) {
-        if (cancelled || !hasAuthenticatedRef.current) return;
+        if (cancelled || hasFetchedRef.current !== fetchKey) return;
         const error = err as any;
         // Suppress 401 errors completely
         if (error?.status === 401 || error?.message?.includes('401')) {
           setRecommendations([]);
           setIsLoading(false);
+          hasFetchedRef.current = null;
           return;
         }
         console.error('Error fetching predictive recommendations:', err);
         setError(err as Error);
-      } finally {
-        if (!cancelled && hasAuthenticatedRef.current) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
@@ -111,9 +119,8 @@ export const usePredictiveRecommendations = () => {
 
     return () => {
       cancelled = true;
-      hasAuthenticatedRef.current = false;
     };
-  }, [user, session, authLoading]);
+  }, [user?.id, session?.access_token, authLoading]);
 
   return { recommendations, isLoading, error };
 };

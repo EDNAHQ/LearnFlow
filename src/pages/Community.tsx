@@ -18,9 +18,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { Eye, Heart, GitFork, Star } from "lucide-react";
 import { getTopTrending } from "@/utils/trendingScore";
-import { LiveActivityFeed } from "@/components/community/LiveActivityFeed";
-import { DiscoveryHub } from "@/components/community/DiscoveryHub";
-import { CommunityPulse } from "@/components/community/CommunityPulse";
 
 interface CommunityPath {
   id: string;
@@ -52,11 +49,59 @@ const Community = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generatingTopics, setGeneratingTopics] = useState<string[]>([]);
+  const [generatedPathIds, setGeneratedPathIds] = useState<string[]>([]);
 
   useEffect(() => {
     loadCommunityPaths();
     getCurrentUser();
   }, [sortBy]);
+
+  // Auto-generate topics if community is empty (one-time, immediate)
+  useEffect(() => {
+    const generateIfEmpty = async () => {
+      const hasGenerated = sessionStorage.getItem('community-topics-generated');
+      if (hasGenerated) return;
+      
+      // Wait for initial load to complete
+      if (!loading && paths.length === 0) {
+        console.log('Community is empty - generating topics now...');
+        sessionStorage.setItem('community-topics-generated', 'true');
+        try {
+          const { data, error } = await supabase.functions.invoke('generate-daily-community-topics', { 
+            body: {} 
+          });
+          
+          if (error) {
+            console.error('Generation error:', error);
+            toast({
+              title: "Generation failed",
+              description: error.message,
+              variant: "destructive"
+            });
+          } else {
+            console.log('Generation started:', data);
+            toast({
+              title: "Generating topics...",
+              description: "Creating learning paths, please wait...",
+            });
+            // Reload after a delay
+            setTimeout(() => {
+              loadCommunityPaths();
+            }, 5000);
+          }
+        } catch (error: any) {
+          console.error('Failed to generate:', error);
+        }
+      }
+    };
+    
+    // Check after loading completes
+    if (!loading) {
+      generateIfEmpty();
+    }
+  }, [loading, paths.length]);
 
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -66,19 +111,17 @@ const Community = () => {
   const loadCommunityPaths = async () => {
     setLoading(true);
     try {
+      // Simple query - get all public paths
+      // Include paths with or without published_at (some might be missing it)
       let query = supabase
         .from('learning_paths')
-        .select(`
-          *,
-          profile:profiles!learning_paths_user_id_fkey (
-            username
-          )
-        `)
+        .select('*')
         .eq('is_public', true);
 
       // Apply sorting
       if (sortBy === 'recent') {
-        query = query.order('published_at', { ascending: false });
+        query = query.order('published_at', { ascending: false, nullsFirst: false })
+                     .order('created_at', { ascending: false });
       } else if (sortBy === 'popular') {
         query = query.order('like_count', { ascending: false });
       } else if (sortBy === 'views') {
@@ -89,10 +132,24 @@ const Community = () => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading community paths:', error);
+        throw error;
+      }
+
+      console.log('Loaded community paths:', data?.length || 0, 'paths');
+      console.log('Sample path data:', data?.[0]);
 
       // Apply trending sort client-side if needed
       let processedData = data || [];
+      
+      // Ensure all paths have required fields
+      processedData = processedData
+        .filter(path => path !== null && path !== undefined)
+        .map(path => ({
+          ...path,
+          profile: path.profile || { username: null }
+        }));
       if (sortBy === 'trending') {
         processedData = getTopTrending(processedData, processedData.length, 30);
       }
@@ -111,10 +168,14 @@ const Community = () => {
 
         setPaths(processedData.map(path => ({
           ...path,
-          user_liked: likedPaths.has(path.id)
+          user_liked: likedPaths.has(path.id),
+          profile: path.profile || { username: null } // Ensure profile exists even if null
         })));
       } else {
-        setPaths(processedData);
+        setPaths(processedData.map(path => ({
+          ...path,
+          profile: path.profile || { username: null } // Ensure profile exists even if null
+        })));
       }
     } catch (error) {
       console.error('Error loading community paths:', error);
@@ -282,16 +343,6 @@ const Community = () => {
         </div>
       </section>
 
-      {/* Compact Community Widgets */}
-      <section className="bg-white border-b border-gray-100">
-        <div className="container max-w-7xl mx-auto px-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <CommunityPulse />
-            <LiveActivityFeed />
-            <DiscoveryHub />
-          </div>
-        </div>
-      </section>
 
       {/* Main Content */}
       <div className="container max-w-7xl mx-auto px-4 py-12">
@@ -302,7 +353,7 @@ const Community = () => {
           transition={{ duration: 0.5 }}
           className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8"
         >
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1">
               <Input
                 placeholder="Search learning paths..."
@@ -322,6 +373,98 @@ const Community = () => {
                 <SelectItem value="trending">Trending</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              onClick={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Generate button clicked');
+                setGenerating(true);
+                setGeneratingTopics(['Generating topic 1...', 'Generating topic 2...']);
+                toast({ title: "Generating...", description: "Creating 2 new topics..." });
+                
+                try {
+                  console.log('Calling edge function...');
+                  const { data, error } = await supabase.functions.invoke('generate-daily-community-topics', { 
+                    body: {} 
+                  });
+                  
+                  console.log('Function response:', { data, error });
+                  
+                  if (error) {
+                    console.error('Function error:', error);
+                    setGeneratingTopics([]);
+                    toast({ 
+                      title: "Error", 
+                      description: error.message || JSON.stringify(error), 
+                      variant: "destructive" 
+                    });
+                  } else if (data) {
+                    console.log('Success! Created paths:', data.pathsCreated, data.pathIds);
+                    console.log('Topics attempted:', data.topicsAttempted);
+                    console.log('Skipped:', data.skipped);
+                    console.log('Errors:', data.errors);
+                    
+                    if (data.pathIds && data.pathIds.length > 0) {
+                      setGeneratedPathIds(data.pathIds);
+                      toast({ 
+                        title: "Success!", 
+                        description: `Generated ${data.pathsCreated} new topics!` 
+                      });
+                    } else if (data.topicsAttempted) {
+                      // Show what topics were attempted
+                      setGeneratingTopics(data.topicsAttempted.map((t: string, i: number) => 
+                        `${t} ${data.errors?.some((e: string) => e.includes(t)) ? '(skipped)' : '(already exists)'}`
+                      ));
+                      toast({ 
+                        title: "No new topics created", 
+                        description: `${data.skipped || 0} topics skipped (already exist). ${data.errors?.length || 0} errors. Try again for different topics.`,
+                        variant: "default"
+                      });
+                      setTimeout(() => setGeneratingTopics([]), 5000);
+                    } else {
+                      toast({ 
+                        title: "No new topics", 
+                        description: data.errors?.join(', ') || "All topics already exist. Try again for different topics.",
+                        variant: "default"
+                      });
+                      setGeneratingTopics([]);
+                    }
+                    
+                    // Reload paths immediately if we created any
+                    if (data.pathIds && data.pathIds.length > 0) {
+                      setTimeout(() => {
+                        console.log('Reloading community paths...');
+                        loadCommunityPaths();
+                        setGeneratingTopics([]);
+                      }, 2000);
+                    }
+                  } else {
+                    console.warn('No data returned from function');
+                    setGeneratingTopics([]);
+                    toast({ 
+                      title: "No response", 
+                      description: "Function completed but no data returned. Check console.",
+                      variant: "destructive"
+                    });
+                  }
+                } catch (err: any) {
+                  console.error('Exception calling function:', err);
+                  setGeneratingTopics([]);
+                  toast({ 
+                    title: "Exception", 
+                    description: err.message || String(err), 
+                    variant: "destructive" 
+                  });
+                } finally {
+                  setGenerating(false);
+                }
+              }}
+              disabled={generating}
+              className="brand-gradient text-white"
+              variant="outline"
+            >
+              {generating ? "Generating..." : "Generate 2 New Topics"}
+            </Button>
           </div>
         </motion.div>
 
@@ -357,6 +500,35 @@ const Community = () => {
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Show generating cards */}
+            {generatingTopics.map((topic, idx) => (
+              <motion.div
+                key={`generating-${idx}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative"
+              >
+                <Card className="h-full overflow-hidden bg-white border-2 border-dashed border-brand-purple/30">
+                  <div className="h-1 bg-gradient-to-r from-brand-purple to-brand-pink animate-pulse" />
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-brand-purple border-t-transparent" />
+                      <span className="text-xs font-medium text-brand-purple">Generating...</span>
+                    </div>
+                    <h3 className="font-semibold text-brand-black text-lg">{topic}</h3>
+                    <div className="text-xs text-gray-400 mt-2">Creating learning path...</div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-2 bg-gray-200 rounded animate-pulse" />
+                      <div className="h-2 bg-gray-200 rounded animate-pulse w-3/4" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+            
+            {/* Show existing paths */}
             {filteredPaths.map((path, index) => (
               <motion.div
                 key={path.id}
@@ -407,7 +579,7 @@ const Community = () => {
                             {path.title || path.topic}
                           </h3>
                           <div className="text-xs text-gray-500">
-                            <span>by {path.profile?.username || 'Anonymous'}</span>
+                            <span>by {path.profile?.username || 'LearnFlow'}</span>
                             {path.published_at && (
                               <span className="ml-2">• {formatDistanceToNow(new Date(path.published_at), { addSuffix: true })}</span>
                             )}
