@@ -15,8 +15,6 @@ export const useFetchLearningSteps = () => {
     if (!pathId) return;
     
     try {
-      console.log("Fetching learning steps for path:", pathId);
-      
       const { data, error } = await supabase
         .from('learning_steps')
         .select('*')
@@ -29,9 +27,6 @@ export const useFetchLearningSteps = () => {
       }
 
       if (data && data.length > 0) {
-        console.log(`Retrieved ${data.length} learning steps for path:`, pathId);
-        
-        // Process data to ensure all values are properly formatted as strings
         const processedData = data.map(step => ({
           ...step,
           content: typeof step.content === 'string' 
@@ -42,21 +37,33 @@ export const useFetchLearningSteps = () => {
             : (step.detailed_content ? JSON.stringify(step.detailed_content) : null)
         }));
         
-        // Count steps with detailed content first
-        const stepsWithDetailedContent = countGeneratedSteps(processedData);
+        setSteps(processedData);
 
-        // Only update state if count has changed to prevent unnecessary re-renders
-        if (stepsWithDetailedContent !== generatedSteps) {
-          setSteps(processedData);
-          setGeneratedSteps(stepsWithDetailedContent);
-          setGeneratingContent(stepsWithDetailedContent < processedData.length);
-          console.log(`Content generation status: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
-        } else {
-          // Still update steps but don't log or trigger other updates
-          setSteps(processedData);
+        const stepsWithDetailedContent = countGeneratedSteps(processedData);
+        const hasSteps = processedData.length > 0;
+        const isGenerating = hasSteps && stepsWithDetailedContent < processedData.length;
+
+        if (stepsWithDetailedContent !== generatedSteps && stepsWithDetailedContent > 0) {
+          console.log(`✓ Content: ${stepsWithDetailedContent}/${processedData.length} steps generated`);
         }
+
+        setGeneratedSteps(prev => {
+          if (prev === stepsWithDetailedContent) {
+            return prev;
+          }
+          return stepsWithDetailedContent;
+        });
+
+        setGeneratingContent(prev => {
+          if (prev === isGenerating) {
+            return prev;
+          }
+          return isGenerating;
+        });
       } else {
-        console.log("No learning steps found for path:", pathId);
+        setSteps([]);
+        setGeneratedSteps(0);
+        setGeneratingContent(false);
       }
     } catch (error) {
       console.error("Error fetching learning steps:", error);

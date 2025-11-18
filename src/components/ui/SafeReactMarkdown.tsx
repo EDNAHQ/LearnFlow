@@ -1,6 +1,7 @@
 import React, { Component, ReactNode, ErrorInfo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { AlertCircle } from 'lucide-react';
 
 interface SafeReactMarkdownProps {
@@ -18,6 +19,7 @@ interface SafeReactMarkdownState {
 
 class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkdownState> {
   private markdownKey: number = 0;
+  private gfmErrorCount: number = 0;
 
   constructor(props: SafeReactMarkdownProps) {
     super(props);
@@ -29,9 +31,9 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
   }
 
   static getDerivedStateFromError(error: Error): SafeReactMarkdownState {
-    // If it's a remark-gfm error, try without it
     const isGfmError = error.message && (
       error.message.includes('inTable') || 
+      error.message.includes('Cannot read properties of undefined') ||
       error.message.includes('remark-gfm') ||
       error.message.includes('gfm')
     );
@@ -43,17 +45,21 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('SafeReactMarkdown caught an error:', error, errorInfo);
-    // If it's a remark-gfm error, increment key to force remount without gfm
     const isGfmError = error.message && (
       error.message.includes('inTable') || 
+      error.message.includes('Cannot read properties of undefined') ||
       error.message.includes('remark-gfm') ||
       error.message.includes('gfm')
     );
     
-    if (isGfmError && !this.state.useBasicMarkdown) {
-      this.markdownKey += 1;
-      this.setState({ useBasicMarkdown: true });
+    if (isGfmError) {
+      this.gfmErrorCount += 1;
+      if (this.gfmErrorCount > 2 && !this.state.useBasicMarkdown) {
+        this.markdownKey += 1;
+        this.setState({ useBasicMarkdown: true });
+      }
+    } else {
+      console.error('SafeReactMarkdown caught an error:', error, errorInfo);
     }
   }
 
@@ -61,6 +67,7 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
     if (prevProps.children !== this.props.children) {
       this.setState({ hasError: false, error: null, useBasicMarkdown: false });
       this.markdownKey = 0;
+      this.gfmErrorCount = 0;
     }
   }
 
@@ -87,20 +94,14 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
     }
 
     try {
-      // If remark-gfm causes errors, fall back to basic markdown
       let remarkPlugins = this.props.remarkPlugins || [];
       
-      // Filter out remark-gfm if we've encountered errors before
-      if (this.state.useBasicMarkdown) {
+      if (this.state.useBasicMarkdown || this.gfmErrorCount > 2) {
         remarkPlugins = remarkPlugins.filter((plugin: any) => {
-          // Check if it's remark-gfm by checking the plugin reference or name
           if (!plugin) return true;
-          // Check by reference (if it's the imported remarkGfm)
           if (plugin === remarkGfm) return false;
-          // Check by string representation
-          const pluginStr = plugin.toString();
+          const pluginStr = String(plugin);
           if (pluginStr.includes('remark-gfm') || pluginStr.includes('gfm')) return false;
-          // Check by name property
           if (plugin.name && (plugin.name.includes('gfm') || plugin.name.includes('remark-gfm'))) return false;
           return true;
         });
@@ -110,6 +111,7 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
         <ReactMarkdown
           key={this.markdownKey}
           remarkPlugins={remarkPlugins}
+          rehypePlugins={[rehypeRaw]}
           components={this.props.components}
           className={this.props.className}
         >
@@ -117,6 +119,18 @@ class SafeReactMarkdown extends Component<SafeReactMarkdownProps, SafeReactMarkd
         </ReactMarkdown>
       );
     } catch (error) {
+      const isGfmError = error instanceof Error && (
+        error.message.includes('inTable') || 
+        error.message.includes('Cannot read properties of undefined')
+      );
+      
+      if (isGfmError && !this.state.useBasicMarkdown) {
+        this.gfmErrorCount += 1;
+        this.markdownKey += 1;
+        this.setState({ useBasicMarkdown: true });
+        return null;
+      }
+      
       console.error('Error in SafeReactMarkdown render:', error);
       return (
         <div className="p-4 border border-red-200 rounded-lg bg-red-50">

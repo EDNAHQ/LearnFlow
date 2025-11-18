@@ -164,45 +164,48 @@ export const generateLearningPlan = async (topic: string): Promise<Step[]> => {
   }
 };
 
-// Function to start background generation of all content
+const generateStepContentWithRetry = async (
+  step: Step, 
+  topic: string, 
+  maxRetries: number = 2,
+  retryDelay: number = 3000
+): Promise<string | null> => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await generateStepContent(step, topic, true);
+    } catch (error) {
+      if (attempt === maxRetries) {
+        console.error(`Failed to generate content for step "${step.title}" after ${maxRetries + 1} attempts`);
+        return null;
+      }
+      await new Promise(resolve => setTimeout(resolve, retryDelay * (attempt + 1)));
+    }
+  }
+  return null;
+};
+
 const startBackgroundContentGeneration = async (steps: Step[], topic: string, pathId: string) => {
-  console.log(`Starting background content generation for ${steps.length} steps`);
-  
-  // Process steps concurrently but with a small delay between requests to avoid rate limiting
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     
     try {
-      // Check if detailed content already exists for this step
       const { data, error } = await supabase
         .from('learning_steps')
         .select('detailed_content')
         .eq('id', step.id)
         .single();
         
-      if (error) {
-        console.error(`Error checking detailed content for step ${step.id}:`, error);
-        continue;
-      }
+      if (error) continue;
       
-      // Only generate if no detailed content exists
       if (!data.detailed_content) {
-        console.log(`Generating content for step ${i+1}/${steps.length}: ${step.title}`);
-        
-        // Call the function but don't await - let it run in background
-        generateStepContent(step, topic, true)
-          .then(content => {
-            console.log(`Successfully generated content for step ${step.id}`);
-          })
-          .catch(err => {
-            console.error(`Background generation error for step ${step.id}:`, err);
+        generateStepContentWithRetry(step, topic)
+          .catch(() => {
+            // Error already logged in retry function
           });
         
-        // Add a small delay between requests to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1500));
       }
     } catch (error) {
-      console.error(`Error in background generation for step ${step.id}:`, error);
       // Continue with other steps even if one fails
     }
   }
@@ -233,10 +236,7 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
       return stepData.detailed_content;
     }
     
-    // Otherwise, call the edge function to generate content
     try {
-      console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
-      
       const response = await supabase.functions.invoke('generate-learning-content', {
         body: {
           stepId: step.id,
@@ -244,29 +244,23 @@ export const generateStepContent = async (step: Step, topic: string, silent = fa
           title: step.title,
           stepNumber: stepData.order_index + 1,
           totalSteps: 10,
-          silent // Pass the silent parameter to suppress notifications
+          silent
         }
       });
       
       if (response.error) {
-        console.error("Edge function error:", response.error);
-        throw new Error("Failed to generate content using the AI");
+        throw new Error(`Edge function error: ${response.error.message || 'Unknown error'}`);
       }
       
       const data = response.data;
       
       if (!data || !data.content) {
-        console.error("Invalid content format returned:", data);
-        throw new Error("Invalid content generated");
+        throw new Error("Invalid content format returned");
       }
-      
-      // No need to save here as the edge function should have saved it
-      console.log(`Content generation for step ${step.id} completed successfully`);
       
       return data.content;
     } catch (error) {
-      console.error("Error calling edge function:", error);
-      throw new Error("Failed to call the content generation service");
+      throw error instanceof Error ? error : new Error("Failed to call the content generation service");
     }
   } catch (error) {
     console.error("Error generating step content:", error);
