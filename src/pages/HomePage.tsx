@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/auth";
@@ -14,16 +14,30 @@ import { LearningDNA } from "@/components/home/personalization/LearningDNA";
 import { PromptInsights } from "@/components/home/personalization/PromptInsights";
 import { SkillGaps } from "@/components/home/personalization/SkillGaps";
 import { AdaptiveDifficulty } from "@/components/home/personalization/AdaptiveDifficulty";
-import { TimeBasedRecommendations } from "@/components/home/personalization/TimeBasedRecommendations";
 import { PredictiveRecommendations } from "@/components/home/personalization/PredictiveRecommendations";
 import { useLearningCommandStore } from "@/store/learningCommandStore";
 import LearningJourneyWizard from "@/components/journey/LearningJourneyWizard";
 import { FloatingNewProjectButton } from "@/components/projects/FloatingNewProjectButton";
+import { PersonalizationMarketingBanner } from "@/components/home/PersonalizationMarketingBanner";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, session, loading: authLoading } = useAuth();
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
+  const [initialTopic, setInitialTopic] = useState<string | undefined>(undefined);
+
+  // Listen for custom event to open wizard with topic
+  useEffect(() => {
+    const handleOpenWizard = (event: CustomEvent<{ topic: string }>) => {
+      setInitialTopic(event.detail.topic);
+      setShowJourneyWizard(true);
+    };
+
+    window.addEventListener('openLearningWizard', handleOpenWizard as EventListener);
+    return () => {
+      window.removeEventListener('openLearningWizard', handleOpenWizard as EventListener);
+    };
+  }, []);
 
   const openWidget = useLearningCommandStore((state) => state.openWidget);
 
@@ -40,7 +54,11 @@ const HomePage = () => {
   };
 
   // Only render personalization components when auth is loaded and session is valid
-  const shouldShowPersonalization = !authLoading && user && session && session.access_token;
+  // Memoize to prevent unnecessary re-renders
+  const shouldShowPersonalization = useMemo(
+    () => !authLoading && user && session && session.access_token,
+    [authLoading, user?.id, session?.access_token]
+  );
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
@@ -55,7 +73,6 @@ const HomePage = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, staggerChildren: 0.1 }}
             >
-              <TimeBasedRecommendations />
               <LearningDNA />
               <PromptInsights />
               <SkillGaps />
@@ -76,7 +93,11 @@ const HomePage = () => {
       {showJourneyWizard && (
         <LearningJourneyWizard
           isOpen={showJourneyWizard}
-          onClose={() => setShowJourneyWizard(false)}
+          onClose={() => {
+            setShowJourneyWizard(false);
+            setInitialTopic(undefined);
+          }}
+          initialTopic={initialTopic}
         />
       )}
 
@@ -93,6 +114,9 @@ const HomePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Personalization Marketing Banner */}
+      <PersonalizationMarketingBanner onStartLearning={handleStartLearning} />
     </div>
   );
 };

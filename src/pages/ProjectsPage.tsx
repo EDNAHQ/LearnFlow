@@ -15,6 +15,7 @@ import { FloatingNewProjectButton } from "@/components/projects/FloatingNewProje
 import { useUserProfile } from "@/hooks/profile/useUserProfile";
 import { Flame } from "lucide-react";
 import { ContinueLearning } from "@/components/projects/ContinueLearning";
+import { PredictiveRecommendations } from "@/components/home/personalization/PredictiveRecommendations";
 // Icons removed for cleaner design
 
 // Demo projects for non-logged in users
@@ -61,9 +62,23 @@ const ProjectsPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const deferredSearch = useDeferredValue(searchQuery);
   const [showJourneyWizard, setShowJourneyWizard] = useState(false);
+  const [initialTopic, setInitialTopic] = useState<string | undefined>(undefined);
   
   const streak = profile?.learning_streak_days || 0;
   const showStreak = user && profile && streak > 0;
+
+  // Listen for custom event to open wizard with topic (same as HomePage)
+  useEffect(() => {
+    const handleOpenWizard = (event: CustomEvent<{ topic: string }>) => {
+      setInitialTopic(event.detail.topic);
+      setShowJourneyWizard(true);
+    };
+
+    window.addEventListener('openLearningWizard', handleOpenWizard as EventListener);
+    return () => {
+      window.removeEventListener('openLearningWizard', handleOpenWizard as EventListener);
+    };
+  }, []);
 
   // Use demo projects if not logged in
   const displayProjects = user ? projects : demoProjects;
@@ -178,6 +193,13 @@ const ProjectsPage = () => {
       <div className="container max-w-7xl mx-auto px-4 py-12">
         {/* Continue Where You Left Off - Enhanced with insights */}
         {user && <ContinueLearning />}
+
+        {/* Personalized Recommendations - Show for logged-in users */}
+        {user && (
+          <div className="mb-12">
+            <PredictiveRecommendations />
+          </div>
+        )}
 
         {/* Show sign-in prompt for non-logged in users */}
         {!user && (
@@ -314,7 +336,11 @@ const ProjectsPage = () => {
       {showJourneyWizard && (
         <LearningJourneyWizard
           isOpen={showJourneyWizard}
-          onClose={() => setShowJourneyWizard(false)}
+          onClose={() => {
+            setShowJourneyWizard(false);
+            setInitialTopic(undefined);
+          }}
+          initialTopic={initialTopic}
         />
       )}
 

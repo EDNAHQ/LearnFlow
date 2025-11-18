@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useUserLearningProfile } from '@/hooks/personalization/useUserLearningProfile';
 import { useProjects } from '@/hooks/projects/useProjects';
@@ -6,8 +6,10 @@ import { useAuth } from '@/hooks/auth';
 import { ArrowRight, Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import AILoadingState from '@/components/ai/AILoadingState';
 
-export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => void }) => {
+export const PersonalizedHero = React.memo(({ onStartLearning }: { onStartLearning: () => void }) => {
   const { profile, isLoading } = useUserLearningProfile();
   const { projects } = useProjects();
   const { user } = useAuth();
@@ -101,9 +103,11 @@ export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => v
       .slice(0, 2);
 
     let nextAction = "Start a new learning path";
+    let nextActionProjectId: string | null = null;
     if (activeProjects.length > 0) {
       const mostRecent = activeProjects[0];
       nextAction = `Continue "${mostRecent.topic}"`;
+      nextActionProjectId = mostRecent.id;
     }
 
     const achievements = [];
@@ -139,6 +143,7 @@ export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => v
       stats,
       activeProjects,
       nextAction,
+      nextActionProjectId,
       achievements: achievements.slice(0, 2),
       hasData: true,
     };
@@ -179,21 +184,60 @@ export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => v
     }
   }, [isDesktop]);
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  const handleContinueProject = useCallback(async (projectId: string) => {
+    try {
+      // Get steps to find the first incomplete step
+      const { data: steps } = await supabase
+        .from('learning_steps')
+        .select('id, order_index, completed')
+        .eq('path_id', projectId)
+        .order('order_index', { ascending: true });
+
+      if (steps && steps.length > 0) {
+        // Find the first incomplete step by array index (0-based)
+        const firstIncompleteIndex = steps.findIndex(step => !step.completed);
+        const stepIndex = firstIncompleteIndex >= 0 
+          ? firstIncompleteIndex 
+          : 0; // If all completed, go to first step
+        
+        navigate(`/content/${projectId}/step/${stepIndex}`);
+      } else {
+        // No steps yet, navigate to first step
+        navigate(`/content/${projectId}/step/0`);
+      }
+    } catch (error) {
+      console.error('Error fetching steps for navigation:', error);
+      // Fallback to step 0 if there's an error
+      navigate(`/content/${projectId}/step/0`);
+    }
+  }, [navigate]);
+
+  // Loading state - AFTER all hooks
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[600px]">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-brand-purple border-t-transparent rounded-full"
+      <section className="relative w-full overflow-hidden min-h-[600px]">
+        {/* Background Image */}
+        <img
+          src="/images/sam.mckay.edna_Network_of_nodes_connected_by_glowing_lines_ea_1fa62e10-cb69-40e5-bb59-618e8919caf8_1.png"
+          alt="Background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
         />
-      </div>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 z-[2]" />
+        <div className="absolute inset-0 brand-gradient opacity-30 z-[2]" />
+        
+        {/* Loading Content */}
+        <div className="relative z-[3] flex items-center justify-center min-h-[600px]">
+          <AILoadingState 
+            variant="animated" 
+            message="Loading your personalized experience..."
+            className="py-8"
+          />
+        </div>
+      </section>
     );
   }
-
-  const handleContinueProject = (projectId: string) => {
-    navigate(`/content/${projectId}`);
-  };
 
   return (
     <section className="relative w-full overflow-hidden">
@@ -409,7 +453,13 @@ export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => v
               whileTap={{ scale: 0.95 }}
             >
               <Button
-                onClick={onStartLearning}
+                onClick={() => {
+                  if (personalizedData.nextActionProjectId) {
+                    handleContinueProject(personalizedData.nextActionProjectId);
+                  } else {
+                    onStartLearning();
+                  }
+                }}
                 size="lg"
                 className="group relative px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold text-white rounded-full transform transition-all duration-200 shadow-xl brand-gradient hover:opacity-90 overflow-hidden whitespace-nowrap"
               >
@@ -478,6 +528,7 @@ export const PersonalizedHero = ({ onStartLearning }: { onStartLearning: () => v
       </div>
     </section>
   );
-};
+});
 
+PersonalizedHero.displayName = 'PersonalizedHero';
 

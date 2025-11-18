@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
 import SafeReactMarkdown from "@/components/ui/SafeReactMarkdown";
 import remarkGfm from "remark-gfm";
 import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
@@ -7,6 +7,7 @@ import { preprocessContent } from "@/utils/markdown/contentPreprocessor";
 import ContentQuestionsSection from "../questions/ContentQuestionsSection";
 import LearningModesToolbar from "../common/LearningModesToolbar";
 import { ContentStyleAdjuster } from "../common/ContentStyleAdjuster";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -31,6 +32,14 @@ const ContentSectionCore = ({
   onQuestionClick,
   onContentUpdated
 }: ContentSectionCoreProps) => {
+  // Manage local content state for immediate updates
+  const [currentContent, setCurrentContent] = useState(loadedDetailedContent);
+  
+  // Update local content when prop changes
+  useEffect(() => {
+    setCurrentContent(loadedDetailedContent);
+  }, [loadedDetailedContent]);
+
   // Create a ref for the content area for margin notes
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +50,7 @@ const ContentSectionCore = ({
   );
 
   // Preprocess content to detect and format code blocks
-  const processedContent = preprocessContent(loadedDetailedContent);
+  const processedContent = preprocessContent(currentContent);
 
   const getSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -55,12 +64,43 @@ const ContentSectionCore = ({
     return text.length > 0 ? text : null;
   }, []);
 
+  const handleContentReplace = useCallback(async (newContent: string) => {
+    if (!stepId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('learning_steps')
+        .update({ detailed_content: newContent })
+        .eq('id', stepId);
+
+      if (error) throw error;
+
+      // Update local state immediately for instant UI feedback
+      setCurrentContent(newContent);
+
+      if (onContentUpdated) {
+        onContentUpdated(newContent);
+      }
+    } catch (error) {
+      console.error('Error replacing content:', error);
+    }
+  }, [stepId, onContentUpdated]);
+
   return (
     <div className="content-area-wrapper">
       <div
         ref={contentRef}
         className="content-area"
       >
+        {/* Learn-it-your-way toolbar at the top */}
+        <LearningModesToolbar
+          content={currentContent}
+          topic={topic || undefined}
+          title={title}
+          getSelection={getSelection}
+          onContentReplace={stepId ? handleContentReplace : undefined}
+        />
+
         <SafeReactMarkdown 
           remarkPlugins={[remarkGfm]}
           components={markdownComponents}
@@ -71,21 +111,13 @@ const ContentSectionCore = ({
         {/* Related questions at the bottom of content */}
         {topic && (
           <ContentQuestionsSection 
-            loadedDetailedContent={loadedDetailedContent}
+            loadedDetailedContent={currentContent}
             topic={topic}
             title={title}
             stepId={stepId}
             onQuestionClick={onQuestionClick}
           />
         )}
-
-        {/* Learn-it-your-way toolbar */}
-        <LearningModesToolbar
-          content={loadedDetailedContent}
-          topic={topic || undefined}
-          title={title}
-          getSelection={getSelection}
-        />
 
         {/* Style adjustment button */}
         {stepId && topic && title && (

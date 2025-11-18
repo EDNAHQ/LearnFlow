@@ -35,6 +35,11 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
   const { user, session, loading: authLoading } = useAuth();
   const hasAuthenticatedRef = useRef(false);
   const enabled = options?.enabled !== false; // Default to true for backward compatibility
+  
+  // Use stable references to prevent unnecessary re-fetches
+  const userId = user?.id;
+  const accessToken = session?.access_token;
+  const expiresAt = session?.expires_at;
 
   useEffect(() => {
     // Reset flag when auth state changes
@@ -58,7 +63,7 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
 
     // If auth is loaded but no user/session, don't make any requests
     // Early return prevents any API calls
-    if (!user || !session || !session.access_token) {
+    if (!userId || !accessToken) {
       setProfile(null);
       setIsLoading(false);
       setError(null);
@@ -67,7 +72,7 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
 
     // Verify session is still valid by checking expiration
     const now = Math.floor(Date.now() / 1000);
-    if (session.expires_at && session.expires_at < now) {
+    if (expiresAt && expiresAt < now) {
       // Session expired, don't make request
       setProfile(null);
       setIsLoading(false);
@@ -81,13 +86,13 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
 
     const fetchProfile = async () => {
       // Re-check authentication before making the request
-      if (cancelled || !hasAuthenticatedRef.current || !user || !session || !session.access_token) {
+      if (cancelled || !hasAuthenticatedRef.current || !userId || !accessToken) {
         return;
       }
 
       // Re-check session expiration
       const currentTime = Math.floor(Date.now() / 1000);
-      if (session.expires_at && session.expires_at < currentTime) {
+      if (expiresAt && expiresAt < currentTime) {
         setIsLoading(false);
         return;
       }
@@ -97,7 +102,7 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
 
       try {
         // Final check before API call
-        if (!user || !session || !session.access_token) {
+        if (!userId || !accessToken) {
           setIsLoading(false);
           return;
         }
@@ -108,7 +113,7 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
           {
             body: {},
             headers: {
-              Authorization: `Bearer ${session.access_token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           }
         );
@@ -160,7 +165,7 @@ export const useUserLearningProfile = (options?: { enabled?: boolean }) => {
       cancelled = true;
       hasAuthenticatedRef.current = false;
     };
-  }, [user, session, authLoading, enabled]);
+  }, [userId, accessToken, expiresAt, authLoading, enabled]);
 
   return { profile, isLoading, error };
 };

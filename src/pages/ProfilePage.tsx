@@ -49,6 +49,8 @@ export default function ProfilePage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<string | null>(null);
+  const [skillValue, setSkillValue] = useState<number>(0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -104,6 +106,34 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveSkill = async (field: string) => {
+    if (!profile) return;
+    
+    setSaving(true);
+    try {
+      await updateProfile({ [field]: skillValue || null });
+      toast({
+        title: "Skill updated",
+        description: "Your skill level has been saved.",
+      });
+      setEditingSkill(null);
+      setSkillValue(0);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update skill. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleStartEditSkill = (field: string, currentValue: number | null | undefined) => {
+    setEditingSkill(field);
+    setSkillValue(currentValue || 0);
   };
 
   const getSkillLevel = (skill: number | null | undefined): string => {
@@ -227,12 +257,23 @@ export default function ProfilePage() {
                   setEditValue={setEditValue}
                   saving={saving}
                 />
-                <div>
-                  <label className="text-sm font-medium text-gray-500 mb-2 block">Experience Level</label>
-                  <Badge className="bg-brand-purple/10 text-brand-purple border-brand-purple/20">
-                    {getExperienceLabel(profile?.experience_level)}
-                  </Badge>
-                </div>
+                <EditableSelectField
+                  label="Experience Level"
+                  value={profile?.experience_level}
+                  field="experience_level"
+                  options={[
+                    { value: 'beginner', label: 'Beginner' },
+                    { value: 'competent', label: 'Competent' },
+                    { value: 'builder', label: 'Builder' },
+                  ]}
+                  editingField={editingField}
+                  onStartEdit={handleStartEdit}
+                  onCancelEdit={handleCancelEdit}
+                  onSave={handleSave}
+                  editValue={editValue}
+                  setEditValue={setEditValue}
+                  saving={saving}
+                />
               </div>
             </ProfileSection>
 
@@ -242,29 +283,61 @@ export default function ProfilePage() {
               icon={BarChart3}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <SkillCard
+                <EditableSkillCard
                   icon={Database}
                   label="Data"
                   skill={profile?.skill_data}
+                  field="skill_data"
                   color="brand-purple"
+                  editingSkill={editingSkill}
+                  onStartEdit={handleStartEditSkill}
+                  onCancelEdit={() => setEditingSkill(null)}
+                  onSave={handleSaveSkill}
+                  skillValue={skillValue}
+                  setSkillValue={setSkillValue}
+                  saving={saving}
                 />
-                <SkillCard
+                <EditableSkillCard
                   icon={Code}
                   label="Apps"
                   skill={profile?.skill_apps}
+                  field="skill_apps"
                   color="brand-pink"
+                  editingSkill={editingSkill}
+                  onStartEdit={handleStartEditSkill}
+                  onCancelEdit={() => setEditingSkill(null)}
+                  onSave={handleSaveSkill}
+                  skillValue={skillValue}
+                  setSkillValue={setSkillValue}
+                  saving={saving}
                 />
-                <SkillCard
+                <EditableSkillCard
                   icon={Settings}
                   label="Automation"
                   skill={profile?.skill_automation}
+                  field="skill_automation"
                   color="brand-gold"
+                  editingSkill={editingSkill}
+                  onStartEdit={handleStartEditSkill}
+                  onCancelEdit={() => setEditingSkill(null)}
+                  onSave={handleSaveSkill}
+                  skillValue={skillValue}
+                  setSkillValue={setSkillValue}
+                  saving={saving}
                 />
-                <SkillCard
+                <EditableSkillCard
                   icon={Bot}
                   label="AI Reasoning"
                   skill={profile?.skill_ai_reasoning}
+                  field="skill_ai_reasoning"
                   color="brand-purple"
+                  editingSkill={editingSkill}
+                  onStartEdit={handleStartEditSkill}
+                  onCancelEdit={() => setEditingSkill(null)}
+                  onSave={handleSaveSkill}
+                  skillValue={skillValue}
+                  setSkillValue={setSkillValue}
+                  saving={saving}
                 />
               </div>
             </ProfileSection>
@@ -318,6 +391,120 @@ export default function ProfilePage() {
                   setEditValue={setEditValue}
                   saving={saving}
                 />
+              </div>
+            </ProfileSection>
+
+            {/* Content Preferences */}
+            <ProfileSection
+              title="Content Preferences"
+              icon={Sparkles}
+              editingField={editingField}
+              onStartEdit={handleStartEdit}
+              onCancelEdit={handleCancelEdit}
+              onSave={handleSave}
+              editValue={editValue}
+              setEditValue={setEditValue}
+              saving={saving}
+            >
+              <div className="space-y-6">
+                <p className="text-sm text-gray-600 mb-4">
+                  Set your default content preferences. These will be used when creating new projects unless you override them.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <EditableSelectField
+                    label="Writing Style"
+                    value={profile?.default_content_style}
+                    field="default_content_style"
+                    options={[
+                      { value: 'conversational', label: 'Conversational' },
+                      { value: 'formal', label: 'Formal' },
+                      { value: 'technical', label: 'Technical' },
+                      { value: 'storytelling', label: 'Storytelling' },
+                      { value: 'practical', label: 'Practical' },
+                    ]}
+                    editingField={editingField}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSave={handleSave}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    saving={saving}
+                  />
+                  <EditableSelectField
+                    label="Content Length"
+                    value={profile?.default_content_length}
+                    field="default_content_length"
+                    options={[
+                      { value: 'brief', label: 'Brief (300-400 words)' },
+                      { value: 'standard', label: 'Standard (600-700 words)' },
+                      { value: 'detailed', label: 'Detailed (800-1000 words)' },
+                      { value: 'comprehensive', label: 'Comprehensive (1000+ words)' },
+                    ]}
+                    editingField={editingField}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSave={handleSave}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    saving={saving}
+                  />
+                  <EditableSelectField
+                    label="Complexity Level"
+                    value={profile?.default_content_complexity || profile?.content_complexity}
+                    field="default_content_complexity"
+                    options={[
+                      { value: 'simplified', label: 'Simplified' },
+                      { value: 'balanced', label: 'Balanced' },
+                      { value: 'advanced', label: 'Advanced' },
+                      { value: 'expert', label: 'Expert' },
+                    ]}
+                    editingField={editingField}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSave={handleSave}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    saving={saving}
+                  />
+                  <EditableSelectField
+                    label="Preferred Examples"
+                    value={profile?.default_preferred_examples}
+                    field="default_preferred_examples"
+                    options={[
+                      { value: 'real-world', label: 'Real-World' },
+                      { value: 'theoretical', label: 'Theoretical' },
+                      { value: 'code-focused', label: 'Code-Focused' },
+                      { value: 'business-focused', label: 'Business-Focused' },
+                      { value: 'mixed', label: 'Mixed' },
+                    ]}
+                    editingField={editingField}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSave={handleSave}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    saving={saving}
+                  />
+                  <EditableSelectField
+                    label="Learning Approach"
+                    value={profile?.default_learning_approach}
+                    field="default_learning_approach"
+                    options={[
+                      { value: 'hands-on', label: 'Hands-On' },
+                      { value: 'conceptual', label: 'Conceptual' },
+                      { value: 'visual', label: 'Visual' },
+                      { value: 'analytical', label: 'Analytical' },
+                      { value: 'balanced', label: 'Balanced' },
+                    ]}
+                    editingField={editingField}
+                    onStartEdit={handleStartEdit}
+                    onCancelEdit={handleCancelEdit}
+                    onSave={handleSave}
+                    editValue={editValue}
+                    setEditValue={setEditValue}
+                    saving={saving}
+                  />
+                </div>
               </div>
             </ProfileSection>
 
@@ -670,7 +857,7 @@ function EditableField({
           </Button>
         </div>
       ) : (
-        <div className="flex items-center justify-between group">
+        <div className="flex items-center justify-between">
           <div className={cn(
             "text-gray-900",
             !value && "text-gray-400 italic"
@@ -681,9 +868,10 @@ function EditableField({
             size="sm"
             variant="ghost"
             onClick={() => onStartEdit(field, value || null)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            className="text-brand-purple hover:text-brand-purple/80"
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 className="w-4 h-4 mr-1" />
+            Edit
           </Button>
         </div>
       )}
@@ -752,9 +940,9 @@ function EditableTextareaField({
           </div>
         </div>
       ) : (
-        <div className="flex items-start justify-between group">
+        <div className="flex items-start justify-between">
           <div className={cn(
-            "text-gray-900 whitespace-pre-wrap",
+            "text-gray-900 whitespace-pre-wrap flex-1",
             !value && "text-gray-400 italic"
           )}>
             {value || 'Not set'}
@@ -763,9 +951,10 @@ function EditableTextareaField({
             size="sm"
             variant="ghost"
             onClick={() => onStartEdit(field, value || null)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity ml-4 flex-shrink-0"
+            className="text-brand-purple hover:text-brand-purple/80 ml-4 flex-shrink-0"
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 className="w-4 h-4 mr-1" />
+            Edit
           </Button>
         </div>
       )}
@@ -773,14 +962,122 @@ function EditableTextareaField({
   );
 }
 
-interface SkillCardProps {
+interface EditableSelectFieldProps {
+  label: string;
+  value: string | null | undefined;
+  field: string;
+  options: Array<{ value: string; label: string }>;
+  editingField: string | null;
+  onStartEdit: (field: string, value: string | null) => void;
+  onCancelEdit: () => void;
+  onSave: (field: string) => void;
+  editValue: string;
+  setEditValue: (value: string) => void;
+  saving: boolean;
+}
+
+function EditableSelectField({
+  label,
+  value,
+  field,
+  options,
+  editingField,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  editValue,
+  setEditValue,
+  saving
+}: EditableSelectFieldProps) {
+  const isEditing = editingField === field;
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-500 mb-2 block">{label}</label>
+      {isEditing ? (
+        <div className="flex gap-2">
+          <select
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-purple"
+            autoFocus
+          >
+            <option value="">Not set</option>
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <Button
+            size="sm"
+            onClick={() => onSave(field)}
+            disabled={saving}
+            className="bg-brand-purple hover:bg-brand-purple/90"
+          >
+            <Save className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onCancelEdit}
+            disabled={saving}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <div className={cn(
+            "text-gray-900",
+            !value && "text-gray-400 italic"
+          )}>
+            {value ? options.find(o => o.value === value)?.label || value : 'Not set'}
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onStartEdit(field, value || null)}
+            className="text-brand-purple hover:text-brand-purple/80"
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Edit
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface EditableSkillCardProps {
   icon: React.ElementType;
   label: string;
   skill: number | null | undefined;
+  field: string;
   color: 'brand-purple' | 'brand-pink' | 'brand-gold';
+  editingSkill: string | null;
+  onStartEdit: (field: string, value: number | null | undefined) => void;
+  onCancelEdit: () => void;
+  onSave: (field: string) => void;
+  skillValue: number;
+  setSkillValue: (value: number) => void;
+  saving: boolean;
 }
 
-function SkillCard({ icon: Icon, label, skill, color }: SkillCardProps) {
+function EditableSkillCard({ 
+  icon: Icon, 
+  label, 
+  skill, 
+  field,
+  color,
+  editingSkill,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  skillValue,
+  setSkillValue,
+  saving
+}: EditableSkillCardProps) {
   const colorClasses = {
     'brand-purple': 'bg-brand-purple/10 text-brand-purple border-brand-purple/20',
     'brand-pink': 'bg-brand-pink/10 text-brand-pink border-brand-pink/20',
@@ -788,6 +1085,7 @@ function SkillCard({ icon: Icon, label, skill, color }: SkillCardProps) {
   };
 
   const level = skill ? Math.round((skill / 5) * 100) : 0;
+  const isEditing = editingSkill === field;
 
   return (
     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -797,13 +1095,60 @@ function SkillCard({ icon: Icon, label, skill, color }: SkillCardProps) {
         </div>
         <div className="flex-1">
           <div className="text-sm font-medium text-gray-700">{label}</div>
-          <div className="text-xs text-gray-500">
-            {skill ? `${skill}/5` : 'Not set'}
-          </div>
+          {isEditing ? (
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="range"
+                min="0"
+                max="5"
+                step="1"
+                value={skillValue}
+                onChange={(e) => setSkillValue(parseInt(e.target.value))}
+                className="flex-1"
+              />
+              <span className="text-xs text-gray-500 w-8">{skillValue}/5</span>
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500">
+              {skill ? `${skill}/5` : 'Not set'}
+            </div>
+          )}
         </div>
+        {!isEditing && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onStartEdit(field, skill)}
+            className="text-brand-purple hover:text-brand-purple/80"
+          >
+            <Edit2 className="w-4 h-4" />
+          </Button>
+        )}
       </div>
-      {skill && (
-        <Progress value={level} className="h-2" />
+      {isEditing ? (
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            onClick={() => onSave(field)}
+            disabled={saving}
+            className="bg-brand-purple hover:bg-brand-purple/90 flex-1"
+          >
+            <Save className="w-4 h-4 mr-1" />
+            Save
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onCancelEdit}
+            disabled={saving}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      ) : (
+        skill && (
+          <Progress value={level} className="h-2" />
+        )
       )}
     </div>
   );

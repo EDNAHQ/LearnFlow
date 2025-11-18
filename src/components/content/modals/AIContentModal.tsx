@@ -6,6 +6,7 @@ import { getMarkdownComponents } from "@/utils/markdown/markdownComponents";
 import { preprocessContent } from "@/utils/markdown/contentPreprocessor";
 import AILoadingState from "@/components/ai/AILoadingState";
 import AIErrorState from "@/components/ai/AIErrorState";
+import { cn } from "@/lib/utils";
 
 export type AIContentType = "insight" | "deep-dive" | "explore-further" | "related-topic";
 
@@ -22,6 +23,7 @@ interface AIContentModalProps {
   widthVariant?: "full" | "halfRight";
   contentType?: AIContentType;
   placement?: "bottom" | "right";
+  onReplaceContent?: () => void;
 }
 
 const AIContentModal = ({
@@ -36,7 +38,8 @@ const AIContentModal = ({
   topic = "",
   widthVariant = "full",
   contentType = "insight",
-  placement = "bottom"
+  placement = "bottom",
+  onReplaceContent
 }: AIContentModalProps) => {
   const handleClose = () => {
     onOpenChange(false);
@@ -129,7 +132,7 @@ const AIContentModal = ({
 
             {/* Content area with scrolling */}
             <div className="flex-1 overflow-y-auto">
-              <div className="px-8 py-6">
+              <div className="px-8 py-6 pb-8">
                 {isLoading && (
                   <div className="py-12">
                     <AILoadingState variant="animated" />
@@ -185,10 +188,21 @@ const AIContentModal = ({
             {/* Footer with action buttons */}
             {!isLoading && content && (
               <div className="flex-shrink-0 border-t border-gray-200 bg-white px-8 py-4">
-                <div className="flex justify-start">
+                <div className="flex justify-between gap-3">
+                  {onReplaceContent && (
+                    <button
+                      onClick={onReplaceContent}
+                      className="px-6 py-2 rounded-lg border-2 border-brand-purple text-brand-purple font-medium hover:bg-brand-purple/5 transition-colors"
+                    >
+                      Replace Content
+                    </button>
+                  )}
                   <button
                     onClick={handleClose}
-                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] text-white font-medium hover:opacity-90 transition-opacity"
+                    className={cn(
+                      "px-6 py-2 rounded-lg bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] text-white font-medium hover:opacity-90 transition-opacity",
+                      onReplaceContent && "ml-auto"
+                    )}
                   >
                     Done
                   </button>
