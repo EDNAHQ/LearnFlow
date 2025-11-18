@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import InterestDiscovery from './steps/InterestDiscovery';
@@ -13,12 +13,13 @@ import { useAuth } from '@/hooks/auth';
 interface LearningJourneyWizardProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTopic?: string;
 }
 
-const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, onClose }) => {
+const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, onClose, initialTopic }) => {
   const navigate = useNavigate();
   const { trackClick } = useBehaviorTracking();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(initialTopic ? 2 : 1);
   const [topicHistory, setTopicHistory] = useState<string[]>([]);
   const [contentPreferences, setContentPreferences] = useState<ContentPreferencesData>({});
   const [selectedTopicForLearning, setSelectedTopicForLearning] = useState<any>(null);
@@ -93,6 +94,36 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
     error
   } = useLearningJourney();
 
+  // Handle initial topic when wizard opens
+  useEffect(() => {
+    if (isOpen && initialTopic && currentStep === 2 && journeyData.topics.length === 0) {
+      // Create a topic object from the initial topic
+      const topicObject = {
+        id: `topic-initial-${Date.now()}`,
+        title: initialTopic,
+        description: `Learn ${initialTopic} through hands-on projects and practical exercises.`,
+        difficulty: 'beginner' as const,
+        timeCommitment: '10-20 hours',
+        careerPaths: [],
+        trending: false,
+        matchScore: 95,
+      };
+      
+      // Set topics with the initial topic
+      updateJourneyData({ 
+        topics: [topicObject],
+        selectedTopic: topicObject 
+      });
+      
+      // Auto-select and move to preferences step
+      setSelectedTopicForLearning(topicObject);
+      // Auto-advance to preferences step after a brief delay
+      setTimeout(() => {
+        setCurrentStep(3);
+      }, 300);
+    }
+  }, [isOpen, initialTopic, currentStep, journeyData.topics.length, updateJourneyData]);
+
   const handleTopicSelect = async (topic: any) => {
     // Add selected topic to history
     setTopicHistory([...topicHistory, topic.title]);
@@ -140,17 +171,23 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
     // Store topic
     setSelectedTopicForLearning(topic);
     
-    // If we have enough data, auto-apply preferences and skip to plan
-    if (hasEnoughData && autoDetectedPreferences) {
-      setContentPreferences(autoDetectedPreferences);
-      sessionStorage.setItem('content-preferences', JSON.stringify(autoDetectedPreferences));
-      sessionStorage.setItem('learn-topic', topic.title);
-      navigate(`/plan?topic=${encodeURIComponent(topic.title)}`);
-      onClose();
-    } else {
-      // Not enough data, show preferences step
-      setCurrentStep(3);
+    // Always show preferences step, but pre-populate with defaults
+    // Priority: 1. Profile defaults, 2. Auto-detected from learning profile, 3. Empty
+    const defaultPreferences: ContentPreferencesData = {};
+    
+    if (profile?.default_content_style) defaultPreferences.content_style = profile.default_content_style as any;
+    if (profile?.default_content_length) defaultPreferences.content_length = profile.default_content_length as any;
+    if (profile?.default_content_complexity) defaultPreferences.content_complexity = profile.default_content_complexity as any;
+    if (profile?.default_preferred_examples) defaultPreferences.preferred_examples = profile.default_preferred_examples as any;
+    if (profile?.default_learning_approach) defaultPreferences.learning_approach = profile.default_learning_approach as any;
+    
+    // If no profile defaults, use auto-detected preferences
+    if (Object.keys(defaultPreferences).length === 0 && autoDetectedPreferences) {
+      Object.assign(defaultPreferences, autoDetectedPreferences);
     }
+    
+    setContentPreferences(defaultPreferences);
+    setCurrentStep(3);
   };
 
   const handlePreferencesContinue = () => {
@@ -168,6 +205,24 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
   const handlePreferencesSkip = () => {
     if (!selectedTopicForLearning) return;
     
+    // If user has profile defaults, use those; otherwise use empty preferences
+    const preferencesToUse = profile && (
+      profile.default_content_style || 
+      profile.default_content_length || 
+      profile.default_content_complexity ||
+      profile.default_preferred_examples ||
+      profile.default_learning_approach
+    ) ? {
+      content_style: profile.default_content_style as any,
+      content_length: profile.default_content_length as any,
+      content_complexity: profile.default_content_complexity as any,
+      preferred_examples: profile.default_preferred_examples as any,
+      learning_approach: profile.default_learning_approach as any,
+    } : {};
+    
+    // Save preferences to session storage
+    sessionStorage.setItem('content-preferences', JSON.stringify(preferencesToUse));
+    
     // Save topic to session storage and navigate to plan page
     sessionStorage.setItem('learn-topic', selectedTopicForLearning.title);
     navigate(`/plan?topic=${encodeURIComponent(selectedTopicForLearning.title)}`);
@@ -179,7 +234,9 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
       return "What do you want to learn?";
     }
     if (currentStep === 3) {
-      return "Customize Your Learning";
+      return selectedTopicForLearning 
+        ? `Customize Content for "${selectedTopicForLearning.title}"`
+        : "Customize Your Learning";
     }
     if (topicHistory.length === 0) {
       return "Pick a topic";
@@ -196,9 +253,21 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
       return "Choose an area of interest to explore";
     }
     if (currentStep === 3) {
+      const hasDefaults = profile && (
+        profile.default_content_style || 
+        profile.default_content_length || 
+        profile.default_content_complexity ||
+        profile.default_preferred_examples ||
+        profile.default_learning_approach
+      );
+      
+      if (hasDefaults) {
+        return `Your default preferences are pre-selected. You can adjust them for this project or continue with defaults.`;
+      }
+      
       return selectedTopicForLearning 
         ? `We'll personalize your learning path for "${selectedTopicForLearning.title}" based on your preferences.`
-        : "";
+        : "Choose how you'd like your content to be generated.";
     }
     if (topicHistory.length === 0) {
       // Personalized message based on user's goals
@@ -222,12 +291,30 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
     }
 
     if (currentStep === 3) {
+      const hasProfileDefaults = profile && (
+        profile.default_content_style || 
+        profile.default_content_length || 
+        profile.default_content_complexity ||
+        profile.default_preferred_examples ||
+        profile.default_learning_approach
+      );
+      
+      const profileDefaultsData: ContentPreferencesData | undefined = hasProfileDefaults ? {
+        content_style: profile.default_content_style as any,
+        content_length: profile.default_content_length as any,
+        content_complexity: profile.default_content_complexity as any,
+        preferred_examples: profile.default_preferred_examples as any,
+        learning_approach: profile.default_learning_approach as any,
+      } : undefined;
+      
       return (
         <ContentPreferences
           preferences={contentPreferences}
           onPreferencesChange={setContentPreferences}
           onContinue={handlePreferencesContinue}
           onSkip={handlePreferencesSkip}
+          hasProfileDefaults={hasProfileDefaults || false}
+          profileDefaults={profileDefaultsData}
         />
       );
     }
@@ -335,9 +422,22 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
             Back
           </button>
           {currentStep === 3 && (
-            <p className="text-xs font-light text-gray-500">
-              Optional: Skip to use default settings
-            </p>
+            <div className="flex items-center gap-2">
+              {profile && (
+                profile.default_content_style || 
+                profile.default_content_length || 
+                profile.default_content_complexity ||
+                profile.default_preferred_examples ||
+                profile.default_learning_approach
+              ) && (
+                <p className="text-xs font-medium text-brand-purple">
+                  Using your profile defaults
+                </p>
+              )}
+              <p className="text-xs font-light text-gray-500">
+                Optional: Skip to use default settings
+              </p>
+            </div>
           )}
         </div>
       </motion.div>

@@ -97,7 +97,7 @@ export const PersonalizationDiscovery: React.FC<PersonalizationDiscoveryProps> =
             stiffness: 300,
             damping: 25,
           }}
-          className="fixed bottom-6 right-6 z-50 max-w-sm"
+          className="fixed bottom-6 left-6 z-50 max-w-sm"
         >
           <motion.div
             className={cn(

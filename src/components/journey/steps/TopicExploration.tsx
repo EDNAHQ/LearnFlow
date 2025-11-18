@@ -30,41 +30,17 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
   selectedTopic,
   isLoading
 }) => {
+  // ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS
   const [searchQuery, setSearchQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const { profile } = useUserProfile();
 
-  if (isLoading) {
-    return (
-      <JourneyLoadingAnimation
-        message="Discovering perfect topics for you"
-        subMessage="Analyzing your interests to find the best learning paths..."
-      />
-    );
-  }
-
-  // Add extra safety check for array
-  if (!topics || !Array.isArray(topics)) {
-    console.error('Topics is not an array:', topics);
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 font-light">Error loading topics. Please try again.</p>
-      </div>
-    );
-  }
-
-  if (topics.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 font-light">No topics available yet. Please go back and select an interest.</p>
-      </div>
-    );
-  }
-
-  // Filter and sort topics
+  // Filter and sort topics - use safe defaults
+  const safeTopics = Array.isArray(topics) ? topics : [];
+  
   const filteredTopics = useMemo(() => {
-    let filtered = topics;
+    let filtered = safeTopics;
     
     // Filter by search query
     if (searchQuery.trim()) {
@@ -82,7 +58,7 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
       }
       return a.title.localeCompare(b.title);
     });
-  }, [topics, searchQuery]);
+  }, [safeTopics, searchQuery]);
 
   // Get recommended topics - enhanced with profile-based matching
   const recommendedTopics = useMemo(() => {
@@ -109,6 +85,34 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
     
     return recommended.slice(0, 6);
   }, [filteredTopics, profile]);
+
+  // NOW we can do early returns
+  if (isLoading) {
+    return (
+      <JourneyLoadingAnimation
+        message="Discovering perfect topics for you"
+        subMessage="Analyzing your interests to find the best learning paths..."
+      />
+    );
+  }
+
+  // Add extra safety check for array
+  if (!topics || !Array.isArray(topics)) {
+    console.error('Topics is not an array:', topics);
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 font-light">Error loading topics. Please try again.</p>
+      </div>
+    );
+  }
+
+  if (topics.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 font-light">No topics available yet. Please go back and select an interest.</p>
+      </div>
+    );
+  }
 
   // Display topics - show recommended first, then others
   const displayTopics = showAll ? filteredTopics : filteredTopics.slice(0, 9);
@@ -261,8 +265,11 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
               {onStartLearning && (
                 <div className="px-5 pb-5 pt-2 flex gap-3 border-t border-gray-100">
                   <button
+                    type="button"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
+                      console.log('Start Learning clicked for topic:', topic.title);
                       onStartLearning(topic);
                     }}
                     className="flex-1 px-4 py-2.5 text-sm font-medium text-white brand-gradient rounded-lg hover:opacity-90 transition-opacity shadow-sm"
@@ -270,7 +277,13 @@ const TopicExploration: React.FC<TopicExplorationProps> = ({
                     Start Learning
                   </button>
                   <button
-                    onClick={() => onSelect(topic)}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Explore clicked for topic:', topic.title);
+                      onSelect(topic);
+                    }}
                     className="flex-1 px-4 py-2.5 text-sm font-light text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200"
                   >
                     Explore →

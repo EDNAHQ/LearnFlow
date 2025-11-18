@@ -64,6 +64,21 @@ export const useUserContentPreferences = () => {
           .eq('user_id', user.id);
 
         if (fetchError) {
+          // If columns don't exist yet (400 error), silently return null preferences
+          if (fetchError.code === '42703' || fetchError.message?.includes('column') || fetchError.message?.includes('does not exist')) {
+            console.warn('Content preference columns not yet migrated. Run: supabase db push');
+            setPreferences({
+              contentStyle: null,
+              contentLength: null,
+              contentComplexity: null,
+              preferredExamples: null,
+              learningApproach: null,
+              totalProjects: 0,
+              projectsWithPreferences: 0,
+            });
+            setIsLoading(false);
+            return;
+          }
           throw fetchError;
         }
 

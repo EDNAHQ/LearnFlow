@@ -21,16 +21,23 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<LearningProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Use stable reference to prevent unnecessary re-fetches
+  const userId = user?.id;
 
   useEffect(() => {
     const fetchProjects = async () => {
-      if (!user) return;
+      if (!userId) {
+        setProjects([]);
+        setLoading(false);
+        return;
+      }
 
       try {
         const { data, error } = await supabase
           .from('learning_paths')
           .select('id, topic, created_at, is_approved, is_completed, is_public, view_count, like_count')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -81,7 +88,7 @@ export const useProjects = () => {
     };
 
     fetchProjects();
-  }, [user]);
+  }, [userId]);
 
   const handleDeleteProject = async (projectId: string) => {
     setIsDeleting(true);
