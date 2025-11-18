@@ -230,6 +230,31 @@ export function enhanceMarkdownFormatting(content: string): string {
 }
 
 /**
+ * Preprocesses custom markdown blocks (:::block-type)
+ * Converts them to HTML divs with data attributes for react-markdown to handle
+ */
+export function preprocessCustomBlocks(content: string): string {
+  if (!content || typeof content !== 'string') {
+    return content;
+  }
+
+  let processed = content;
+  
+  // Match custom blocks: :::block-type\ncontent\n:::
+  // Handle multiline blocks - match from start of line to end of line
+  const blockPattern = /^:::(key-idea|checkpoint|deep-dive|summary)\n([\s\S]*?)\n:::$/gm;
+  
+  processed = processed.replace(blockPattern, (match, blockType, blockContent) => {
+    // Trim content but preserve internal formatting
+    const trimmedContent = blockContent.trim();
+    // Wrap in HTML div with data attribute
+    return `\n<div data-custom-block="${blockType}">${trimmedContent}</div>\n`;
+  });
+
+  return processed;
+}
+
+/**
  * Main preprocessing function
  */
 export function preprocessContent(content: string): string {
@@ -237,10 +262,13 @@ export function preprocessContent(content: string): string {
     return content;
   }
 
-  // First, detect and format code blocks
-  let processed = preprocessContentForCodeBlocks(content);
+  // First, preprocess custom blocks (before code block detection to avoid conflicts)
+  let processed = preprocessCustomBlocks(content);
   
-  // Then enhance markdown formatting
+  // Then detect and format code blocks
+  processed = preprocessContentForCodeBlocks(processed);
+  
+  // Finally enhance markdown formatting
   processed = enhanceMarkdownFormatting(processed);
 
   return processed;

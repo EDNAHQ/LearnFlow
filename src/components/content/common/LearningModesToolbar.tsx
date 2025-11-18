@@ -1,34 +1,24 @@
-import { useCallback, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
-import { supabase } from "@/integrations/supabase/client";
-import AIContentModal from "@/components/content/modals/AIContentModal";
-import { Brain, HelpCircle, BookOpen, Layout, Target, BookOpenText } from "lucide-react";
+import { useMemo } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Brain, HelpCircle, BookOpen, Layout, Target, BookOpenText, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type Mode = "mental_models" | "socratic" | "worked_examples" | "visual_summary" | "active_practice" | "story_mode";
+import type { Mode } from "@/hooks/content/useContentModeToggle";
 
 interface LearningModesToolbarProps {
-  content: string;
-  topic?: string;
-  title?: string;
-  getSelection?: () => string | null;
-  onContentReplace?: (newContent: string) => void;
+  activeModes: Mode[];
+  isLoadingMode: (mode: Mode) => boolean;
+  getError: (mode: Mode) => string | null;
+  onToggleMode: (mode: Mode) => void;
+  onReset: () => void;
 }
 
 export default function LearningModesToolbar({ 
-  content, 
-  topic, 
-  title, 
-  getSelection,
-  onContentReplace 
+  activeModes,
+  isLoadingMode,
+  getError,
+  onToggleMode,
+  onReset,
 }: LearningModesToolbarProps) {
-  const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<Mode | null>(null);
-  const [result, setResult] = useState("");
-
   const buttons = useMemo(() => ([
     { 
       key: "mental_models" as Mode, 
@@ -68,98 +58,73 @@ export default function LearningModesToolbar({
     },
   ]), []);
 
-  const startTransform = useCallback(async (selectedMode: Mode) => {
-    setMode(selectedMode);
-    setOpen(true);
-    setIsLoading(true);
-    setError(null);
-    setResult("");
-
-    try {
-      const selection = getSelection ? (getSelection() || "") : "";
-
-      const { data, error: fnError } = await supabase.functions.invoke(EDGE_FUNCTIONS.learningModesTransform, {
-        body: {
-          mode: selectedMode,
-          content,
-          topic,
-          title,
-          selection,
-        }
-      });
-
-      if (fnError) throw fnError;
-      setResult(data?.content || "");
-    } catch (e: any) {
-      setError(e?.message || "Failed to transform content");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [content, topic, title, getSelection]);
-
-  const handleReplaceContent = useCallback(() => {
-    if (result && onContentReplace) {
-      onContentReplace(result);
-      setOpen(false);
-    }
-  }, [result, onContentReplace]);
-
-  const modalTitle = useMemo(() => {
-    if (!mode) return "Learn it your way";
-    if (mode === "mental_models") return "Mental model map";
-    if (mode === "socratic") return "Socratic coach";
-    if (mode === "worked_examples") return "Worked examples";
-    if (mode === "visual_summary") return "Visual summary";
-    if (mode === "active_practice") return "Active practice";
-    if (mode === "story_mode") return "Story mode";
-    return "Learn it your way";
-  }, [mode]);
-
   return (
-    <>
-      <div className="mb-6 pb-4 border-b border-gray-200">
-        <div className="flex flex-col gap-3">
+    <div className="mb-6 pb-4 border-b border-gray-200">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">Learn it your way:</span>
-          <div className="flex flex-wrap items-center gap-2">
+          {activeModes.length > 0 && (
+            <button
+              onClick={onReset}
+              className="text-xs text-brand-purple hover:text-brand-pink underline transition-colors"
+            >
+              Reset to default
+            </button>
+          )}
+        </div>
+        <ToggleGroup
+          type="multiple"
+          value={activeModes}
+          onValueChange={(values) => {
+            const newModes = values as Mode[];
+            // Find which mode was toggled
+            const added = newModes.find(m => !activeModes.includes(m));
+            const removed = activeModes.find(m => !newModes.includes(m));
+            
+            if (added) {
+              onToggleMode(added);
+            } else if (removed) {
+              onToggleMode(removed);
+            }
+          }}
+          className="flex flex-wrap gap-2"
+        >
           {buttons.map(b => {
             const Icon = b.icon;
+            const isLoading = isLoadingMode(b.key);
+            const error = getError(b.key);
+            const isActive = activeModes.includes(b.key);
+
             return (
-              <Button 
-                key={b.key} 
-                size="sm" 
-                variant="outline"
-                onClick={() => startTransform(b.key)}
-                className={cn(
-                  "gap-2 border-gray-300 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-purple/5 transition-colors",
-                  isLoading && mode === b.key && "border-brand-purple text-brand-purple bg-brand-purple/10"
+              <div key={b.key} className="relative">
+                <ToggleGroupItem
+                  value={b.key}
+                  aria-label={b.label}
+                  className={cn(
+                    "gap-2 border-gray-300 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-purple/5 transition-colors",
+                    isActive && "border-brand-purple text-brand-purple bg-brand-purple/10 data-[state=on]:bg-brand-purple/10",
+                    isLoading && "opacity-60 cursor-wait"
+                  )}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icon className="h-4 w-4" />
+                  )}
+                  {b.label}
+                </ToggleGroupItem>
+                {error && (
+                  <div className="absolute -bottom-6 left-0 right-0 flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" />
+                    <span className="truncate">{error}</span>
+                  </div>
                 )}
-                disabled={isLoading}
-              >
-                <Icon className="h-4 w-4" />
-                {b.label}
-              </Button>
+              </div>
             );
           })}
-          </div>
-        </div>
+        </ToggleGroup>
       </div>
-
-      <AIContentModal
-        open={open}
-        onOpenChange={setOpen}
-        title={modalTitle}
-        subtitle={topic}
-        content={result}
-        isLoading={isLoading}
-        error={error}
-        contentType="insight"
-        widthVariant="halfRight"
-        placement="right"
-        topic={topic}
-        onReplaceContent={onContentReplace ? handleReplaceContent : undefined}
-      />
-    </>
+    </div>
   );
 }
-
-

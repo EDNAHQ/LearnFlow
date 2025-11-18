@@ -29,23 +29,9 @@ const DeepDiveSection: React.FC<DeepDiveSectionProps> = ({
     generateDeepDiveContent
   } = useDeepDiveTopics(topic, content, title);
 
-  // Debug logging
-  useEffect(() => {
-    console.log("🔍 [DeepDiveSection] State:", {
-      topic,
-      hasContent: !!content,
-      contentLength: content?.length,
-      title,
-      isLoading,
-      error,
-      topicsCount: filteredTopics.length,
-      topics: filteredTopics
-    });
-  }, [topic, content, title, isLoading, error, filteredTopics]);
 
   // Don't render if no topic
   if (!topic) {
-    console.log("⚠️ [DeepDiveSection] No topic provided, not rendering");
     return null;
   }
 

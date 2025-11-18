@@ -8,6 +8,9 @@ import ContentQuestionsSection from "../questions/ContentQuestionsSection";
 import LearningModesToolbar from "../common/LearningModesToolbar";
 import { ContentStyleAdjuster } from "../common/ContentStyleAdjuster";
 import { supabase } from "@/integrations/supabase/client";
+import { useContentModeToggle } from "@/hooks/content/useContentModeToggle";
+import { useContentProgress } from "@/hooks/content/useContentProgress";
+import { ContentProgressIndicator } from "../navigation/ContentProgressIndicator";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -43,15 +46,6 @@ const ContentSectionCore = ({
   // Create a ref for the content area for margin notes
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Create markdown components with question handlers
-  const markdownComponents = getMarkdownComponents(
-    topic || undefined,
-    onQuestionClick
-  );
-
-  // Preprocess content to detect and format code blocks
-  const processedContent = preprocessContent(currentContent);
-
   const getSelection = useCallback(() => {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return null;
@@ -63,6 +57,47 @@ const ContentSectionCore = ({
     const text = selection.toString().trim();
     return text.length > 0 ? text : null;
   }, []);
+
+  // Use content mode toggle hook
+  const {
+    activeModes,
+    transformedContent,
+    isLoading: isModeLoading,
+    isLoadingMode,
+    getError,
+    toggleMode,
+    resetToDefault,
+  } = useContentModeToggle({
+    originalContent: currentContent,
+    stepId,
+    topic: topic || undefined,
+    title,
+    getSelection,
+  });
+
+  // Use transformed content when modes are active, otherwise use original
+  const displayContent = activeModes.length > 0 ? transformedContent : currentContent;
+
+  // Track content progress
+  const {
+    sections,
+    completedSections,
+    scrollToSection,
+    progressPercentage,
+  } = useContentProgress({
+    stepId,
+    contentRef,
+    content: displayContent,
+  });
+
+  // Create markdown components with question handlers
+  const markdownComponents = getMarkdownComponents(
+    topic || undefined,
+    onQuestionClick
+  );
+
+  // Preprocess content to detect and format code blocks
+  const processedContent = preprocessContent(displayContent);
 
   const handleContentReplace = useCallback(async (newContent: string) => {
     if (!stepId) return;
@@ -88,17 +123,23 @@ const ContentSectionCore = ({
 
   return (
     <div className="content-area-wrapper">
+      <ContentProgressIndicator
+        sections={sections}
+        completedSections={completedSections}
+        progressPercentage={progressPercentage}
+        onSectionClick={scrollToSection}
+      />
       <div
         ref={contentRef}
         className="content-area"
       >
         {/* Learn-it-your-way toolbar at the top */}
         <LearningModesToolbar
-          content={currentContent}
-          topic={topic || undefined}
-          title={title}
-          getSelection={getSelection}
-          onContentReplace={stepId ? handleContentReplace : undefined}
+          activeModes={activeModes}
+          isLoadingMode={isLoadingMode}
+          getError={getError}
+          onToggleMode={toggleMode}
+          onReset={resetToDefault}
         />
 
         <SafeReactMarkdown 
@@ -111,7 +152,7 @@ const ContentSectionCore = ({
         {/* Related questions at the bottom of content */}
         {topic && (
           <ContentQuestionsSection 
-            loadedDetailedContent={currentContent}
+            loadedDetailedContent={displayContent}
             topic={topic}
             title={title}
             stepId={stepId}

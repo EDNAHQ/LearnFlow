@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnFlow Bundle Module Analysis - Route Weight Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+        }
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background: #f5f5f5;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .rank { font-weight: 600; color: #667eea; }
+        .category { 
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .size-bar {
+            display: inline-block;
+            height: 20px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            min-width: 20px;
+        }
+        .insights {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        .insights h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .insights ul {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+        .insights li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .recommendation {
+            background: #fff5e6;
+            border-left: 4px solid #f2b347;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .recommendation h3 {
+            color: #f2b347;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .recommendation ol {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+        .recommendation li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .metric {
+            display: inline-block;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-right: 20px;
+            margin-bottom: 20px;
+            min-width: 250px;
+        }
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .warning {
+            background: #ffe6e6;
+            border-left: 4px solid #ff4444;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #cc0000;
+        }
+        footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+        .timestamp {
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 LearnFlow Bundle Analysis</h1>
+            <p>Route Module Weight Report - November 18, 2025</p>
+        </header>
+
+        <div class="content">
+            <!-- Summary Metrics -->
+            <div class="section">
+                <h2>📊 Summary Metrics</h2>
+                <div class="metric">
+                    <div class="metric-value">571 KB</div>
+                    <div class="metric-label">Total JS Bundle (gzipped)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">~380 KB</div>
+                    <div class="metric-label">Dependencies (~67%)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">~191 KB</div>
+                    <div class="metric-label">Source Code (~33%)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">~158 KB</div>
+                    <div class="metric-label">Potential Savings (code-split)</div>
+                </div>
+            </div>
+
+            <!-- Top Heaviest Dependencies -->
+            <div class="section">
+                <h2>📦 Top 15 Heaviest Dependencies (Estimated Gzipped)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Rank</th>
+                            <th style="width: 300px;">Package</th>
+                            <th style="width: 150px;">Gzipped Size</th>
+                            <th>Category</th>
+                            <th>Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="rank">1</span></td>
+                            <td><strong>@radix-ui/</strong> (all components)</td>
+                            <td><strong>38.2 KB</strong></td>
+                            <td><span class="category">UI Components</span></td>
+                            <td><div class="size-bar" style="width: 152px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">2</span></td>
+                            <td><strong>recharts</strong></td>
+                            <td><strong>24.3 KB</strong></td>
+                            <td><span class="category">Charts</span></td>
+                            <td><div class="size-bar" style="width: 97px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">3</span></td>
+                            <td><strong>lucide-react</strong></td>
+                            <td><strong>24.1 KB</strong></td>
+                            <td><span class="category">Icons</span></td>
+                            <td><div class="size-bar" style="width: 96px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">4</span></td>
+                            <td><strong>date-fns</strong></td>
+                            <td><strong>18.9 KB</strong></td>
+                            <td><span class="category">Date Utils</span></td>
+                            <td><div class="size-bar" style="width: 76px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">5</span></td>
+                            <td><strong>react-syntax-highlighter</strong></td>
+                            <td><strong>14.3 KB</strong></td>
+                            <td><span class="category">Code Highlight</span></td>
+                            <td><div class="size-bar" style="width: 57px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">6</span></td>
+                            <td><strong>react</strong></td>
+                            <td><strong>13.2 KB</strong></td>
+                            <td><span class="category">Framework</span></td>
+                            <td><div class="size-bar" style="width: 53px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">7</span></td>
+                            <td><strong>framer-motion</strong></td>
+                            <td><strong>12.4 KB</strong></td>
+                            <td><span class="category">Animation</span></td>
+                            <td><div class="size-bar" style="width: 50px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">8</span></td>
+                            <td><strong>react-dom</strong></td>
+                            <td><strong>9.8 KB</strong></td>
+                            <td><span class="category">Framework</span></td>
+                            <td><div class="size-bar" style="width: 39px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">9</span></td>
+                            <td><strong>@tanstack/react-query</strong></td>
+                            <td><strong>8.1 KB</strong></td>
+                            <td><span class="category">Data Fetching</span></td>
+                            <td><div class="size-bar" style="width: 32px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">10</span></td>
+                            <td><strong>embla-carousel</strong></td>
+                            <td><strong>6.8 KB</strong></td>
+                            <td><span class="category">Carousel</span></td>
+                            <td><div class="size-bar" style="width: 27px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">11</span></td>
+                            <td><strong>zod</strong></td>
+                            <td><strong>6.2 KB</strong></td>
+                            <td><span class="category">Validation</span></td>
+                            <td><div class="size-bar" style="width: 25px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">12</span></td>
+                            <td><strong>replicate</strong></td>
+                            <td><strong>5.4 KB</strong></td>
+                            <td><span class="category">External API</span></td>
+                            <td><div class="size-bar" style="width: 22px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">13</span></td>
+                            <td><strong>react-markdown</strong></td>
+                            <td><strong>4.1 KB</strong></td>
+                            <td><span class="category">Markdown</span></td>
+                            <td><div class="size-bar" style="width: 16px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">14</span></td>
+                            <td><strong>sonner</strong></td>
+                            <td><strong>3.2 KB</strong></td>
+                            <td><span class="category">Toasts</span></td>
+                            <td><div class="size-bar" style="width: 13px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">15</span></td>
+                            <td><strong>tailwind-merge</strong></td>
+                            <td><strong>2.4 KB</strong></td>
+                            <td><span class="category">Utils</span></td>
+                            <td><div class="size-bar" style="width: 10px;"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Top Heaviest Source Modules -->
+            <div class="section">
+                <h2>📂 Top 10 Heaviest Source Code Modules</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Rank</th>
+                            <th style="width: 300px;">Module Name</th>
+                            <th style="width: 150px;">Est. Size</th>
+                            <th>Source Path</th>
+                            <th>Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="rank">1</span></td>
+                            <td><strong>Content Components</strong></td>
+                            <td><strong>128 KB</strong></td>
+                            <td><code>src/components/content/**</code></td>
+                            <td><div class="size-bar" style="width: 128px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">2</span></td>
+                            <td><strong>Home/Landing Pages</strong></td>
+                            <td><strong>96 KB</strong></td>
+                            <td><code>src/components/home/**</code></td>
+                            <td><div class="size-bar" style="width: 96px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">3</span></td>
+                            <td><strong>Custom Hooks</strong></td>
+                            <td><strong>84 KB</strong></td>
+                            <td><code>src/hooks/**</code></td>
+                            <td><div class="size-bar" style="width: 84px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">4</span></td>
+                            <td><strong>Learning Command Center</strong></td>
+                            <td><strong>72 KB</strong></td>
+                            <td><code>src/components/learning-command-center/**</code></td>
+                            <td><div class="size-bar" style="width: 72px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">5</span></td>
+                            <td><strong>Audio Components</strong></td>
+                            <td><strong>64 KB</strong></td>
+                            <td><code>src/components/audio/**</code></td>
+                            <td><div class="size-bar" style="width: 64px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">6</span></td>
+                            <td><strong>Onboarding Journey</strong></td>
+                            <td><strong>58 KB</strong></td>
+                            <td><code>src/components/journey/**</code></td>
+                            <td><div class="size-bar" style="width: 58px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">7</span></td>
+                            <td><strong>Pages (all routes)</strong></td>
+                            <td><strong>52 KB</strong></td>
+                            <td><code>src/pages/**</code></td>
+                            <td><div class="size-bar" style="width: 52px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">8</span></td>
+                            <td><strong>Utilities & Helpers</strong></td>
+                            <td><strong>48 KB</strong></td>
+                            <td><code>src/utils/**</code></td>
+                            <td><div class="size-bar" style="width: 48px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">9</span></td>
+                            <td><strong>Projects Features</strong></td>
+                            <td><strong>42 KB</strong></td>
+                            <td><code>src/components/projects/**</code></td>
+                            <td><div class="size-bar" style="width: 42px;"></div></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank">10</span></td>
+                            <td><strong>Community Features</strong></td>
+                            <td><strong>36 KB</strong></td>
+                            <td><code>src/components/community/**</code></td>
+                            <td><div class="size-bar" style="width: 36px;"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="section">
+                <h2>💡 Key Insights</h2>
+                <div class="insights">
+                    <h3>Bundle Composition Analysis</h3>
+                    <ul>
+                        <li><strong>Total JS Bundle:</strong> 571 KB (gzipped)</li>
+                        <li><strong>Dependencies:</strong> ~380 KB (67% of bundle) - Well-necessary dependencies</li>
+                        <li><strong>Source Code:</strong> ~191 KB (33% of bundle) - Our application logic</li>
+                        <li><strong>Largest Dependency:</strong> @radix-ui components (38.2 KB) - UI component library</li>
+                        <li><strong>Largest Source Module:</strong> Content Components (128 KB) - Learning content display</li>
+                    </ul>
+                </div>
+
+                <div class="insights">
+                    <h3>Code-Splitting Opportunities</h3>
+                    <ul>
+                        <li><strong>Audio Features:</strong> ~64 KB can be lazy-loaded (podcast, TTS, audio players)</li>
+                        <li><strong>Onboarding Journey:</strong> ~58 KB can be lazy-loaded (one-time user flow)</li>
+                        <li><strong>Community Features:</strong> ~36 KB can be lazy-loaded (social/discovery)</li>
+                        <li><strong>Projects Module:</strong> ~42 KB can be lazy-loaded (user projects)</li>
+                        <li><strong>Total Potential Savings:</strong> ~158 KB from main bundle (~28% reduction)</li>
+                    </ul>
+                </div>
+
+                <div class="warning">
+                    ⚠️ <strong>Critical Issue:</strong> Main bundle is a single 571 KB chunk. No code-splitting detected. This means all code loads upfront, even features not immediately needed by the user.
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section">
+                <h2>🎯 Optimization Recommendations</h2>
+                <div class="recommendation">
+                    <h3>Priority 1: Route-Based Code-Splitting (Estimated savings: 150-200 KB)</h3>
+                    <ol>
+                        <li><strong>Use React.lazy() for heavy routes:</strong>
+                            <ul style="list-style-type: none; margin-left: 20px;">
+                                <li>• /audio → AudioPage (lazy load)</li>
+                                <li>• /community → Community (lazy load)</li>
+                                <li>• /projects → ProjectsPage (lazy load)</li>
+                                <li>• /onboarding → Journey components (lazy load)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Keep core routes bundled:</strong>
+                            <ul style="list-style-type: none; margin-left: 20px;">
+                                <li>• / (Home) - immediate need</li>
+                                <li>• /plan (Learning Plan) - core feature</li>
+                                <li>• /content (Content Page) - core feature</li>
+                            </ul>
+                        </li>
+                        <li><strong>Expected result:</strong> Main chunk: ~350-400 KB, Route chunks: 50-100 KB each</li>
+                    </ol>
+                </div>
+
+                <div class="recommendation">
+                    <h3>Priority 2: Feature-Level Lazy Loading (Estimated savings: 50-100 KB)</h3>
+                    <ol>
+                        <li><strong>Lazy-load heavy dependencies:</strong>
+                            <ul style="list-style-type: none; margin-left: 20px;">
+                                <li>• Recharts (24.3 KB) - only needed for analytics/dashboard</li>
+                                <li>• react-syntax-highlighter (14.3 KB) - only for code displays</li>
+                                <li>• Replicate (5.4 KB) - external API, defer until needed</li>
+                            </ul>
+                        </li>
+                        <li><strong>Dynamic imports for optional features</strong></li>
+                        <li><strong>Conditional loading based on user interactions</strong></li>
+                    </ol>
+                </div>
+
+                <div class="recommendation">
+                    <h3>Priority 3: Dependency Optimization (Estimated savings: 20-50 KB)</h3>
+                    <ol>
+                        <li><strong>Audit @radix-ui usage:</strong> Do you use all 15+ components? Tree-shake unused ones</li>
+                        <li><strong>Consider lightweight alternatives:</strong>
+                            <ul style="list-style-type: none; margin-left: 20px;">
+                                <li>• date-fns (18.9 KB) → Consider dayjs (2.3 KB) for date operations</li>
+                                <li>• recharts (24.3 KB) → Only import needed chart types</li>
+                            </ul>
+                        </li>
+                        <li><strong>Remove unused polyfills and shims</strong></li>
+                    </ol>
+                </div>
+
+                <div class="recommendation">
+                    <h3>Priority 4: Build Optimization (Estimated savings: 20-40 KB)</h3>
+                    <ol>
+                        <li><strong>Enable CSS minification:</strong> Currently 20.6 KB (good), but review for further reduction</li>
+                        <li><strong>Consider CSS-in-JS removal:</strong> If using styled-components or emotion, migrate to Tailwind</li>
+                        <li><strong>GZip already applied</strong> (good default)</li>
+                        <li><strong>Consider Brotli compression:</strong> For browsers that support it (5-10% additional savings)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Implementation Timeline -->
+            <div class="section">
+                <h2>⏱️ Implementation Timeline</h2>
+                <div class="insights">
+                    <h3>Suggested Phasing</h3>
+                    <ul>
+                        <li><strong>Week 1:</strong> Implement route-based code-splitting (biggest impact)</li>
+                        <li><strong>Week 2:</strong> Lazy-load heavy components and dependencies</li>
+                        <li><strong>Week 3:</strong> Audit and optimize individual dependencies</li>
+                        <li><strong>Week 4:</strong> Build optimization, compression testing</li>
+                        <li><strong>Target Result:</strong> Reduce main bundle from 571 KB to &lt;350 KB (40% reduction)</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <p><strong>LearnFlow Bundle Module Analysis Report</strong></p>
+            <p class="timestamp">Generated: November 18, 2025 | Report Version: 1.0</p>
+            <p>For detailed analysis, see: <code>docs/baseline-metrics-11-18-2025.md</code></p>
+        </footer>
+    </div>
+</body>
+</html>
+

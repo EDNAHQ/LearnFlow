@@ -12,22 +12,29 @@ Central ledger for every optimization initiative. Treat this file as the single 
 ## Baseline & Progress Metrics
 | Metric | Command / Source | Last Sample | Notes |
 | --- | --- | --- | --- |
-| Bundle size (client) | `npm run build && npx vite-bundle-visualizer` | _pending_ | capture gzip + brotli |
-| Lighthouse (Home / Plan / Content) | `npx lighthouse http://localhost:5173/...` | _pending_ | log Perf/PWA/SEO |
-| React Profiler targets | `ContentPage`, `LearningCommandCenter` | _pending_ | record commits >16 ms |
-| Supabase query/profile | `supabase logs tail --project ...` | _pending_ | look for hot tables |
-| ESLint / TypeScript | `npm run lint`, `tsc --noEmit` | _pending_ | attach warnings summary |
+| Bundle size (client) | `npm run build && npx vite-bundle-visualizer` | 2025-11-18 — JS 571 KB gzip, CSS 20.6 KB gzip | Single chunk >500 KB; needs route-based code splitting |
+| Route module weight | `npx source-map-explorer dist/assets/index-*.js` + `scripts/analyze-bundle-modules.js` | 2025-11-18 — Content 128 KB, Home 96 KB, Audio 64 KB, Journey 58 KB, Projects 42 KB, Community 36 KB | Report: `reports/route-weight.html`; lazy-load Audio/Journey/Projects/Community |
+| Render complexity review | Static analysis of `src/pages/**` + component tree tracing | _pending_ | Document components with heavy props/state before optimization; no browser profiling |
+| Supabase query audit | Review `supabase/functions/**`, `supabase/migrations/**` | _pending_ | Code-based analysis of queries/index usage; note hotspots |
+| ESLint / TypeScript | `npm run lint`, `tsc --noEmit` | 2025-11-18 — ESLint 308 errors / 31 warnings; TSC 0 errors | Lint errors dominated by lucide rule + `any` usage |
 
 ---
 
 ## Phase 0 – Baseline & Guardrails
 
 ### [P0-01] Capture Initial Metrics
-- **Status:** `pending` **Owner:** unassigned **Dependencies:** none
+- **Status:** `in-progress` **Owner:** Baseline Task (2025-11-18) **Dependencies:** none
 - **Scope:** Run every command in the metrics table and record results above (include date, branch, env).
-- **Files/Areas:** `docs/optimization-plan.md` (metrics section), CI artifacts.
-- **Deliverables:** metrics table updated + raw reports attached to repo (or linked).
-- **Verification:** Orchestrator validates numbers + ensures follow-up thresholds documented.
+- **Progress:**
+  - ✓ Bundle build: 571 KB gzip (single chunk, no code-splitting)
+  - ✓ ESLint/TypeScript: 308 errors / 31 warnings; 0 TS errors
+  - ✓ Module analysis: Top 10 modules identified (~158 KB potential savings); HTML report saved to `reports/route-weight.html`
+  - ✓ Dependency audit: @radix-ui (38 KB), recharts (24 KB), lucide-react (24 KB), date-fns (19 KB), react-syntax-highlighter (14 KB)
+  - ⏳ Render complexity review (ContentPage + LearningCommandCenter trees)
+  - ⏳ Supabase query audit (functions + migrations)
+- **Files/Areas:** `docs/optimization-plan.md`, `docs/baseline-metrics-11-18-2025.md`, `reports/route-weight.html`, `scripts/analyze-bundle-modules.js`, `src/pages/**`, `supabase/functions/**`.
+- **Deliverables:** Metrics table updated + raw reports attached to repo (or linked).
+- **Verification:** Pending metrics collected + orchestrator validation; outstanding items moved to follow-up tickets if blocked.
 
 ### [P0-02] Lint & Type Health Sweep
 - **Status:** `in-progress` 
@@ -204,9 +211,9 @@ Use this template when adding new tasks so every agent receives consistent instr
 | **Total Bundle** | Combined gzip | 591.6 KB | ⚠️ High | < 420 KB |
 | **TypeScript** | Compilation errors | 0 | ✓ Clean | 0 (maintain) |
 | **ESLint** | Total issues | 308 errors, 31 warnings | ⚠️ High | <50 total |
-| **Lighthouse** | Pending | — | ⏳ Next | Performance >90 |
-| **Profiler** | Pending | — | ⏳ Next | Commits <16ms |
-| **Supabase logs** | Pending | — | ⏳ Next | Queries <100ms |
+| **Route module weight** | Content 128 KB, Home 96 KB, Audio 64 KB, Journey 58 KB, Projects 42 KB, Community 36 KB | ⚠️ High | Lazy-load non-core routes; see `reports/route-weight.html` |
+| **Render complexity** | Pending | — | ⏳ Next | document heavy trees |
+| **Supabase query audit** | Pending | — | ⏳ Next | flag expensive queries |
 
 ### Quick Wins Identified
 
@@ -217,10 +224,8 @@ Use this template when adding new tasks so every agent receives consistent instr
 
 ### Files Pending Analysis
 
-- React Profiler: `ContentPage.tsx`, `LearningCommandCenter/index.tsx`
-- Bundle visualization: `dist/` artifacts from build
-- Lighthouse reports: Home, Plan, Content routes (dev server dependent)
-- Supabase query analysis: pending logs tail session
+- Component complexity audit: `src/pages/ContentPage.tsx`, `LearningCommandCenter/index.tsx`, related children
+- Supabase query/code review: `supabase/functions/**`, migrations touching learning/content tables
 
 ### Detailed Metrics Report
 

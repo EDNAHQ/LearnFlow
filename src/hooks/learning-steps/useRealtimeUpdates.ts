@@ -19,6 +19,7 @@ export const useRealtimeUpdates = (
   // Track subscription status and intervals
   const subscriptionActive = useRef<boolean>(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const healthCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const generationCompleteRef = useRef<boolean>(false);
 
   // Store the fetch function in a ref to avoid dependency issues
@@ -27,27 +28,47 @@ export const useRealtimeUpdates = (
 
   // Check if generation is complete and stop polling if needed
   useEffect(() => {
-    if (!pathId) return;
+    if (!pathId || !totalSteps) return;
 
-    // Only mark as complete when ALL steps have content
-    if (totalSteps && totalSteps > 0 && generatedSteps >= totalSteps) {
+    if (generatedSteps >= totalSteps) {
       generationCompleteRef.current = true;
 
-      // Clear any existing poll interval
       if (pollIntervalRef.current) {
-        console.log("All content generation complete, stopping polling");
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
+
+      if (healthCheckIntervalRef.current) {
+        clearInterval(healthCheckIntervalRef.current);
+        healthCheckIntervalRef.current = null;
+      }
+    } else {
+      generationCompleteRef.current = false;
     }
   }, [generatedSteps, pathId, totalSteps]);
 
+  // Reset tracking whenever the path changes
   useEffect(() => {
-    if (!pathId || generationCompleteRef.current) return;
+    generationCompleteRef.current = false;
+
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+
+    if (healthCheckIntervalRef.current) {
+      clearInterval(healthCheckIntervalRef.current);
+      healthCheckIntervalRef.current = null;
+    }
+  }, [pathId]);
+
+  useEffect(() => {
+    if (!pathId) return;
 
     // Set up subscription to track generation progress
     try {
       const channel = supabase.channel(`steps-${pathId}`);
+      let subscriptionEstablished = false;
 
       const subscription = channel
         .on('postgres_changes',
@@ -58,8 +79,6 @@ export const useRealtimeUpdates = (
             filter: `path_id=eq.${pathId}`
           },
           (payload) => {
-            console.log('Step updated (realtime):', payload.new.id);
-
             // Throttle updates to prevent excessive re-renders
             const now = Date.now();
             if (now - lastUpdateRef.current < updateThrottleMs) {
@@ -71,25 +90,29 @@ export const useRealtimeUpdates = (
           }
         )
         .subscribe((status) => {
-          console.log(`Realtime subscription status: ${status}`);
           subscriptionActive.current = status === 'SUBSCRIBED';
+          subscriptionEstablished = status === 'SUBSCRIBED';
         });
 
-      console.log("Subscription to learning steps updates established");
-
-      // Aggressive polling while content is generating
-      pollIntervalRef.current = setInterval(() => {
-        if (!generationCompleteRef.current) {
-          fetchRef.current();
-        } else {
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
+      // Only use polling as a fallback if realtime subscription is not available
+      // Delay polling start to give realtime subscription time to establish
+      const pollStartTimeoutRef = setTimeout(() => {
+        if (!subscriptionEstablished && !generationCompleteRef.current) {
+          pollIntervalRef.current = setInterval(() => {
+            if (!generationCompleteRef.current) {
+              fetchRef.current();
+            } else {
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+            }
+          }, 3000);
         }
-      }, 2000); // Poll every 2 seconds for fast updates
+      }, 1000);
 
       return () => {
+        clearTimeout(pollStartTimeoutRef);
         channel.unsubscribe();
         subscriptionActive.current = false;
         if (pollIntervalRef.current) {
@@ -110,7 +133,7 @@ export const useRealtimeUpdates = (
               pollIntervalRef.current = null;
             }
           }
-        }, 2000);
+        }, 3000); // Fallback polling every 3 seconds
       }
 
       return () => {
@@ -121,4 +144,27 @@ export const useRealtimeUpdates = (
       };
     }
   }, [pathId]);
+
+  // Health-check polling to guarantee progress sync even if realtime misses updates
+  useEffect(() => {
+    if (!pathId || !totalSteps || totalSteps === 0) return;
+
+    if (healthCheckIntervalRef.current) {
+      clearInterval(healthCheckIntervalRef.current);
+      healthCheckIntervalRef.current = null;
+    }
+
+    healthCheckIntervalRef.current = setInterval(() => {
+      if (!generationCompleteRef.current) {
+        fetchRef.current();
+      }
+    }, 6000);
+
+    return () => {
+      if (healthCheckIntervalRef.current) {
+        clearInterval(healthCheckIntervalRef.current);
+        healthCheckIntervalRef.current = null;
+      }
+    };
+  }, [pathId, totalSteps]);
 };

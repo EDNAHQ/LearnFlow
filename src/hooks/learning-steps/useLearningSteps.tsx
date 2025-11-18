@@ -17,6 +17,7 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   
   // Track if we've already fetched steps
   const initialFetchComplete = useRef<boolean>(false);
+  const generatedStepsRef = useRef<number>(0);
 
   // Function to count how many steps have detailed content - memoize as it's called frequently
   const countGeneratedSteps = useCallback((stepsArray: LearningStepData[]) => {
@@ -27,36 +28,46 @@ export const useLearningSteps = (pathId: string | null, topic: string | null) =>
   const { fetchLearningSteps } = useFetchLearningSteps();
   const { markStepAsComplete } = useStepCompletion(setSteps);
 
-  // Create a stable version that doesn't depend on generatedSteps to avoid infinite loops
-  const fetchStepsRef = useRef<() => void>();
+  // Reset state when path changes to avoid carrying over previous progress
+  useEffect(() => {
+    setSteps([]);
+    setGeneratedSteps(0);
+    generatedStepsRef.current = 0;
+    setGeneratingContent(false);
+    setIsLoading(true);
+    initialFetchComplete.current = false;
+  }, [pathId]);
 
-  fetchStepsRef.current = useCallback(() => {
+  // Create a stable fetchSteps function - removed generatedSteps from dependencies
+  const fetchSteps = useCallback(() => {
     return fetchLearningSteps(
       pathId,
       countGeneratedSteps,
       setSteps,
       setGeneratedSteps,
       setGeneratingContent,
-      generatedSteps
+      generatedStepsRef.current
     );
-  }, [pathId, countGeneratedSteps, fetchLearningSteps, generatedSteps]);
+  }, [pathId, countGeneratedSteps, fetchLearningSteps]);
 
-  const fetchSteps = useCallback(() => {
-    return fetchStepsRef.current?.();
-  }, [pathId]);
+  // Keep the ref in sync with state to avoid dependency issues
+  useEffect(() => {
+    generatedStepsRef.current = generatedSteps;
+  }, [generatedSteps]);
 
   // Initial fetch
   useEffect(() => {
     if (!pathId) return;
     
-    // Fetch data immediately
-    fetchSteps();
+    const loadSteps = async () => {
+      await fetchSteps();
+      if (!initialFetchComplete.current) {
+        setIsLoading(false);
+        initialFetchComplete.current = true;
+      }
+    };
     
-    // Mark loading as complete after initial fetch
-    if (!initialFetchComplete.current) {
-      setIsLoading(false);
-      initialFetchComplete.current = true;
-    }
+    loadSteps();
   }, [pathId, fetchSteps]);
 
   // Set up realtime updates
