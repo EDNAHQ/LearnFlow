@@ -387,8 +387,8 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
           </p>
         </div>
 
-        {/* Content - More spacious with better padding */}
-        <div className="flex-1 px-8 py-6 overflow-y-auto">
+        {/* Content - No scroll for step 3 (content preferences) */}
+        <div className={`flex-1 ${currentStep === 3 ? 'px-6 py-4 overflow-hidden' : 'px-8 py-6 overflow-y-auto'}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -396,6 +396,7 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
+              className={currentStep === 3 ? 'h-full flex flex-col' : ''}
             >
               {renderStep()}
             </motion.div>
@@ -409,7 +410,7 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
         </div>
 
         {/* Footer - Fixed at bottom */}
-        <div className="px-8 py-5 border-t border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
+        <div className="px-8 py-4 border-t border-gray-200 flex justify-between items-center bg-gray-50 flex-shrink-0">
           <button
             onClick={handleBack}
             disabled={currentStep === 1 && topicHistory.length === 0}
@@ -422,21 +423,34 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
             Back
           </button>
           {currentStep === 3 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {profile && (
                 profile.default_content_style || 
                 profile.default_content_length || 
                 profile.default_content_complexity ||
                 profile.default_preferred_examples ||
                 profile.default_learning_approach
-              ) && (
-                <p className="text-xs font-medium text-brand-purple">
-                  Using your profile defaults
-                </p>
+              ) ? (
+                <button
+                  onClick={handlePreferencesSkip}
+                  className="px-4 py-2 text-sm font-medium text-brand-purple hover:bg-brand-purple/10 rounded-lg transition-colors"
+                >
+                  Use Defaults
+                </button>
+              ) : (
+                <button
+                  onClick={handlePreferencesSkip}
+                  className="px-4 py-2 text-xs font-light text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Skip
+                </button>
               )}
-              <p className="text-xs font-light text-gray-500">
-                Optional: Skip to use default settings
-              </p>
+              <button
+                onClick={handlePreferencesContinue}
+                className="px-6 py-2.5 text-sm font-medium text-white brand-gradient rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+              >
+                Continue
+              </button>
             </div>
           )}
         </div>

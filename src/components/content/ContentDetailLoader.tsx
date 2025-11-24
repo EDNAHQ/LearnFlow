@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
-import { generateStepContent } from "@/utils/learning";
+import { generateStepContentWithRetry } from "@/utils/learning/generateStepContentWithRetry";
 
 interface ContentDetailLoaderProps {
   stepId: string;
@@ -47,25 +47,34 @@ const ContentDetailLoader = ({
             ? content.split(":")[1]?.trim() || ""
             : content;
             
-          const generatedContent = await generateStepContent(
+          const generatedContent = await generateStepContentWithRetry(
             { id: stepId, title, description },
             topic,
             true // Add silent parameter to avoid UI updates
           );
           
-          if (typeof generatedContent === 'string') {
+          if (typeof generatedContent === 'string' && generatedContent.length > 0) {
             console.log("Content generated successfully");
             hasLoadedRef.current = true;
             onContentLoaded(generatedContent);
           } else {
-            console.error("Generated content is not a string:", generatedContent);
+            console.error("Generated content is invalid:", typeof generatedContent);
             hasLoadedRef.current = true;
             onContentLoaded("Content could not be loaded properly. Please try refreshing the page.");
           }
         } catch (error) {
-          console.error("Error loading content:", error);
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          console.error("Error loading content:", errorMessage);
           hasLoadedRef.current = true;
-          onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
+          
+          // Provide more helpful error message
+          if (errorMessage.includes("timed out")) {
+            onContentLoaded("Content generation timed out. Please try refreshing the page or contact support if this persists.");
+          } else if (errorMessage.includes("Failed to generate")) {
+            onContentLoaded("Content generation failed. Please try refreshing the page.");
+          } else {
+            onContentLoaded("An error occurred while loading content. Please try refreshing the page.");
+          }
         } finally {
           setIsLoading(false);
         }

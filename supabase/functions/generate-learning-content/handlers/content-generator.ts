@@ -101,61 +101,25 @@ export async function generateStepContent(
     // Build personalization context
     const personalizationContext = buildPersonalizationContext(userProfile, preferences);
     
-    // Build the improved prompt with contextual information
-    const prompt = `
-Create comprehensive educational content about "${title}" as part of a learning path on "${topic}".
+    // Simplified system message - just establish the role
+    const systemMessage = `You are an expert teacher with deep knowledge of ${topic}. You explain concepts clearly, use engaging examples, and make learning enjoyable. Write naturally and conversationally, as if teaching a curious student one-on-one.
 
-**Primary Focus:** "${title}"
-**Context:** "${description}"
-**Learning Level:** ${phase.toUpperCase()}
-${previousStepTitle ? `**Note:** The previous chapter covered "${previousStepTitle}" - avoid repeating that material.` : ''}
-${personalizationContext}
+NEVER include word counts, meta-commentary, or any notes about the content itself. Output ONLY pure educational content.`;
 
-**Your Task:**
-Write ${wordCount.min}-${wordCount.max} words of deep, focused educational content that thoroughly explores "${title}".
+    // Simplified prompt - just the essentials
+    const prompt = `Teach me about "${title}".
 
-**Phase-Appropriate Approach:**
-${progressContext[phase]}
+${description ? `Context: ${description}` : ''}
+${previousStepTitle ? `Note: We just covered "${previousStepTitle}" - build on that naturally.` : ''}
+${stepNumber && totalSteps ? `This is step ${stepNumber} of ${totalSteps}.` : ''}
 
-**Content Quality Standards:**
-1. **Laser-Focused** - Every paragraph should directly relate to "${title}", not just general information about "${topic}"
-2. **Comprehensive Coverage** - Dig deep into this specific subtopic. Cover the most important aspects thoroughly
-3. **Concrete Examples** - ${exampleGuidance}
-4. **Clarity and Depth** - ${depthGuidance}, but always prioritize understanding over brevity
-5. **Substantive Value** - Make every sentence count. No filler, no fluff
+Write ${wordCount.min}-${wordCount.max} words of engaging, clear content. Use examples, analogies, and real-world connections. Make it interesting to read.
 
-**What to Include:**
-- ${contentFocus}
-- Practical, relatable examples that illuminate the concepts
-- Clear explanations that build genuine understanding
-- The "why" behind concepts, not just the "what"
+CRITICAL: Do NOT include word counts, word count notes, or any meta-commentary. Write ONLY the educational content itself.
 
-**Writing Style:**
-- SHORT PARAGRAPHS (2-3 sentences maximum) for readability
-${preferences?.content_style === 'conversational' ? '- Use a friendly, conversational tone as if talking directly to the learner\n- Address them as "you" and make it personal' : preferences?.content_style === 'formal' ? '- Use a formal, academic writing style\n- Maintain professional tone throughout' : preferences?.content_style === 'technical' ? '- Focus on technical precision and terminology\n- Use precise technical language' : preferences?.content_style === 'storytelling' ? '- Use storytelling and narrative techniques\n- Create engaging narratives to explain concepts' : preferences?.content_style === 'practical' ? '- Emphasize practical, actionable advice\n- Focus on real-world application' : '- Clear, engaging, conversational educational tone'}
-- NO meta-references like "In this section," "This chapter," or "Part ${currentStepNumber}"
-- Start immediately with substantive content
-- Use frequent paragraph breaks to maintain engagement
-${userProfile ? `- Write as if explaining to ${userProfile.role || 'someone'} who is ${userProfile.experience_level || 'beginner'} level and wants to learn about this topic` : '- Write as if explaining to someone genuinely curious about this specific topic'}
-${userProfile?.goals_short_term ? `- Keep in mind their goal: "${userProfile.goals_short_term}" - make content relevant to achieving this` : ''}
+${personalizationContext ? `\n${personalizationContext}` : ''}
 
-**Quality Over Everything:**
-Focus entirely on making this the best possible explanation of "${title}". Don't worry about connecting to other steps - just make THIS content exceptional.
-
-**CRITICAL OUTPUT REQUIREMENTS:**
-- Output ONLY the educational content itself - no meta-commentary, no word counts, no notes about the content
-- Do NOT include phrases like "Word Count:", "This content is...", "In summary...", or any self-referential notes
-- Do NOT add headers like "### Word Count: 682" or similar metadata
-- Start immediately with the actual educational content
-- End with the last paragraph of content - no closing statements or meta-notes
-- The output should be pure educational content that can be displayed directly to learners
-`;
-
-    const systemMessage = `You are a master educator and expert content writer. You create deep, focused educational content that thoroughly explores specific topics. Your writing is clear, engaging, and substantive - you explain complex ideas in accessible ways while maintaining rigor. You use short paragraphs, concrete examples, and careful explanations. You avoid filler words, redundancy, and vague generalizations. You always complete your thoughts fully and deliver complete, polished content.
-
-CRITICAL: Output ONLY the educational content. Never include meta-commentary, word counts, notes about the content, or any self-referential statements. The content you generate will be displayed directly to learners - it must be pure educational material with no metadata or commentary about the content itself.
-${userProfile ? `You personalize your content to match the learner's background (${userProfile.role || 'general learner'}), experience level (${userProfile.experience_level || 'beginner'}), and goals. Make it feel like you're writing specifically for them.` : ''}
-${preferences ? `You adapt your writing style, length, and complexity based on the learner's preferences.` : ''}`;
+Start writing the content now:`;
 
     // Increased token limit to ensure complete responses for 600-700 words
     const data = await callOpenAI(prompt, systemMessage, undefined, 2000);

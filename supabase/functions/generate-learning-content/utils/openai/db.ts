@@ -29,7 +29,11 @@ export function cleanMetaCommentary(content: string): string {
   
   let cleaned = content;
   
-  // Remove word count patterns (e.g., "Word Count: 682", "### Word Count: 682")
+  // Remove word count patterns - catch ALL variations including parentheses
+  // Patterns: "Word Count: 682", "(Word count: 378)", "### Word Count: 682", etc.
+  cleaned = cleaned.replace(/\(?\s*Word\s+Count\s*:\s*\d+\s*\)?/gi, '');
+  cleaned = cleaned.replace(/\(?\s*word\s+count\s*:\s*\d+\s*\)?/gi, '');
+  cleaned = cleaned.replace(/\(?\s*WORD\s+COUNT\s*:\s*\d+\s*\)?/gi, '');
   cleaned = cleaned.replace(/^#{1,6}\s*Word\s+Count\s*:\s*\d+.*$/gmi, '');
   cleaned = cleaned.replace(/^Word\s+Count\s*:\s*\d+.*$/gmi, '');
   cleaned = cleaned.replace(/###\s*Word\s+Count.*$/gmi, '');

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useContentModeToggle } from "@/hooks/content/useContentModeToggle";
 import { useContentProgress } from "@/hooks/content/useContentProgress";
 import { ContentProgressIndicator } from "../navigation/ContentProgressIndicator";
+import AILoadingState from "@/components/ai/AILoadingState";
 
 interface ContentSectionCoreProps {
   loadedDetailedContent: string;
@@ -123,15 +124,17 @@ const ContentSectionCore = ({
 
   return (
     <div className="content-area-wrapper">
-      <ContentProgressIndicator
-        sections={sections}
-        completedSections={completedSections}
-        progressPercentage={progressPercentage}
-        onSectionClick={scrollToSection}
-      />
+      {activeModes.length === 0 && (
+        <ContentProgressIndicator
+          sections={sections}
+          completedSections={completedSections}
+          progressPercentage={progressPercentage}
+          onSectionClick={scrollToSection}
+        />
+      )}
       <div
         ref={contentRef}
-        className="content-area"
+        className="content-area relative"
       >
         {/* Learn-it-your-way toolbar at the top */}
         <LearningModesToolbar
@@ -141,6 +144,16 @@ const ContentSectionCore = ({
           onToggleMode={toggleMode}
           onReset={resetToDefault}
         />
+
+        {/* Loading overlay when transforming content */}
+        {isModeLoading && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+            <AILoadingState 
+              variant="animated" 
+              message="Transforming content for you..."
+            />
+          </div>
+        )}
 
         <SafeReactMarkdown 
           remarkPlugins={[remarkGfm]}

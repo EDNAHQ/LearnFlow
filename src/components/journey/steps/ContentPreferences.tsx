@@ -28,7 +28,6 @@ const ContentPreferences: React.FC<ContentPreferencesProps> = ({
   profileDefaults
 }) => {
   const { profile } = useUserLearningProfile();
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [autoDetected, setAutoDetected] = useState(false);
 
   // Auto-expand sections that have defaults selected
@@ -187,79 +186,37 @@ const ContentPreferences: React.FC<ContentPreferencesProps> = ({
     options: Array<{ value: string; label: string; description: string }>;
     currentValue?: string | null;
   }) => {
-    const isExpanded = expandedSection === sectionKey;
-    
     return (
-      <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-        <button
-          onClick={() => setExpandedSection(isExpanded ? null : sectionKey)}
-          className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-        >
-          <div className="text-left">
-            <h3 className="text-base font-medium text-gray-900">{title}</h3>
-            <p className="text-sm font-light text-gray-600 mt-1">{description}</p>
-            {currentValue && (
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-xs font-medium text-brand-purple">
-                  Selected: {options.find(o => o.value === currentValue)?.label}
-                </p>
-                {hasProfileDefaults && profileDefaults && profileDefaults[sectionKey as keyof ContentPreferencesData] === currentValue && (
-                  <span className="text-xs px-2 py-0.5 bg-brand-purple/10 text-brand-purple rounded-full font-medium">
-                    Default
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </motion.div>
-        </button>
-        
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="px-5 pb-4 border-t border-gray-100"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-              {options.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    updatePreference(sectionKey as keyof ContentPreferencesData, option.value as any);
-                    setExpandedSection(null);
-                  }}
-                  className={`p-3 rounded-lg border-2 text-left transition-all relative ${
-                    currentValue === option.value
-                      ? 'border-brand-purple bg-brand-purple/5'
-                      : hasProfileDefaults && profileDefaults && profileDefaults[sectionKey as keyof ContentPreferencesData] === option.value
-                      ? 'border-brand-purple/30 bg-brand-purple/5 hover:border-brand-purple/50'
-                      : 'border-gray-200 hover:border-brand-purple/50 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="font-medium text-sm text-gray-900">{option.label}</div>
-                      <div className="text-xs font-light text-gray-600 mt-1">{option.description}</div>
-                    </div>
-                    {hasProfileDefaults && profileDefaults && profileDefaults[sectionKey as keyof ContentPreferencesData] === option.value && (
-                      <span className="ml-2 text-xs px-2 py-0.5 bg-brand-purple/20 text-brand-purple rounded-full font-medium flex-shrink-0">
-                        Your Default
-                      </span>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+      <div className="space-y-1.5">
+        <div>
+          <h3 className="text-xs font-medium text-gray-900">{title}</h3>
+          <p className="text-[10px] font-light text-gray-600">{description}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                updatePreference(sectionKey as keyof ContentPreferencesData, option.value as any);
+              }}
+              className={`p-2 rounded-lg border-2 text-left transition-all relative ${
+                currentValue === option.value
+                  ? 'border-brand-purple bg-brand-purple/5'
+                  : hasProfileDefaults && profileDefaults && profileDefaults[sectionKey as keyof ContentPreferencesData] === option.value
+                  ? 'border-brand-purple/30 bg-brand-purple/5 hover:border-brand-purple/50'
+                  : 'border-gray-200 hover:border-brand-purple/50 hover:bg-gray-50'
+              }`}
+            >
+              <div className="font-medium text-xs text-gray-900 mb-0.5 leading-tight">{option.label}</div>
+              <div className="text-[10px] font-light text-gray-600 leading-tight line-clamp-2">{option.description}</div>
+              {hasProfileDefaults && profileDefaults && profileDefaults[sectionKey as keyof ContentPreferencesData] === option.value && (
+                <span className="absolute top-0.5 right-0.5 text-[8px] px-1 py-0.5 bg-brand-purple/20 text-brand-purple rounded-full font-medium">
+                  D
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
     );
   };
@@ -268,37 +225,24 @@ const ContentPreferences: React.FC<ContentPreferencesProps> = ({
   const hasEnoughData = profile && profile.totalLearningTimeMinutes >= 30 && profile.avgSuccessRate > 0;
 
   return (
-    <div className="space-y-6">
-      {hasProfileDefaults && (
+    <div className="space-y-2 h-full flex flex-col">
+      {/* Compact banner */}
+      {(hasProfileDefaults || (hasEnoughData && autoDetectPreferences)) && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 bg-gradient-to-r from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 rounded-xl border border-brand-purple/20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="p-2 bg-gradient-to-r from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 rounded-lg border border-brand-purple/20 flex-shrink-0"
         >
-          <p className="text-sm font-medium text-brand-black">
-            Your profile defaults are pre-selected below.
-          </p>
-          <p className="text-xs font-light text-brand-black/60 mt-1">
-            You can adjust them for this project or continue with your defaults.
-          </p>
-        </motion.div>
-      )}
-      {!hasProfileDefaults && hasEnoughData && autoDetectPreferences && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 bg-gradient-to-r from-brand-purple/10 via-brand-pink/10 to-brand-gold/10 rounded-xl border border-brand-purple/20"
-        >
-          <p className="text-sm font-medium text-brand-black">
-            We've automatically personalized your preferences based on your learning patterns.
-          </p>
-          <p className="text-xs font-light text-brand-black/60 mt-1">
-            You can adjust these below if needed.
+          <p className="text-xs font-medium text-brand-black leading-tight">
+            {hasProfileDefaults 
+              ? "Your profile defaults are pre-selected. Adjust below or continue with defaults."
+              : "Preferences personalized based on your learning patterns. Adjust if needed."}
           </p>
         </motion.div>
       )}
 
-      <div className="space-y-4 max-w-4xl mx-auto">
+      {/* Compact preferences grid */}
+      <div className="flex-1 min-h-0 space-y-2">
         <PreferenceSection
           title="Writing Style"
           description="How should the content be written?"
@@ -338,40 +282,6 @@ const ContentPreferences: React.FC<ContentPreferencesProps> = ({
           options={approachOptions}
           currentValue={preferences.learning_approach}
         />
-      </div>
-
-      <div className="flex flex-col gap-4 pt-6 max-w-2xl mx-auto">
-        {hasProfileDefaults && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            onClick={onSkip}
-            className="w-full px-8 py-4 text-base font-medium text-white brand-gradient rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Use Your Defaults
-          </motion.button>
-        )}
-        <div className="flex gap-4 justify-center">
-          {!hasProfileDefaults && (
-            <button
-              onClick={onSkip}
-              className="px-6 py-2.5 text-sm font-light text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Use Defaults
-            </button>
-          )}
-          <button
-            onClick={onContinue}
-            className={`px-8 py-2.5 text-sm font-medium text-white brand-gradient rounded-lg hover:opacity-90 transition-opacity shadow-sm ${
-              hasProfileDefaults ? 'flex-1' : ''
-            }`}
-          >
-            {hasAnyPreference ? 'Continue with Preferences' : 'Continue with Defaults'}
-          </button>
-        </div>
       </div>
     </div>
   );

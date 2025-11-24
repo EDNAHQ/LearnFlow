@@ -125,14 +125,14 @@ export const useContentModeToggle = ({
   }, [originalContent, topic, title, getSelection, getCacheKey, contentCache, stepId]);
 
   const toggleMode = useCallback(async (mode: Mode) => {
-    const isActive = activeModes.includes(mode);
+    const isActive = activeModes[0] === mode;
     
     if (isActive) {
-      // Remove mode
-      setActiveModes(prev => prev.filter(m => m !== mode));
+      // Deselect mode - reset to default
+      setActiveModes([]);
     } else {
-      // Add mode and fetch content if not cached
-      setActiveModes(prev => [...prev, mode]);
+      // Select this mode (replacing any existing selection)
+      setActiveModes([mode]);
       
       const cacheKey = getCacheKey(mode);
       if (!contentCache[cacheKey]) {
@@ -140,7 +140,7 @@ export const useContentModeToggle = ({
           await fetchTransformedContent(mode);
         } catch (e) {
           // Error already set in state
-          setActiveModes(prev => prev.filter(m => m !== mode));
+          setActiveModes([]);
         }
       }
     }
@@ -150,16 +150,15 @@ export const useContentModeToggle = ({
     setActiveModes([]);
   }, []);
 
-  // Compute final content based on active modes
+  // Compute final content based on active mode
   const transformedContent = useMemo(() => {
     if (activeModes.length === 0) {
       return originalContent;
     }
 
-    // If multiple modes active, combine them (for now, use the last one)
-    // TODO: Could implement mode combination logic here
-    const lastMode = activeModes[activeModes.length - 1];
-    const cacheKey = getCacheKey(lastMode);
+    // Only one mode can be active at a time now
+    const activeMode = activeModes[0];
+    const cacheKey = getCacheKey(activeMode);
     return contentCache[cacheKey] || originalContent;
   }, [activeModes, contentCache, originalContent, getCacheKey]);
 

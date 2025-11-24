@@ -146,8 +146,21 @@ export const useRealtimeUpdates = (
   }, [pathId]);
 
   // Health-check polling to guarantee progress sync even if realtime misses updates
+  // Also tracks generation start time to detect stuck generations
+  const generationStartTimeRef = useRef<number | null>(null);
+  
   useEffect(() => {
     if (!pathId || !totalSteps || totalSteps === 0) return;
+
+    // Track when generation starts
+    if (generatedSteps === 0 && totalSteps > 0) {
+      generationStartTimeRef.current = Date.now();
+    }
+
+    // Reset start time if generation completes
+    if (generatedSteps >= totalSteps) {
+      generationStartTimeRef.current = null;
+    }
 
     if (healthCheckIntervalRef.current) {
       clearInterval(healthCheckIntervalRef.current);
@@ -156,6 +169,20 @@ export const useRealtimeUpdates = (
 
     healthCheckIntervalRef.current = setInterval(() => {
       if (!generationCompleteRef.current) {
+        // Check if generation has been stuck for more than 5 minutes
+        if (generationStartTimeRef.current) {
+          const elapsed = Date.now() - generationStartTimeRef.current;
+          const stuckThreshold = 5 * 60 * 1000; // 5 minutes
+          
+          if (elapsed > stuckThreshold) {
+            console.warn(
+              `Content generation appears stuck: ${generatedSteps}/${totalSteps} steps completed after ${Math.round(elapsed / 1000)}s`
+            );
+            // Force a refresh to check for any missed updates
+            fetchRef.current();
+          }
+        }
+        
         fetchRef.current();
       }
     }, 6000);
@@ -166,5 +193,5 @@ export const useRealtimeUpdates = (
         healthCheckIntervalRef.current = null;
       }
     };
-  }, [pathId, totalSteps]);
+  }, [pathId, totalSteps, generatedSteps]);
 };

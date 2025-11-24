@@ -112,16 +112,31 @@ export class AIClient {
       });
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.openrouterApiKey}`,
-        'HTTP-Referer': SITE_CONFIG.url,
-        'X-Title': SITE_CONFIG.name,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    // Add timeout to fetch call using AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+    let response: Response;
+    try {
+      response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.openrouterApiKey}`,
+          'HTTP-Referer': SITE_CONFIG.url,
+          'X-Title': SITE_CONFIG.name,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('OpenRouter API request timed out after 60 seconds');
+      }
+      throw error;
+    }
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -191,7 +206,15 @@ export class AIClient {
       });
     }
 
-    const completion = await this.openaiClient.chat.completions.create(requestParams);
+    // Add timeout wrapper for OpenAI direct call
+    const completionPromise = this.openaiClient.chat.completions.create(requestParams);
+    
+    // Create timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('OpenAI API request timed out after 60 seconds')), 60000);
+    });
+    
+    const completion = await Promise.race([completionPromise, timeoutPromise]);
 
     if (!completion.choices || !completion.choices[0] || !completion.choices[0].message) {
       throw new Error('Invalid response from OpenAI');

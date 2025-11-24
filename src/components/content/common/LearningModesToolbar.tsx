@@ -61,34 +61,24 @@ export default function LearningModesToolbar({
   return (
     <div className="mb-6 pb-4 border-b border-gray-200">
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Learn it your way:</span>
-          {activeModes.length > 0 && (
-            <button
-              onClick={onReset}
-              className="text-xs text-brand-purple hover:text-brand-pink underline transition-colors"
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Learn it your way:</span>
+            <ToggleGroup
+              type="single"
+              value={activeModes[0] || ""}
+              onValueChange={(value) => {
+                if (value) {
+                  // Selecting a mode (or switching to a different one)
+                  const mode = value as Mode;
+                  onToggleMode(mode);
+                } else {
+                  // Deselecting (value is empty string) - reset to default
+                  onReset();
+                }
+              }}
+              className="flex flex-wrap gap-2"
             >
-              Reset to default
-            </button>
-          )}
-        </div>
-        <ToggleGroup
-          type="multiple"
-          value={activeModes}
-          onValueChange={(values) => {
-            const newModes = values as Mode[];
-            // Find which mode was toggled
-            const added = newModes.find(m => !activeModes.includes(m));
-            const removed = activeModes.find(m => !newModes.includes(m));
-            
-            if (added) {
-              onToggleMode(added);
-            } else if (removed) {
-              onToggleMode(removed);
-            }
-          }}
-          className="flex flex-wrap gap-2"
-        >
           {buttons.map(b => {
             const Icon = b.icon;
             const isLoading = isLoadingMode(b.key);
@@ -101,8 +91,10 @@ export default function LearningModesToolbar({
                   value={b.key}
                   aria-label={b.label}
                   className={cn(
-                    "gap-2 border-gray-300 hover:border-brand-purple hover:text-brand-purple hover:bg-brand-purple/5 transition-colors",
-                    isActive && "border-brand-purple text-brand-purple bg-brand-purple/10 data-[state=on]:bg-brand-purple/10",
+                    "gap-2 border-2 transition-all font-medium",
+                    isActive 
+                      ? "border-brand-purple text-white bg-brand-purple shadow-md scale-105" 
+                      : "border-gray-300 text-gray-700 bg-white hover:border-brand-purple/50 hover:text-brand-purple hover:bg-brand-purple/5",
                     isLoading && "opacity-60 cursor-wait"
                   )}
                   disabled={isLoading}
@@ -123,7 +115,17 @@ export default function LearningModesToolbar({
               </div>
             );
           })}
-        </ToggleGroup>
+            </ToggleGroup>
+          </div>
+          {activeModes.length > 0 && (
+            <button
+              onClick={onReset}
+              className="text-xs text-brand-purple hover:text-brand-pink underline transition-colors whitespace-nowrap"
+            >
+              Reset to default
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

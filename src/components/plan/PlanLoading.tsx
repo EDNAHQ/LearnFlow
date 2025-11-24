@@ -1,73 +1,114 @@
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
 
 const PlanLoading = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6">
-      {/* Animated loader */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="mb-8"
-      >
-        <div className="relative">
-          {/* Outer glow ring */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-24 h-24 rounded-full border-4 border-transparent border-t-brand-purple border-r-brand-pink"
-          />
-          {/* Inner spinning ring */}
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 w-24 h-24 rounded-full border-4 border-transparent border-b-brand-gold border-l-brand-purple"
-          />
-          {/* Center icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-brand-purple animate-spin" />
-          </div>
-        </div>
-      </motion.div>
+    <div className="flex flex-col items-center justify-center h-full px-6 relative">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.03, 0.06, 0.03],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-brand-purple to-brand-pink rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.03, 0.06, 0.03],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+          className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-br from-brand-pink to-brand-gold rounded-full blur-3xl"
+        />
+      </div>
 
-      {/* Loading text */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.6 }}
-        className="text-center"
-      >
-        <p className="text-2xl sm:text-3xl font-light text-brand-black mb-3">
-          Crafting your personalized learning journey...
-        </p>
-        <p className="text-base sm:text-lg font-light text-brand-black/60">
-          This may take up to 30 seconds
-        </p>
-      </motion.div>
-
-      {/* Progress dots */}
+      {/* Main content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="flex gap-2 mt-8"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative z-10 flex flex-col items-center"
       >
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
+        {/* Animated LearnFlow logo */}
+        <motion.div
+          className="mb-6 sm:mb-8 flex flex-col items-center"
+          animate={{
+            scale: [1, 1.05, 1],
+            opacity: [0.7, 1, 0.7]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <span className="text-4xl sm:text-5xl md:text-6xl font-black bg-gradient-to-r from-[#6654f5] via-[#ca5a8b] to-[#f2b347] bg-clip-text text-transparent tracking-tight leading-tight pb-1">
+            LearnFlow
+          </span>
+          <motion.span
+            className="text-xs font-semibold text-gray-400 tracking-wide uppercase mt-2"
             animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.5, 1, 0.5],
+              opacity: [0.4, 0.7, 0.4]
             }}
             transition={{
-              duration: 1.5,
+              duration: 2,
               repeat: Infinity,
-              delay: i * 0.2,
+              ease: "easeInOut",
+              delay: 0.3
             }}
-            className="w-3 h-3 rounded-full brand-gradient"
-          />
-        ))}
+          >
+            by Enterprise DNA
+          </motion.span>
+        </motion.div>
+
+        {/* Loading message */}
+        <motion.p
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="text-lg sm:text-xl md:text-2xl font-medium text-brand-black text-center mb-2 px-4"
+        >
+          Crafting your personalized learning journey...
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="text-sm sm:text-base text-gray-600 text-center mb-6 px-4"
+        >
+          This may take up to 30 seconds
+        </motion.p>
+
+        {/* Animated dots loader */}
+        <div className="flex items-center gap-2">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{
+                y: [0, -8, 0],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.1
+              }}
+              className="w-3 h-3 bg-gradient-to-r from-brand-purple to-brand-pink rounded-full"
+            />
+          ))}
+        </div>
       </motion.div>
     </div>
   );

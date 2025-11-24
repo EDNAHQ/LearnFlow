@@ -3,9 +3,11 @@ import PlanLoading from "@/components/plan/PlanLoading";
 import PlanAuthError from "@/components/plan/PlanAuthError";
 import PlanStepsList from "@/components/plan/PlanStepsList";
 import PlanActionButtons from "@/components/plan/PlanActionButtons";
+import StepDetailModal from "@/components/plan/StepDetailModal";
 import { usePlanPage } from "@/hooks/projects";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import PlanImmersiveLayout from "@/components/plan/layout/PlanImmersiveLayout";
+import { Step } from "@/components/learning/LearningStep";
 
 const PlanPage = () => {
   const {
@@ -22,6 +24,8 @@ const PlanPage = () => {
     handleLogin,
     handleDeletePlan
   } = usePlanPage();
+
+  const [selectedStepDetail, setSelectedStepDetail] = useState<{ step: Step; index: number } | null>(null);
 
   // Debug logging to help trace pathId issues
   useEffect(() => {
@@ -65,13 +69,19 @@ const PlanPage = () => {
           ) : authError ? (
             <PlanAuthError handleLogin={handleLogin} />
           ) : (
-            <div className="w-full h-full flex flex-col px-2 sm:px-4 lg:px-6">
-              {/* Steps grid - Takes most space */}
-              <div className="flex-1 flex items-center justify-center min-h-0 py-2">
+            <div className="w-full h-full flex flex-col md:px-2 lg:px-4 xl:px-6">
+              {/* Steps grid - Scrollable on mobile, centered on desktop */}
+              <div className="flex-1 flex items-start md:items-center justify-center min-h-0 py-2 md:py-2 overflow-y-auto md:overflow-hidden">
                 <PlanStepsList
                   steps={steps}
                   activeStep={activeStep}
-                  setActiveStep={setActiveStep}
+                  setActiveStep={(index) => {
+                    setActiveStep(index);
+                    // Open detail modal when clicking a step
+                    if (steps[index]) {
+                      setSelectedStepDetail({ step: steps[index], index });
+                    }
+                  }}
                 />
               </div>
               
@@ -83,6 +93,14 @@ const PlanPage = () => {
             </div>
           )}
         </div>
+
+        {/* Step Detail Modal */}
+        <StepDetailModal
+          step={selectedStepDetail?.step || null}
+          index={selectedStepDetail?.index ?? null}
+          isOpen={selectedStepDetail !== null}
+          onClose={() => setSelectedStepDetail(null)}
+        />
       </div>
     </PlanImmersiveLayout>
   );

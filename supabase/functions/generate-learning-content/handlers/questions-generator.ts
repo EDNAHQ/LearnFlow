@@ -12,48 +12,12 @@ export async function generateQuestions(content: string, topic: string, title: s
   console.log(`Generating questions for topic: ${topic}, title: ${title}`);
   
   // Generate related questions using OpenAI
-  const prompt = `
-  You are an expert educator helping students explore a topic in more depth.
-  
-  Below is content about "${topic}" with the title "${title}".
-  
-  CONTENT:
-  ${content.substring(0, 4000)}
-  
-  Based on this specific content, generate exactly 5 thought-provoking questions that would help a learner explore this topic more deeply.
-  
-  Requirements for the questions:
-  1. Each question should address an important concept or idea from THIS SPECIFIC content
-  2. Questions should encourage critical thinking, not just recall facts
-  3. Questions should be concise but specific (15-30 words each)
-  4. Each question should explore a different aspect of the content
-  5. Make sure questions end with a question mark
-  6. Questions must be DIRECTLY related to the content provided, not generic questions about the topic
-  
-  YOUR RESPONSE MUST BE VALID JSON with this exact structure:
-  {
-    "questions": [
-      "First question related to the content?",
-      "Second question related to the content?",
-      "Third question related to the content?",
-      "Fourth question related to the content?",
-      "Fifth question related to the content?"
-    ]
-  }
-  
-  Ensure you format this as valid JSON with no trailing commas. The response must be parseable by JSON.parse().
-  Do not include any text outside of this JSON structure.
-  `;
+  const prompt = `Topic: "${topic}"\nTitle: "${title}"\n\nContent:\n${content.substring(0, 4000)}\n\nGenerate 5 questions (15-30 words each) that explore key concepts from this content. Return JSON: {"questions": ["question 1?", "question 2?", ...]}`;
 
   console.log(`Calling OpenAI API to generate related questions for: ${title}`);
   
   try {
-    const systemMessage = `You are an expert educator creating thoughtful questions to explore topics in depth based on specific content. 
-    
-    YOU MUST RETURN VALID JSON WITHOUT TRAILING COMMAS OR OTHER SYNTAX ERRORS. 
-    
-    Do not include markdown formatting, code blocks, or any text outside the JSON object. 
-    The response must be parseable by JSON.parse().`;
+    const systemMessage = `Generate 5 thought-provoking questions based on the content. Return valid JSON only: {"questions": ["question?", ...]}`;
     
     const data = await callOpenAI(prompt, systemMessage, "json_object");
     
