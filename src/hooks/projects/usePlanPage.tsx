@@ -86,7 +86,13 @@ export const usePlanPage = () => {
       return;
     }
 
+    if (steps.length === 0) {
+      console.error("No steps found in the plan. Please try again.");
+      return;
+    }
+
     try {
+      // First, update the learning path to mark it as approved
       const { error } = await supabase
         .from('learning_paths')
         .update({ is_approved: true })
@@ -97,11 +103,19 @@ export const usePlanPage = () => {
         return;
       }
 
+      // Store the path info in session storage for the content page
       sessionStorage.setItem("learning-path-id", pathId);
 
       console.log(`Starting content generation for ${steps.length} steps`);
-      startBackgroundContentGeneration(steps, topic, pathId);
 
+      // Start background generation (fire-and-forget pattern is intentional)
+      // ContentPage will monitor progress via useLearningSteps hook
+      startBackgroundContentGeneration(steps, topic, pathId).catch((err) => {
+        // Log any errors but don't block navigation - ContentPage handles retry
+        console.error("Background generation error:", err);
+      });
+
+      // Navigate to content page which will show loading state while content generates
       navigate(`/content/${pathId}`);
     } catch (error) {
       console.error("Error in handleApprove:", error);

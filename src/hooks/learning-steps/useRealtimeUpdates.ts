@@ -148,19 +148,27 @@ export const useRealtimeUpdates = (
   // Health-check polling to guarantee progress sync even if realtime misses updates
   // Also tracks generation start time to detect stuck generations
   const generationStartTimeRef = useRef<number | null>(null);
-  
-  useEffect(() => {
-    if (!pathId || !totalSteps || totalSteps === 0) return;
 
+  // Store generatedSteps in a ref to avoid dependency issues in the health check effect
+  const generatedStepsRef = useRef(generatedSteps);
+  generatedStepsRef.current = generatedSteps;
+
+  // Track generation start/complete separately to avoid constant interval recreation
+  useEffect(() => {
     // Track when generation starts
-    if (generatedSteps === 0 && totalSteps > 0) {
+    if (generatedSteps === 0 && totalSteps && totalSteps > 0) {
       generationStartTimeRef.current = Date.now();
     }
 
     // Reset start time if generation completes
-    if (generatedSteps >= totalSteps) {
+    if (totalSteps && generatedSteps >= totalSteps) {
       generationStartTimeRef.current = null;
     }
+  }, [generatedSteps, totalSteps]);
+
+  // Set up health check interval once per pathId/totalSteps - NOT dependent on generatedSteps
+  useEffect(() => {
+    if (!pathId || !totalSteps || totalSteps === 0) return;
 
     if (healthCheckIntervalRef.current) {
       clearInterval(healthCheckIntervalRef.current);
@@ -173,16 +181,16 @@ export const useRealtimeUpdates = (
         if (generationStartTimeRef.current) {
           const elapsed = Date.now() - generationStartTimeRef.current;
           const stuckThreshold = 5 * 60 * 1000; // 5 minutes
-          
+
           if (elapsed > stuckThreshold) {
             console.warn(
-              `Content generation appears stuck: ${generatedSteps}/${totalSteps} steps completed after ${Math.round(elapsed / 1000)}s`
+              `Content generation appears stuck: ${generatedStepsRef.current}/${totalSteps} steps completed after ${Math.round(elapsed / 1000)}s`
             );
             // Force a refresh to check for any missed updates
             fetchRef.current();
           }
         }
-        
+
         fetchRef.current();
       }
     }, 6000);
@@ -193,5 +201,5 @@ export const useRealtimeUpdates = (
         healthCheckIntervalRef.current = null;
       }
     };
-  }, [pathId, totalSteps, generatedSteps]);
+  }, [pathId, totalSteps]); // Removed generatedSteps - using ref instead to prevent interval recreation
 };

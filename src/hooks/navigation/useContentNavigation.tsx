@@ -64,7 +64,8 @@ export const useContentNavigation = () => {
       setHasRedirected(true);
       navigateToStep(0);
     }
-  }, [generatingContent, generatedSteps, steps.length, pathId, hasRedirected, stepIndex, initialLoading, navigateToStep]);
+    // Note: generatedSteps removed from deps to prevent cascading re-runs - we only care about generatingContent state
+  }, [generatingContent, steps.length, pathId, hasRedirected, stepIndex, initialLoading, navigateToStep]);
 
   // Wrap markStepAsComplete to pass it to the step navigation hook
   const handleMarkCompleteWithStep = async () => {
