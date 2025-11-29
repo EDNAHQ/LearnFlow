@@ -38,7 +38,8 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
     }
   }, [updateThreshold]);
 
-  // Add a timeout to eventually disable initial loading after 10 seconds
+  // Add a timeout to eventually disable initial loading after 30 seconds
+  // This gives edge functions enough time to start generating content
   useEffect(() => {
     if (initialLoading) {
       const timer = setTimeout(() => {
@@ -46,8 +47,8 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
           console.log("Loading timeout reached, ending loading state despite incomplete generation");
           setInitialLoading(false);
         }
-      }, 10000); // 10 second timeout
-      
+      }, 30000); // 30 second timeout to accommodate edge function startup time
+
       return () => clearTimeout(timer);
     }
   }, [initialLoading, steps.length, generatedSteps]);

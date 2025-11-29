@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useContentMode } from "@/hooks/content";
 import { useContentNavigation } from "@/hooks/navigation";
 import { useLearningSession } from "@/hooks/analytics/useLearningSession";
@@ -39,7 +39,6 @@ const ContentPage = () => {
   const { logProgress, markComplete } = useProgressTracking();
   const contentViewStartTime = useRef<Date | null>(null);
 
-  const navigate = useNavigate();
   const {
     setMode
   } = useContentMode();
@@ -58,9 +57,6 @@ const ContentPage = () => {
     generatedSteps,
     navigateToStep
   } = useContentNavigation();
-
-  // Track if we've already redirected to avoid loops
-  const [hasRedirected, setHasRedirected] = useState(false);
 
   // Centralized modal state for Explore Further
   const [exploreFurtherModal, setExploreFurtherModal] = useState({
@@ -166,24 +162,7 @@ const ContentPage = () => {
     setMode("text");
   }, [setMode]);
 
-  // Handle generation complete redirect - only redirect if we're not on a step page
-  useEffect(() => {
-    const generationComplete = (!isLoading && !generatingContent) || (generatedSteps === steps.length && steps.length > 0);
-    if (!hasRedirected && generationComplete && pathId && steps.length > 0 && !stepIndex) {
-      setHasRedirected(true);
-      navigate(`/content/${pathId}/step/0`);
-    }
-  }, [
-    generatingContent, 
-    generatedSteps, 
-    steps.length, 
-    pathId, 
-    navigate, 
-    hasRedirected, 
-    stepIndex, 
-    isLoading
-  ]);
-
+  // Note: Redirect logic is handled in useContentNavigation hook to avoid duplicate redirects
 
   // Show loading screen ONLY on the path-level route (no stepIndex)
   if ((isLoading || generatingContent) && !stepIndex) {
