@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/auth";
 import { MainNav } from "@/components/navigation";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -65,22 +65,19 @@ const HomePage = () => {
       <MainNav />
       <main className="flex-1">
         <HeroSection onStartLearning={handleStartLearning} />
-        <AnimatePresence>
-          {shouldShowPersonalization && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, staggerChildren: 0.1 }}
-            >
-              <LearningDNA />
-              <PromptInsights />
-              <SkillGaps />
-              <AdaptiveDifficulty />
-              <PredictiveRecommendations />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {shouldShowPersonalization && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <LearningDNA />
+            <PromptInsights />
+            <SkillGaps />
+            <AdaptiveDifficulty />
+            <PredictiveRecommendations />
+          </motion.div>
+        )}
         <FeaturedPathsSection />
         <FeaturesSection />
         <HowItWorksSection />
@@ -102,18 +99,15 @@ const HomePage = () => {
       )}
 
       {/* Floating New Project Button */}
-      <AnimatePresence>
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-          >
-            <FloatingNewProjectButton onClick={handleStartLearning} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {user && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <FloatingNewProjectButton onClick={handleStartLearning} />
+        </motion.div>
+      )}
 
       {/* Personalization Marketing Banner */}
       <PersonalizationMarketingBanner onStartLearning={handleStartLearning} />
