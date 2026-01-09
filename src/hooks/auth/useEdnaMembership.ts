@@ -67,6 +67,35 @@ export const useEdnaMembership = () => {
       return;
     }
 
+    // Ensure SSO loading screen is visible (reinforces the index.html script)
+    const showSSOLoadingScreen = () => {
+      // Check if loading screen already exists
+      if (document.getElementById("sso-loading-screen")) {
+        return;
+      }
+
+      // Create loading screen overlay
+      const loadingScreen = document.createElement("div");
+      loadingScreen.id = "sso-loading-screen";
+      loadingScreen.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: white; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999999;">
+          <div style="animation: sso-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
+            <img src="/EDNA Logo.png" alt="EDNA" style="width: 128px; height: 128px; object-fit: contain;" />
+          </div>
+        </div>
+        <style>
+          @keyframes sso-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+        </style>
+      `;
+      document.body.appendChild(loadingScreen);
+    };
+
+    // Show loading screen immediately
+    showSSOLoadingScreen();
+
     try {
       const { data, error } = await supabase.functions.invoke("sso-login", {
         body: {
@@ -77,6 +106,11 @@ export const useEdnaMembership = () => {
 
       if (error) {
         console.error("SSO login error:", error);
+        // Remove loading screen on error
+        const loadingScreen = document.getElementById("sso-loading-screen");
+        if (loadingScreen) {
+          loadingScreen.remove();
+        }
         return;
       }
 
@@ -85,6 +119,11 @@ export const useEdnaMembership = () => {
       }
     } catch (error) {
       console.error("Auto SSO processing error:", error);
+      // Remove loading screen on error
+      const loadingScreen = document.getElementById("sso-loading-screen");
+      if (loadingScreen) {
+        loadingScreen.remove();
+      }
     }
   }, []);
 
