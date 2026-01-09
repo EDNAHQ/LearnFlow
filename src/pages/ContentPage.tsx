@@ -181,7 +181,7 @@ const ContentPage = () => {
   }
   
   // Wrap completion handler to track progress
-  const handleCompleteWithTracking = async () => {
+  const handleComplete = async () => {
     if (currentStepData?.id && pathId && contentViewStartTime.current) {
       const completionTime = Math.floor(
         (new Date().getTime() - contentViewStartTime.current.getTime()) / 1000
@@ -227,8 +227,6 @@ const ContentPage = () => {
       await handleMarkComplete();
     }
   };
-
-  const handleComplete = handleCompleteWithTracking;
 
   // Ensure content is a string
   const safeContent = typeof currentStepData?.content === 'string' ? currentStepData.content : currentStepData?.content ? JSON.stringify(currentStepData.content) : "No content available";

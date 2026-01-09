@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/auth';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
@@ -14,7 +14,7 @@ export const useUserProfile = () => {
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch user profile
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) {
       setProfile(null);
       setLoading(false);
@@ -53,7 +53,7 @@ export const useUserProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   // Update user profile
   const updateProfile = async (updates: UserProfileUpdate) => {
@@ -80,7 +80,7 @@ export const useUserProfile = () => {
   // Load profile on mount or user change
   useEffect(() => {
     fetchProfile();
-  }, [user?.id]);
+  }, [fetchProfile]);
 
   return {
     profile,

@@ -10,7 +10,7 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
   
   // Track last update time to throttle updates
   const lastUpdateTime = useRef<number>(Date.now());
-  const updateThreshold = 2000; // Only update every 2 seconds
+  const UPDATE_THRESHOLD_MS = 2000; // Only update every 2 seconds
 
   // Removed background fan-out. Content is generated per-step on first view.
   useEffect(() => {
@@ -23,20 +23,28 @@ export function useContentGeneration(steps: any[], pathId: string | null, topic:
   // Update generation status when background process progresses
   const updateGenerationStatus = useCallback((bgGenerating: boolean, bgGenerated: number, stepsLength: number, hasStepId: boolean) => {
     const now = Date.now();
-    if (now - lastUpdateTime.current > updateThreshold) {
-      lastUpdateTime.current = now;
-      
+    const isGenerationComplete = !bgGenerating && stepsLength > 0 && bgGenerated >= stepsLength;
+
+    // Always update immediately when generation completes to avoid stale notifications
+    // For in-progress updates, throttle to prevent excessive re-renders
+    const shouldUpdate = isGenerationComplete || (now - lastUpdateTime.current > UPDATE_THRESHOLD_MS);
+
+    if (shouldUpdate) {
+      if (isGenerationComplete) {
+        lastUpdateTime.current = now;
+      }
+
       // Only update if values changed to prevent unnecessary re-renders
       // Show generating status even when on a step page so users can see progress
       setGeneratingContent(prev => bgGenerating !== prev ? bgGenerating : prev);
       setGeneratedSteps(prev => bgGenerated !== prev ? bgGenerated : prev);
-      
+
       // Only set initialLoading to false when content generation is complete or after a timeout
-      if ((!bgGenerating && stepsLength > 0 && bgGenerated >= stepsLength) || hasStepId) {
+      if (isGenerationComplete || hasStepId) {
         setInitialLoading(false);
       }
     }
-  }, [updateThreshold]);
+  }, []);
 
   // Add a timeout to eventually disable initial loading after 30 seconds
   // This gives edge functions enough time to start generating content

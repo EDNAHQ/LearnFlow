@@ -19,7 +19,7 @@ interface LearningJourneyWizardProps {
 const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, onClose, initialTopic }) => {
   const navigate = useNavigate();
   const { trackClick } = useBehaviorTracking();
-  const [currentStep, setCurrentStep] = useState(initialTopic ? 2 : 1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [topicHistory, setTopicHistory] = useState<string[]>([]);
   const [contentPreferences, setContentPreferences] = useState<ContentPreferencesData>({});
   const [selectedTopicForLearning, setSelectedTopicForLearning] = useState<any>(null);
@@ -96,7 +96,7 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
 
   // Handle initial topic when wizard opens
   useEffect(() => {
-    if (isOpen && initialTopic && currentStep === 2 && journeyData.topics.length === 0) {
+    if (isOpen && initialTopic && !selectedTopicForLearning) {
       // Create a topic object from the initial topic
       const topicObject = {
         id: `topic-initial-${Date.now()}`,
@@ -108,21 +108,20 @@ const LearningJourneyWizard: React.FC<LearningJourneyWizardProps> = ({ isOpen, o
         trending: false,
         matchScore: 95,
       };
-      
+
       // Set topics with the initial topic
-      updateJourneyData({ 
+      updateJourneyData({
         topics: [topicObject],
-        selectedTopic: topicObject 
+        selectedTopic: topicObject
       });
-      
+
       // Auto-select and move to preferences step
       setSelectedTopicForLearning(topicObject);
-      // Auto-advance to preferences step after a brief delay
-      setTimeout(() => {
-        setCurrentStep(3);
-      }, 300);
+
+      // Auto-advance to preferences step immediately
+      setCurrentStep(3);
     }
-  }, [isOpen, initialTopic, currentStep, journeyData.topics.length, updateJourneyData]);
+  }, [isOpen, initialTopic]);
 
   const handleTopicSelect = async (topic: any) => {
     // Add selected topic to history

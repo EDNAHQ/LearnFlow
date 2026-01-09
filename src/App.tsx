@@ -37,8 +37,8 @@ function AppContent() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/community" element={<Community />} />
         <Route path="/plan" element={<PlanPage />} />
-        <Route path="/content/:pathId" element={<ContentPage />} />
         <Route path="/content/:pathId/step/:stepIndex" element={<ContentPage />} />
+        <Route path="/content/:pathId" element={<ContentPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/generate-topics" element={<AdminGenerateTopics />} />
@@ -48,8 +48,6 @@ function AppContent() {
 }
 
 export default function App() {
-  console.log('App rendering with real HomePage...');
-
   return (
     <BrowserRouter>
       <AuthProvider>

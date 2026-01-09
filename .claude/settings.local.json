@@ -11,7 +11,9 @@
       "Skill(edge-function-templates)",
       "Skill(error-handling)",
       "Skill(component-templates)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Skill(dev:commit)",
+      "Skill(dev:commit:*)"
     ],
     "defaultMode": "bypassPermissions"
   },

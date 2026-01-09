@@ -12,8 +12,8 @@ export const useContentNavigation = () => {
   const { user } = useAuth();
   const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Get topic from session storage
-  const { topic } = useTopicManagement(pathId || null, user);
+  // Get topic from session storage or database
+  const { topic, isLoading: topicLoading } = useTopicManagement(pathId || null, user);
 
   // Get learning steps data
   const {
@@ -80,7 +80,7 @@ export const useContentNavigation = () => {
     currentStep,
     pathId: pathId || null,
     steps,
-    isLoading: stepsLoading || initialLoading,
+    isLoading: stepsLoading || initialLoading || topicLoading,
     generatingContent,
     generatedSteps,
     handleMarkComplete: handleMarkCompleteWithStep,

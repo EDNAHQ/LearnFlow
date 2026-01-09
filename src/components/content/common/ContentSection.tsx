@@ -1,5 +1,6 @@
 import { memo } from "react";
 import ContentLoader from "../loading/ContentLoader";
+import ContentError from "../loading/ContentError";
 import ContentDetailLoader from "../ContentDetailLoader";
 import ContentSectionCore from "../layout/ContentSectionCore";
 import ContentSectionContainer from "../layout/ContentSectionContainer";
@@ -24,15 +25,14 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
     loadedDetailedContent,
     contentLoaded,
     stepId,
-    concepts,
     handleContentLoaded,
-    handleConceptClick,
-    focusedConcept
+    handleError,
+    handleRetry,
+    error
   } = useContentSection({ content, detailedContent, topic });
 
   // Handle question clicking - pass it to parent with content
   const handleQuestionClick = (question: string) => {
-    console.log("Question clicked in ContentSection:", question);
     if (onQuestionClick) {
       onQuestionClick(question, loadedDetailedContent);
     }
@@ -40,8 +40,8 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
 
   return (
     <ContentSectionContainer isVisible={isVisible}>
-      {/* Only show ContentDetailLoader if content is not already loaded */}
-      {!contentLoaded && (
+      {/* Only show ContentDetailLoader if content is not already loaded and no error */}
+      {!contentLoaded && !error && (
         <ContentDetailLoader
           stepId={stepId}
           title={title}
@@ -49,10 +49,14 @@ const ContentSection = memo(({ title, content, index, detailedContent, topic, pa
           topic={topic}
           detailedContent={detailedContent}
           onContentLoaded={handleContentLoaded}
+          onError={handleError}
         />
       )}
-      
-      {!loadedDetailedContent ? (
+
+      {/* Show error state if there's an error */}
+      {error ? (
+        <ContentError message={error} onRetry={handleRetry} />
+      ) : !loadedDetailedContent ? (
         <ContentLoader message="Loading content..." />
       ) : (
         <ContentSectionCore

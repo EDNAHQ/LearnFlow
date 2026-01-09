@@ -1,9 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/learning/LearningStep";
 import { EDGE_FUNCTIONS } from "@/integrations/supabase/functions";
-import { withTimeout } from "@/utils/timeout";
-
-const EDGE_FUNCTION_TIMEOUT_MS = 90000; // 90 seconds timeout
 
 // Generate detailed content for a learning step using the edge function
 export const generateStepContent = async (
@@ -34,14 +31,11 @@ export const generateStepContent = async (
       return stepData.detailed_content;
     }
 
-    // Otherwise, call the edge function to generate content
-    console.log(`Generating detailed content for step: ${step.title} (ID: ${step.id})`);
-
     // Get user ID for personalization
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Wrap edge function call with timeout
-    const invokePromise = supabase.functions.invoke(EDGE_FUNCTIONS.generateLearningContent, {
+    // Call edge function (timeout handled by generateStepContentWithRetry wrapper)
+    const response = await supabase.functions.invoke(EDGE_FUNCTIONS.generateLearningContent, {
       body: {
         stepId: step.id,
         topic,
@@ -53,12 +47,6 @@ export const generateStepContent = async (
         pathId: stepData.path_id,
       },
     });
-
-    const response = await withTimeout(
-      invokePromise,
-      EDGE_FUNCTION_TIMEOUT_MS,
-      `Edge function call timed out after ${EDGE_FUNCTION_TIMEOUT_MS}ms for step "${step.title}"`
-    );
 
     if (response.error) {
       console.error("Edge function error:", response.error);
@@ -83,9 +71,6 @@ export const generateStepContent = async (
       console.error("Invalid content format returned:", data);
       throw new Error("Invalid content format: missing content field");
     }
-
-    // No need to save here as the edge function should have saved it
-    console.log(`Content generation for step ${step.id} completed successfully`);
 
     return data.content;
   } catch (error) {

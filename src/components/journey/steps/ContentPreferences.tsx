@@ -29,6 +29,7 @@ const ContentPreferences: React.FC<ContentPreferencesProps> = ({
 }) => {
   const { profile } = useUserLearningProfile();
   const [autoDetected, setAutoDetected] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   // Auto-expand sections that have defaults selected
   useEffect(() => {
