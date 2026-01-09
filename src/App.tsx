@@ -17,12 +17,33 @@ import ProfilePage from './pages/ProfilePage';
 import Community from './pages/Community';
 import AdminGenerateTopics from './pages/AdminGenerateTopics';
 
+declare global {
+  interface Window {
+    hg?: (command: string, options?: Record<string, unknown>) => void;
+  }
+}
+
 function AppContent() {
   const { processAutoSSO } = useEdnaMembership();
 
   useEffect(() => {
     processAutoSSO();
   }, [processAutoSSO]);
+
+  // Initialize HelpGenie widget
+  useEffect(() => {
+    if (window.hg) {
+      window.hg('init', {
+        agentUrl: 'feedback-genie',
+        position: 'bottom-right',
+        primaryColor: '#6654f5',
+        buttonColor: '#f5f5f5',
+        baseUrl: 'https://helpgenie.ai',
+        agentName: 'Enterprise DNA',
+        customAvatarUrl: 'https://vdskjkjxyeehklwxnhrf.supabase.co/storage/v1/object/public/genie-images/i291wa4-1764809388319.png'
+      });
+    }
+  }, []);
 
   return (
     <>
@@ -43,6 +64,13 @@ function AppContent() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin/generate-topics" element={<AdminGenerateTopics />} />
       </Routes>
+
+      {/* Custom Help Label */}
+      <div className="helpgenie-label-container">
+        <div className="helpgenie-label">
+          Need help?
+        </div>
+      </div>
     </>
   );
 }
