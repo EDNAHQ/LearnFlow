@@ -108,7 +108,7 @@ serve(async (req) => {
       type: "magiclink",
       email: user.email!,
       options: {
-        redirectTo: `${req.headers.get("origin") || "http://localhost:3000"}/projects`,
+        redirectTo: `https://learnflow.enterprisedna.co/projects`,
       },
     });
 
