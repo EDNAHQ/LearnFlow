@@ -13,6 +13,27 @@
       html, body { height: 100%; }
       body { margin: 0; background: #ffffff; color: #0b0c18; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; font-weight: 300; }
       #root, #portal-root { isolation: isolate; }
+
+      /* HelpGenie widget button customization */
+      [id*="hg"][class*="widget"] button,
+      [id*="hg"] button,
+      div[style*="position: fixed"] button {
+        width: 70px !important;
+        height: 70px !important;
+        background: white !important;
+        border: 3px solid transparent !important;
+        background-image: linear-gradient(white, white), linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-pink))) !important;
+        background-origin: border-box !important;
+        background-clip: padding-box, border-box !important;
+        border-radius: 50% !important;
+      }
+
+      /* Scale the icon inside */
+      [id*="hg"][class*="widget"] button svg,
+      [id*="hg"] button svg,
+      div[style*="position: fixed"] button svg {
+        transform: scale(1.5) !important;
+      }
     </style>
 
     <!-- Primary Meta Tags -->
@@ -65,13 +86,7 @@
     </script>
 
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Need Help badge next to the widget -->
-    <button id="helpgenie-badge" type="button" aria-label="Need help?"
-            style="position: fixed; bottom: 24px; right: 92px; z-index: 2147483000; background: #ffffff; color: #0b0c18; border: 1px solid #6654f5; border-radius: 9999px; padding: 8px 12px; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 1; box-shadow: 0 2px 8px rgba(102,84,245,0.18); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500;">
-      Need help?
-    </button>
-    
+
     <!-- HelpGenie Widget -->
     <script>
       (function(w,d,s,o,f,js,fjs){
@@ -80,94 +95,22 @@
         js=d.createElement(s),fjs=d.getElementsByTagName(s)[0];
         js.id=o;js.src=f;js.async=1;fjs.parentNode.insertBefore(js,fjs);
       }(window,document,'script','hg','https://helpgenie.ai/widget.js'));
-      
+
       hg('init', {
-        agentUrl: 'learn-flow',
+        agentUrl: 'feedback-genie',
         position: 'bottom-right',
-        primaryColor: '#ac5ca4',
-        buttonColor: '#dfeaf4', // Customize button background color
+        primaryColor: '#6654f5',
+        buttonColor: '#f5f5f5',
         baseUrl: 'https://helpgenie.ai',
-        agentName: 'Learn Flow',
-        customAvatarUrl: 'https://vdskjkjxyeehklwxnhrf.supabase.co/storage/v1/object/public/genie-images/2ahqvn5-1759724943216.png'
+        agentName: 'Enterprise DNA',
+        customAvatarUrl: 'https://vdskjkjxyeehklwxnhrf.supabase.co/storage/v1/object/public/genie-images/i291wa4-1764809388319.png',
+        showLabel: true,
+        label: 'Need help?',
+        dotSize: 12
       });
     </script>
     <!-- End HelpGenie Widget -->
 
-    <!-- Open widget when clicking the Need Help badge -->
-    <script>
-      (function(){
-        var badge = document.getElementById('helpgenie-badge');
-        if (!badge) return;
-        badge.addEventListener('click', function(e){
-          e.preventDefault();
-          try { if (typeof window.hg === 'function') window.hg('open'); } catch(_) {}
-        });
-      })();
-    </script>
-
-    <!-- Click-away to close HelpGenie -->
-    <script>
-      (function(){
-        function whenHgReady(cb, tries){
-          tries = tries || 0;
-          if (typeof window.hg === 'function') return cb();
-          if (tries > 60) return; // ~6s max wait
-          setTimeout(function(){ whenHgReady(cb, tries + 1); }, 100);
-        }
-
-        var isOpen = false;
-        function isInWidgetPath(e){
-          try {
-            var path = (typeof e.composedPath === 'function') ? e.composedPath() : [];
-            var widgets = Array.prototype.slice.call(document.querySelectorAll(
-              'iframe[src*="helpgenie.ai"], [id*="helpgenie"], [class*="helpgenie"], [data-hg], [data-helpgenie]'
-            ));
-            for (var i = 0; i < path.length; i++) {
-              var node = path[i];
-              if (!node || node.nodeType !== 1) continue;
-              for (var j = 0; j < widgets.length; j++) {
-                var w = widgets[j];
-                if (w === node || (typeof w.contains === 'function' && w.contains(node))) return true;
-              }
-            }
-          } catch(_) {}
-          return false;
-        }
-
-        function onPointerDown(e){
-          if (!isOpen) return;
-          if (isInWidgetPath(e)) return;
-          try { window.hg('close'); } catch(_) {}
-        }
-
-        function attach(){ document.addEventListener('pointerdown', onPointerDown, true); }
-        function detach(){ document.removeEventListener('pointerdown', onPointerDown, true); }
-
-        whenHgReady(function(){
-          var wired = false;
-          try {
-            window.hg('on', 'open', function(){ isOpen = true; if (!wired) { attach(); wired = true; } });
-            window.hg('on', 'close', function(){ isOpen = false; });
-          } catch(e) {
-            // Fallback: poll visibility to toggle isOpen
-            setInterval(function(){
-              try {
-                var el = document.querySelector('iframe[src*="helpgenie.ai"], [id*="helpgenie"], [class*="helpgenie"], [data-hg], [data-helpgenie]');
-                var opened = false;
-                if (el) {
-                  var rect = el.getBoundingClientRect();
-                  var st = window.getComputedStyle(el);
-                  var vis = st && st.display !== 'none' && st.visibility !== 'hidden' && parseFloat(st.opacity || '1') > 0.05;
-                  opened = vis && rect.width > 200 && rect.height > 200;
-                }
-                if (opened && !isOpen) { isOpen = true; if (!wired) { attach(); wired = true; } }
-                if (!opened && isOpen) { isOpen = false; }
-              } catch(_) {}
-            }, 900);
-          }
-        });
-      })();
-    </script>
     <script src="https://enterprisedna.co/widget/ecosystem-widget.js" data-button-color="#6654f5"></script>
 </body>
 </html>
