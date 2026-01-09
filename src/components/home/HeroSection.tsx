@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/auth";
 import { PersonalizedHero } from "@/components/home/personalization/PersonalizedHero";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface HeroSectionProps {
   onStartLearning: () => void;
@@ -47,43 +47,15 @@ export const HeroSection = ({ onStartLearning }: HeroSectionProps) => {
     }
   }, [isDesktop]);
 
-  // Show loading skeleton only if auth is still loading and we don't have a cached user
-  if (authLoading && !user) {
-    return (
-      <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex items-center justify-center py-12 sm:py-16 md:py-20 min-h-[600px]">
-          <div className="absolute inset-0 bg-black/20 animate-pulse" />
-          <div className="relative z-[3] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-8">
-            <div className="h-16 bg-white/10 rounded-lg w-3/4 mx-auto mb-6 animate-pulse" />
-            <div className="h-6 bg-white/10 rounded-lg w-1/2 mx-auto mb-8 animate-pulse" />
-          </div>
-        </div>
-      </section>
-    );
+  // Render PersonalizedHero if user is authenticated (will show loading state if needed)
+  // Otherwise render default hero
+  if (user) {
+    return <PersonalizedHero onStartLearning={onStartLearning} />;
   }
 
-  // Use AnimatePresence for smooth transitions between authenticated/unauthenticated states
+  // Default hero for unauthenticated users
   return (
-    <AnimatePresence mode="wait">
-      {!authLoading && user ? (
-        <motion.div
-          key="personalized"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <PersonalizedHero onStartLearning={onStartLearning} />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="default"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <section className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden flex items-center justify-center py-12 sm:py-16 md:py-20">
         {/* Background Image - ALWAYS visible */}
         <img
@@ -165,9 +137,6 @@ export const HeroSection = ({ onStartLearning }: HeroSectionProps) => {
         </div>
       </div>
     </section>
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 };
 

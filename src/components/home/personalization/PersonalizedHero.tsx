@@ -14,6 +14,19 @@ export const PersonalizedHero = React.memo(({ onStartLearning }: { onStartLearni
   const { projects } = useProjects();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  // Delay showing loading state to avoid flickering on fast loads (>200ms)
+  useEffect(() => {
+    if (!isLoading) {
+      setShowLoadingState(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setShowLoadingState(true);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   const personalizedData = useMemo(() => {
     const hour = new Date().getHours();
@@ -214,7 +227,8 @@ export const PersonalizedHero = React.memo(({ onStartLearning }: { onStartLearni
   }, [navigate]);
 
   // Loading state - AFTER all hooks
-  if (isLoading) {
+  // Only show loading state if it takes longer than 200ms
+  if (showLoadingState) {
     return (
       <section className="relative w-full overflow-hidden min-h-[600px]">
         {/* Background Image */}
@@ -226,11 +240,11 @@ export const PersonalizedHero = React.memo(({ onStartLearning }: { onStartLearni
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 z-[2]" />
         <div className="absolute inset-0 brand-gradient opacity-30 z-[2]" />
-        
+
         {/* Loading Content */}
         <div className="relative z-[3] flex items-center justify-center min-h-[600px]">
-          <AILoadingState 
-            variant="animated" 
+          <AILoadingState
+            variant="animated"
             message="Loading your personalized experience..."
             className="py-8"
           />
