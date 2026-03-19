@@ -19,7 +19,22 @@ jobs:
         with:
           version: latest
 
+      - name: Verify secrets are configured
+        run: |
+          if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ] || [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "::error::Missing required secrets. Please add SUPABASE_PROJECT_REF and SUPABASE_ACCESS_TOKEN in Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+
       - name: Deploy all Edge Functions
-        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          for dir in supabase/functions/*/; do
+            func_name=$(basename "$dir")
+            if [ "$func_name" = "_shared" ]; then
+              continue
+            fi
+            echo "Deploying $func_name..."
+            supabase functions deploy "$func_name" --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" --no-verify-jwt
+          done
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
