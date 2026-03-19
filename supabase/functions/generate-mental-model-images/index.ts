@@ -103,7 +103,7 @@ serve(async (req) => {
 
         // Call Replicate API
         const replicateResponse = await fetch(
-          'https://api.replicate.com/v1/models/bytedance/seedream-4/predictions',
+          'https://api.replicate.com/v1/models/openai/gpt-image-1.5/predictions',
           {
             method: 'POST',
             headers: {
