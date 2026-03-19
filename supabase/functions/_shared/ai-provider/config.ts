@@ -2,10 +2,10 @@ import type { ModelConfig, FunctionType } from './types.ts';
 
 // Centralized, code-first defaults
 // Update DEFAULT_PRIMARY_MODEL to change the model across all function types in one place.
-const DEFAULT_PRIMARY_MODEL = Deno.env.get('DEFAULT_AI_MODEL') || 'x-ai/grok-code-fast-1';
+const DEFAULT_PRIMARY_MODEL = Deno.env.get('DEFAULT_AI_MODEL') || 'openai/gpt-5.4';
 
 // Optional: centralized fallback model (some function types may override)
-const DEFAULT_FALLBACK_MODEL = Deno.env.get('FALLBACK_AI_MODEL') || 'openai/gpt-4o-mini';
+const DEFAULT_FALLBACK_MODEL = Deno.env.get('FALLBACK_AI_MODEL') || 'openai/gpt-5.4';
 
 // Code configuration - the single source of truth for AI models
 const CODE_CONFIG: Record<FunctionType, ModelConfig> = {
@@ -27,7 +27,7 @@ const CODE_CONFIG: Record<FunctionType, ModelConfig> = {
     provider: 'openrouter',
     model: DEFAULT_PRIMARY_MODEL,
     maxTokens: 2000,
-    fallbackModel: 'openai/gpt-4o',
+    fallbackModel: 'openai/gpt-5.4',
     temperature: 0.7,
   },
   'structured-extraction': {
