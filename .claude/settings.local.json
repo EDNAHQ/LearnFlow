@@ -13,7 +13,8 @@
       "Skill(component-templates)",
       "Bash(git checkout:*)",
       "Skill(dev:commit)",
-      "Skill(dev:commit:*)"
+      "Skill(dev:commit:*)",
+      "mcp__fetch__fetch"
     ],
     "defaultMode": "bypassPermissions"
   },
